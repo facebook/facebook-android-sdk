@@ -39,7 +39,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import junit.framework.Assert;
@@ -80,10 +79,6 @@ public class TestUtils {
       writeParcel.recycle();
       readParcel.recycle();
     }
-  }
-
-  public static Date nowPlusSeconds(final long offset) {
-    return new Date(new Date().getTime() + (offset * 1000L));
   }
 
   public static void assertSamePermissions(

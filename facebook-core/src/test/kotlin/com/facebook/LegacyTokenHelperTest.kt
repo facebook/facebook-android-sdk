@@ -29,8 +29,8 @@ class LegacyTokenHelperTest : FacebookPowerMockTestCase() {
     val declinedPermissions: Set<String> = Utility.hashSet("no you may not", "no soup for you")
     val expiredPermissions: Set<String> = Utility.hashSet("expired", "oh no")
     val token = "AnImaginaryTokenValue"
-    val later = TestUtils.nowPlusSeconds(60)
-    val earlier = TestUtils.nowPlusSeconds(-60)
+    val later = FacebookTestUtility.nowPlusSeconds(60)
+    val earlier = FacebookTestUtility.nowPlusSeconds(-60)
     val applicationId = "1234"
 
     val bundle = Bundle()
@@ -46,12 +46,12 @@ class LegacyTokenHelperTest : FacebookPowerMockTestCase() {
     val accessToken = AccessToken.createFromLegacyCache(bundle)
     Assert.assertNotNull(accessToken)
     checkNotNull(accessToken)
-    TestUtils.assertSamePermissions(permissions, accessToken)
+    FacebookTestUtility.assertSameCollectionContents(permissions, accessToken.permissions)
     Assert.assertEquals(token, accessToken.token)
     Assert.assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.source)
     Assert.assertTrue(!accessToken.isExpired)
 
     val cache = AccessTokenTestHelper.toLegacyCacheBundle(accessToken)
-    TestUtils.assertEqualContentsWithoutOrder(bundle, cache)
+    FacebookTestUtility.assertEqualContentsWithoutOrder(bundle, cache)
   }
 }

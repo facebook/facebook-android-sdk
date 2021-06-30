@@ -133,8 +133,8 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     val declinedPermissions: Set<String> = hashSet("no you may not", "no soup for you")
     val expiredPermissions: Set<String> = hashSet("expired", "oh no")
     val token = "AnImaginaryTokenValue"
-    val later = TestUtils.nowPlusSeconds(60)
-    val earlier = TestUtils.nowPlusSeconds(-60)
+    val later = FacebookTestUtility.nowPlusSeconds(60)
+    val earlier = FacebookTestUtility.nowPlusSeconds(-60)
     val applicationId = "1234"
     val bundle = Bundle()
     LegacyTokenHelper.putToken(bundle, token)
@@ -148,12 +148,12 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     val accessToken = AccessToken.createFromLegacyCache(bundle)
     Assert.assertNotNull(accessToken)
     checkNotNull(accessToken)
-    TestUtils.assertSamePermissions(permissions, accessToken)
+    FacebookTestUtility.assertSameCollectionContents(permissions, accessToken.permissions)
     Assert.assertEquals(token, accessToken.token)
     Assert.assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.source)
     Assert.assertTrue(!accessToken.isExpired)
     val cache = AccessTokenTestHelper.toLegacyCacheBundle(accessToken)
-    TestUtils.assertEqualContentsWithoutOrder(bundle, cache)
+    FacebookTestUtility.assertEqualContentsWithoutOrder(bundle, cache)
   }
 
   @Test
@@ -205,7 +205,8 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     val permissionLists = listOf(normalList, emptyList, normalArrayList, emptyArrayList)
     for (list in permissionLists) {
       LegacyTokenHelper.putPermissions(bundle, list)
-      TestUtils.assertSamePermissions(list, LegacyTokenHelper.getPermissions(bundle))
+      FacebookTestUtility.assertSameCollectionContents(
+          list, LegacyTokenHelper.getPermissions(bundle))
     }
     normalArrayList.add(null)
   }
@@ -355,7 +356,8 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
             null,
             null,
             null)
-    val accessToken2 = TestUtils.parcelAndUnparcel(accessToken1)
+    val accessToken2 = FacebookTestUtility.parcelAndUnparcel(accessToken1)
+    checkNotNull(accessToken2)
     Assert.assertEquals(accessToken1, accessToken2)
     Assert.assertEquals(token, accessToken2.token)
     Assert.assertEquals(appId, accessToken2.applicationId)

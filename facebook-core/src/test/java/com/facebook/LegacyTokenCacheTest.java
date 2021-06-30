@@ -129,13 +129,13 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
     assertEquals(
         originalBundle.getFloat(FLOAT_KEY),
         cachedBundle.getFloat(FLOAT_KEY),
-        TestUtils.DOUBLE_EQUALS_DELTA);
+        FacebookTestUtility.DOUBLE_EQUALS_DELTA);
     assertArrayEquals(
         originalBundle.getFloatArray(FLOAT_ARRAY_KEY), cachedBundle.getFloatArray(FLOAT_ARRAY_KEY));
     assertEquals(
         originalBundle.getDouble(DOUBLE_KEY),
         cachedBundle.getDouble(DOUBLE_KEY),
-        TestUtils.DOUBLE_EQUALS_DELTA);
+        FacebookTestUtility.DOUBLE_EQUALS_DELTA);
     assertArrayEquals(
         originalBundle.getDoubleArray(DOUBLE_ARRAY_KEY),
         cachedBundle.getDoubleArray(DOUBLE_ARRAY_KEY));
@@ -185,8 +185,8 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
   public void testCacheRoundtrip() {
     Set<String> permissions = Utility.hashSet("stream_publish", "go_outside_and_play");
     String token = "AnImaginaryTokenValue";
-    Date later = TestUtils.nowPlusSeconds(60);
-    Date earlier = TestUtils.nowPlusSeconds(-60);
+    Date later = FacebookTestUtility.INSTANCE.nowPlusSeconds(60);
+    Date earlier = FacebookTestUtility.INSTANCE.nowPlusSeconds(-60);
     String applicationId = "1234";
 
     LegacyTokenHelper cache = new LegacyTokenHelper(RuntimeEnvironment.application);
@@ -206,13 +206,14 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
     bundle = cache.load();
 
     AccessToken accessToken = AccessToken.createFromLegacyCache(bundle);
-    TestUtils.assertSamePermissions(permissions, accessToken);
+    FacebookTestUtility.INSTANCE.assertSameCollectionContents(
+        permissions, accessToken.getPermissions());
     assertEquals(token, accessToken.getToken());
     assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_NATIVE, accessToken.getSource());
     assertTrue(!accessToken.isExpired());
 
     Bundle cachedBundle = AccessTokenTestHelper.toLegacyCacheBundle(accessToken);
-    TestUtils.assertEqualContentsWithoutOrder(bundle, cachedBundle);
+    FacebookTestUtility.INSTANCE.assertEqualContentsWithoutOrder(bundle, cachedBundle);
   }
 
   private static void assertArrayEquals(Object a1, Object a2) {

@@ -27,7 +27,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.facebook.AccessToken.Companion.isCurrentAccessTokenActive
 import com.facebook.internal.Utility.areObjectsEqual
@@ -38,8 +37,7 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
 class AccessTokenManager
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-constructor(
+internal constructor(
     private val localBroadcastManager: LocalBroadcastManager,
     private val accessTokenCache: AccessTokenCache
 ) {

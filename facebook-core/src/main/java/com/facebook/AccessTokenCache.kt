@@ -21,13 +21,11 @@ package com.facebook
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONException
 import org.json.JSONObject
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class AccessTokenCache(
+internal class AccessTokenCache(
     private val sharedPreferences: SharedPreferences,
     private val tokenCachingStrategyFactory: SharedPreferencesTokenCachingStrategyFactory
 ) {
@@ -114,8 +112,7 @@ class AccessTokenCache(
       return accessToken
     }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  class SharedPreferencesTokenCachingStrategyFactory {
+  internal class SharedPreferencesTokenCachingStrategyFactory {
     fun create(): LegacyTokenHelper {
       return LegacyTokenHelper(FacebookSdk.getApplicationContext())
     }
