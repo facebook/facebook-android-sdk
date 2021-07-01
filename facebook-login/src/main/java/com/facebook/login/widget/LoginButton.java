@@ -20,6 +20,7 @@
 
 package com.facebook.login.widget;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,8 +31,13 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
+
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -48,6 +54,7 @@ import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.DefaultAudience;
+import com.facebook.login.FacebookLoginContract;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -115,6 +122,7 @@ public class LoginButton extends FacebookButtonBase {
   private boolean confirmLogout;
   private String loginText;
   private String logoutText;
+  private boolean useResultContract;
   private LoginButtonProperties properties = new LoginButtonProperties();
   private String loginLogoutEventName = AnalyticsEvents.EVENT_LOGIN_VIEW_USAGE;
   private boolean toolTipChecked;
@@ -124,6 +132,7 @@ public class LoginButton extends FacebookButtonBase {
   private ToolTipPopup toolTipPopup;
   private AccessTokenTracker accessTokenTracker;
   private LoginManager loginManager;
+  private CallbackManager callbackManager;
 
   static class LoginButtonProperties {
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
@@ -239,6 +248,10 @@ public class LoginButton extends FacebookButtonBase {
   public void setLogoutText(String logoutText) {
     this.logoutText = logoutText;
     setButtonText();
+  }
+
+  public void setUseResultContract(boolean useResumeContract) {
+    this.useResultContract = useResumeContract;
   }
 
   /**
@@ -542,6 +555,7 @@ public class LoginButton extends FacebookButtonBase {
    */
   public void registerCallback(
       final CallbackManager callbackManager, final FacebookCallback<LoginResult> callback) {
+    this.callbackManager = callbackManager;
     getLoginManager().registerCallback(callbackManager, callback);
   }
 
@@ -551,6 +565,7 @@ public class LoginButton extends FacebookButtonBase {
    * @param callbackManager The callback manager that will encapsulate the callback.
    */
   public void unregisterCallback(final CallbackManager callbackManager) {
+    this.callbackManager = null;
     getLoginManager().unregisterCallback(callbackManager);
   }
 
@@ -731,6 +746,8 @@ public class LoginButton extends FacebookButtonBase {
               a.getInt(
                   R.styleable.com_facebook_login_view_com_facebook_tooltip_mode,
                   ToolTipMode.DEFAULT.getValue()));
+      useResultContract =
+              a.getBoolean(R.styleable.com_facebook_login_view_com_facebook_use_result_contract, false);
     } finally {
       a.recycle();
     }
@@ -823,8 +840,28 @@ public class LoginButton extends FacebookButtonBase {
     this.loginManager = loginManager;
   }
 
+  public void setCallbackManager(CallbackManager callbackManager) {
+    this.callbackManager = callbackManager;
+  }
+
   @AutoHandleExceptions
   protected class LoginClickListener implements OnClickListener {
+
+    ActivityResultLauncher<FacebookLoginContract.Request> resultLauncher;
+
+    public LoginClickListener() {
+      Activity activity = getActivity();
+      if (activity instanceof ComponentActivity) {
+        ComponentActivity componentActivity = ((ComponentActivity) activity);
+        resultLauncher = componentActivity.registerForActivityResult(new FacebookLoginContract(), new ActivityResultCallback<FacebookLoginContract.Result>() {
+          @Override
+          public void onActivityResult(FacebookLoginContract.Result result) {
+            loginManager.processResult(getContext(), result, callbackManager);
+          }
+        });
+      }
+    }
+
     @Override
     public void onClick(View v) {
       callExternalOnClickListener(v);
@@ -848,7 +885,9 @@ public class LoginButton extends FacebookButtonBase {
 
     protected void performLogin() {
       final LoginManager loginManager = getLoginManager();
-      if (LoginButton.this.getFragment() != null) {
+      if (useResultContract && callbackManager != null && resultLauncher != null) {
+        loginManager.logIn(resultLauncher, properties.permissions);
+      } else if (LoginButton.this.getFragment() != null) {
         loginManager.logIn(LoginButton.this.getFragment(), properties.permissions);
       } else if (LoginButton.this.getNativeFragment() != null) {
         loginManager.logIn(LoginButton.this.getNativeFragment(), properties.permissions);

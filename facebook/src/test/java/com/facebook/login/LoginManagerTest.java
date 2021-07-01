@@ -50,6 +50,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Looper;
+
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistry;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
@@ -533,6 +541,106 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     AccessToken.setCurrentAccessToken(eq(createAccessToken()));
   }
 
+  @Test
+  public void testLoginWithLauncher() {
+    final LoginManager loginManager = new LoginManager();
+    ActivityResultRegistry registry = new ActivityResultRegistry() {
+      @Override
+      public <I, O> void onLaunch(int requestCode, @NonNull ActivityResultContract<I, O> contract,
+                                  I input, @Nullable ActivityOptionsCompat options) {
+        dispatchResult(requestCode, Activity.RESULT_OK, createSuccessResultIntent());
+      }
+    };
+    ActivityResultLauncher<FacebookLoginContract.Request> launcher =
+            registry.register("test", new FacebookLoginContract(), new ActivityResultCallback<FacebookLoginContract.Result>() {
+              @Override
+              public void onActivityResult(FacebookLoginContract.Result result) {
+                assertTrue(result instanceof FacebookLoginContract.Result.Success);
+                FacebookLoginContract.Result.Success success = (FacebookLoginContract.Result.Success) result;
+                loginManager.onActivityResult(success.getResultCode(), success.getIntent(), mockCallback);
+              }
+            });
+    loginManager.logIn(launcher, Arrays.asList("public_profile", "user_friends"));
+    verifyStatic(AccessToken.class, times(1));
+    verify(mockCallback, never()).onError(any(FacebookException.class));
+    verify(mockCallback, times(1)).onSuccess(isA(LoginResult.class));
+  }
+
+  @Test
+  public void testLoginCancelWithLauncher() {
+    final LoginManager loginManager = new LoginManager();
+    ActivityResultRegistry registry = new ActivityResultRegistry() {
+      @Override
+      public <I, O> void onLaunch(int requestCode, @NonNull ActivityResultContract<I, O> contract,
+                                  I input, @Nullable ActivityOptionsCompat options) {
+        dispatchResult(requestCode, Activity.RESULT_CANCELED, createCancelResultIntent());
+      }
+    };
+    ActivityResultLauncher<FacebookLoginContract.Request> launcher =
+            registry.register("test", new FacebookLoginContract(), new ActivityResultCallback<FacebookLoginContract.Result>() {
+              @Override
+              public void onActivityResult(FacebookLoginContract.Result result) {
+                assertTrue(result instanceof FacebookLoginContract.Result.Success);
+                FacebookLoginContract.Result.Success success = (FacebookLoginContract.Result.Success) result;
+                loginManager.onActivityResult(success.getResultCode(), success.getIntent(), mockCallback);
+              }
+            });
+    loginManager.logIn(launcher, Arrays.asList("public_profile", "user_friends"));
+    verifyStatic(AccessToken.class, never());
+    verify(mockCallback, never()).onError(any(FacebookException.class));
+    verify(mockCallback, times(1)).onCancel();
+  }
+
+  @Test
+  public void testLoginErrorWithLauncher() {
+    final LoginManager loginManager = new LoginManager();
+    ActivityResultRegistry registry = new ActivityResultRegistry() {
+      @Override
+      public <I, O> void onLaunch(int requestCode, @NonNull ActivityResultContract<I, O> contract,
+                                  I input, @Nullable ActivityOptionsCompat options) {
+        dispatchResult(requestCode, Activity.RESULT_CANCELED, createErrorResultIntent());
+      }
+    };
+    ActivityResultLauncher<FacebookLoginContract.Request> launcher =
+            registry.register("test", new FacebookLoginContract(), new ActivityResultCallback<FacebookLoginContract.Result>() {
+              @Override
+              public void onActivityResult(FacebookLoginContract.Result result) {
+                assertTrue(result instanceof FacebookLoginContract.Result.Success);
+                FacebookLoginContract.Result.Success success = (FacebookLoginContract.Result.Success) result;
+                loginManager.onActivityResult(success.getResultCode(), success.getIntent(), mockCallback);
+              }
+            });
+    loginManager.logIn(launcher, Arrays.asList("public_profile", "user_friends"));
+    verifyStatic(AccessToken.class, never());
+    verify(mockCallback, never()).onSuccess(any(LoginResult.class));
+    verify(mockCallback, times(1)).onError(isA(FacebookException.class));
+  }
+
+  @Test
+  public void testNoActivityWithLauncher() {
+    final LoginManager loginManager = new LoginManager();
+    ActivityResultRegistry registry = new ActivityResultRegistry() {
+      @Override
+      public <I, O> void onLaunch(int requestCode, @NonNull ActivityResultContract<I, O> contract,
+                                  I input, @Nullable ActivityOptionsCompat options) {
+        ActivityResultContract.SynchronousResult<?> syncResult = contract.getSynchronousResult(mockApplicationContext, input);
+        if (syncResult == null) {
+          throw new ActivityNotFoundException();
+        } else {
+          dispatchResult(requestCode, syncResult.getValue());
+        }
+      }
+    };
+    ActivityResultLauncher<FacebookLoginContract.Request> launcher =
+            registry.register("test", new FacebookLoginContract(), new ActivityResultCallback<FacebookLoginContract.Result>() {
+              @Override
+              public void onActivityResult(FacebookLoginContract.Result result) {
+                assertTrue(result instanceof FacebookLoginContract.Result.Error);
+              }
+            });
+    loginManager.logIn(launcher, Arrays.asList("public_profile", "user_friends"));
+  }
+
   private Intent createSuccessResultIntent() {
     Intent intent = new Intent();
 
@@ -545,6 +653,10 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     intent.putExtra(LoginFragment.RESULT_KEY, result);
 
     return intent;
+  }
+
+  private FacebookLoginContract.Result createSuccessResult() {
+    return new FacebookLoginContract.Result.Success(Activity.RESULT_OK, createSuccessResultIntent());
   }
 
   private Intent createErrorResultIntent() {

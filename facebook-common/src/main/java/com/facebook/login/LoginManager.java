@@ -27,6 +27,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.fragment.app.Fragment;
@@ -65,6 +68,9 @@ public class LoginManager {
   private static final String EXPRESS_LOGIN_ALLOWED = "express_login_allowed";
   private static final String PREFERENCE_LOGIN_MANAGER = "com.facebook.loginManager";
   private static final Set<String> OTHER_PUBLISH_PERMISSIONS = getOtherPublishPermissions();
+
+  static final String ACTIVITY_RESOLVE_ERROR = "Log in attempt failed: FacebookActivity could not be started."
+          + " Please make sure you added FacebookActivity to the AndroidManifest.";
 
   private static volatile LoginManager instance;
 
@@ -154,6 +160,23 @@ public class LoginManager {
   private void resolveError(final FragmentWrapper fragment, final GraphResponse response) {
     startLogin(
         new FragmentStartActivityDelegate(fragment), createLoginRequestFromResponse(response));
+  }
+
+  /**
+   * Starts the login process to resolve the error defined in the response. The registered login
+   * callbacks will be called on completion.
+   *
+   * @param launcher The launcher which is starting the login process
+   * @param response The response that has the error.
+   */
+  public void resolveError(final ActivityResultLauncher<FacebookLoginContract.Request> launcher,
+                           final GraphResponse response) {
+    LoginClient.Request request = createLoginRequestFromResponse(response);
+    try {
+      launcher.launch(new FacebookLoginContract.Request.Login(this, request));
+    } catch (ActivityNotFoundException e) {
+      launcher.launch(new FacebookLoginContract.Request.ActivityLaunchingError(request));
+    }
   }
 
   private LoginClient.Request createLoginRequestFromResponse(final GraphResponse response) {
@@ -423,6 +446,18 @@ public class LoginManager {
   }
 
   /**
+   * Logs the user in with the requested read permissions.
+   *
+   * @param launcher The launcher which is starting the login process.
+   * @param permissions The requested permissions.
+   */
+  public void logInWithReadPermissions(ActivityResultLauncher<FacebookLoginContract.Request> launcher,
+                                       Collection<String> permissions) {
+    validateReadPermissions(permissions);
+    logIn(launcher, permissions);
+  }
+
+  /**
    * Reauthorize data access
    *
    * @param activity The activity which is starting the reauthorization process.
@@ -449,6 +484,20 @@ public class LoginManager {
   private void reauthorizeDataAccess(FragmentWrapper fragment) {
     LoginClient.Request loginRequest = createReauthorizeRequest();
     startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+  }
+
+  /**
+   * Reauthorize data access
+   *
+   * @param launcher The launcher which is starting the reauthorization process.
+   */
+  public void reauthorizeDataAccess(ActivityResultLauncher<FacebookLoginContract.Request> launcher) {
+    LoginClient.Request request = createReauthorizeRequest();
+    try {
+      launcher.launch(new FacebookLoginContract.Request.Login(this, request));
+    } catch (ActivityNotFoundException e) {
+      launcher.launch(new FacebookLoginContract.Request.ActivityLaunchingError(request));
+    }
   }
 
   /**
@@ -498,6 +547,19 @@ public class LoginManager {
   }
 
   /**
+   * Logs the user in with the requested publish permissions.
+   *
+   * @param launcher The launcher which is starting the login process.
+   * @param permissions The requested permissions.
+   */
+  public void logInWithPublishPermissions(ActivityResultLauncher<FacebookLoginContract.Request> launcher,
+                                          Collection<String> permissions) {
+    validatePublishPermissions(permissions);
+
+    logIn(launcher, permissions);
+  }
+
+  /**
    * Logs the user in with the requested permissions.
    *
    * @param fragment The android.support.v4.app.Fragment which is starting the login process.
@@ -537,6 +599,45 @@ public class LoginManager {
   public void logIn(Activity activity, Collection<String> permissions) {
     LoginClient.Request loginRequest = createLoginRequest(permissions);
     startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
+   * @param launcher The launcher which is starting the login process.
+   * @param permissions The requested permissions.
+   */
+  public void logIn(ActivityResultLauncher<FacebookLoginContract.Request> launcher, Collection<String> permissions) {
+    LoginClient.Request request = createLoginRequest(permissions);
+    try {
+      launcher.launch(new FacebookLoginContract.Request.Login(this, request));
+    } catch (ActivityNotFoundException e) {
+      launcher.launch(new FacebookLoginContract.Request.ActivityLaunchingError(request));
+    }
+  }
+
+  /**
+   * Processes the result obtained by launching a {@link FacebookLoginContract} through the activity result launcher.
+   * @param context the context
+   * @param result the result obtained through the launcher
+   * @param callbackManager the callback manager which will process the callback in case of success
+   */
+  public void processResult(Context context, FacebookLoginContract.Result result, CallbackManager callbackManager) {
+    if (result instanceof FacebookLoginContract.Result.Success) {
+      FacebookLoginContract.Result.Success success = ((FacebookLoginContract.Result.Success) result);
+      callbackManager.onActivityResult(LoginClient.getLoginRequestCode(), success.getResultCode(), success.getIntent());
+    } else {
+      FacebookLoginContract.Result.Error error = ((FacebookLoginContract.Result.Error) result);
+      logCompleteLogin(
+              context,
+              LoginClient.Result.Code.ERROR,
+              null,
+              error.getException(),
+              false,
+              error.getRequest()
+      );
+      throw error.getException();
+    }
   }
 
   private void validateReadPermissions(Collection<String> permissions) {
@@ -613,20 +714,24 @@ public class LoginManager {
         UUID.randomUUID().toString());
   }
 
+  void registerDefaultCallback() {
+    CallbackManagerImpl.registerStaticCallback(
+            CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
+            new CallbackManagerImpl.Callback() {
+              @Override
+              public boolean onActivityResult(int resultCode, Intent data) {
+                return LoginManager.this.onActivityResult(resultCode, data);
+              }
+            });
+  }
+
   private void startLogin(StartActivityDelegate startActivityDelegate, LoginClient.Request request)
       throws FacebookException {
 
     logStartLogin(startActivityDelegate.getActivityContext(), request);
 
     // Make sure the static handler for login is registered if there isn't an explicit callback
-    CallbackManagerImpl.registerStaticCallback(
-        CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
-        new CallbackManagerImpl.Callback() {
-          @Override
-          public boolean onActivityResult(int resultCode, Intent data) {
-            return LoginManager.this.onActivityResult(resultCode, data);
-          }
-        });
+    registerDefaultCallback();
 
     boolean started = tryFacebookActivity(startActivityDelegate, request);
 
@@ -647,7 +752,7 @@ public class LoginManager {
     }
   }
 
-  private void logStartLogin(Context context, LoginClient.Request loginRequest) {
+  void logStartLogin(Context context, LoginClient.Request loginRequest) {
     LoginLogger loginLogger = LoginLoggerHolder.getLogger(context);
     if (loginLogger != null && loginRequest != null) {
       loginLogger.logStartLogin(loginRequest);
@@ -700,13 +805,13 @@ public class LoginManager {
     return true;
   }
 
-  private boolean resolveIntent(Intent intent) {
+  boolean resolveIntent(Intent intent) {
     ResolveInfo resolveInfo =
         FacebookSdk.getApplicationContext().getPackageManager().resolveActivity(intent, 0);
     return resolveInfo != null;
   }
 
-  protected Intent getFacebookActivityIntent(LoginClient.Request request) {
+  Intent getFacebookActivityIntent(LoginClient.Request request) {
     Intent intent = new Intent();
     intent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
     intent.setAction(request.getLoginBehavior().toString());

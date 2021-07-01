@@ -36,6 +36,8 @@ dependencies {
     implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
     implementation "androidx.cardview:cardview:${project.ext.androidxCardviewVersion}"
     implementation "androidx.browser:browser:${project.ext.androidxBrowserVersion}"
+    implementation "androidx.activity:activity-ktx:${project.ext.androidxActivityVersion}"
+    implementation "androidx.fragment:fragment-ktx:${project.ext.androidxFragmentVersion}"
 
     // Third-party Dependencies
     implementation 'com.google.zxing:core:3.3.3'

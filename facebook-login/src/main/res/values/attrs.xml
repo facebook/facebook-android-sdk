@@ -30,6 +30,7 @@
             <enum name="display_always" value="1" />
             <enum name="never_display" value="2" />
         </attr>
+        <attr name="com_facebook_use_result_contract" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="com_facebook_profile_picture_view">
         <attr name="com_facebook_preset_size">
