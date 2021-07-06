@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.1.0] - 2021-06-29
+
+### Added
+- Validating the package checksum's providers when requesting it on Android S+.
+- Application Not Response (ANR) detector for improving the SDK quality. It will only collect ANR that caused by Facebook SDK and can be turned off by disabling automatically logged events. More details: https://developers.facebook.com/docs/app-events/getting-started-app-events-android/#auto-events
+
 ## [11.0.0] - 2021-06-08
 
 ### Added
@@ -314,6 +320,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[11.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.0.0...sdk-version-11.1.0
 [11.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.1...sdk-version-11.0.0
 [9.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.0...sdk-version-9.1.1
 [9.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.0.0...sdk-version-9.1.0
