@@ -109,4 +109,9 @@ public class GameFeaturesLibrary {
     DaemonRequest.executeAsync(
         context, parameters, callback, SDKMessageEnum.TOURNAMENT_POST_SCORE_ASYNC);
   }
+
+  public static void performHapticFeedbackAsync(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(
+        context, null, callback, SDKMessageEnum.PERFORM_HAPTIC_FEEDBACK_ASYNC);
+  }
 }
