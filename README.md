@@ -63,22 +63,22 @@ include the appropriate dependency (or dependencies) listed below in your `app/b
 ```gradle
 dependencies {
     // Facebook Core only (Analytics)
-    implementation 'com.facebook.android:facebook-core:8.1.0'
+    implementation 'com.facebook.android:facebook-core:11.1.0'
 
     // Facebook Login only
-    implementation 'com.facebook.android:facebook-login:8.1.0'
+    implementation 'com.facebook.android:facebook-login:11.1.0'
 
     // Facebook Share only
-    implementation 'com.facebook.android:facebook-share:8.1.0'
+    implementation 'com.facebook.android:facebook-share:11.1.0'
 
     // Facebook Messenger only
-    implementation 'com.facebook.android:facebook-messenger:8.1.0'
+    implementation 'com.facebook.android:facebook-messenger:11.1.0'
 
     // Facebook App Links only
-    implementation 'com.facebook.android:facebook-applinks:8.1.0'
+    implementation 'com.facebook.android:facebook-applinks:11.1.0'
 
     // Facebook Android SDK (everything)
-    implementation 'com.facebook.android:facebook-android-sdk:8.1.0'
+    implementation 'com.facebook.android:facebook-android-sdk:11.1.0'
 }
 ```
 
