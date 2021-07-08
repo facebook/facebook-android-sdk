@@ -22,7 +22,6 @@ package com.facebook.appevents
 import android.content.Context
 import android.os.Bundle
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.facebook.AccessToken
 import com.facebook.FacebookSdk
 import java.math.BigDecimal
@@ -35,9 +34,7 @@ import java.util.concurrent.Executor
  * be modified or removed without warning at any time.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class InternalAppEventsLogger
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-constructor(private val loggerImpl: AppEventsLoggerImpl) {
+class InternalAppEventsLogger internal constructor(private val loggerImpl: AppEventsLoggerImpl) {
   constructor(context: Context?) : this(AppEventsLoggerImpl(context, null, null))
   constructor(
       context: Context?,

@@ -101,7 +101,6 @@ android {
             java {
                 exclude '**/MonitorTest.java'
                 exclude '**/MonitorLoggingManagerTest.java'
-                exclude '**/AppEventsLoggerImplTest.java'
                 exclude '**/UserSettingsManagerTest.java'
                 exclude '**/LoginManagerTest.java'
 

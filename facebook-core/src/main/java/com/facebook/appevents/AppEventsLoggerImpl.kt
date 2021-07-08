@@ -25,7 +25,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.WebView
-import androidx.annotation.VisibleForTesting
 import com.facebook.AccessToken
 import com.facebook.AccessToken.Companion.getCurrentAccessToken
 import com.facebook.FacebookException
@@ -72,8 +71,7 @@ import org.json.JSONException
 import org.json.JSONObject
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class AppEventsLoggerImpl
+internal class AppEventsLoggerImpl
 internal constructor(activityName: String, applicationId: String?, accessToken: AccessToken?) {
 
   internal constructor(

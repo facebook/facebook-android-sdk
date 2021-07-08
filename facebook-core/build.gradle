@@ -61,9 +61,6 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
 
-    testImplementation "com.android.installreferrer:installreferrer:1.0"
-    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
 }
 
 android {
@@ -93,6 +90,11 @@ android {
 
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
+        test {
+            java {
+                exclude '**/AppEventsLoggerImplTest.java'
+            }
+        }
     }
 
     testOptions {
