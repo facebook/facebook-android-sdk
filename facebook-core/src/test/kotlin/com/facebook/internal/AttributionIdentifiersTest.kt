@@ -57,6 +57,7 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
     mockContext = PowerMockito.mock(Context::class.java)
     mockPackageManager = PowerMockito.mock(PackageManager::class.java)
     PowerMockito.`when`(mockContext.packageManager).thenReturn(mockPackageManager)
+    AttributionIdentifiers.cachedIdentifiers = null
   }
 
   @Test
@@ -88,11 +89,23 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
     val newLooper = PowerMockito.mock(Looper::class.java)
     PowerMockito.`when`(Looper.myLooper()).thenReturn(newLooper)
 
-    val id = PowerMockito.mock(AttributionIdentifiers::class.java)
-    PowerMockito.whenNew(AttributionIdentifiers::class.java).withNoArguments().thenReturn(id)
+    PowerMockito.whenNew(AttributionIdentifiers::class.java).withNoArguments().thenReturn(mockId)
     PowerMockito.`when`(Utility.getMethodQuietly(anyString(), anyString(), any())).thenReturn(null)
     val obtainedId = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
-    Assert.assertEquals(id, obtainedId)
-    Assert.assertEquals(id, AttributionIdentifiers.cachedIdentifiers)
+    Assert.assertEquals(mockId, obtainedId)
+    Assert.assertEquals(mockId, AttributionIdentifiers.cachedIdentifiers)
+  }
+
+  @Test
+  fun `test return new identifier if bindService throws SecurityException`() {
+    val newLooper = PowerMockito.mock(Looper::class.java)
+    PowerMockito.`when`(Looper.myLooper()).thenReturn(newLooper)
+
+    PowerMockito.`when`(mockContext.bindService(any(), any(), any())).thenThrow(SecurityException())
+    PowerMockito.`when`(Utility.getMethodQuietly(anyString(), anyString(), any())).thenReturn(null)
+    PowerMockito.whenNew(AttributionIdentifiers::class.java).withNoArguments().thenReturn(mockId)
+    val obtainedId = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    Assert.assertEquals(mockId, obtainedId)
+    Assert.assertEquals(mockId, AttributionIdentifiers.cachedIdentifiers)
   }
 }

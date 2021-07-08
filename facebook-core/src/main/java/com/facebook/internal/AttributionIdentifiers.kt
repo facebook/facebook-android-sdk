@@ -32,6 +32,7 @@ import android.os.Looper
 import android.os.Parcel
 import android.os.RemoteException
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
@@ -79,8 +80,10 @@ class AttributionIdentifiers {
     // com.google.android.gms.common.ConnectionResult.SUCCESS
     private const val CONNECTION_RESULT_SUCCESS = 0
     private const val IDENTIFIER_REFRESH_INTERVAL_MILLIS = (3600 * 1000).toLong()
-    var cachedIdentifiers: AttributionIdentifiers? = null
-      private set
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @JvmField
+    internal var cachedIdentifiers: AttributionIdentifiers? = null
 
     private fun getAndroidId(context: Context): AttributionIdentifiers {
       var identifiers = getAndroidIdViaReflection(context)
@@ -146,7 +149,13 @@ class AttributionIdentifiers {
       val connection = GoogleAdServiceConnection()
       val intent = Intent("com.google.android.gms.ads.identifier.service.START")
       intent.setPackage("com.google.android.gms")
-      if (context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
+      val isBindServiceSucceed =
+          try {
+            context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+          } catch (_: SecurityException) {
+            return null
+          }
+      if (isBindServiceSucceed) {
         try {
           val adInfo = GoogleAdInfo(connection.binder)
           val identifiers = AttributionIdentifiers()
