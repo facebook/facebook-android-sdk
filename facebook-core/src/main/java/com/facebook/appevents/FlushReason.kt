@@ -19,10 +19,7 @@
  */
 package com.facebook.appevents
 
-import androidx.annotation.VisibleForTesting
-
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-enum class FlushReason {
+internal enum class FlushReason {
   EXPLICIT,
   TIMER,
   SESSION_CHANGE,

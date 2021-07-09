@@ -19,10 +19,7 @@
  */
 package com.facebook.appevents
 
-import androidx.annotation.VisibleForTesting
-
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class FlushStatistics {
+internal class FlushStatistics {
   var numEvents = 0
   var result = FlushResult.SUCCESS
 }
