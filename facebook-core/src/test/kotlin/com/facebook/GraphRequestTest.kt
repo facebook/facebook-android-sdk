@@ -27,7 +27,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.AttributionIdentifiers
-import com.facebook.share.internal.ShareInternalUtility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -101,7 +100,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     assertThat(request2.accessToken).isNull()
     assertThat(request2.httpMethod).isEqualTo(HttpMethod.POST)
     assertThat(request2.graphPath).isEqualTo(graphPath)
-    TestUtils.assertEqualContentsWithoutOrder(parameters, request2.parameters)
+    FacebookTestUtility.assertEqualContentsWithoutOrder(parameters, request2.parameters)
     assertThat(request2.callback).isNull()
   }
 
@@ -129,9 +128,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
   @Test
   fun testCreateUploadPhotoRequest() {
     val image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8)
-    val request =
-        GraphRequest.newUploadPhotoRequest(
-            null, ShareInternalUtility.MY_PHOTOS, image, null, null, null)
+    val request = GraphRequest.newUploadPhotoRequest(null, "me/photos", image, null, null, null)
     val parameters = request.parameters
     assertThat(parameters.containsKey("picture")).isTrue
     assertThat(parameters.getParcelable<Bitmap>("picture")).isEqualTo(image)
@@ -210,9 +207,9 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
 
     val mockGraphResponseCompanion = mock<GraphResponse.Companion>()
     whenever(mockGraphResponseCompanion.fromHttpConnection(any(), any())).thenReturn(responses)
-
+    Whitebox.setInternalState(GraphResponse::class.java, "Companion", mockGraphResponseCompanion)
     val callback = mock<GraphRequest.Callback>()
-    val request = GraphRequest(null, null, null, null, callback)
+    val request = GraphRequest(null, "me/photos", null, null, callback)
     request.executeAndWait()
     verify(callback, times(1)).onCompleted(any())
   }
@@ -234,7 +231,8 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
             mock(), FacebookSdk.getApplicationContext(), "mockAppID", null)
     assertThat(request.graphPath).isEqualTo(expectedRequest.graphPath)
     assertThat(request.httpMethod).isEqualTo(expectedRequest.httpMethod)
-    TestUtils.assertEqualContentsWithoutOrder(expectedRequest.parameters, request.parameters)
+    FacebookTestUtility.assertEqualContentsWithoutOrder(
+        expectedRequest.parameters, request.parameters)
   }
 
   @Test

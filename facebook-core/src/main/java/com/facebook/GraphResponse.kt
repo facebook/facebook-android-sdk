@@ -21,7 +21,6 @@
 package com.facebook
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.Logger
 import com.facebook.internal.Utility
@@ -192,9 +191,8 @@ internal constructor(
     private const val RESPONSE_LOG_TAG = "Response"
 
     @SuppressWarnings("resource")
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     @JvmStatic
-    fun fromHttpConnection(
+    internal fun fromHttpConnection(
         connection: HttpURLConnection,
         requests: GraphRequestBatch
     ): List<GraphResponse> {
@@ -227,10 +225,9 @@ internal constructor(
       }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     @JvmStatic
     @Throws(FacebookException::class, JSONException::class, IOException::class)
-    fun createResponsesFromStream(
+    internal fun createResponsesFromStream(
         stream: InputStream?,
         connection: HttpURLConnection?,
         requests: GraphRequestBatch
@@ -245,10 +242,9 @@ internal constructor(
       return createResponsesFromString(responseString, connection, requests)
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     @JvmStatic
     @Throws(FacebookException::class, JSONException::class, IOException::class)
-    fun createResponsesFromString(
+    internal fun createResponsesFromString(
         responseString: String,
         connection: HttpURLConnection?,
         requests: GraphRequestBatch
