@@ -19,14 +19,12 @@
  */
 package com.facebook.appevents
 
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.io.ObjectStreamException
 import java.io.Serializable
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class PersistedEvents : Serializable {
+internal class PersistedEvents : Serializable {
   private val events = hashMapOf<AccessTokenAppIdPair, MutableList<AppEvent>>()
 
   constructor()

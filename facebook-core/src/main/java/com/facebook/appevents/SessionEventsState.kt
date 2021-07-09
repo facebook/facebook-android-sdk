@@ -20,7 +20,6 @@
 package com.facebook.appevents
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import com.facebook.GraphRequest
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager.processEvents
 import com.facebook.appevents.internal.AppEventsLoggerUtility
@@ -33,8 +32,7 @@ import org.json.JSONException
 import org.json.JSONObject
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class SessionEventsState(
+internal class SessionEventsState(
     private val attributionIdentifiers: AttributionIdentifiers,
     private val anonymousAppDeviceGUID: String
 ) {
