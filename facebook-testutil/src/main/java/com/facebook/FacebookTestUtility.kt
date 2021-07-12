@@ -76,6 +76,7 @@ object FacebookTestUtility {
     assertEqualContents(a, b, true)
   }
 
+  @JvmStatic
   fun assertEquals(expected: JSONObject?, actual: JSONObject?) {
     // JSONObject.equals does not do an order-independent comparison, so let's roll our own  :(
     if (areEqual(expected, actual)) {
@@ -85,6 +86,7 @@ object FacebookTestUtility {
     assertThat(true).isFalse.withFailMessage("JSONObject is not equal")
   }
 
+  @JvmStatic
   fun assertEquals(expected: JSONArray?, actual: JSONArray?) {
     // JSONObject.equals does not do an order-independent comparison, so let's roll our own  :(
     if (areEqual(expected, actual)) {

@@ -25,8 +25,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
+import com.facebook.FacebookTestUtility;
 import com.facebook.MockSharedPreference;
-import com.facebook.TestUtils;
 import com.facebook.internal.Utility;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,7 +111,7 @@ public class UserDataStoreTest extends FacebookPowerMockTestCase {
     expectedData.put(UserDataStore.PHONE, Utility.sha256hash(phone));
     JSONObject expected = new JSONObject(expectedData);
     JSONObject actual = new JSONObject(UserDataStore.getHashedUserData());
-    TestUtils.assertEquals(expected, actual);
+    FacebookTestUtility.assertEquals(expected, actual);
 
     Bundle bundleData = new Bundle();
     bundleData.putString(UserDataStore.EMAIL, "android@fb.com");
@@ -119,7 +119,7 @@ public class UserDataStoreTest extends FacebookPowerMockTestCase {
     expectedData.put(UserDataStore.EMAIL, Utility.sha256hash("android@fb.com"));
     expected = new JSONObject(expectedData);
     actual = new JSONObject(UserDataStore.getHashedUserData());
-    TestUtils.assertEquals(expected, actual);
+    FacebookTestUtility.assertEquals(expected, actual);
   }
 
   @Test
