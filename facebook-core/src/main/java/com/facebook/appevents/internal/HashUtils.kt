@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Base64
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -20,8 +19,7 @@ import java.security.cert.CertificateFactory
 import java.util.concurrent.locks.ReentrantLock
 
 /** Utility class to compute file checksums. */
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-object HashUtils {
+internal object HashUtils {
   private const val MD5 = "MD5"
   private const val BUFFER_SIZE = 1024
   private val TAG = HashUtils::class.java.simpleName

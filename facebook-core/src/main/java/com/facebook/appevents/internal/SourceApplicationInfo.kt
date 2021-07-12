@@ -21,12 +21,10 @@ package com.facebook.appevents.internal
 
 import android.app.Activity
 import android.preference.PreferenceManager
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.bolts.AppLinks
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class SourceApplicationInfo
+internal class SourceApplicationInfo
 private constructor(val callingApplicationPackage: String?, val isOpenedByAppLink: Boolean) {
   override fun toString(): String {
     var openType = "Unclassified"
