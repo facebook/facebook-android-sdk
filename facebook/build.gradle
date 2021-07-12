@@ -29,7 +29,7 @@ project.ext.description = 'Facebook Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
-    def kotlin_ver = '1.3.31'
+    def kotlin_ver = project.ext.kotlinVersion
 
     // Facebook Dependencies
     api project(':facebook-core')
