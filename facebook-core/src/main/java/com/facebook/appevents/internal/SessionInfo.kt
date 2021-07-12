@@ -20,12 +20,10 @@
 package com.facebook.appevents.internal
 
 import android.preference.PreferenceManager
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import java.util.UUID
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class SessionInfo
+internal class SessionInfo
 @JvmOverloads
 constructor(
     val sessionStartTime: Long?,

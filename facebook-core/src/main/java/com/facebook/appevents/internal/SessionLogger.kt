@@ -22,7 +22,6 @@ package com.facebook.appevents.internal
 import android.content.Context
 import android.os.Bundle
 import android.text.format.DateUtils
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.LoggingBehavior
 import com.facebook.appevents.AppEventsConstants
@@ -35,8 +34,7 @@ import com.facebook.internal.security.CertificateUtil.getCertificateHash
 import java.util.Locale
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-object SessionLogger {
+internal object SessionLogger {
   private const val PACKAGE_CHECKSUM = "PCKGCHKSUM"
   private val TAG = SessionLogger::class.java.canonicalName
   private val INACTIVE_SECONDS_QUANTA =
@@ -119,7 +117,6 @@ object SessionLogger {
     log(LoggingBehavior.APP_EVENTS, TAG!!, "Clock skew detected")
   }
 
-  @VisibleForTesting
   @JvmStatic
   fun getQuantaIndex(timeBetweenSessions: Long): Int {
     var quantaIndex = 0
