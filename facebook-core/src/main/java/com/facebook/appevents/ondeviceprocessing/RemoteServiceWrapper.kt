@@ -26,7 +26,6 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
 import com.facebook.appevents.internal.AppEventUtility.assertIsNotMainThread
@@ -159,8 +158,7 @@ object RemoteServiceWrapper {
     }
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  class RemoteServiceConnection : ServiceConnection {
+  internal class RemoteServiceConnection : ServiceConnection {
     private val latch = CountDownLatch(1)
     private var binder: IBinder? = null
     override fun onServiceConnected(name: ComponentName, serviceBinder: IBinder) {

@@ -19,14 +19,12 @@
  */
 package com.facebook.appevents.ml
 
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import kotlin.math.exp
 import kotlin.math.max
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-object Operator {
+internal object Operator {
   @JvmStatic
   fun addmv(x: MTensor, b: MTensor) {
     val exampleSize = x.getShape(0)

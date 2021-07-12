@@ -20,7 +20,6 @@
 package com.facebook.appevents.ondeviceprocessing
 
 import android.os.Bundle
-import androidx.annotation.VisibleForTesting
 import com.facebook.appevents.AppEvent
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
@@ -29,8 +28,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONArray
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-object RemoteServiceParametersHelper {
+internal object RemoteServiceParametersHelper {
   private val TAG = RemoteServiceWrapper::class.java.simpleName
 
   @JvmStatic

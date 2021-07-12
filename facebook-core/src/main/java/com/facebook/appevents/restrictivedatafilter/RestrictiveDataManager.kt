@@ -21,7 +21,6 @@ package com.facebook.appevents.restrictivedatafilter
 
 import android.util.Log
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.facebook.internal.Utility.convertJSONObjectToStringMap
@@ -140,6 +139,8 @@ object RestrictiveDataManager {
     return restrictedEvents.contains(eventName)
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  class RestrictiveParamFilter(var eventName: String, var restrictiveParams: Map<String, String?>)
+  internal class RestrictiveParamFilter(
+      var eventName: String,
+      var restrictiveParams: Map<String, String?>
+  )
 }

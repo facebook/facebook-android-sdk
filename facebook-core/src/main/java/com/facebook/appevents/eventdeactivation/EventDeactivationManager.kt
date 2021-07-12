@@ -20,7 +20,6 @@
 package com.facebook.appevents.eventdeactivation
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
@@ -109,6 +108,5 @@ object EventDeactivationManager {
     }
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  class DeprecatedParamFilter(var eventName: String, var deprecateParams: List<String>)
+  internal class DeprecatedParamFilter(var eventName: String, var deprecateParams: List<String>)
 }
