@@ -38,7 +38,7 @@ private constructor(
     val allowCachedRedirects: Boolean,
     val callerTag: Any
 ) {
-  interface Callback {
+  fun interface Callback {
     /**
      * This method should always be called on the UI thread. ImageDownloader makes sure to do this
      * when it is responsible for issuing the ImageResponse

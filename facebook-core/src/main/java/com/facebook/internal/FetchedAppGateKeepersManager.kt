@@ -259,7 +259,7 @@ object FetchedAppGateKeepersManager {
   }
 
   /** Callback for fetch GK when the GK results are valid. */
-  interface Callback {
+  fun interface Callback {
     /** The method that will be called when the GK request completes. */
     fun onCompleted()
   }

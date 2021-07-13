@@ -1378,11 +1378,11 @@ object Utility {
       return false
     }
 
-  interface Predicate<T> {
+  fun interface Predicate<T> {
     fun apply(item: T): Boolean
   }
 
-  interface Mapper<T, K> {
+  fun interface Mapper<T, K> {
     fun apply(item: T): K
   }
 

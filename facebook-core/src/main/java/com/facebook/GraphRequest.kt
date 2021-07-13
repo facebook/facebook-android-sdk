@@ -1661,7 +1661,7 @@ class GraphRequest {
     batch.put(batchEntry)
   }
 
-  private interface KeyValueSerializer {
+  private fun interface KeyValueSerializer {
     fun writeString(key: String, value: String)
   }
 

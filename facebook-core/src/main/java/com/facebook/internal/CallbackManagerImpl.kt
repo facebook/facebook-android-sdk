@@ -45,7 +45,7 @@ class CallbackManagerImpl : CallbackManager {
         ?: runStaticCallback(requestCode, resultCode, data)
   }
 
-  interface Callback {
+  fun interface Callback {
     fun onActivityResult(resultCode: Int, data: Intent?): Boolean
   }
 

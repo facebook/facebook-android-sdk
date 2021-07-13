@@ -91,7 +91,7 @@ object InstallReferrerUtil {
       return preferences.getBoolean(IS_REFERRER_UPDATED, false)
     }
 
-  interface Callback {
+  fun interface Callback {
     fun onReceiveReferrerUrl(s: String?)
   }
 }

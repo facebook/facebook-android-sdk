@@ -569,7 +569,7 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
     }
   }
 
-  private interface StreamCloseCallback {
+  private fun interface StreamCloseCallback {
     fun onClose()
   }
 

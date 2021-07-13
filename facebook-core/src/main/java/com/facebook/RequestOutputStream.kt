@@ -20,6 +20,6 @@
 
 package com.facebook
 
-internal interface RequestOutputStream {
+internal fun interface RequestOutputStream {
   fun setCurrentRequest(r: GraphRequest?)
 }
