@@ -26,8 +26,7 @@ import androidx.annotation.VisibleForTesting
  * finalized. If it is finalized with a task, then the uncaught exception handler is executed with
  * an UnobservedTaskException.
  */
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class UnobservedErrorNotifier(private var task: Task<*>?) {
+internal class UnobservedErrorNotifier(private var task: Task<*>?) {
   @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
   fun finalize() {
     val faultedTask = task

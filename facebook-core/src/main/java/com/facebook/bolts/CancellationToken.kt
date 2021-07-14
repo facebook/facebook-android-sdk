@@ -20,7 +20,6 @@
 
 package com.facebook.bolts
 
-import androidx.annotation.VisibleForTesting
 import java.util.Locale
 import java.util.concurrent.CancellationException
 
@@ -40,9 +39,7 @@ import java.util.concurrent.CancellationException
  * @see CancellationTokenSource.cancel
  * @see CancellationToken.register
  */
-class CancellationToken
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-constructor(private val tokenSource: CancellationTokenSource) {
+class CancellationToken internal constructor(private val tokenSource: CancellationTokenSource) {
   /** @return `true` if the cancellation was requested from the source, `false` otherwise. */
   val isCancellationRequested: Boolean
     get() = tokenSource.isCancellationRequested

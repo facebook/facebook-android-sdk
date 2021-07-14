@@ -19,7 +19,6 @@
  */
 package com.facebook.bolts
 
-import androidx.annotation.VisibleForTesting
 import java.io.Closeable
 import java.util.Locale
 import java.util.concurrent.CancellationException
@@ -124,8 +123,7 @@ class CancellationTokenSource : Closeable {
     }
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  fun register(action: Runnable?): CancellationTokenRegistration {
+  internal fun register(action: Runnable?): CancellationTokenRegistration {
     var ctr: CancellationTokenRegistration
     synchronized(lock) {
       throwIfClosed()
@@ -143,9 +141,8 @@ class CancellationTokenSource : Closeable {
    * @throws CancellationException if this token has had cancellation requested. May be used to stop
    * execution of a thread or runnable.
    */
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   @Throws(CancellationException::class)
-  fun throwIfCancellationRequested() {
+  internal fun throwIfCancellationRequested() {
     synchronized(lock) {
       throwIfClosed()
       if (cancellationRequested) {
@@ -154,8 +151,7 @@ class CancellationTokenSource : Closeable {
     }
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  fun unregister(registration: CancellationTokenRegistration) {
+  internal fun unregister(registration: CancellationTokenRegistration) {
     synchronized(lock) {
       throwIfClosed()
       registrations.remove(registration)

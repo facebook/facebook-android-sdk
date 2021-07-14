@@ -19,7 +19,6 @@
  */
 package com.facebook.bolts
 
-import androidx.annotation.VisibleForTesting
 import java.io.Closeable
 
 /**
@@ -28,8 +27,8 @@ import java.io.Closeable
  * @see CancellationToken.register
  */
 class CancellationTokenRegistration
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-constructor(tokenSource: CancellationTokenSource, private var action: Runnable?) : Closeable {
+internal constructor(tokenSource: CancellationTokenSource, private var action: Runnable?) :
+    Closeable {
   private var closed = false
   private var tokenSource: CancellationTokenSource? = tokenSource
 
@@ -46,8 +45,7 @@ constructor(tokenSource: CancellationTokenSource, private var action: Runnable?)
     }
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  fun runAction() {
+  internal fun runAction() {
     synchronized(this) {
       throwIfClosed()
       action?.run()
