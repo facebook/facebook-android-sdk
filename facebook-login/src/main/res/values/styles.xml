@@ -20,7 +20,7 @@
 -->
 
 <resources>
-    <style name="tooltip_bubble_text">
+    <style name="com_facebook_tooltip_bubble_text">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:gravity">left</item>
         <item name="android:textSize">12sp</item>
