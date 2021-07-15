@@ -23,7 +23,6 @@ import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.ImageRequest.Companion.getProfilePictureUri
 import com.facebook.internal.Utility
 import com.facebook.internal.Utility.getGraphMeRequestWithCacheAsync
@@ -170,8 +169,7 @@ class Profile : Parcelable {
     return jsonObject
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  constructor(jsonObject: JSONObject) {
+  internal constructor(jsonObject: JSONObject) {
     id = jsonObject.optString(ID_KEY, null)
     firstName = jsonObject.optString(FIRST_NAME_KEY, null)
     middleName = jsonObject.optString(MIDDLE_NAME_KEY, null)

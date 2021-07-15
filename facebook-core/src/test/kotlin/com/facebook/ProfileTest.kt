@@ -95,13 +95,13 @@ class ProfileTest : FacebookPowerMockTestCase() {
   @Test
   fun testParcelSerialization() {
     var profile1 = createDefaultProfile()
-    var profile2 = TestUtils.parcelAndUnparcel(profile1)
+    var profile2 = FacebookTestUtility.parcelAndUnparcel(profile1)
     assertDefaultObjectGetters(profile2)
     Assert.assertEquals(profile1, profile2)
 
     // Check with nulls
     profile1 = createMostlyNullsProfile()
-    profile2 = TestUtils.parcelAndUnparcel(profile1)
+    profile2 = FacebookTestUtility.parcelAndUnparcel(profile1)
     assertMostlyNullsObjectGetters(profile2)
     Assert.assertEquals(profile1, profile2)
   }

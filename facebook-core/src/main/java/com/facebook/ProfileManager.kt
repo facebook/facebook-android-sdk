@@ -20,13 +20,11 @@
 package com.facebook
 
 import android.content.Intent
-import androidx.annotation.VisibleForTesting
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.facebook.internal.Utility.areObjectsEqual
 
 class ProfileManager
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-constructor(
+internal constructor(
     private val localBroadcastManager: LocalBroadcastManager,
     private val profileCache: ProfileCache
 ) {
