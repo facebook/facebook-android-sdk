@@ -211,7 +211,7 @@ class TaskTest {
   fun testSynchronousTaskCancellation() {
     val first = Task.forResult(1)
     val second =
-        first.continueWithTask(Continuation<Int, Task<Int>?> { throw CancellationException() })
+        first.continueWithTask(Continuation<Int, Task<Int>> { throw CancellationException() })
     assertThat(first.isCompleted).isTrue
     assertThat(second.isCancelled).isTrue
   }
@@ -434,10 +434,10 @@ class TaskTest {
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
         assertThat(task.result).isEqualTo(firstToCompleteSuccess)
-        assertThat(task.result.isCompleted).isTrue
-        assertThat(task.result.isCancelled).isFalse
-        assertThat(task.result.isFaulted).isFalse
-        assertThat(task.result.result).isEqualTo(10)
+        assertThat(task.result?.isCompleted).isTrue
+        assertThat(task.result?.isCancelled).isFalse
+        assertThat(task.result?.isFaulted).isFalse
+        assertThat(task.result?.result).isEqualTo(10)
         null
       }
     }
@@ -460,10 +460,10 @@ class TaskTest {
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
         assertThat(task.result).isEqualTo(firstToCompleteSuccess)
-        assertThat(task.result.isCompleted).isTrue
-        assertThat(task.result.isCancelled).isFalse
-        assertThat(task.result.isFaulted).isFalse
-        assertThat(task.result.result).isEqualTo("SUCCESS")
+        assertThat(task.result?.isCompleted).isTrue
+        assertThat(task.result?.isCancelled).isFalse
+        assertThat(task.result?.isFaulted).isFalse
+        assertThat(task.result?.result).isEqualTo("SUCCESS")
         null
       }
     }
@@ -487,10 +487,10 @@ class TaskTest {
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
         assertThat(task.result).isEqualTo(firstToCompleteError)
-        assertThat(task.result.isCompleted).isTrue
-        assertThat(task.result.isCancelled).isFalse
-        assertThat(task.result.isFaulted).isTrue
-        assertThat(task.result.error).isEqualTo(error)
+        assertThat(task.result?.isCompleted).isTrue
+        assertThat(task.result?.isCancelled).isFalse
+        assertThat(task.result?.isFaulted).isTrue
+        assertThat(task.result?.error).isEqualTo(error)
         null
       }
     }
@@ -514,10 +514,10 @@ class TaskTest {
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
         assertThat(task.result).isEqualTo(firstToCompleteError)
-        assertThat(task.result.isCompleted).isTrue
-        assertThat(task.result.isCancelled).isFalse
-        assertThat(task.result.isFaulted).isTrue
-        assertThat(task.result.error).isEqualTo(error)
+        assertThat(task.result?.isCompleted).isTrue
+        assertThat(task.result?.isCancelled).isFalse
+        assertThat(task.result?.isFaulted).isTrue
+        assertThat(task.result?.error).isEqualTo(error)
         null
       }
     }
@@ -540,9 +540,9 @@ class TaskTest {
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
         assertThat(task.result).isEqualTo(firstToCompleteCancelled)
-        assertThat(task.result.isCompleted).isTrue
-        assertThat(task.result.isCancelled).isTrue
-        assertThat(task.result.isFaulted).isFalse
+        assertThat(task.result?.isCompleted).isTrue
+        assertThat(task.result?.isCancelled).isTrue
+        assertThat(task.result?.isFaulted).isFalse
         null
       }
     }
@@ -565,9 +565,9 @@ class TaskTest {
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
         assertThat(task.result).isEqualTo(firstToCompleteCancelled)
-        assertThat(task.result.isCompleted).isTrue
-        assertThat(task.result.isCancelled).isTrue
-        assertThat(task.result.isFaulted).isFalse
+        assertThat(task.result?.isCompleted).isTrue
+        assertThat(task.result?.isCancelled).isTrue
+        assertThat(task.result?.isFaulted).isFalse
         null
       }
     }
@@ -662,7 +662,7 @@ class TaskTest {
     assertThat(task.isCompleted).isTrue
     assertThat(task.isCancelled).isFalse
     assertThat(task.isFaulted).isFalse
-    assertThat(task.result.isEmpty()).isTrue
+    assertThat(task.result?.isEmpty()).isTrue
   }
 
   @Test
@@ -682,11 +682,11 @@ class TaskTest {
         assertThat(task.isCompleted).isTrue
         assertThat(task.isFaulted).isFalse
         assertThat(task.isCancelled).isFalse
-        assertThat(task.result.size).isEqualTo(tasks.size)
+        assertThat(task.result?.size).isEqualTo(tasks.size)
         for (i in tasks.indices) {
           val t = tasks[i]
           assertThat(t.isCompleted).isTrue
-          assertThat(t.result).isEqualTo(task.result[i])
+          assertThat(t.result)?.isEqualTo(task.result?.get(i))
         }
         null
       }
@@ -697,7 +697,7 @@ class TaskTest {
   fun testAsyncChaining() {
     runTaskTest {
       val sequence = ArrayList<Int>()
-      var result = Task.forResult<Void>(null)
+      var result = Task.forResult<Void?>(null)
       for (i in 0..19) {
         result =
             result.continueWithTask {
@@ -721,7 +721,8 @@ class TaskTest {
 
   @Test
   fun testOnSuccess() {
-    val continuation: Continuation<Int, Int> = Continuation<Int, Int> { task -> task.result + 1 }
+    val continuation: Continuation<Int, Int> =
+        Continuation<Int, Int> { task -> checkNotNull(task.result) + 1 }
     val complete = Task.forResult(5).onSuccess(continuation)
     val error = Task.forError<Int>(IllegalStateException()).onSuccess(continuation)
     val cancelled = Task.cancelled<Int>().onSuccess(continuation)
@@ -741,7 +742,7 @@ class TaskTest {
   @Test
   fun testOnSuccessTask() {
     val continuation: Continuation<Int, Task<Int>> =
-        Continuation<Int, Task<Int>> { task -> Task.forResult(task.result + 1) }
+        Continuation<Int, Task<Int>> { task -> Task.forResult(checkNotNull(task.result) + 1) }
     val complete = Task.forResult(5).onSuccessTask(continuation)
     val error = Task.forError<Int>(IllegalStateException()).onSuccessTask(continuation)
     val cancelled = Task.cancelled<Int>().onSuccessTask(continuation)
@@ -823,7 +824,7 @@ class TaskTest {
     Task.call({ 1 }) { throw exception }.continueWith { task ->
       assertThat(task.isFaulted).isTrue
       assertThat(task.error is ExecutorException).isTrue
-      assertThat(task.error.cause).isEqualTo(exception)
+      assertThat(task.error?.cause).isEqualTo(exception)
       null
     }
   }
@@ -834,7 +835,7 @@ class TaskTest {
     Task.call { 1 }.continueWith({ task -> task.result }) { throw exception }.continueWith { task ->
       assertThat(task.isFaulted).isTrue
       assertThat(task.error is ExecutorException).isTrue
-      assertThat(task.error.cause).isEqualTo(exception)
+      assertThat(task.error?.cause).isEqualTo(exception)
       null
     }
   }
@@ -845,7 +846,7 @@ class TaskTest {
     Task.call { 1 }.continueWithTask({ task -> task }) { throw exception }.continueWith { task ->
       assertThat(task.isFaulted).isTrue
       assertThat(task.error is ExecutorException).isTrue
-      assertThat(task.error.cause).isEqualTo(exception)
+      assertThat(task.error?.cause).isEqualTo(exception)
       null
     }
   }

@@ -35,7 +35,7 @@ open class TaskCompletionSource<TResult> {
   }
 
   /** Sets the result on the Task if the Task hasn't already been completed. */
-  fun trySetResult(result: TResult): Boolean {
+  fun trySetResult(result: TResult?): Boolean {
     return task.trySetResult(result)
   }
 
@@ -50,7 +50,7 @@ open class TaskCompletionSource<TResult> {
   }
 
   /** Sets the result of the Task, throwing if the Task has already been completed. */
-  fun setResult(result: TResult) {
+  fun setResult(result: TResult?) {
     check(trySetResult(result)) { "Cannot set the result of a completed task." }
   }
 
