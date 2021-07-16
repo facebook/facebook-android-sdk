@@ -120,10 +120,11 @@ public class DaemonRequest {
                     intent.putExtra(key, value);
                   }
 
-                  mContext.sendBroadcast(intent);
-                  mLogger.logSentRequest(functionType, uniqueID, mParameters);
                   CompletableFuture<GraphResponse> future = new CompletableFuture<GraphResponse>();
                   mRequestStore.put(uniqueID, future);
+                  mContext.sendBroadcast(intent);
+                  mLogger.logSentRequest(functionType, uniqueID, mParameters);
+
                   return future.get();
                 } catch (JSONException | InterruptedException | ExecutionException e) {
                   FacebookRequestError error =
