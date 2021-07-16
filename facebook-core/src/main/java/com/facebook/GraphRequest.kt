@@ -1314,7 +1314,7 @@ class GraphRequest {
 
     private fun serializeAttachments(attachments: Map<String, Attachment>, serializer: Serializer) {
       attachments.forEach {
-        if (isSupportedAttachmentType(it.value)) {
+        if (isSupportedAttachmentType(it.value.value)) {
           serializer.writeObject(it.key, it.value.value, it.value.request)
         }
       }
