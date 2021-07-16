@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.Logger.Companion.log
 import java.util.Date
 import kotlin.collections.ArrayList
@@ -31,8 +30,9 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class LegacyTokenHelper @JvmOverloads constructor(context: Context, cacheKey: String? = null) {
+internal class LegacyTokenHelper
+@JvmOverloads
+constructor(context: Context, cacheKey: String? = null) {
   private val cacheKey: String
   private val cache: SharedPreferences
 
