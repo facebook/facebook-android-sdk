@@ -29,7 +29,7 @@ def ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : ""
 task setVersion {
     // The version will be derived from source
     project.version = null
-    def sdkVersionFile = file("${rootDir}/facebook-core/src/main/java/com/facebook/FacebookSdkVersion.java")
+    def sdkVersionFile = file("${rootDir}/facebook-core/src/main/java/com/facebook/FacebookSdkVersion.kt")
     sdkVersionFile.eachLine{
         def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
         if (matcher.matches()) {
