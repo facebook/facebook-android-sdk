@@ -192,19 +192,19 @@ class TaskTest {
   @Test
   fun testSynchronousContinuationTokenAlreadyCancelled() {
     val cts = CancellationTokenSource()
-    val continuationRun = Capture(false)
+    var continuationRun = false
     cts.cancel()
     val first = Task.forResult(1)
     val second =
         first.continueWith(
             {
-              continuationRun.set(true)
+              continuationRun = true
               2
             },
             cts.token)
     assertThat(first.isCompleted).isTrue
     assertThat(second.isCancelled).isTrue
-    assertThat(continuationRun.get()).isFalse
+    assertThat(continuationRun).isFalse
   }
 
   @Test
@@ -234,14 +234,14 @@ class TaskTest {
   fun testBackgroundCallTokenCancellation() {
     val cts = CancellationTokenSource()
     val ct = cts.token
-    val waitingToBeCancelled = Capture(false)
+    var waitingToBeCancelled = false
     val cancelLock = ReentrantLock()
     val cancelCondition = cancelLock.newCondition()
     val task =
         Task.callInBackground {
           cancelLock.lock()
           try {
-            waitingToBeCancelled.set(true)
+            waitingToBeCancelled = true
             cancelCondition.await()
           } finally {
             cancelLock.unlock()
@@ -252,7 +252,7 @@ class TaskTest {
     while (true) {
       cancelLock.lock()
       try {
-        if (waitingToBeCancelled.get()) {
+        if (waitingToBeCancelled) {
           cts.cancel()
           cancelCondition.signal()
           break

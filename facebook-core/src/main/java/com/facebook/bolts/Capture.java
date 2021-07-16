@@ -25,6 +25,7 @@ package com.facebook.bolts;
  *
  * @param <T>
  */
+@Deprecated
 public class Capture<T> {
   private T value;
 

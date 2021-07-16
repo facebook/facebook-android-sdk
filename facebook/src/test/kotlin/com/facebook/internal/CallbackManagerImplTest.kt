@@ -23,7 +23,6 @@ import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.facebook.bolts.Capture
 import com.facebook.internal.CallbackManagerImpl.Companion.registerStaticCallback
 import org.junit.Assert
 import org.junit.Before
@@ -51,29 +50,29 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test callback executed`() {
-    val capture = Capture(false)
+    var capturedResult = false
     val callbackManagerImpl = CallbackManagerImpl()
     callbackManagerImpl.registerCallback(
         CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
         object : CallbackManagerImpl.Callback {
           override fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
-            capture.set(true)
+            capturedResult = true
             return true
           }
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
-    Assert.assertTrue(capture.get())
+    Assert.assertTrue(capturedResult)
   }
 
   @Test
   fun `test right callback executed`() {
-    val capture = Capture(false)
+    var capturedResult = false
     val callbackManagerImpl = CallbackManagerImpl()
     callbackManagerImpl.registerCallback(
         123,
         object : CallbackManagerImpl.Callback {
           override fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
-            capture.set(true)
+            capturedResult = true
             return true
           }
         })
@@ -85,35 +84,35 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
           }
         })
     callbackManagerImpl.onActivityResult(123, 1, Intent())
-    Assert.assertTrue(capture.get())
+    Assert.assertTrue(capturedResult)
   }
 
   @Test
   fun `test static callback executed`() {
-    val capture = Capture(false)
+    var capturedResult = false
     val callbackManagerImpl = CallbackManagerImpl()
     registerStaticCallback(
         CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
         object : CallbackManagerImpl.Callback {
           override fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
-            capture.set(true)
+            capturedResult = true
             return true
           }
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
-    Assert.assertTrue(capture.get())
+    Assert.assertTrue(capturedResult)
   }
 
   @Test
   fun `test static callback skipped`() {
-    val capture = Capture(false)
-    val captureStatic = Capture(false)
+    var capturedResult = false
+    var capturedResultStatic = false
     val callbackManagerImpl = CallbackManagerImpl()
     callbackManagerImpl.registerCallback(
         CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
         object : CallbackManagerImpl.Callback {
           override fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
-            capture.set(true)
+            capturedResult = true
             return true
           }
         })
@@ -121,12 +120,12 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
         CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
         object : CallbackManagerImpl.Callback {
           override fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
-            captureStatic.set(true)
+            capturedResultStatic = true
             return true
           }
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
-    Assert.assertTrue(capture.get())
-    Assert.assertFalse(captureStatic.get())
+    Assert.assertTrue(capturedResult)
+    Assert.assertFalse(capturedResultStatic)
   }
 }

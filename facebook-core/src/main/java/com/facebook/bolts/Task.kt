@@ -206,8 +206,7 @@ class Task<TResult> {
       executor: Executor = IMMEDIATE_EXECUTOR,
       ct: CancellationToken? = null
   ): Task<Void> {
-    val predicateContinuation = Capture<Continuation<Void, Task<Void>>>()
-    predicateContinuation.set(
+    val predicateContinuation: Continuation<Void, Task<Void>> =
         object : Continuation<Void, Task<Void>> {
           @Throws(Exception::class)
           override fun then(task: Task<Void>): Task<Void> {
@@ -217,11 +216,11 @@ class Task<TResult> {
             return if (predicate.call()) {
               forResult<Void>(null)
                   .onSuccessTask(continuation, executor)
-                  .onSuccessTask(predicateContinuation.get(), executor)
+                  .onSuccessTask(this, executor)
             } else forResult(null)
           }
-        })
-    return makeVoid().continueWithTask(predicateContinuation.get(), executor)
+        }
+    return makeVoid().continueWithTask(predicateContinuation, executor)
   }
 
   /**
