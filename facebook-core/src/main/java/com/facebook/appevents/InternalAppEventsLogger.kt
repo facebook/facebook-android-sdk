@@ -132,7 +132,7 @@ class InternalAppEventsLogger internal constructor(private val loggerImpl: AppEv
 
     @RestrictTo(RestrictTo.Scope.GROUP_ID)
     @JvmStatic
-    fun setInternalUserData(ud: Map<String?, String?>?) {
+    fun setInternalUserData(ud: Map<String, String>) {
       UserDataStore.setInternalUd(ud)
     }
   }
