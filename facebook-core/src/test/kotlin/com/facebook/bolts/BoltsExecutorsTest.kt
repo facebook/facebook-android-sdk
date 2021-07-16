@@ -23,13 +23,12 @@ package com.facebook.bolts
 import com.facebook.FacebookPowerMockTestCase
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ExecutorService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(BoltsExecutors::class)
 class BoltsExecutorsTest : FacebookPowerMockTestCase() {
   companion object {
     private const val IMMEDIATE_MAX_DEPTH = 15
@@ -38,8 +37,11 @@ class BoltsExecutorsTest : FacebookPowerMockTestCase() {
   override fun setup() {
     mockBackgroundExecutor = mock()
 
-    PowerMockito.spy(BoltsExecutors::class.java)
-    PowerMockito.`when`(BoltsExecutors.background()).thenReturn(mockBackgroundExecutor)
+    val mockBoltsExecutorCompanion = mock<BoltsExecutors.Companion>()
+    whenever(mockBoltsExecutorCompanion.background()).thenReturn(mockBackgroundExecutor)
+    whenever(mockBoltsExecutorCompanion.immediate()).thenCallRealMethod()
+    whenever(mockBoltsExecutorCompanion.scheduled()).thenCallRealMethod()
+    Whitebox.setInternalState(BoltsExecutors::class.java, "Companion", mockBoltsExecutorCompanion)
   }
 
   @Test
