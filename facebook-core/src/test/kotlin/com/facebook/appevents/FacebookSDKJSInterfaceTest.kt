@@ -1,26 +1,67 @@
 package com.facebook.appevents
 
+import android.content.Context
+import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Before
 import org.junit.Test
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.core.classloader.annotations.PrepareForTest
 
+@PrepareForTest(FacebookSdk::class, FacebookSDKJSInterface::class)
 class FacebookSDKJSInterfaceTest : FacebookPowerMockTestCase() {
   private val validJson =
       "{\n" +
           "  \"supports_implicit_sdk_logging\": true,\n" +
           "  \"android_dialog_configs\": [20140701, 20140702, 20140703]\n" +
           "}"
+  private lateinit var mockContext: Context
+  private lateinit var mockLogger: InternalAppEventsLogger
+  private lateinit var sdkInterface: FacebookSDKJSInterface
+  @Before
+  fun init() {
+    PowerMockito.mockStatic(FacebookSdk::class.java)
+    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+
+    mockContext = mock()
+    mockLogger = mock()
+
+    PowerMockito.whenNew(InternalAppEventsLogger::class.java)
+        .withAnyArguments()
+        .thenReturn(mockLogger)
+    sdkInterface = FacebookSDKJSInterface(mockContext)
+  }
+
   @Test
   fun `test with valid json`() {
-    val result = FacebookSDKJSInterface.jsonStringToBundle(validJson)
-    assertNotNull(result["supports_implicit_sdk_logging"])
-    assertNotNull(result["android_dialog_configs"])
+    var captureParameters: Bundle? = null
+    PowerMockito.`when`(mockLogger.logEvent(any(), any())).thenAnswer {
+      captureParameters = it.arguments[1] as Bundle
+      Unit
+    }
+
+    sdkInterface.sendEvent("pixel_123", "event_name", validJson)
+    assertThat(captureParameters).isNotNull
+    assertThat(captureParameters?.size()).isEqualTo(3)
+    assertThat(captureParameters?.get("_fb_pixel_referral_id")).isEqualTo("pixel_123")
+    assertThat(captureParameters?.get("supports_implicit_sdk_logging")).isNotNull
+    assertThat(captureParameters?.get("android_dialog_configs")).isNotNull
   }
 
   @Test
   fun `test nonsense json`() {
-    val result = FacebookSDKJSInterface.jsonStringToBundle("anystringwhat")
-    assertTrue(result.isEmpty)
+    var captureParameters: Bundle? = null
+    PowerMockito.`when`(mockLogger.logEvent(any(), any())).thenAnswer {
+      captureParameters = it.arguments[1] as Bundle
+      Unit
+    }
+    sdkInterface.sendEvent("pixel_123", "event_name", "anystringwhat")
+    assertThat(captureParameters).isNotNull
+    assertThat(captureParameters?.size()).isEqualTo(1)
+    assertThat(captureParameters?.get("_fb_pixel_referral_id")).isEqualTo("pixel_123")
   }
 }
