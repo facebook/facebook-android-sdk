@@ -25,7 +25,6 @@ import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
-import androidx.annotation.VisibleForTesting
 import com.facebook.internal.Utility
 import com.facebook.internal.Utility.awaitGetGraphMeRequestWithCache
 import com.facebook.internal.Utility.getBundleLongAsDate
@@ -275,9 +274,8 @@ class AccessToken : Parcelable {
   val isDataAccessExpired: Boolean
     get() = Date().after(dataAccessExpirationTime)
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   @Throws(JSONException::class)
-  fun toJSONObject(): JSONObject {
+  internal fun toJSONObject(): JSONObject {
     val jsonObject = JSONObject()
     jsonObject.put(VERSION_KEY, CURRENT_JSON_FORMAT)
     jsonObject.put(TOKEN_KEY, token)
@@ -509,9 +507,8 @@ class AccessToken : Parcelable {
     }
 
     @SuppressLint("FieldGetter")
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     @JvmStatic
-    fun createFromRefresh(current: AccessToken, bundle: Bundle): AccessToken? {
+    internal fun createFromRefresh(current: AccessToken, bundle: Bundle): AccessToken? {
       // Only tokens obtained via SSO support refresh. Token refresh returns the expiration date
       // in seconds from the epoch rather than seconds from now.
       if (current.source !== AccessTokenSource.FACEBOOK_APPLICATION_WEB &&
@@ -556,9 +553,8 @@ class AccessToken : Parcelable {
           current.dataAccessExpirationTime)
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     @JvmStatic
-    fun createFromLegacyCache(bundle: Bundle): AccessToken? {
+    internal fun createFromLegacyCache(bundle: Bundle): AccessToken? {
       val permissions = getPermissionsFromBundle(bundle, LegacyTokenHelper.PERMISSIONS_KEY)
       val declinedPermissions =
           getPermissionsFromBundle(bundle, LegacyTokenHelper.DECLINED_PERMISSIONS_KEY)
@@ -605,10 +601,9 @@ class AccessToken : Parcelable {
       return permissions
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     @Throws(JSONException::class)
     @JvmStatic
-    fun createFromJSONObject(jsonObject: JSONObject): AccessToken {
+    internal fun createFromJSONObject(jsonObject: JSONObject): AccessToken {
       val version = jsonObject.getInt(VERSION_KEY)
       if (version > CURRENT_JSON_FORMAT) {
         throw FacebookException("Unknown AccessToken serialization format.")
