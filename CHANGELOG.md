@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.1.1] - 2021-07-16
+
+### Fixed
+- Fixed the bug in `GraphRequest` when passing an attachment through POST method.
+- Fixed the race condition in cloud game.
+- Fixed the bug of accessing WindowManager from a non-visual context on Android 11.
+
 ## [11.1.0] - 2021-06-29
 
 ### Added
@@ -320,6 +327,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[11.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.0...sdk-version-11.1.1
 [11.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.0.0...sdk-version-11.1.0
 [11.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.1...sdk-version-11.0.0
 [9.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.0...sdk-version-9.1.1
