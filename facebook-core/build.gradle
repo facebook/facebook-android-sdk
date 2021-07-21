@@ -108,3 +108,7 @@ apply from: "${rootDir}/maven.gradle"
 repositories {
     mavenCentral()
 }
+
+tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile) {
+    kotlinOptions.useOldBackend = true
+}
