@@ -136,7 +136,7 @@ class AppEvent : Serializable {
   }
 
   private fun validateParameters(parameters: Bundle): Map<String, String?> {
-    val paramMap: MutableMap<String, String?> = hashMapOf()
+    val paramMap: MutableMap<String, String> = hashMapOf()
     for (key in parameters.keySet()) {
       validateIdentifier(key)
       val value = parameters[key]
@@ -150,8 +150,8 @@ class AppEvent : Serializable {
       paramMap[key] = value.toString()
     }
     IntegrityManager.processParameters(paramMap)
-    processParameters(paramMap, name)
-    processDeprecatedParameters(paramMap, name)
+    processParameters(paramMap as MutableMap<String, String?>, name)
+    processDeprecatedParameters(paramMap as MutableMap<String, String?>, name)
     return paramMap
   }
 
