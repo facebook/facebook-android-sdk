@@ -55,7 +55,8 @@ public enum SDKMessageEnum {
   TOURNAMENT_POST_SCORE_ASYNC("tournamentPostScoreAsync"),
   OPEN_LINK("openExternalLink"),
   PERFORM_HAPTIC_FEEDBACK_ASYNC("performHapticFeedbackAsync"),
-  CONTEXT_SWITCH("contextSwitch");
+  CONTEXT_SWITCH("contextSwitch"),
+  CONTEXT_CHOOSE("contextChoose");
 
   private final String mStringValue;
 
