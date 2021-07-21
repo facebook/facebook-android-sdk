@@ -1,7 +1,7 @@
 package com.facebook.internal
 
 import com.facebook.FacebookPowerMockTestCase
-import java.util.*
+import java.util.EnumSet
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

@@ -22,7 +22,7 @@ package com.facebook.internal
 
 import android.os.Bundle
 import com.facebook.FacebookTestCase
-import com.facebook.TestUtils
+import com.facebook.FacebookTestUtility
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
@@ -52,7 +52,8 @@ class BundleJSONConverterTest : FacebookTestCase() {
     Assert.assertEquals(true, json.getBoolean("boolValue"))
     Assert.assertEquals(7, json.getInt("intValue"))
     Assert.assertEquals(5_000_000_000L, json.getLong("longValue"))
-    Assert.assertEquals(3.14, json.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA)
+    Assert.assertEquals(
+        3.14, json.getDouble("doubleValue"), FacebookTestUtility.DOUBLE_EQUALS_DELTA)
     Assert.assertEquals("hello world", json.getString("stringValue"))
     var jsonArray = json.getJSONArray("stringArrayValue")
     Assert.assertEquals(2, jsonArray.length())
@@ -77,7 +78,8 @@ class BundleJSONConverterTest : FacebookTestCase() {
     Assert.assertEquals(true, finalBundle.getBoolean("boolValue"))
     Assert.assertEquals(7, finalBundle.getInt("intValue"))
     Assert.assertEquals(5_000_000_000L, finalBundle.getLong("longValue"))
-    Assert.assertEquals(3.14, finalBundle.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA)
+    Assert.assertEquals(
+        3.14, finalBundle.getDouble("doubleValue"), FacebookTestUtility.DOUBLE_EQUALS_DELTA)
     Assert.assertEquals("hello world", finalBundle.getString("stringValue"))
     var stringList = finalBundle.getStringArrayList("stringArrayValue")
     checkNotNull(stringList)

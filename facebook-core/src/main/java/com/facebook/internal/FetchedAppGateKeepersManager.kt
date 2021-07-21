@@ -233,8 +233,12 @@ object FetchedAppGateKeepersManager {
   }
 
   @Synchronized
-  @VisibleForTesting
-  fun parseAppGateKeepersFromJSON(applicationId: String, gateKeepersJSON: JSONObject?): JSONObject {
+  @JvmStatic
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal fun parseAppGateKeepersFromJSON(
+      applicationId: String,
+      gateKeepersJSON: JSONObject?
+  ): JSONObject {
     val result = fetchedAppGateKeepers[applicationId] ?: JSONObject()
     val gateKeepers =
         gateKeepersJSON?.optJSONArray(APPLICATION_GRAPH_DATA)?.optJSONObject(0) ?: JSONObject()

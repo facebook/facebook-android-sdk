@@ -22,14 +22,16 @@ package com.facebook.internal
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.facebook.TestUtils
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.Random
 import java.util.UUID
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 import junit.framework.TestCase
+import kotlin.concurrent.withLock
 import kotlin.math.min
 import org.junit.Assert
 import org.junit.Before
@@ -43,6 +45,32 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
   companion object {
     private val random = Random()
     private val mockExecutor = FacebookSerialExecutor()
+    private const val CACHE_CLEAR_TIMEOUT: Long = 100
+
+    private fun clearFileLruCache(cache: FileLruCache) {
+      // since the cache clearing happens in a separate thread, we need to wait until
+      // the clear is complete before we can check for the existence of the old files
+      val lock = ReentrantLock()
+      val condition = lock.newCondition()
+      lock.withLock {
+        cache.clearCache()
+        FacebookSdk.getExecutor().execute {
+          lock.withLock { lock.withLock { condition.signalAll() } }
+        }
+        condition.await(CACHE_CLEAR_TIMEOUT, TimeUnit.MILLISECONDS)
+      }
+      Thread.sleep(CACHE_CLEAR_TIMEOUT)
+    }
+
+    private fun deleteLruCacheDirectory(cache: FileLruCache) {
+      val directory = File(cache.location)
+      directory.delete()
+    }
+
+    private fun clearAndDeleteLruCacheDirectory(cache: FileLruCache) {
+      clearFileLruCache(cache)
+      deleteLruCacheDirectory(cache)
+    }
   }
 
   @Before
@@ -71,7 +99,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
       put(cache, key, data)
       checkValue(cache, key, data)
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -85,12 +113,12 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // Limit to 2x to allow for extra header data
     val cache = FileLruCache("testCacheInputStream", limitCacheSize(2 * dataSize))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       val wrapped = cache.interceptAndPut(key, stream)
       consumeAndClose(wrapped)
       checkValue(cache, key, data)
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -103,14 +131,14 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // Limit to 2x to allow for extra header data
     val cache = FileLruCache("testCacheClear", limitCacheSize(2 * dataSize))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       put(cache, key, data)
       checkValue(cache, key, data)
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       Assert.assertEquals(false, hasValue(cache, key))
       Assert.assertEquals(0, cache.sizeInBytesForTest())
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -124,19 +152,19 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // Limit to 2x to allow for extra header data
     val cache = FileLruCache("testCacheClear", limitCacheSize(2 * dataSize))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       put(cache, key, data)
       checkValue(cache, key, data)
       val stream = cache.openPutStream(key2)
       Thread.sleep(200)
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       stream.write(data)
       stream.close()
       Assert.assertEquals(false, hasValue(cache, key))
       Assert.assertEquals(false, hasValue(cache, key2))
       Assert.assertEquals(0, cache.sizeInBytesForTest())
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -150,7 +178,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // Limit to 2x to allow for extra header data
     val cache = FileLruCache("testSizeInBytes", limitCacheSize(2 * cacheSize))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       for (i in 0 until count) {
         put(cache, i, data)
 
@@ -166,7 +194,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
         checkValue(cache, i.toString(), data)
       }
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -181,7 +209,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // added all the data.
     val cache = FileLruCache("testCacheSizeLimit", limitCacheSize(cacheSize))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       for (i in 0 until count) {
         put(cache, i, data)
 
@@ -212,7 +240,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
       Assert.assertEquals(true, hasValueExists)
       Assert.assertEquals(true, hasNoValueExists)
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -226,7 +254,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // Here we only limit by count, and we allow half of the entries.
     val cache = FileLruCache("testCacheCountLimit", limitCacheCount(cacheCount))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       for (i in 0 until count) {
         put(cache, i, data)
       }
@@ -248,7 +276,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
       Assert.assertEquals(true, hasValueExists)
       Assert.assertEquals(true, hasNoValueExists)
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -262,7 +290,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     // Limit by count, and allow all the keep keys plus one other.
     val cache = FileLruCache("testCacheLru", limitCacheCount(keepCount + 1))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       for (i in 0 until keepCount) {
         put(cache, i, data)
       }
@@ -282,7 +310,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
         Assert.assertEquals(false, hasValue(cache, key))
       }
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 
@@ -295,7 +323,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     val data = generateBytes(dataSize)
     val cache = FileLruCache("testConcurrentWritesToSameKey", limitCacheCount(count + 1))
     try {
-      TestUtils.clearFileLruCache(cache)
+      clearFileLruCache(cache)
       val run = Runnable {
         repeat(iterationCount) {
           for (i in 0 until count) {
@@ -317,7 +345,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
         checkValue(cache, i, data)
       }
     } finally {
-      TestUtils.clearAndDeleteLruCacheDirectory(cache)
+      clearAndDeleteLruCacheDirectory(cache)
     }
   }
 

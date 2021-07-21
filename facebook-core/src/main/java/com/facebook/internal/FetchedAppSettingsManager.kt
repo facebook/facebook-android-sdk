@@ -26,7 +26,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.appevents.codeless.internal.UnityReflection
@@ -227,8 +226,7 @@ object FetchedAppSettingsManager {
     return fetchedAppSettings
   }
 
-  @VisibleForTesting
-  fun parseAppSettingsFromJSON(
+  internal fun parseAppSettingsFromJSON(
       applicationId: String,
       settingsJSON: JSONObject
   ): FetchedAppSettings {

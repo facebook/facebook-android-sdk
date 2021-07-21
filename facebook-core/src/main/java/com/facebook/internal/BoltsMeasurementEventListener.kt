@@ -40,7 +40,8 @@ class BoltsMeasurementEventListener private constructor(context: Context) : Broa
   companion object {
     private var singleton: BoltsMeasurementEventListener? = null
 
-    @VisibleForTesting val MEASUREMENT_EVENT_NOTIFICATION_NAME = "com.parse.bolts.measurement_event"
+    @VisibleForTesting
+    internal val MEASUREMENT_EVENT_NOTIFICATION_NAME = "com.parse.bolts.measurement_event"
     private const val MEASUREMENT_EVENT_NAME_KEY = "event_name"
     private const val MEASUREMENT_EVENT_ARGS_KEY = "event_args"
     private const val BOLTS_MEASUREMENT_EVENT_PREFIX = "bf_"
