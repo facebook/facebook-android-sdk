@@ -5,7 +5,6 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import java.io.File
 import java.io.IOException
-import java.util.UUID
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

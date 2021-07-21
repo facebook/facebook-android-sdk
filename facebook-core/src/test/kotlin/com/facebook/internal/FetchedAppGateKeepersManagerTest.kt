@@ -3,7 +3,9 @@ package com.facebook.internal
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.gatekeeper.GateKeeper
-import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.eq
 import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONObject
 import org.junit.After
@@ -12,11 +14,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.isA
-import org.powermock.api.mockito.PowerMockito.mock
-import org.powermock.api.mockito.PowerMockito.`mockStatic`
+import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -88,26 +86,24 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     `when`(FacebookSdk.isInitialized()).thenReturn(true)
     `when`(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_NAME)
     loadAsyncTimes = 0
-    val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     mockStatic(FetchedAppGateKeepersManager::class.java)
 
-    `when`(mockManager.parseAppGateKeepersFromJSON(anyString(), any(JSONObject::class.java)))
-        .thenCallRealMethod()
-
     `when`(
-            mockManager.getGateKeeperForKey(
-                anyString(), isA(String::class.java), isA(Boolean::class.java)))
+            FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(
+                eq(APPLICATION_NAME), anyOrNull()))
         .thenCallRealMethod()
 
-    `when`(mockManager.getGateKeepersForApplication(isA(String::class.java))).thenCallRealMethod()
+    `when`(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), anyOrNull(), any()))
+        .thenCallRealMethod()
 
-    `when`(mockManager.setRuntimeGateKeeper(anyString(), anyObject())).thenCallRealMethod()
+    `when`(FetchedAppGateKeepersManager.getGateKeepersForApplication(anyOrNull()))
+        .thenCallRealMethod()
 
-    `when`(mockManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
+    `when`(FetchedAppGateKeepersManager.setRuntimeGateKeeper(any(), any())).thenCallRealMethod()
 
-    `when`(mockManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
+    `when`(FetchedAppGateKeepersManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
 
-    Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
+    `when`(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
 
     // because it is a static variable which holds a lot of state about the GKs, we need to reset it
     // every time

@@ -1,6 +1,6 @@
 package com.facebook.internal
 
-import java.util.*
+import java.util.EnumSet
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
