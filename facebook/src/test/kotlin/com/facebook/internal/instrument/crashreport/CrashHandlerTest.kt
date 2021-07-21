@@ -1,57 +1,59 @@
 package com.facebook.internal.instrument.crashreport
 
-import androidx.test.core.app.ApplicationProvider
+import android.content.Context
+import android.content.SharedPreferences
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.GraphRequest
 import com.facebook.internal.instrument.InstrumentData
 import com.facebook.internal.instrument.InstrumentUtility
-import com.facebook.util.common.anyObject
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.isNull
+import com.nhaarman.mockitokotlin2.mock
 import java.io.File
 import java.util.UUID
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONTokener
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(InstrumentUtility::class, InstrumentData.Builder::class, FacebookSdk::class)
+@PrepareForTest(InstrumentData::class, FacebookSdk::class)
 class CrashHandlerTest : FacebookPowerMockTestCase() {
   private lateinit var root: File
-  private lateinit var directory: File
+  private lateinit var mockGraphRequestCompanionObject: GraphRequest.Companion
 
   @Before
   fun init() {
     val rootName = UUID.randomUUID().toString()
-    directory = File(rootName, "instrument")
-    directory.mkdirs()
     root = File(rootName)
+    root.mkdir()
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
-        .thenReturn(ApplicationProvider.getApplicationContext())
-    PowerMockito.mockStatic(InstrumentData.Builder::class.java)
+    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123")
 
-    PowerMockito.mockStatic(InstrumentUtility::class.java)
-    PowerMockito.`when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
-    PowerMockito.`when`(InstrumentUtility.listExceptionReportFiles()).thenCallRealMethod()
-    PowerMockito.`when`(InstrumentUtility.listExceptionAnalysisReportFiles()).thenCallRealMethod()
+    val mockContext: Context = mock()
+    val mockSharedPreferences: SharedPreferences = mock()
+    PowerMockito.`when`(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null))
+        .thenReturn(null)
+    PowerMockito.`when`(mockContext.cacheDir).thenReturn(root)
     PowerMockito.`when`(
-            InstrumentUtility.writeFile(
-                ArgumentMatchers.isA(String::class.java), ArgumentMatchers.isA(String::class.java)))
-        .thenCallRealMethod()
-    PowerMockito.`when`(
-            InstrumentUtility.readFile(
-                ArgumentMatchers.isA(String::class.java),
-                ArgumentMatchers.isA(Boolean::class.java)))
-        .thenCallRealMethod()
-    PowerMockito.`when`(InstrumentData.Builder.load(anyObject())).thenCallRealMethod()
+            mockContext.getSharedPreferences(
+                FacebookSdk.DATA_PROCESSING_OPTIONS_PREFERENCES, Context.MODE_PRIVATE))
+        .thenReturn(mockSharedPreferences)
+    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+
+    PowerMockito.mockStatic(InstrumentData::class.java)
+    mockGraphRequestCompanionObject = mock()
+    Whitebox.setInternalState(
+        GraphRequest::class.java, "Companion", mockGraphRequestCompanionObject)
   }
 
   @After
@@ -63,7 +65,7 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
   fun `test not to send report if app events disabled or data processing restricted`() {
     var hitSendReports = false
     PowerMockito.`when`(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
-    PowerMockito.`when`(InstrumentUtility.sendReports(anyObject(), anyObject(), anyObject()))
+    PowerMockito.`when`(mockGraphRequestCompanionObject.newPostRequest(any(), any(), any(), any()))
         .thenAnswer {
           hitSendReports = true
           null
@@ -82,9 +84,9 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test crash handler save the exception report`() {
-    PowerMockito.`when`(InstrumentUtility.isSDKRelatedException(anyObject())).thenCallRealMethod()
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
+    PowerMockito.whenNew(InstrumentData::class.java)
+        .withAnyArguments()
         .thenReturn(mockInstrumentData)
     val e = Exception()
     val trace =
@@ -107,17 +109,20 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
     InstrumentUtility.writeFile("crash_log_1.json", "{\"callstack\":[],\"timestamp\":1}")
     InstrumentUtility.writeFile("crash_log_2.json", "{\"callstack\":[],\"timestamp\":2}")
     InstrumentUtility.writeFile("crash_log_3.json", "{\"callstack\":[],\"timestamp\":3}")
-    var crashLogs: JSONArray? = null
-    PowerMockito.`when`(InstrumentUtility.sendReports(anyObject(), anyObject(), anyObject()))
+    var crashLogs: JSONObject? = null
+    val mockRequest: GraphRequest = mock()
+    PowerMockito.`when`(
+            mockGraphRequestCompanionObject.newPostRequest(isNull(), any(), any(), any()))
         .thenAnswer {
-          crashLogs = it.arguments[1] as JSONArray
-          null
+          crashLogs = it.arguments[2] as JSONObject?
+          mockRequest
         }
     CrashHandler.enable()
-    // check the order of the reports is correct
+    val tokener = JSONTokener(crashLogs?.get("crash_reports") as String)
+    val logArray = JSONArray(tokener)
     val crashLogsTimeStamps =
-        (0 until (crashLogs?.length() ?: 0)).map {
-          JSONObject(crashLogs?.getString(it) ?: "{}").getInt("timestamp")
+        (0 until logArray?.length()).map {
+          JSONObject(logArray?.getString(it) ?: "{}").getInt("timestamp")
         }
     Assert.assertArrayEquals(intArrayOf(3, 2, 1), crashLogsTimeStamps.toIntArray())
   }

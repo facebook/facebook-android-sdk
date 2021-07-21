@@ -1,43 +1,37 @@
 package com.facebook.internal.instrument
 
+import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
-import com.nhaarman.mockitokotlin2.any
+import com.facebook.FacebookSdk
 import java.io.File
-import java.io.FileOutputStream
-import java.util.*
+import java.util.UUID
 import org.json.JSONArray
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.isA
-import org.powermock.api.mockito.PowerMockito.*
+import org.powermock.api.mockito.PowerMockito.mock
+import org.powermock.api.mockito.PowerMockito.mockStatic
+import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(InstrumentUtility::class, FileOutputStream::class)
+@PrepareForTest(FacebookSdk::class)
 class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
-  private lateinit var directory: File
   private lateinit var rootDirectory: File
 
   @Before
   fun init() {
     val rootName = UUID.randomUUID().toString()
-    directory = File(rootName, "instrument")
-    directory.mkdirs()
     rootDirectory = File(rootName)
-    mockStatic(InstrumentUtility::class.java)
-    `when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
-    `when`(InstrumentUtility.writeFile(isA(String::class.java), isA(String::class.java)))
-        .thenCallRealMethod()
-    `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
-        .thenCallRealMethod()
-    `when`(InstrumentUtility.getStackTrace(any<Thread>())).thenCallRealMethod()
-    `when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenCallRealMethod()
-    `when`(InstrumentUtility.listAnrReportFiles()).thenCallRealMethod()
-    `when`(InstrumentUtility.listExceptionReportFiles()).thenCallRealMethod()
-    `when`(InstrumentUtility.listExceptionAnalysisReportFiles()).thenCallRealMethod()
-    `when`(InstrumentUtility.deleteFile(isA(String::class.java))).thenCallRealMethod()
+    rootDirectory.mkdir()
+    mockStatic(FacebookSdk::class.java)
+    val mockContext = mock(Context::class.java)
+    `when`(mockContext.cacheDir).thenReturn(rootDirectory)
+    `when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
   @After
