@@ -20,6 +20,9 @@
 
 package com.facebook.bolts;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 /**
  * A function to be called after a task completes.
  *
@@ -29,5 +32,6 @@ package com.facebook.bolts;
  * @see Task
  */
 public interface Continuation<TTaskResult, TContinuationResult> {
-  TContinuationResult then(Task<TTaskResult> task) throws Exception;
+  @Nullable
+  TContinuationResult then(@NonNull Task<TTaskResult> task) throws Exception;
 }
