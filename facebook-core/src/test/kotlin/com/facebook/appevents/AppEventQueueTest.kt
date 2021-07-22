@@ -1,15 +1,17 @@
 package com.facebook.appevents
 
 import android.content.Context
+import android.content.Intent
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookRequestError
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.GraphResponse
-import com.facebook.appevents.AppEventQueue.flushAndWait
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
@@ -18,7 +20,10 @@ import java.util.concurrent.ScheduledFuture
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.powermock.api.mockito.PowerMockito.doAnswer
+import org.powermock.api.mockito.PowerMockito.doReturn
 import org.powermock.api.mockito.PowerMockito.mockStatic
+import org.powermock.api.mockito.PowerMockito.spy as powerSpy
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -29,7 +34,8 @@ import org.powermock.reflect.internal.WhiteboxImpl
     AppEventQueue::class,
     FacebookSdk::class,
     GraphRequest::class,
-    FetchedAppSettingsManager::class)
+    FetchedAppSettingsManager::class,
+    LocalBroadcastManager::class)
 class AppEventQueueTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockAppEventCollection: AppEventCollection
@@ -56,7 +62,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   fun init() {
     mockStatic(AppEventStore::class.java)
     mockStatic(GraphRequest::class.java)
-    mockStatic(AppEventQueue::class.java)
+    powerSpy(AppEventQueue::class.java)
     mockStatic(FacebookSdk::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
 
@@ -109,14 +115,14 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
         AppEventQueue::class.java, "singleThreadExecutor", mockScheduledExecutor)
     Whitebox.setInternalState(
         AppEventQueue::class.java, "appEventCollection", mockAppEventCollection)
-    whenCalled(AppEventQueue.buildRequestForSession(any(), any(), any(), any()))
-        .thenReturn(mockGraphRequest)
-    whenCalled(AppEventQueue.persistToDisk()).thenCallRealMethod()
-    whenCalled(AppEventQueue.flush(any())).thenCallRealMethod()
-    whenCalled(flushAndWait(any())).thenCallRealMethod()
-    whenCalled(AppEventQueue.handleResponse(any(), any(), any(), any(), any())).thenCallRealMethod()
-    whenCalled(AppEventQueue.buildRequests(any(), any())).thenCallRealMethod()
-    whenCalled(AppEventQueue.add(any(), any())).thenCallRealMethod()
+    doReturn(mockGraphRequest)
+        .`when`(
+            AppEventQueue::class.java,
+            "buildRequestForSession",
+            any<AccessTokenAppIdPair>(),
+            any<SessionEventsState>(),
+            any<Boolean>(),
+            any<FlushStatistics>())
   }
 
   @Test
@@ -127,10 +133,23 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `flush and wait`() {
+    val mockLocalBroadcastManager = mock<LocalBroadcastManager>()
+    val intentCaptor = argumentCaptor<Intent>()
     whenCalled(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
-    whenCalled(AppEventQueue.buildRequests(any(), any())).thenReturn(emptyList())
-    flushAndWait(flushReason)
+    doReturn(emptyList<GraphRequest>())
+        .`when`(
+            AppEventQueue::class.java,
+            "buildRequests",
+            any<AppEventCollection>(),
+            any<FlushReason>())
+    mockStatic(LocalBroadcastManager::class.java)
+    whenCalled(LocalBroadcastManager.getInstance(any())).thenReturn(mockLocalBroadcastManager)
+
+    AppEventQueue.flushAndWait(flushReason)
+
     verify(mockAppEventCollection).addPersistedEvents(mockPersistedEvents)
+    verify(mockLocalBroadcastManager).sendBroadcast(intentCaptor.capture())
+    assertEquals(intentCaptor.firstValue.action, AppEventsLogger.ACTION_APP_EVENTS_FLUSHED)
   }
 
   @Test
@@ -178,7 +197,8 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     whenCalled(AppEventsLogger.getFlushBehavior()).thenReturn(AppEventsLogger.FlushBehavior.AUTO)
     whenCalled(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter + 1)
     var flushAndWaitHasBeenCalledTimes = 0
-    whenCalled(flushAndWait(any())).thenAnswer { flushAndWaitHasBeenCalledTimes++ }
+    doAnswer { flushAndWaitHasBeenCalledTimes++ }
+        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
     assertEquals(1, flushAndWaitHasBeenCalledTimes)
   }
@@ -187,7 +207,9 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   fun `add when flush behavior is EXPLICIT_ONLY and try to flush`() {
     whenCalled(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter + 1)
     var flushAndWaitHasBeenCalledTimes = 0
-    whenCalled(flushAndWait(any())).thenAnswer { flushAndWaitHasBeenCalledTimes++ }
+    doAnswer { flushAndWaitHasBeenCalledTimes++ }
+        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
+
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
     assertEquals(0, flushAndWaitHasBeenCalledTimes)
   }
@@ -197,7 +219,9 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     whenCalled(AppEventsLogger.getFlushBehavior()).thenReturn(AppEventsLogger.FlushBehavior.AUTO)
     whenCalled(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter - 1)
     var flushAndWaitHasBeenCalledTimes = 0
-    whenCalled(flushAndWait(any())).thenAnswer { flushAndWaitHasBeenCalledTimes++ }
+    doAnswer { flushAndWaitHasBeenCalledTimes++ }
+        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
+
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
     assertEquals(0, flushAndWaitHasBeenCalledTimes)
   }
@@ -206,7 +230,8 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   fun `add when flush behavior is EXPLICIT_ONLY and not try to flush`() {
     whenCalled(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter - 1)
     var flushAndWaitHasBeenCalledTimes = 0
-    whenCalled(flushAndWait(any())).thenAnswer { flushAndWaitHasBeenCalledTimes++ }
+    doAnswer { flushAndWaitHasBeenCalledTimes++ }
+        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
     assertEquals(0, flushAndWaitHasBeenCalledTimes)
   }
