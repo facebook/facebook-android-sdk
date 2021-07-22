@@ -172,7 +172,7 @@ internal constructor(
   }
 
   companion object {
-    val TAG: String? = GraphResponse::class.java.canonicalName
+    private val TAG: String? = GraphResponse::class.java.canonicalName
     /**
      * Property name of non-JSON results in the GraphObject. Certain calls to Facebook result in a
      * non-JSON response (e.g., the string literal "true" or "false"). To present a consistent way

@@ -280,7 +280,7 @@ private constructor(
     private const val ERROR_USER_TITLE_KEY = "error_user_title"
     private const val ERROR_USER_MSG_KEY = "error_user_msg"
     private const val ERROR_IS_TRANSIENT_KEY = "is_transient"
-    val HTTP_RANGE_SUCCESS = Range(200, 299)
+    internal val HTTP_RANGE_SUCCESS = Range(200, 299)
 
     @JvmStatic
     fun checkResponseAndCreateError(
