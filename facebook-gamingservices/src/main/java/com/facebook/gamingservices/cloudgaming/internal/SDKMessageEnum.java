@@ -56,7 +56,8 @@ public enum SDKMessageEnum {
   OPEN_LINK("openExternalLink"),
   PERFORM_HAPTIC_FEEDBACK_ASYNC("performHapticFeedbackAsync"),
   CONTEXT_SWITCH("contextSwitch"),
-  CONTEXT_CHOOSE("contextChoose");
+  CONTEXT_CHOOSE("contextChoose"),
+  CONTEXT_CREATE("contextCreate");
 
   private final String mStringValue;
 
