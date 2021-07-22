@@ -32,6 +32,7 @@ import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.FetchedAppSettingsManager.parseAppSettingsFromJSON
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -135,7 +136,7 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
 
     // Mock App Event Store
     PowerMockito.mockStatic(AppEventStore::class.java)
-    val accessTokenAppIdPair = AccessTokenAppIdPair("anothertoken1337", "yoloapplication")
+    val accessTokenAppIdPair = AccessTokenAppIdPair(null, "1234")
     val appEvent = AppEvent("ctxName", "eventName2", 0.0, Bundle(), true, true, null)
     val map = hashMapOf(accessTokenAppIdPair to mutableListOf(appEvent))
     val persistedEvents: PersistedEvents = PersistedEvents(map)
@@ -144,13 +145,15 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     // Mock graph request
     val mockRequest: GraphRequest = mock()
     PowerMockito.whenNew(GraphRequest::class.java).withAnyArguments().thenReturn(mockRequest)
-    PowerMockito.mockStatic(AppEventQueue::class.java)
-    PowerMockito.`when`(AppEventQueue.buildRequestForSession(any(), any(), any(), any()))
-        .thenReturn(mockRequest)
-    PowerMockito.`when`(AppEventQueue.flush(any())).thenCallRealMethod()
-    PowerMockito.`when`(AppEventQueue.flushAndWait(any())).thenCallRealMethod()
-    PowerMockito.`when`(AppEventQueue.sendEventsToServer(any(), any())).thenCallRealMethod()
-    PowerMockito.`when`(AppEventQueue.buildRequests(any(), any())).thenCallRealMethod()
+    PowerMockito.spy(AppEventQueue::class.java)
+    PowerMockito.doReturn(mockRequest)
+        .`when`(
+            AppEventQueue::class.java,
+            "buildRequestForSession",
+            any<AccessTokenAppIdPair>(),
+            any<SessionEventsState>(),
+            any<Boolean>(),
+            any<FlushStatistics>())
     val loggerImpl = AppEventsLoggerImpl(RuntimeEnvironment.application, "1234", null)
     loggerImpl.logEvent("fb_mock_event", 1.0, Bundle(), true, null)
     loggerImpl.flush()
