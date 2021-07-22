@@ -31,6 +31,7 @@ import android.os.Parcelable
 import android.text.TextUtils
 import android.util.Log
 import android.util.Pair
+import androidx.annotation.VisibleForTesting
 import com.facebook.GraphResponse.Companion.constructErrorResponses
 import com.facebook.GraphResponse.Companion.fromHttpConnection
 import com.facebook.internal.AttributionIdentifiers.Companion.getAttributionIdentifiers
@@ -207,7 +208,9 @@ class GraphRequest {
      * enforced on the service side by the Facebook platform, not by the Request class.
      */
     const val MAXIMUM_BATCH_SIZE = 50
-    val TAG = GraphRequest::class.java.simpleName
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @JvmField
+    internal val TAG = GraphRequest::class.java.simpleName
     private const val VIDEOS_SUFFIX = "/videos"
     private const val ME = "me"
     private const val MY_FRIENDS = "me/friends"
@@ -1924,6 +1927,7 @@ class GraphRequest {
     }
 
     companion object {
+      @JvmField
       val CREATOR: Parcelable.Creator<ParcelableResourceWithMimeType<*>?> =
           object : Parcelable.Creator<ParcelableResourceWithMimeType<*>?> {
             override fun createFromParcel(source: Parcel): ParcelableResourceWithMimeType<*> {
