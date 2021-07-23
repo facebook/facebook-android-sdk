@@ -98,6 +98,12 @@ android {
             maxHeapSize = "1024m"
         }
     }
+
+    kotlinOptions {
+        useOldBackend = true
+        // Keep jvm target at 1.6 to maintain compatibility with Android API level < 26
+        jvmTarget = "1.6"
+    }
 }
 
 if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
@@ -107,8 +113,4 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
 apply from: "${rootDir}/maven.gradle"
 repositories {
     mavenCentral()
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile) {
-    kotlinOptions.useOldBackend = true
 }
