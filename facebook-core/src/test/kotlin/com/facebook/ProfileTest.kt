@@ -20,21 +20,30 @@
 package com.facebook
 
 import android.content.Context
+import android.net.Uri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
+import com.facebook.internal.ImageRequest
+import com.facebook.util.common.ProfileTestHelper.PICTURE_URI
 import com.facebook.util.common.ProfileTestHelper.assertDefaultObjectGetters
 import com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters
 import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile
+import com.facebook.util.common.ProfileTestHelper.createProfileWithPictureUri
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Matchers
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, LocalBroadcastManager::class)
+@PrepareForTest(FacebookSdk::class, ImageRequest::class, LocalBroadcastManager::class)
 class ProfileTest : FacebookPowerMockTestCase() {
+
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
@@ -62,6 +71,11 @@ class ProfileTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(profile1.hashCode().toLong(), profile2.hashCode().toLong())
     val profile3 = createMostlyNullsProfile()
     Assert.assertNotEquals(profile1.hashCode().toLong(), profile3.hashCode().toLong())
+
+    val profile4 = createProfileWithPictureUri()
+    val profile5 = createProfileWithPictureUri()
+    Assert.assertEquals(profile4.hashCode().toLong(), profile5.hashCode().toLong())
+    Assert.assertNotEquals(profile4.hashCode().toLong(), profile3.hashCode().toLong())
   }
 
   @Test
@@ -90,6 +104,15 @@ class ProfileTest : FacebookPowerMockTestCase() {
     profile2 = Profile(jsonObject)
     assertMostlyNullsObjectGetters(profile2)
     Assert.assertEquals(profile1, profile2)
+
+    // Check with picture_uri field
+    profile1 = createProfileWithPictureUri()
+    jsonObject = profile1.toJSONObject()
+    jsonObject = checkNotNull(jsonObject)
+    profile2 = Profile(jsonObject)
+    assertDefaultObjectGetters(profile2)
+    Assert.assertEquals(Uri.parse(PICTURE_URI), profile2.pictureUri)
+    Assert.assertEquals(profile1, profile2)
   }
 
   @Test
@@ -104,6 +127,13 @@ class ProfileTest : FacebookPowerMockTestCase() {
     profile2 = FacebookTestUtility.parcelAndUnparcel(profile1)
     assertMostlyNullsObjectGetters(profile2)
     Assert.assertEquals(profile1, profile2)
+
+    // Check with picture_uri field
+    profile1 = createProfileWithPictureUri()
+    profile2 = FacebookTestUtility.parcelAndUnparcel(profile1)
+    assertDefaultObjectGetters(profile2)
+    Assert.assertEquals(Uri.parse(PICTURE_URI), profile2?.pictureUri)
+    Assert.assertEquals(profile1, profile2)
   }
 
   @Test
@@ -115,5 +145,24 @@ class ProfileTest : FacebookPowerMockTestCase() {
     Profile.setCurrentProfile(null)
     Assert.assertNull(ProfileManager.getInstance().currentProfile)
     Assert.assertNull(Profile.getCurrentProfile())
+  }
+
+  @Test
+  fun testGetProfilePictureUri() {
+    val testFacebookImageUri = Uri.parse("https://scontent.xx.fbcdn.net/")
+
+    val mockImageRequestCompanion = mock<ImageRequest.Companion>()
+    Whitebox.setInternalState(ImageRequest::class.java, "Companion", mockImageRequestCompanion)
+    whenever(mockImageRequestCompanion.getProfilePictureUri(any(), any(), any(), any()))
+        .thenReturn(testFacebookImageUri)
+    val instagramProfile = createProfileWithPictureUri()
+    Profile.setCurrentProfile(instagramProfile)
+
+    Assert.assertEquals(instagramProfile.pictureUri, Uri.parse(PICTURE_URI))
+    Assert.assertEquals(instagramProfile.getProfilePictureUri(100, 100), Uri.parse(PICTURE_URI))
+
+    val facebookProfile = createDefaultProfile()
+    Assert.assertNull(facebookProfile.pictureUri)
+    Assert.assertEquals(facebookProfile.getProfilePictureUri(100, 100), testFacebookImageUri)
   }
 }

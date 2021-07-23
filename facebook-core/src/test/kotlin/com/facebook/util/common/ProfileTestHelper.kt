@@ -19,6 +19,12 @@ object ProfileTestHelper {
   }
 
   @JvmStatic
+  fun createProfileWithPictureUri(): Profile {
+    return Profile(
+        ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, NAME, Uri.parse(LINK_URI), Uri.parse(PICTURE_URI))
+  }
+
+  @JvmStatic
   fun assertDefaultObjectGetters(profile: Profile?) {
     Assert.assertNotNull(profile)
     Assert.assertEquals(ID, profile?.id)

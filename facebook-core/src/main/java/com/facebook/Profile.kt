@@ -75,6 +75,13 @@ class Profile : Parcelable {
   val linkUri: Uri?
 
   /**
+   * Getter for the picture URI of the profile
+   *
+   * @return the picture URI of the profile.
+   */
+  val pictureUri: Uri?
+
+  /**
    * Constructor.
    *
    * @param id The id of the profile.
@@ -84,13 +91,15 @@ class Profile : Parcelable {
    * @param name The name of the profile. Can be null.
    * @param linkUri The link for this profile. Can be null.
    */
+  @JvmOverloads
   constructor(
       id: String?,
       firstName: String?,
       middleName: String?,
       lastName: String?,
       name: String?,
-      linkUri: Uri?
+      linkUri: Uri?,
+      pictureUri: Uri? = null,
   ) {
     notNullOrEmpty(id, "id")
     this.id = id
@@ -99,6 +108,7 @@ class Profile : Parcelable {
     this.lastName = lastName
     this.name = name
     this.linkUri = linkUri
+    this.pictureUri = pictureUri
   }
 
   /**
@@ -109,6 +119,10 @@ class Profile : Parcelable {
    * @return The Uri of the profile picture.
    */
   fun getProfilePictureUri(width: Int, height: Int): Uri {
+    // Only Instagram users will have non-null profile picture URIs
+    if (pictureUri != null) {
+      return pictureUri
+    }
     val accessToken =
         if (AccessToken.isCurrentAccessTokenActive()) AccessToken.getCurrentAccessToken()?.token
         else ""
@@ -128,7 +142,8 @@ class Profile : Parcelable {
         (middleName == null && other.middleName == null || middleName == other.middleName) &&
         (lastName == null && other.lastName == null || lastName == other.lastName) &&
         (name == null && other.name == null || name == other.name) &&
-        (linkUri == null && other.linkUri == null || linkUri == other.linkUri)
+        (linkUri == null && other.linkUri == null || linkUri == other.linkUri) &&
+        (pictureUri == null && other.pictureUri == null || pictureUri == other.pictureUri)
   }
 
   override fun hashCode(): Int {
@@ -149,6 +164,9 @@ class Profile : Parcelable {
     if (linkUri != null) {
       result = result * 31 + linkUri.hashCode()
     }
+    if (pictureUri != null) {
+      result = result * 31 + pictureUri.hashCode()
+    }
     return result
   }
 
@@ -162,6 +180,9 @@ class Profile : Parcelable {
       jsonObject.put(NAME_KEY, name)
       if (linkUri != null) {
         jsonObject.put(LINK_URI_KEY, linkUri.toString())
+      }
+      if (pictureUri != null) {
+        jsonObject.put(PICTURE_URI_KEY, pictureUri.toString())
       }
     } catch (_: JSONException) {
       return null
@@ -177,6 +198,8 @@ class Profile : Parcelable {
     name = jsonObject.optString(NAME_KEY, null)
     val linkUriString = jsonObject.optString(LINK_URI_KEY, null)
     linkUri = if (linkUriString == null) null else Uri.parse(linkUriString)
+    val pictureUriString = jsonObject.optString(PICTURE_URI_KEY, null)
+    pictureUri = if (pictureUriString == null) null else Uri.parse(pictureUriString)
   }
 
   private constructor(source: Parcel) {
@@ -187,6 +210,8 @@ class Profile : Parcelable {
     name = source.readString()
     val linkUriString = source.readString()
     linkUri = if (linkUriString == null) null else Uri.parse(linkUriString)
+    val pictureUriString = source.readString()
+    pictureUri = if (pictureUriString == null) null else Uri.parse(pictureUriString)
   }
 
   override fun describeContents(): Int {
@@ -200,6 +225,7 @@ class Profile : Parcelable {
     dest.writeString(lastName)
     dest.writeString(name)
     dest.writeString(linkUri?.toString())
+    dest.writeString(pictureUri?.toString())
   }
 
   companion object {
@@ -210,6 +236,8 @@ class Profile : Parcelable {
     private const val LAST_NAME_KEY = "last_name"
     private const val NAME_KEY = "name"
     private const val LINK_URI_KEY = "link_uri"
+    // Used exclusively for Instagram profiles
+    private const val PICTURE_URI_KEY = "picture_uri"
 
     /**
      * Getter for the profile that is currently logged in to the application.
@@ -254,6 +282,7 @@ class Profile : Parcelable {
                 return
               }
               val link = userInfo.optString("link")
+              val picture = userInfo.optString("profile_picture", null)
               val profile =
                   Profile(
                       id,
@@ -261,7 +290,8 @@ class Profile : Parcelable {
                       userInfo.optString("middle_name"),
                       userInfo.optString("last_name"),
                       userInfo.optString("name"),
-                      if (link != null) Uri.parse(link) else null)
+                      if (link != null) Uri.parse(link) else null,
+                      if (picture != null) Uri.parse(picture) else null)
               setCurrentProfile(profile)
             }
 
