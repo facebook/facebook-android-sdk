@@ -293,6 +293,7 @@ object FetchedAppSettingsManager {
     }
     appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", appSettingFields))
     val request = GraphRequest.newGraphPathRequest(null, applicationId, null)
+    request.setForceApplicationRequest(true)
     request.setSkipClientToken(true)
     request.parameters = appSettingsParams
     return request.executeAndWait().jsonObject ?: JSONObject()
