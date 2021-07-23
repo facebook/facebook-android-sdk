@@ -168,7 +168,7 @@ class AccessToken : Parcelable {
       expirationTime: Date?,
       lastRefreshTime: Date?,
       dataAccessExpirationTime: Date?,
-      graphDomain: String? = null
+      graphDomain: String? = DEFAULT_GRAPH_DOMAIN
   ) {
     Validate.notEmpty(accessToken, "accessToken")
     Validate.notEmpty(applicationId, "applicationId")
@@ -184,7 +184,9 @@ class AccessToken : Parcelable {
         Collections.unmodifiableSet(
             if (expiredPermissions != null) HashSet(expiredPermissions) else HashSet())
     token = accessToken
-    source = accessTokenSource ?: DEFAULT_ACCESS_TOKEN_SOURCE
+    source =
+        convertTokenSourceForGraphDomain(
+            accessTokenSource ?: DEFAULT_ACCESS_TOKEN_SOURCE, graphDomain)
     lastRefresh = lastRefreshTime ?: DEFAULT_LAST_REFRESH_TIME
     this.applicationId = applicationId
     this.userId = userId
@@ -194,7 +196,7 @@ class AccessToken : Parcelable {
         } else {
           DEFAULT_EXPIRATION_TIME
         }
-    this.graphDomain = graphDomain
+    this.graphDomain = graphDomain ?: DEFAULT_GRAPH_DOMAIN
   }
 
   interface AccessTokenRefreshCallback {
@@ -274,6 +276,15 @@ class AccessToken : Parcelable {
   val isDataAccessExpired: Boolean
     get() = Date().after(dataAccessExpirationTime)
 
+  /**
+   * Determine if the token is an Instagram access token, based on the token's graphDomain
+   * parameter.
+   *
+   * @return true if the token is an Instagram access token.
+   */
+  val isInstagramToken: Boolean
+    get() = graphDomain != null && graphDomain.equals(FacebookSdk.INSTAGRAM)
+
   @Throws(JSONException::class)
   internal fun toJSONObject(): JSONObject {
     val jsonObject = JSONObject()
@@ -310,6 +321,22 @@ class AccessToken : Parcelable {
     builder.append("[")
     builder.append(TextUtils.join(", ", permissions))
     builder.append("]")
+  }
+
+  private fun convertTokenSourceForGraphDomain(
+      tokenSource: AccessTokenSource,
+      graphDomain: String?
+  ): AccessTokenSource {
+    if (graphDomain != null && graphDomain.equals(FacebookSdk.INSTAGRAM)) {
+      return when (tokenSource) {
+        AccessTokenSource.FACEBOOK_APPLICATION_WEB -> AccessTokenSource.INSTAGRAM_APPLICATION_WEB
+        AccessTokenSource.CHROME_CUSTOM_TAB -> AccessTokenSource.INSTAGRAM_CUSTOM_CHROME_TAB
+        AccessTokenSource.WEB_VIEW -> AccessTokenSource.INSTAGRAM_WEB_VIEW
+        // Either already an Instagram token source or not supported source for Instagram
+        else -> tokenSource
+      }
+    }
+    return tokenSource
   }
 
   internal constructor(parcel: Parcel) {
@@ -364,6 +391,8 @@ class AccessToken : Parcelable {
     const val EXPIRES_IN_KEY = "expires_in"
     const val USER_ID_KEY = "user_id"
     const val DATA_ACCESS_EXPIRATION_TIME = "data_access_expiration_time"
+    const val GRAPH_DOMAIN = "graph_domain"
+    const val DEFAULT_GRAPH_DOMAIN = "facebook"
     private val MAX_DATE = Date(Long.MAX_VALUE)
     private val DEFAULT_EXPIRATION_TIME = MAX_DATE
     private val DEFAULT_LAST_REFRESH_TIME = Date()
@@ -380,7 +409,6 @@ class AccessToken : Parcelable {
     private const val SOURCE_KEY = "source"
     private const val LAST_REFRESH_KEY = "last_refresh"
     private const val APPLICATION_ID_KEY = "application_id"
-    private const val GRAPH_DOMAIN = "graph_domain"
     /**
      * Getter for the access token that is current for the application.
      *
@@ -414,6 +442,17 @@ class AccessToken : Parcelable {
     fun isDataAccessActive(): Boolean {
       val accessToken = AccessTokenManager.getInstance().currentAccessToken
       return accessToken != null && !accessToken.isDataAccessExpired
+    }
+
+    /**
+     * Indicates whether the current active access token is for an Instagram user.
+     *
+     * @return true if the current AccessToken exists, is active, and is for the Instagram domain.
+     */
+    @JvmStatic
+    fun isLoggedInWithInstagram(): Boolean {
+      val accessToken = AccessTokenManager.getInstance().currentAccessToken
+      return accessToken != null && !accessToken.isExpired && accessToken.isInstagramToken
     }
 
     /**

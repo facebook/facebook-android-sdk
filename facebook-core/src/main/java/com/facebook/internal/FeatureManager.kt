@@ -137,7 +137,8 @@ object FeatureManager {
       Feature.IapLoggingLib2,
       Feature.ChromeCustomTabsPrefetching,
       Feature.Monitoring,
-      Feature.IgnoreAppSwitchToLoggedOut -> false
+      Feature.IgnoreAppSwitchToLoggedOut,
+      Feature.BypassAppSwitch -> false
       else -> true
     }
   }
@@ -180,6 +181,7 @@ object FeatureManager {
     Login(0x01000000),
     ChromeCustomTabsPrefetching(0x01010000),
     IgnoreAppSwitchToLoggedOut(0x01020000),
+    BypassAppSwitch(0x01030000),
 
     // Features in ShareKit
     /** Essential of ShareKit */
@@ -215,6 +217,7 @@ object FeatureManager {
           Login -> "LoginKit"
           ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
           IgnoreAppSwitchToLoggedOut -> "IgnoreAppSwitchToLoggedOut"
+          BypassAppSwitch -> "BypassAppSwitch"
           Share -> "ShareKit"
           Places -> "PlacesKit"
           else -> "unknown"
