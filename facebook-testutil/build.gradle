@@ -80,6 +80,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    kotlinOptions {
+        useOldBackend = true
+        jvmTarget = "1.6"
+    }
 }
 
 repositories {
