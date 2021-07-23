@@ -52,7 +52,9 @@ class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
             getClientState(request.getAuthId()),
             request.getAuthType(),
             request.getMessengerPageId(),
-            request.getResetMessengerState());
+            request.getResetMessengerState(),
+            request.isFamilyLogin(),
+            request.shouldSkipAccountDeduplication());
 
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 

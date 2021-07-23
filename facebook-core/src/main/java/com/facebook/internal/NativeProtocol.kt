@@ -33,6 +33,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import com.facebook.login.DefaultAudience
+import com.facebook.login.LoginTargetApp
 import java.util.TreeSet
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -62,22 +63,22 @@ object NativeProtocol {
   // Native Protocol updated 2012-11
   const val INTENT_ACTION_PLATFORM_ACTIVITY = "com.facebook.platform.PLATFORM_ACTIVITY"
   const val INTENT_ACTION_PLATFORM_SERVICE = "com.facebook.platform.PLATFORM_SERVICE"
-  const val PROTOCOL_VERSION_20121101 = 20121101
-  const val PROTOCOL_VERSION_20130502 = 20130502
-  const val PROTOCOL_VERSION_20130618 = 20130618
-  const val PROTOCOL_VERSION_20131107 = 20131107
-  const val PROTOCOL_VERSION_20140204 = 20140204
-  const val PROTOCOL_VERSION_20140324 = 20140324
-  const val PROTOCOL_VERSION_20140701 = 20140701
-  const val PROTOCOL_VERSION_20141001 = 20141001
-  const val PROTOCOL_VERSION_20141028 = 20141028
-  const val PROTOCOL_VERSION_20141107 = 20141107 // Bucketed Result Intents
-  const val PROTOCOL_VERSION_20141218 = 20141218
-  const val PROTOCOL_VERSION_20160327 = 20160327
-  const val PROTOCOL_VERSION_20170213 = 20170213
-  const val PROTOCOL_VERSION_20170411 = 20170411 // express login
-  const val PROTOCOL_VERSION_20170417 = 20170417
-  const val PROTOCOL_VERSION_20171115 = 20171115
+  const val PROTOCOL_VERSION_20121101 = 2012_11_01
+  const val PROTOCOL_VERSION_20130502 = 2013_05_02
+  const val PROTOCOL_VERSION_20130618 = 2013_06_18
+  const val PROTOCOL_VERSION_20131107 = 2013_11_07
+  const val PROTOCOL_VERSION_20140204 = 2014_02_04
+  const val PROTOCOL_VERSION_20140324 = 2014_03_24
+  const val PROTOCOL_VERSION_20140701 = 2014_07_01
+  const val PROTOCOL_VERSION_20141001 = 2014_10_01
+  const val PROTOCOL_VERSION_20141028 = 2014_10_28
+  const val PROTOCOL_VERSION_20141107 = 2014_11_07 // Bucketed Result Intents
+  const val PROTOCOL_VERSION_20141218 = 2014_12_18
+  const val PROTOCOL_VERSION_20160327 = 2016_03_27
+  const val PROTOCOL_VERSION_20170213 = 2017_02_13
+  const val PROTOCOL_VERSION_20170411 = 2017_04_11 // express login
+  const val PROTOCOL_VERSION_20170417 = 2017_04_17
+  const val PROTOCOL_VERSION_20171115 = 2017_11_15
   const val EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION"
   const val EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION"
   const val EXTRA_PROTOCOL_CALL_ID = "com.facebook.platform.protocol.CALL_ID"
@@ -278,7 +279,9 @@ object NativeProtocol {
       clientState: String,
       authType: String,
       messengerPageId: String?,
-      resetMessengerState: Boolean
+      resetMessengerState: Boolean,
+      isFamilyLogin: Boolean,
+      shouldSkipAccountDedupe: Boolean
   ): Intent? {
     val appInfo: NativeAppInfo = FBLiteAppInfo()
     var intent =
@@ -293,7 +296,45 @@ object NativeProtocol {
             authType,
             false,
             messengerPageId,
-            resetMessengerState)
+            resetMessengerState,
+            LoginTargetApp.FACEBOOK,
+            isFamilyLogin,
+            shouldSkipAccountDedupe)
+    intent = validateActivityIntent(context, intent, appInfo)
+    return intent
+  }
+
+  @JvmStatic
+  fun createInstagramIntent(
+      context: Context,
+      applicationId: String,
+      permissions: Collection<String?>,
+      e2e: String,
+      isRerequest: Boolean,
+      isForPublish: Boolean,
+      defaultAudience: DefaultAudience,
+      clientState: String,
+      authType: String,
+      isFamilyLogin: Boolean,
+      shouldSkipAccountDedupe: Boolean
+  ): Intent? {
+    val appInfo: NativeAppInfo = InstagramAppInfo()
+    var intent =
+        createNativeAppIntent(
+            appInfo,
+            applicationId,
+            permissions,
+            e2e,
+            isForPublish,
+            defaultAudience,
+            clientState,
+            authType,
+            false,
+            null,
+            false,
+            LoginTargetApp.INSTAGRAM,
+            isFamilyLogin,
+            shouldSkipAccountDedupe)
     intent = validateActivityIntent(context, intent, appInfo)
     return intent
   }
@@ -309,7 +350,10 @@ object NativeProtocol {
       authType: String,
       ignoreAppSwitchToLoggedOut: Boolean,
       messengerPageId: String?,
-      resetMessengerState: Boolean
+      resetMessengerState: Boolean,
+      targetApp: LoginTargetApp,
+      isFamilyLogin: Boolean,
+      shouldSkipAccountDedupe: Boolean
   ): Intent? {
     val activityName = appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
@@ -325,9 +369,7 @@ object NativeProtocol {
       intent.putExtra(FACEBOOK_PROXY_AUTH_E2E_KEY, e2e)
     }
     intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState)
-    intent.putExtra(
-        ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-        ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
+    intent.putExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, appInfo.getResponseType())
     intent.putExtra(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
     if (isForPublish) {
@@ -341,8 +383,15 @@ object NativeProtocol {
     if (ignoreAppSwitchToLoggedOut) {
       intent.putExtra(ServerProtocol.DIALOG_PARAM_FAIL_ON_LOGGED_OUT, true)
     }
+
     intent.putExtra(ServerProtocol.DIALOG_PARAM_MESSENGER_PAGE_ID, messengerPageId)
     intent.putExtra(ServerProtocol.DIALOG_PARAM_RESET_MESSENGER_STATE, resetMessengerState)
+    if (isFamilyLogin) {
+      intent.putExtra(ServerProtocol.DIALOG_PARAM_FX_APP, targetApp.toString())
+    }
+    if (shouldSkipAccountDedupe) {
+      intent.putExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, true)
+    }
     return intent
   }
 
@@ -359,7 +408,9 @@ object NativeProtocol {
       authType: String,
       ignoreAppSwitchToLoggedOut: Boolean,
       messengerPageId: String?,
-      resetMessengerState: Boolean
+      resetMessengerState: Boolean,
+      isFamilyLogin: Boolean,
+      shouldSkipAccountDedupe: Boolean
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
@@ -373,7 +424,10 @@ object NativeProtocol {
           authType,
           ignoreAppSwitchToLoggedOut,
           messengerPageId,
-          resetMessengerState)
+          resetMessengerState,
+          LoginTargetApp.FACEBOOK,
+          isFamilyLogin,
+          shouldSkipAccountDedupe)
     }
   }
 
@@ -787,6 +841,8 @@ object NativeProtocol {
     abstract fun getPackage(): String
     abstract fun getLoginActivity(): String?
     private var availableVersions: TreeSet<Int>? = null
+    open fun getResponseType(): String =
+        ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST
     fun getAvailableVersions(): TreeSet<Int>? {
       if (availableVersions == null || availableVersions?.isEmpty() != false) {
         fetchAvailableVersions(false)
@@ -823,6 +879,12 @@ object NativeProtocol {
     companion object {
       const val FACEBOOK_LITE_ACTIVITY = "com.facebook.lite.platform.LoginGDPDialogActivity"
     }
+  }
+
+  private class InstagramAppInfo : NativeAppInfo() {
+    override fun getLoginActivity(): String = "com.instagram.platform.AppAuthorizeActivity"
+    override fun getPackage(): String = "com.instagram.android"
+    override fun getResponseType(): String = ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES
   }
 
   private class EffectTestAppInfo : NativeAppInfo() {

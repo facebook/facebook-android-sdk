@@ -25,6 +25,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
+import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
@@ -44,71 +45,87 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
   abstract int tryAuthorize(LoginClient.Request request);
 
+  public AccessTokenSource getTokenSource() {
+    return AccessTokenSource.FACEBOOK_APPLICATION_WEB;
+  }
+
   @Override
   boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-    // Handle stuff
-    LoginClient.Result outcome;
-
     LoginClient.Request request = loginClient.getPendingRequest();
 
     if (data == null) {
       // This happens if the user presses 'Back'.
-      outcome = LoginClient.Result.createCancelResult(request, "Operation canceled");
+      completeLogin(LoginClient.Result.createCancelResult(request, "Operation canceled"));
     } else if (resultCode == Activity.RESULT_CANCELED) {
-      outcome = handleResultCancel(request, data);
+      handleResultCancel(request, data);
     } else if (resultCode != Activity.RESULT_OK) {
-      outcome =
+      completeLogin(
           LoginClient.Result.createErrorResult(
-              request, "Unexpected resultCode from authorization.", null);
+              request, "Unexpected resultCode from authorization.", null));
     } else {
-      outcome = handleResultOk(request, data);
-    }
+      Bundle extras = data.getExtras();
+      if (extras == null) {
+        completeLogin(
+            LoginClient.Result.createErrorResult(
+                request, "Unexpected null from returned authorization data.", null));
+        ;
+        return true;
+      }
+      String error = getError(extras);
+      String errorCode =
+          extras.get("error_code") != null ? extras.get("error_code").toString() : null;
+      String errorMessage = getErrorMessage(extras);
 
+      String e2e = extras.getString(NativeProtocol.FACEBOOK_PROXY_AUTH_E2E_KEY);
+      if (!Utility.isNullOrEmpty(e2e)) {
+        logWebLoginCompleted(e2e);
+      }
+      if (error == null && errorCode == null && errorMessage == null) {
+        handleResultOk(request, extras);
+      } else {
+        handleResultError(request, error, errorMessage, errorCode);
+      }
+    }
+    return true;
+  }
+
+  private void completeLogin(@Nullable LoginClient.Result outcome) {
     if (outcome != null) {
       loginClient.completeAndValidate(outcome);
     } else {
       loginClient.tryNextHandler();
     }
-    return true;
   }
 
-  private LoginClient.Result handleResultOk(LoginClient.Request request, Intent data) {
-    Bundle extras = data.getExtras();
-    String error = getError(extras);
-    String errorCode =
-        extras.get("error_code") != null ? extras.get("error_code").toString() : null;
-    String errorMessage = getErrorMessage(extras);
-
-    String e2e = extras.getString(NativeProtocol.FACEBOOK_PROXY_AUTH_E2E_KEY);
-    if (!Utility.isNullOrEmpty(e2e)) {
-      logWebLoginCompleted(e2e);
-    }
-
-    if (error == null && errorCode == null && errorMessage == null) {
-      try {
-        AccessToken token =
-            createAccessTokenFromWebBundle(
-                request.getPermissions(),
-                extras,
-                AccessTokenSource.FACEBOOK_APPLICATION_WEB,
-                request.getApplicationId());
-        return LoginClient.Result.createTokenResult(request, token);
-      } catch (FacebookException ex) {
-        return LoginClient.Result.createErrorResult(request, null, ex.getMessage());
-      }
-    } else if (error.equals("logged_out")) {
+  protected void handleResultError(
+      LoginClient.Request request,
+      @Nullable String error,
+      @Nullable String errorMessage,
+      @Nullable String errorCode) {
+    if (error != null && error.equals("logged_out")) {
       CustomTabLoginMethodHandler.calledThroughLoggedOutAppSwitch = true;
-      return null;
+      completeLogin(null);
     } else if (ServerProtocol.getErrorsProxyAuthDisabled().contains(error)) {
-      return null;
+      completeLogin(null);
     } else if (ServerProtocol.getErrorsUserCanceled().contains(error)) {
-      return LoginClient.Result.createCancelResult(request, null);
+      completeLogin(LoginClient.Result.createCancelResult(request, null));
     } else {
-      return LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode);
+      completeLogin(LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode));
     }
   }
 
-  private LoginClient.Result handleResultCancel(LoginClient.Request request, Intent data) {
+  protected void handleResultOk(LoginClient.Request request, Bundle extras) {
+    try {
+      AccessToken token =
+          createAccessTokenFromWebBundle(
+              request.getPermissions(), extras, getTokenSource(), request.getApplicationId());
+      completeLogin(LoginClient.Result.createTokenResult(request, token));
+    } catch (FacebookException ex) {
+      completeLogin(LoginClient.Result.createErrorResult(request, null, ex.getMessage()));
+    }
+  }
+
+  protected void handleResultCancel(LoginClient.Request request, Intent data) {
     Bundle extras = data.getExtras();
     String error = getError(extras);
     String errorCode =
@@ -119,14 +136,16 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     // users to "reconnect and try again".
     if (ServerProtocol.getErrorConnectionFailure().equals(errorCode)) {
       String errorMessage = getErrorMessage(extras);
-
-      return LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode);
+      completeLogin(LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode));
     }
 
-    return LoginClient.Result.createCancelResult(request, error);
+    completeLogin(LoginClient.Result.createCancelResult(request, error));
   }
 
-  private String getError(Bundle extras) {
+  protected @Nullable String getError(@Nullable Bundle extras) {
+    if (extras == null) {
+      return null;
+    }
     String error = extras.getString("error");
     if (error == null) {
       error = extras.getString("error_type");
@@ -134,7 +153,10 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     return error;
   }
 
-  private String getErrorMessage(Bundle extras) {
+  protected @Nullable String getErrorMessage(@Nullable Bundle extras) {
+    if (extras == null) {
+      return null;
+    }
     String errorMessage = extras.getString("error_message");
     if (errorMessage == null) {
       errorMessage = extras.getString("error_description");

@@ -20,6 +20,7 @@
 
 package com.facebook.login;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -66,6 +67,9 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
   @Before
   public void before() throws Exception {
     Whitebox.setInternalState(FacebookSdk.class, "executor", serialExecutor);
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.setAutoLogAppEventsEnabled(false);
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
 
     FragmentActivity activity = Robolectric.buildActivity(FragmentActivity.class).create().get();
     when(mockFragment.getActivity()).thenReturn(activity);
@@ -74,9 +78,6 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testReauthorizationWithSameFbidSucceeds() throws Exception {
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.setAutoLogAppEventsEnabled(false);
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     LoginClient.Request request = createRequest(ACCESS_TOKEN);
 
     AccessToken token =
@@ -116,21 +117,50 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     LoginClient.Request unparceledRequest = TestUtils.parcelAndUnparcel(request);
 
     assertEquals(LoginBehavior.NATIVE_WITH_FALLBACK, unparceledRequest.getLoginBehavior());
+    assertEquals(LoginTargetApp.FACEBOOK, unparceledRequest.getLoginTargetApp());
     assertEquals(new HashSet<String>(PERMISSIONS), unparceledRequest.getPermissions());
     assertEquals(DefaultAudience.FRIENDS, unparceledRequest.getDefaultAudience());
     assertEquals("1234", unparceledRequest.getApplicationId());
     assertEquals("5678", unparceledRequest.getAuthId());
     assertFalse(unparceledRequest.isRerequest());
+    assertThat(unparceledRequest.isFamilyLogin()).isFalse();
+    assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isFalse();
+  }
+
+  @Test
+  public void testRequestParcelingWithNullFields() {
+    LoginClient.Request request =
+        new LoginClient.Request(null, null, null, "rerequest", "1234", "5678", null);
+
+    LoginClient.Request unparceledRequest = TestUtils.parcelAndUnparcel(request);
+
+    assertThat(unparceledRequest.getLoginBehavior()).isNull();
+    assertThat(unparceledRequest.getLoginTargetApp()).isNull();
+    assertThat(unparceledRequest.getPermissions()).isEqualTo(new HashSet<String>());
+    assertThat(unparceledRequest.getDefaultAudience()).isNull();
+    assertThat(unparceledRequest.getApplicationId()).isEqualTo("1234");
+    assertThat(unparceledRequest.getAuthId()).isEqualTo("5678");
+    assertThat(unparceledRequest.isRerequest()).isFalse();
+    assertThat(unparceledRequest.isFamilyLogin()).isFalse();
+    assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isFalse();
   }
 
   @Test
   public void testResultParceling() {
     LoginClient.Request request =
         new LoginClient.Request(
-            LoginBehavior.WEB_ONLY, null, DefaultAudience.EVERYONE, null, null, null);
+            LoginBehavior.WEB_ONLY,
+            null,
+            DefaultAudience.EVERYONE,
+            null,
+            null,
+            null,
+            LoginTargetApp.FACEBOOK);
     request.setRerequest(true);
     request.setResetMessengerState(false);
     request.setMessengerPageId("1928");
+    request.setFamilyLogin(true);
+    request.setShouldSkipAccountDeduplication(true);
     AccessToken token1 =
         new AccessToken("Token2", "12345", "1000", null, null, null, null, null, null, null);
     LoginClient.Result result =
@@ -140,11 +170,14 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     LoginClient.Request unparceledRequest = unparceledResult.request;
 
     assertEquals(LoginBehavior.WEB_ONLY, unparceledRequest.getLoginBehavior());
+    assertEquals(LoginTargetApp.FACEBOOK, unparceledRequest.getLoginTargetApp());
     assertEquals(new HashSet<String>(), unparceledRequest.getPermissions());
     assertEquals(DefaultAudience.EVERYONE, unparceledRequest.getDefaultAudience());
     assertEquals(null, unparceledRequest.getApplicationId());
     assertEquals(null, unparceledRequest.getAuthId());
     assertTrue(unparceledRequest.isRerequest());
+    assertThat(unparceledRequest.isFamilyLogin()).isTrue();
+    assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isTrue();
 
     assertEquals(LoginClient.Result.Code.SUCCESS, unparceledResult.code);
     assertEquals(token1, unparceledResult.token);
@@ -154,6 +187,86 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     assertEquals(false, unparceledRequest.getResetMessengerState());
   }
 
+  @Test
+  public void testGetHandlersForFBSSOLogin() {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            LoginBehavior.NATIVE_WITH_FALLBACK,
+            null,
+            DefaultAudience.EVERYONE,
+            null,
+            null,
+            null,
+            LoginTargetApp.FACEBOOK);
+    LoginClient client = new LoginClient(mockFragment);
+    LoginMethodHandler[] handlers = client.getHandlersToTry(request);
+
+    assertThat(handlers.length).isEqualTo(5);
+    assertThat(handlers[0]).isInstanceOf(GetTokenLoginMethodHandler.class);
+    assertThat(handlers[1]).isInstanceOf(KatanaProxyLoginMethodHandler.class);
+    assertThat(handlers[2]).isInstanceOf(FacebookLiteLoginMethodHandler.class);
+    assertThat(handlers[3]).isInstanceOf(CustomTabLoginMethodHandler.class);
+    assertThat(handlers[4]).isInstanceOf(WebViewLoginMethodHandler.class);
+  }
+
+  @Test
+  public void testGetHandlersForFBWebLoginOnly() {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            LoginBehavior.WEB_ONLY,
+            null,
+            DefaultAudience.EVERYONE,
+            null,
+            null,
+            null,
+            LoginTargetApp.FACEBOOK);
+    LoginClient client = new LoginClient(mockFragment);
+    LoginMethodHandler[] handlers = client.getHandlersToTry(request);
+
+    assertThat(handlers.length).isEqualTo(2);
+    assertThat(handlers[0]).isInstanceOf(CustomTabLoginMethodHandler.class);
+    assertThat(handlers[1]).isInstanceOf(WebViewLoginMethodHandler.class);
+  }
+
+  @Test
+  public void testGetHandlersForIGSSOLogin() {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            LoginBehavior.NATIVE_WITH_FALLBACK,
+            null,
+            DefaultAudience.EVERYONE,
+            null,
+            null,
+            null,
+            LoginTargetApp.INSTAGRAM);
+    LoginClient client = new LoginClient(mockFragment);
+    LoginMethodHandler[] handlers = client.getHandlersToTry(request);
+
+    assertThat(handlers.length).isEqualTo(3);
+    assertThat(handlers[0]).isInstanceOf(InstagramAppLoginMethodHandler.class);
+    assertThat(handlers[1]).isInstanceOf(CustomTabLoginMethodHandler.class);
+    assertThat(handlers[2]).isInstanceOf(WebViewLoginMethodHandler.class);
+  }
+
+  @Test
+  public void testGetHandlersForIGWebLoginOnly() {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            LoginBehavior.WEB_ONLY,
+            null,
+            DefaultAudience.EVERYONE,
+            null,
+            null,
+            null,
+            LoginTargetApp.INSTAGRAM);
+    LoginClient client = new LoginClient(mockFragment);
+    LoginMethodHandler[] handlers = client.getHandlersToTry(request);
+
+    assertThat(handlers.length).isEqualTo(2);
+    assertThat(handlers[0]).isInstanceOf(CustomTabLoginMethodHandler.class);
+    assertThat(handlers[1]).isInstanceOf(WebViewLoginMethodHandler.class);
+  }
+
   protected LoginClient.Request createRequest(String previousAccessTokenString) {
     return new LoginClient.Request(
         LoginBehavior.NATIVE_WITH_FALLBACK,
@@ -161,6 +274,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
         DefaultAudience.FRIENDS,
         "rerequest",
         "1234",
-        "5678");
+        "5678",
+        LoginTargetApp.FACEBOOK);
   }
 }

@@ -23,35 +23,35 @@ package com.facebook.login;
 /** Specifies the behaviors to try during login. */
 public enum LoginBehavior {
   /**
-   * Specifies that login should attempt login in using the Facebook App, and if that does not work
-   * fall back to web dialog auth. This is the default behavior.
+   * Specifies that login should attempt login in using a native app in the Facebook Family of Apps,
+   * and if that does not work, fall back to web dialog auth. This is the default behavior.
    */
-  NATIVE_WITH_FALLBACK(true, true, true, false, true, true),
+  NATIVE_WITH_FALLBACK(true, true, true, false, true, true, true),
 
   /**
-   * Specifies that login should only attempt to login using the Facebook App. If the Facebook App
-   * cannot be used then the login fails.
+   * Specifies that login should only attempt to login using a native app in the Facebook Family of
+   * Apps. If the native app cannot be used, then the login fails.
    */
-  NATIVE_ONLY(true, true, false, false, false, true),
+  NATIVE_ONLY(true, true, false, false, false, true, true),
 
   /** Specifies that login should only attempt to use Katana Proxy Login. */
-  KATANA_ONLY(false, true, false, false, false, false),
+  KATANA_ONLY(false, true, false, false, false, false, false),
 
   /** Specifies that only the web dialog auth should be used. */
-  WEB_ONLY(false, false, true, false, true, false),
+  WEB_ONLY(false, false, true, false, true, false, false),
 
   /** Specifies that only the web view dialog auth should be used. */
-  WEB_VIEW_ONLY(false, false, true, false, false, false),
+  WEB_VIEW_ONLY(false, false, true, false, false, false, false),
 
   /** Specifies that only the web dialog auth (from anywhere) should be used */
-  DIALOG_ONLY(false, true, true, false, true, true),
+  DIALOG_ONLY(false, true, true, false, true, true, true),
 
   /**
    * Specifies that device login authentication flow should be used. Use it via ({@link
    * com.facebook.login.widget.DeviceLoginButton DeviceLoginButton} or ({@link
    * com.facebook.login.DeviceLoginManager DeviceLoginManager} to authenticate.
    */
-  DEVICE_AUTH(false, false, false, true, false, false);
+  DEVICE_AUTH(false, false, false, true, false, false, false);
 
   private final boolean allowsGetTokenAuth;
   private final boolean allowsKatanaAuth;
@@ -59,6 +59,7 @@ public enum LoginBehavior {
   private final boolean allowsDeviceAuth;
   private final boolean allowsCustomTabAuth;
   private final boolean allowsFacebookLiteAuth;
+  private final boolean allowsInstagramAppAuth;
 
   LoginBehavior(
       boolean allowsGetTokenAuth,
@@ -66,13 +67,15 @@ public enum LoginBehavior {
       boolean allowsWebViewAuth,
       boolean allowsDeviceAuth,
       boolean allowsCustomTabAuth,
-      boolean allowsFacebookLiteAuth) {
+      boolean allowsFacebookLiteAuth,
+      boolean allowsInstagramAppAuth) {
     this.allowsGetTokenAuth = allowsGetTokenAuth;
     this.allowsKatanaAuth = allowsKatanaAuth;
     this.allowsWebViewAuth = allowsWebViewAuth;
     this.allowsDeviceAuth = allowsDeviceAuth;
     this.allowsCustomTabAuth = allowsCustomTabAuth;
     this.allowsFacebookLiteAuth = allowsFacebookLiteAuth;
+    this.allowsInstagramAppAuth = allowsInstagramAppAuth;
   }
 
   boolean allowsGetTokenAuth() {
@@ -97,5 +100,9 @@ public enum LoginBehavior {
 
   boolean allowsFacebookLiteAuth() {
     return allowsFacebookLiteAuth;
+  }
+
+  boolean allowsInstagramAppAuth() {
+    return allowsInstagramAppAuth;
   }
 }

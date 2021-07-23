@@ -20,12 +20,27 @@
 
 package com.facebook.internal
 
-import com.facebook.FacebookTestCase
+import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import com.facebook.FacebookPowerMockTestCase
+import com.facebook.login.DefaultAudience
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.TreeSet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.core.classloader.annotations.PrepareForTest
 
-class NativeProtocolTest : FacebookTestCase() {
+@PrepareForTest(FacebookSignatureValidator::class)
+class NativeProtocolTest : FacebookPowerMockTestCase() {
+
+  private val mockAppID = "123456789"
+  private val mockPackageName = "com.example"
+
   @Test
   fun `sdk version older than app with version spec open`() {
     // Base case where a feature was enabled a while ago and the SDK and Native app have been
@@ -148,5 +163,88 @@ class NativeProtocolTest : FacebookTestCase() {
       treeSet.add(a)
     }
     return treeSet
+  }
+
+  @Test
+  fun `native intent generation for FB app`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val intents =
+        NativeProtocol.createProxyAuthIntents(
+            mockContext,
+            mockAppID,
+            listOf<String>(), // permissions
+            "", // e2e
+            false, // isRerequest
+            false, // isForPublish
+            DefaultAudience.FRIENDS, // defaultAudience
+            "", // clientState
+            "", // authType
+            false, // ignoreAppSwitchToLoggedOut
+            null, // messengerPageId
+            false, // resetMessengerState
+            false, // isFamilyLogin
+            false) // shouldSkipAccountDedupe
+
+    assertThat(intents.size).isEqualTo(2)
+    val katanaIntent = intents.get(0)
+    assertThat(katanaIntent?.getComponent()?.getClassName())
+        .isEqualTo("com.facebook.katana.ProxyAuth")
+    assertThat(katanaIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
+        .isEqualTo(mockAppID)
+    assertThat(katanaIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
+    assertThat(katanaIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
+        .isFalse()
+
+    val wakizashiIntent = intents.get(1)
+    assertThat(wakizashiIntent?.getComponent()?.getClassName())
+        .isEqualTo("com.facebook.katana.ProxyAuth")
+    assertThat(wakizashiIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
+        .isEqualTo(mockAppID)
+    assertThat(wakizashiIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
+    assertThat(katanaIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
+        .isFalse()
+  }
+
+  @Test
+  fun `native intent generation for IG app`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val instagramIntent =
+        NativeProtocol.createInstagramIntent(
+            mockContext,
+            mockAppID,
+            listOf<String>(), // permissions
+            "", // e2e
+            false, // isRerequest
+            false, // isForPublish
+            DefaultAudience.FRIENDS, // defaultAudience
+            "", // clientState
+            "", // authType
+            true, // isFamilyLogin
+            true) // shouldSkipAccountDedupe
+
+    assertThat(instagramIntent?.getComponent()?.getClassName())
+        .isEqualTo("com.instagram.platform.AppAuthorizeActivity")
+    assertThat(instagramIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
+        .isEqualTo(mockAppID)
+    assertThat(instagramIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES)
+    assertThat(instagramIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
+        .isTrue()
+  }
+
+  fun setUpMockingForNativeIntentGeneration(mockContext: Context) {
+    PowerMockito.mockStatic(FacebookSignatureValidator::class.java)
+    PowerMockito.`when`(FacebookSignatureValidator.validateSignature(any(), any())).thenReturn(true)
+    val mockPackageManager = mock<PackageManager>()
+    val mockResolveInfo = mock<ResolveInfo>()
+    val mockActivityInfo = mock<ActivityInfo>()
+    mockActivityInfo.packageName = mockPackageName
+    mockResolveInfo.activityInfo = mockActivityInfo
+    whenever(mockContext.getPackageManager()).thenReturn(mockPackageManager)
+    whenever(mockPackageManager.resolveActivity(any(), any())).thenReturn(mockResolveInfo)
   }
 }
