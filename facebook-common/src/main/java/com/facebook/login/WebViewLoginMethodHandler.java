@@ -88,6 +88,9 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
             .setIsChromeOS(isChromeOS)
             .setAuthType(request.getAuthType())
             .setLoginBehavior(request.getLoginBehavior())
+            .setLoginTargetApp(request.getLoginTargetApp())
+            .setFamilyLogin(request.isFamilyLogin())
+            .setShouldSkipDedupe(request.shouldSkipAccountDeduplication())
             .setOnCompleteListener(listener);
     loginDialog = builder.build();
 
@@ -110,6 +113,9 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
     private String authType;
     private String redirect_uri = ServerProtocol.DIALOG_REDIRECT_URI;
     private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
+    private LoginTargetApp targetApp = LoginTargetApp.FACEBOOK;
+    private boolean isFamilyLogin = false;
+    private boolean shouldSkipDedupe = false;
 
     public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
       super(context, applicationId, OAUTH_DIALOG, parameters);
@@ -146,6 +152,21 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
       return this;
     }
 
+    public AuthDialogBuilder setLoginTargetApp(final LoginTargetApp targetApp) {
+      this.targetApp = targetApp;
+      return this;
+    }
+
+    public AuthDialogBuilder setFamilyLogin(final boolean isFamilyLogin) {
+      this.isFamilyLogin = isFamilyLogin;
+      return this;
+    }
+
+    public AuthDialogBuilder setShouldSkipDedupe(final boolean shouldSkip) {
+      this.shouldSkipDedupe = shouldSkip;
+      return this;
+    }
+
     @Override
     public WebDialog build() {
       Bundle parameters = getParameters();
@@ -154,14 +175,22 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, e2e);
       parameters.putString(
           ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-          ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
+          (targetApp == LoginTargetApp.INSTAGRAM)
+              ? ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES
+              : ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
       parameters.putString(
           ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
       parameters.putString(ServerProtocol.DIALOG_PARAM_AUTH_TYPE, authType);
       parameters.putString(ServerProtocol.DIALOG_PARAM_LOGIN_BEHAVIOR, loginBehavior.name());
+      if (isFamilyLogin) {
+        parameters.putString(ServerProtocol.DIALOG_PARAM_FX_APP, targetApp.toString());
+      }
+      if (shouldSkipDedupe) {
+        parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true");
+      }
 
       return WebDialog.newInstance(
-          getContext(), OAUTH_DIALOG, parameters, getTheme(), getListener());
+          getContext(), OAUTH_DIALOG, parameters, getTheme(), targetApp, getListener());
     }
   }
 

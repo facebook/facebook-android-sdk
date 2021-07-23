@@ -18,24 +18,36 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.login;
+package com.facebook.internal;
 
-import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.PlatformServiceClient;
+import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.login.CustomTabLoginMethodHandler;
 
-final class GetTokenClient extends PlatformServiceClient {
+@AutoHandleExceptions
+public class InstagramCustomTab extends CustomTab {
 
-  GetTokenClient(Context context, LoginClient.Request request) {
-    super(
-        context,
-        NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REQUEST,
-        NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REPLY,
-        NativeProtocol.PROTOCOL_VERSION_20121101,
-        request.getApplicationId());
+  public InstagramCustomTab(String action, Bundle parameters) {
+    super(action, parameters);
+    if (parameters == null) {
+      parameters = new Bundle();
+    }
+    uri = getURIForAction(action, parameters);
   }
 
-  @Override
-  protected void populateRequestBundle(Bundle data) {}
+  public static Uri getURIForAction(String action, Bundle parameters) {
+    if (action.equals(CustomTabLoginMethodHandler.OAUTH_DIALOG)) {
+      // Instagram has their own non-graph endpoint for oauth
+      return Utility.buildUri(
+          ServerProtocol.getInstagramDialogAuthority(),
+          ServerProtocol.INSTAGRAM_OAUTH_PATH,
+          parameters);
+    }
+    return Utility.buildUri(
+        ServerProtocol.getInstagramDialogAuthority(),
+        FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+        parameters);
+  }
 }

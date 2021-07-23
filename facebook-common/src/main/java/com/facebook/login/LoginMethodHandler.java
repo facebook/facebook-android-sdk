@@ -177,7 +177,7 @@ abstract class LoginMethodHandler implements Parcelable {
       return null;
     }
 
-    String graphDomain = bundle.getString("graph_domain");
+    String graphDomain = bundle.getString(AccessToken.GRAPH_DOMAIN);
     String signed_request = bundle.getString("signed_request");
     String userId = getUserIDFromSignedRequest(signed_request);
 

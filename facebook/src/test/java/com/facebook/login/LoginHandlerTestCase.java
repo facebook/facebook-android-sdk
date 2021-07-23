@@ -34,7 +34,7 @@ import org.robolectric.Robolectric;
 
 public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
   protected static final String ACCESS_TOKEN = "An access token";
-  protected static final String USER_ID = "1000";
+  protected static final String USER_ID = "123";
   protected static final long EXPIRES_IN_DELTA = 3600 * 24 * 60;
   protected static final HashSet<String> PERMISSIONS =
       new HashSet<String>(Arrays.asList("go outside", "come back in"));

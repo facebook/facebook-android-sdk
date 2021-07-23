@@ -57,7 +57,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
   }
 
   int tryAuthorize(final LoginClient.Request request) {
-    getTokenClient = new GetTokenClient(loginClient.getActivity(), request.getApplicationId());
+    getTokenClient = new GetTokenClient(loginClient.getActivity(), request);
     if (!getTokenClient.start()) {
       return 0;
     }

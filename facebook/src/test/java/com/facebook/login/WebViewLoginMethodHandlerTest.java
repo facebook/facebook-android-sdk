@@ -24,8 +24,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,7 +37,9 @@ import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
+import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
+import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.Utility;
 import java.util.Date;
 import java.util.List;
@@ -42,8 +48,8 @@ import org.mockito.ArgumentCaptor;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
-@PrepareForTest({LoginClient.class})
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*"})
+@PrepareForTest({AccessToken.class, FacebookSdk.class, LoginClient.class})
 public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
   private static final String SIGNED_REQUEST_STR =
       "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
@@ -74,6 +80,37 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
     assertNotNull(token);
     assertEquals(ACCESS_TOKEN, token.getToken());
     assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+  }
+
+  @Test
+  public void testIGWebViewHandlesSuccess() throws Exception {
+    mockTryAuthorize();
+    Bundle bundle = new Bundle();
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("graph_domain", "instagram");
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+
+    WebViewLoginMethodHandler handler = new WebViewLoginMethodHandler(mockLoginClient);
+
+    LoginClient.Request igRequest = createIGWebRequest();
+    handler.tryAuthorize(igRequest);
+    handler.onWebDialogComplete(igRequest, bundle, null);
+
+    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+
+    LoginClient.Result result = resultArgumentCaptor.getValue();
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+
+    AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertEquals(USER_ID, token.getUserId());
+    assertEquals("instagram", token.getGraphDomain());
+    assertEquals(AccessTokenSource.INSTAGRAM_WEB_VIEW, token.getSource());
     TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
   }
 
@@ -173,5 +210,14 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
     assertEquals(token, accessToken.getToken());
     assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());
     assertTrue(!accessToken.isExpired());
+  }
+
+  private void mockTryAuthorize() throws Exception {
+    mockStatic(FacebookSdk.class);
+    when(FacebookSdk.isInitialized()).thenReturn(true);
+    mockStatic(AccessToken.class);
+    when(AccessToken.getCurrentAccessToken()).thenReturn(null);
+    FacebookDialogFragment dialogFragment = mock(FacebookDialogFragment.class);
+    whenNew(FacebookDialogFragment.class).withAnyArguments().thenReturn(dialogFragment);
   }
 }

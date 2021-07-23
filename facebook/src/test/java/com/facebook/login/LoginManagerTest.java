@@ -20,6 +20,7 @@
 
 package com.facebook.login;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -156,6 +157,19 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     LoginManager loginManager = new LoginManager();
     loginManager.setLoginBehavior(LoginBehavior.NATIVE_ONLY);
     assertEquals(LoginBehavior.NATIVE_ONLY, loginManager.getLoginBehavior());
+  }
+
+  @Test
+  public void testLoginTargetAppDefaultsToFacebook() {
+    LoginManager loginManager = new LoginManager();
+    assertEquals(LoginTargetApp.FACEBOOK, loginManager.getLoginTargetApp());
+  }
+
+  @Test
+  public void testCanChangeLoginTargetApp() {
+    LoginManager loginManager = new LoginManager();
+    loginManager.setLoginTargetApp(LoginTargetApp.INSTAGRAM);
+    assertEquals(LoginTargetApp.INSTAGRAM, loginManager.getLoginTargetApp());
   }
 
   @Test
@@ -531,6 +545,41 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
 
     verifyStatic(AccessToken.class, times(1));
     AccessToken.setCurrentAccessToken(eq(createAccessToken()));
+  }
+
+  @Test
+  public void testLogInWithFamilyExperience() {
+    createTestForFamilyLoginExperience(true, true);
+  }
+
+  @Test
+  public void testLogInWithStandardExperience() {
+    createTestForFamilyLoginExperience(false, false);
+  }
+
+  @Test
+  public void testLogInWithFamilyExperienceAndSkipAccountDedupe() {
+    createTestForFamilyLoginExperience(true, false);
+  }
+
+  private void createTestForFamilyLoginExperience(boolean isEnabled, boolean shouldSkip) {
+    LoginManager loginManager = new LoginManager();
+    loginManager.setFamilyLogin(isEnabled);
+    loginManager.setShouldSkipAccountDeduplication(shouldSkip);
+
+    int loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
+    final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+    loginManager.logInWithReadPermissions(
+        mockActivity, Arrays.asList("public_profile", "user_friends"));
+
+    verify(mockActivity, times(1))
+        .startActivityForResult(intentCaptor.capture(), eq(loginRequestCode));
+    Bundle bundle = intentCaptor.getValue().getBundleExtra(LoginFragment.REQUEST_KEY);
+    LoginClient.Request request =
+        (LoginClient.Request) bundle.getParcelable(LoginFragment.EXTRA_REQUEST);
+    assertThat(request.isFamilyLogin()).isEqualTo(isEnabled);
+    assertThat(request.shouldSkipAccountDeduplication()).isEqualTo(shouldSkip);
   }
 
   private Intent createSuccessResultIntent() {

@@ -35,6 +35,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.FacebookServiceException;
 import com.facebook.internal.CustomTab;
 import com.facebook.internal.CustomTabUtils;
+import com.facebook.internal.InstagramCustomTab;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -42,11 +43,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
-  private static final String OAUTH_DIALOG = "oauth";
   private static final int CUSTOM_TAB_REQUEST_CODE = 1;
   private static final int CHALLENGE_LENGTH = 20;
   private static final int API_EC_DIALOG_CANCEL = 4201;
   public static boolean calledThroughLoggedOutAppSwitch = false;
+  public static final String OAUTH_DIALOG = "oauth";
 
   private String currentPackage;
   private String expectedChallenge;
@@ -96,7 +97,12 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH, "1");
     }
     if (FacebookSdk.hasCustomTabsPrefetching) {
-      CustomTabPrefetchHelper.mayLaunchUrl(CustomTab.getURIForAction(OAUTH_DIALOG, parameters));
+      if (request.isInstagramLogin()) {
+        CustomTabPrefetchHelper.mayLaunchUrl(
+            InstagramCustomTab.getURIForAction(OAUTH_DIALOG, parameters));
+      } else {
+        CustomTabPrefetchHelper.mayLaunchUrl(CustomTab.getURIForAction(OAUTH_DIALOG, parameters));
+      }
     }
 
     Activity activity = loginClient.getActivity();
@@ -105,6 +111,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, OAUTH_DIALOG);
     intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters);
     intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, getChromePackage());
+    intent.putExtra(CustomTabMainActivity.EXTRA_TARGET_APP, request.getLoginTargetApp().toString());
     loginClient.getFragment().startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE);
 
     return 1;

@@ -33,7 +33,7 @@ import com.facebook.login.CustomTabPrefetchHelper;
 @AutoHandleExceptions
 public class CustomTab {
 
-  private Uri uri;
+  protected Uri uri;
 
   public CustomTab(String action, Bundle parameters) {
     if (parameters == null) {

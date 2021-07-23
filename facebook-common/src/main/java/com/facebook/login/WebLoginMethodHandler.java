@@ -43,6 +43,8 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
       "com.facebook.login.AuthorizationClient.WebViewAuthHandler.TOKEN_STORE_KEY";
   private static final String WEB_VIEW_AUTH_HANDLER_TOKEN_KEY = "TOKEN";
 
+  protected AccessTokenSource tokenSource;
+
   protected String getRedirectUrl() {
     return "fb" + FacebookSdk.getApplicationId() + "://authorize";
   }
@@ -101,11 +103,25 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
 
   protected Bundle addExtraParameters(Bundle parameters, final LoginClient.Request request) {
     parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, this.getRedirectUrl());
-    parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, request.getApplicationId());
+    if (request.isInstagramLogin()) {
+      parameters.putString(ServerProtocol.DIALOG_PARAM_APP_ID, request.getApplicationId());
+    } else {
+      // Client id is a legacy name. IG Login doesn't support it. This line is kept
+      // for FB Login for consistency with old SDKs
+      parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, request.getApplicationId());
+    }
+
     parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, loginClient.getE2E());
-    parameters.putString(
-        ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-        ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
+
+    if (request.isInstagramLogin()) {
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+          ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES);
+    } else {
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+          ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
+    }
     parameters.putString(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
     parameters.putString(ServerProtocol.DIALOG_PARAM_AUTH_TYPE, request.getAuthType());
@@ -120,6 +136,15 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
     parameters.putString(
         ServerProtocol.DIALOG_PARAM_CUSTOM_TABS_PREFETCHING,
         FacebookSdk.hasCustomTabsPrefetching ? "1" : "0");
+
+    if (request.isFamilyLogin()) {
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_FX_APP, request.getLoginTargetApp().toString());
+    }
+
+    if (request.shouldSkipAccountDeduplication()) {
+      parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true");
+    }
 
     return parameters;
   }
