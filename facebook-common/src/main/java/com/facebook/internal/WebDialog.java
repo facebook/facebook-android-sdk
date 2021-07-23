@@ -65,6 +65,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.common.R;
+import com.facebook.login.LoginTargetApp;
 import com.facebook.share.internal.ShareConstants;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.widget.ShareDialog;
@@ -160,7 +161,19 @@ public class WebDialog extends Dialog {
       Context context, String action, Bundle parameters, int theme, OnCompleteListener listener) {
     initDefaultTheme(context);
 
-    return new WebDialog(context, action, parameters, theme, listener);
+    return new WebDialog(context, action, parameters, theme, LoginTargetApp.FACEBOOK, listener);
+  }
+
+  public static WebDialog newInstance(
+      Context context,
+      String action,
+      Bundle parameters,
+      int theme,
+      LoginTargetApp targetApp,
+      OnCompleteListener listener) {
+    initDefaultTheme(context);
+
+    return new WebDialog(context, action, parameters, theme, targetApp, listener);
   }
 
   /**
@@ -233,6 +246,26 @@ public class WebDialog extends Dialog {
    */
   private WebDialog(
       Context context, String action, Bundle parameters, int theme, OnCompleteListener listener) {
+    this(context, action, parameters, theme, LoginTargetApp.FACEBOOK, listener);
+  }
+
+  /**
+   * Constructor which will construct the URL of the Web dialog based on the specified parameters.
+   *
+   * @param context the context to use to display the dialog
+   * @param action the portion of the dialog URL following "dialog/"
+   * @param parameters parameters which will be included as part of the URL
+   * @param theme identifier of a theme to pass to the Dialog class
+   * @param targetApp the target app associated with the oauth dialog
+   * @param listener the listener to notify, or null if no notification is desired
+   */
+  private WebDialog(
+      Context context,
+      String action,
+      Bundle parameters,
+      int theme,
+      LoginTargetApp targetApp,
+      OnCompleteListener listener) {
     super(context, theme == 0 ? getWebDialogTheme() : theme);
 
     if (parameters == null) {
@@ -263,11 +296,22 @@ public class WebDialog extends Dialog {
         && parameters.containsKey(ShareConstants.WEB_DIALOG_PARAM_MEDIA)) {
       this.uploadTask = new UploadStagingResourcesTask(action, parameters);
     } else {
-      Uri uri =
-          Utility.buildUri(
-              ServerProtocol.getDialogAuthority(),
-              FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-              parameters);
+      Uri uri;
+      switch (targetApp) {
+        case INSTAGRAM:
+          uri =
+              Utility.buildUri(
+                  ServerProtocol.getInstagramDialogAuthority(),
+                  ServerProtocol.INSTAGRAM_OAUTH_PATH,
+                  parameters);
+          break;
+        default:
+          uri =
+              Utility.buildUri(
+                  ServerProtocol.getDialogAuthority(),
+                  FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+                  parameters);
+      }
       this.url = uri.toString();
     }
   }

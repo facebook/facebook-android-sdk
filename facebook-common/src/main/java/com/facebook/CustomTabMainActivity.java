@@ -29,8 +29,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.internal.CustomTab;
+import com.facebook.internal.InstagramCustomTab;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.login.LoginTargetApp;
 
 public class CustomTabMainActivity extends Activity {
   public static final String EXTRA_ACTION =
@@ -40,6 +42,8 @@ public class CustomTabMainActivity extends Activity {
   public static final String EXTRA_CHROME_PACKAGE =
       CustomTabMainActivity.class.getSimpleName() + ".extra_chromePackage";
   public static final String EXTRA_URL = CustomTabMainActivity.class.getSimpleName() + ".extra_url";
+  public static final String EXTRA_TARGET_APP =
+      CustomTabMainActivity.class.getSimpleName() + ".extra_targetApp";
   public static final String REFRESH_ACTION =
       CustomTabMainActivity.class.getSimpleName() + ".action_refresh";
   public static final String NO_ACTIVITY_EXCEPTION =
@@ -63,8 +67,18 @@ public class CustomTabMainActivity extends Activity {
       String action = getIntent().getStringExtra(EXTRA_ACTION);
       Bundle parameters = getIntent().getBundleExtra(EXTRA_PARAMS);
       String chromePackage = getIntent().getStringExtra(EXTRA_CHROME_PACKAGE);
+      LoginTargetApp targetApp =
+          LoginTargetApp.fromString(getIntent().getStringExtra(EXTRA_TARGET_APP));
 
-      CustomTab customTab = new CustomTab(action, parameters);
+      CustomTab customTab;
+      switch (targetApp) {
+        case INSTAGRAM:
+          customTab = new InstagramCustomTab(action, parameters);
+          break;
+        default:
+          customTab = new CustomTab(action, parameters);
+      }
+
       boolean couldOpenCustomTab = customTab.openCustomTab(this, chromePackage);
       shouldCloseCustomTab = false;
 

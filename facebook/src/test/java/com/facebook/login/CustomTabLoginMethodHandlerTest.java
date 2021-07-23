@@ -40,6 +40,7 @@ import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenSource;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
@@ -108,6 +109,35 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     assertNotNull(token);
     assertEquals(ACCESS_TOKEN, token.getToken());
     assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+  }
+
+  @Test
+  public void testIGCustomTabHandlesSuccess() {
+    mockCustomTabRedirectActivity(true);
+    LoginClient.Request igRequest = createIGWebRequest();
+    CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
+    final Bundle bundle = new Bundle();
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("graph_domain", "instagram");
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+    handler.onComplete(igRequest, bundle, null);
+
+    final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+
+    final LoginClient.Result result = resultArgumentCaptor.getValue();
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+
+    final AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertEquals(USER_ID, token.getUserId());
+    assertEquals("instagram", token.getGraphDomain());
+    assertEquals(AccessTokenSource.INSTAGRAM_CUSTOM_CHROME_TAB, token.getSource());
     TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
   }
 

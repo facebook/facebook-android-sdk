@@ -74,6 +74,9 @@ public class LoginManager {
   private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
   @Nullable private String messengerPageId;
   private boolean resetMessengerState;
+  private LoginTargetApp targetApp = LoginTargetApp.FACEBOOK;
+  private boolean isFamilyLogin = false;
+  private boolean shouldSkipAccountDeduplication = false;
 
   LoginManager() {
     Validate.sdkInitialized();
@@ -278,6 +281,26 @@ public class LoginManager {
   }
 
   /**
+   * Getter for the login target app.
+   *
+   * @return the login target app.
+   */
+  public LoginTargetApp getLoginTargetApp() {
+    return targetApp;
+  }
+
+  /**
+   * Setter for the login target app.
+   *
+   * @param targetApp The login target app.
+   * @return The login manager.
+   */
+  public LoginManager setLoginTargetApp(LoginTargetApp targetApp) {
+    this.targetApp = targetApp;
+    return this;
+  }
+
+  /**
    * Getter for the default audience.
    *
    * @return The default audience.
@@ -336,6 +359,46 @@ public class LoginManager {
    */
   public LoginManager setResetMessengerState(final boolean resetMessengerState) {
     this.resetMessengerState = resetMessengerState;
+    return this;
+  }
+
+  /**
+   * Determines whether we are using the cross Family of Apps login experience
+   *
+   * @return True if using cross Family of Apps login
+   */
+  public boolean isFamilyLogin() {
+    return isFamilyLogin;
+  }
+
+  /**
+   * Setter for whether we are using cross Family of Apps login
+   *
+   * @param isFamilyLogin Whether we are using cross Family of Apps login
+   * @return The login manager.
+   */
+  public LoginManager setFamilyLogin(boolean isFamilyLogin) {
+    this.isFamilyLogin = isFamilyLogin;
+    return this;
+  }
+
+  /**
+   * Determines if we should skip deduplicating account during x-FoA login.
+   *
+   * @return True if Account deduplication is opted out in Family of Apps login
+   */
+  public boolean getShouldSkipAccountDeduplication() {
+    return shouldSkipAccountDeduplication;
+  }
+  /**
+   * Setter for whether we are skipping deduplicating account during x-FoA login.
+   *
+   * @param shouldSkipAccountDeduplication Whether we want to opt out account deduplication
+   *     experience in Family of Apps login
+   * @return The login manager.
+   */
+  public LoginManager setShouldSkipAccountDeduplication(boolean shouldSkipAccountDeduplication) {
+    this.shouldSkipAccountDeduplication = shouldSkipAccountDeduplication;
     return this;
   }
 
@@ -510,11 +573,34 @@ public class LoginManager {
   /**
    * Logs the user in with the requested permissions.
    *
+   * @param fragment The android.support.v4.app.Fragment which is starting the login process.
+   * @param permissions The requested permissions.
+   * @param loggerID Override the default logger ID for the request
+   */
+  public void logIn(Fragment fragment, Collection<String> permissions, String loggerID) {
+    logIn(new FragmentWrapper(fragment), permissions, loggerID);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
    * @param fragment The android.app.Fragment which is starting the login process.
    * @param permissions The requested permissions.
    */
   public void logIn(android.app.Fragment fragment, Collection<String> permissions) {
     logIn(new FragmentWrapper(fragment), permissions);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
+   * @param fragment The android.app.Fragment which is starting the login process.
+   * @param permissions The requested permissions.
+   * @param loggerID Override the default logger ID for the request
+   */
+  public void logIn(
+      android.app.Fragment fragment, Collection<String> permissions, String loggerID) {
+    logIn(new FragmentWrapper(fragment), permissions, loggerID);
   }
 
   /**
@@ -531,11 +617,35 @@ public class LoginManager {
   /**
    * Logs the user in with the requested permissions.
    *
+   * @param fragment The fragment which is starting the login process.
+   * @param permissions The requested permissions.
+   * @param loggerID Override the default logger ID for the request
+   */
+  public void logIn(FragmentWrapper fragment, Collection<String> permissions, String loggerID) {
+    LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
+    startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
    * @param activity The activity which is starting the login process.
    * @param permissions The requested permissions.
    */
   public void logIn(Activity activity, Collection<String> permissions) {
     LoginClient.Request loginRequest = createLoginRequest(permissions);
+    startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
+   * @param activity The activity which is starting the login process.
+   * @param permissions The requested permissions.
+   * @param loggerID Override the default logger ID for the request
+   */
+  public void logIn(Activity activity, Collection<String> permissions, String loggerID) {
+    LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
     startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
   }
 
@@ -596,21 +706,49 @@ public class LoginManager {
             defaultAudience,
             authType,
             FacebookSdk.getApplicationId(),
-            UUID.randomUUID().toString());
+            UUID.randomUUID().toString(),
+            targetApp);
     request.setRerequest(AccessToken.isCurrentAccessTokenActive());
     request.setMessengerPageId(messengerPageId);
     request.setResetMessengerState(resetMessengerState);
+    request.setFamilyLogin(isFamilyLogin);
+    request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication);
+    return request;
+  }
+
+  protected LoginClient.Request createLoginRequest(
+      Collection<String> permissions, String loggerID) {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            loginBehavior,
+            Collections.unmodifiableSet(
+                permissions != null ? new HashSet(permissions) : new HashSet<String>()),
+            defaultAudience,
+            authType,
+            FacebookSdk.getApplicationId(),
+            loggerID,
+            targetApp);
+    request.setRerequest(AccessToken.isCurrentAccessTokenActive());
+    request.setMessengerPageId(messengerPageId);
+    request.setResetMessengerState(resetMessengerState);
+    request.setFamilyLogin(isFamilyLogin);
+    request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication);
     return request;
   }
 
   protected LoginClient.Request createReauthorizeRequest() {
-    return new LoginClient.Request(
-        LoginBehavior.DIALOG_ONLY,
-        new HashSet<String>(),
-        defaultAudience,
-        "reauthorize",
-        FacebookSdk.getApplicationId(),
-        UUID.randomUUID().toString());
+    LoginClient.Request request =
+        new LoginClient.Request(
+            LoginBehavior.DIALOG_ONLY,
+            new HashSet<String>(),
+            defaultAudience,
+            "reauthorize",
+            FacebookSdk.getApplicationId(),
+            UUID.randomUUID().toString(),
+            targetApp);
+    request.setFamilyLogin(isFamilyLogin);
+    request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication);
+    return request;
   }
 
   private void startLogin(StartActivityDelegate startActivityDelegate, LoginClient.Request request)
@@ -650,7 +788,11 @@ public class LoginManager {
   private void logStartLogin(Context context, LoginClient.Request loginRequest) {
     LoginLogger loginLogger = LoginLoggerHolder.getLogger(context);
     if (loginLogger != null && loginRequest != null) {
-      loginLogger.logStartLogin(loginRequest);
+      loginLogger.logStartLogin(
+          loginRequest,
+          loginRequest.isFamilyLogin()
+              ? LoginLogger.EVENT_NAME_FOA_LOGIN_START
+              : LoginLogger.EVENT_NAME_LOGIN_START);
     }
   }
 
@@ -678,7 +820,14 @@ public class LoginManager {
               ? AppEventsConstants.EVENT_PARAM_VALUE_YES
               : AppEventsConstants.EVENT_PARAM_VALUE_NO);
       loginLogger.logCompleteLogin(
-          request.getAuthId(), pendingLoggingExtras, result, resultExtras, exception);
+          request.getAuthId(),
+          pendingLoggingExtras,
+          result,
+          resultExtras,
+          exception,
+          request.isFamilyLogin()
+              ? LoginLogger.EVENT_NAME_FOA_LOGIN_COMPLETE
+              : LoginLogger.EVENT_NAME_LOGIN_COMPLETE);
     }
   }
 
