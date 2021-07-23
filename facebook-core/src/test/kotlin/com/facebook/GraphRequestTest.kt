@@ -41,10 +41,19 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, Log::class)
+@PrepareForTest(AccessToken::class, FacebookSdk::class, Log::class)
 class GraphRequestTest : FacebookPowerMockTestCase() {
+  private val facebookGraphUrl = "graph.facebook.com"
+  private val gamingGraphUrl = "graph.fb.gg"
+  private val instagramGraphUrl = "graph.instagram.com"
+
   private val mockAppID = "1234"
   private val mockClientToken = "5678"
+  private val mockTokenString = "EAAasdf"
+  private val mockGamingTokenString = "GGasdf"
+  private val mockInstagramTokenString = "IGasdf"
+  private val mockAppTokenString = mockAppID + "|" + mockClientToken
+  private val mockUserID = "1000"
   @Before
   override fun setup() {
     super.setup()
@@ -55,6 +64,10 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(FacebookSdk.isDebugEnabled()).thenReturn(false)
     PowerMockito.`when`(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
+    PowerMockito.`when`(FacebookSdk.getGraphDomain()).thenCallRealMethod()
+    PowerMockito.`when`(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
+    PowerMockito.`when`(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
+    mockLoggedInWithTokenDomain("facebook")
   }
 
   @Test
@@ -75,6 +88,124 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     // Batch URL should contain parameters
     args = Uri.parse(urlBatch).queryParameterNames
     assertThat(args.contains("sample_key")).isTrue
+  }
+
+  @Test
+  fun testBaseUrlCreationForInstagram() {
+    mockLoggedInWithTokenDomain("instagram")
+    val igGraphRequest = GraphRequest.newMeRequest(null, null)
+
+    val singleRequestUrl = igGraphRequest.urlForSingleRequest
+    val batchRequestUrl = igGraphRequest.relativeUrlForBatchedRequest
+
+    assertThat(singleRequestUrl).contains("graph.instagram.com")
+    assertThat(singleRequestUrl.contains(FacebookSdk.getGraphApiVersion())).isTrue
+    assertThat(batchRequestUrl.contains(FacebookSdk.getGraphApiVersion())).isTrue
+  }
+
+  @Test
+  fun testApplicationRequestRoutingByTokenDomain() {
+    // Application requests should always go to the facebook.com or fb.gg domains
+    val appRequest = GraphRequest(null, mockAppID, null, HttpMethod.GET, null)
+    val appActivitiesRequest =
+        GraphRequest(null, mockAppID + "/activities", null, HttpMethod.GET, null)
+
+    // With no access token set
+    assertThat(appRequest.urlForSingleRequest).contains(facebookGraphUrl)
+    assertThat(appActivitiesRequest.urlForSingleRequest).contains(facebookGraphUrl)
+
+    mockLoggedInWithTokenDomain("facebook")
+
+    // User is logged in with facebook
+    assertThat(appRequest.urlForSingleRequest).contains(facebookGraphUrl)
+    assertThat(appActivitiesRequest.urlForSingleRequest).contains(facebookGraphUrl)
+
+    mockLoggedInWithTokenDomain("gaming")
+
+    // User is logged in with gaming
+    assertThat(appRequest.urlForSingleRequest).contains(gamingGraphUrl)
+    assertThat(appActivitiesRequest.urlForSingleRequest).contains(gamingGraphUrl)
+
+    mockLoggedInWithTokenDomain("instagram")
+
+    // User is logged in with instagram
+    assertThat(appRequest.urlForSingleRequest).contains(facebookGraphUrl)
+    assertThat(appActivitiesRequest.urlForSingleRequest).contains(facebookGraphUrl)
+  }
+
+  @Test
+  fun testMeRequestRoutingByTokenDomain() {
+    val meRequest = GraphRequest.newMeRequest(null, null)
+    val mePermissionsRequest = GraphRequest(null, "/me/permissions", null, HttpMethod.GET, null)
+
+    // With no access token set
+    assertThat(meRequest.urlForSingleRequest).contains(facebookGraphUrl)
+    assertThat(mePermissionsRequest.urlForSingleRequest).contains(facebookGraphUrl)
+
+    mockLoggedInWithTokenDomain("facebook")
+
+    // User is logged in with facebook
+    assertThat(meRequest.urlForSingleRequest).contains(facebookGraphUrl)
+    assertThat(mePermissionsRequest.urlForSingleRequest).contains(facebookGraphUrl)
+
+    mockLoggedInWithTokenDomain("gaming")
+
+    // User is logged in with gaming
+    assertThat(meRequest.urlForSingleRequest).contains(gamingGraphUrl)
+    assertThat(mePermissionsRequest.urlForSingleRequest).contains(gamingGraphUrl)
+
+    mockLoggedInWithTokenDomain("instagram")
+
+    // User is logged in with instagram
+    assertThat(meRequest.urlForSingleRequest).contains(instagramGraphUrl)
+    assertThat(mePermissionsRequest.urlForSingleRequest).contains(instagramGraphUrl)
+  }
+
+  @Test
+  fun testRequestShouldUseClientTokenWhenNoTokenProvided() {
+    val request = GraphRequest(null, "testPath", Bundle(), HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockAppTokenString)
+  }
+
+  @Test
+  fun testFBRequestShouldUseFBTokenWhenPassedAsTokenParam() {
+    mockLoggedInWithTokenDomain("facebook")
+    val accessToken = createAccessTokenForDomain("facebook")
+
+    val request = GraphRequest(accessToken, "testPath", Bundle(), HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockTokenString)
+  }
+
+  @Test
+  fun testFBRequestShouldUseFBTokenWhenPassedAsBundleParam() {
+    val parameters = Bundle()
+    parameters.putString("access_token", mockTokenString)
+
+    val request = GraphRequest(null, "testPath", parameters, HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockTokenString)
+  }
+
+  @Test
+  fun testIGRequestShouldUseClientTokenWhenRerouted() {
+    mockLoggedInWithTokenDomain("instagram")
+    val accessToken = createAccessTokenForDomain("instagram")
+
+    val request = GraphRequest(accessToken, mockAppID, Bundle(), HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockAppTokenString)
+  }
+
+  @Test
+  fun testIGRequestShouldUseIGTokenWhenPassedAsTokenParam() {
+    mockLoggedInWithTokenDomain("instagram")
+    val accessToken = createAccessTokenForDomain("instagram")
+
+    val request = GraphRequest(accessToken, "me", Bundle(), HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockInstagramTokenString)
   }
 
   @Test
@@ -109,6 +240,21 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val request = GraphRequest.newMeRequest(null, null)
     assertThat(request.httpMethod).isEqualTo(HttpMethod.GET)
     assertThat(request.graphPath).isEqualTo("me")
+  }
+
+  @Test
+  fun testCreateIGMeRequest() {
+    mockLoggedInWithTokenDomain("instagram")
+
+    val request = GraphRequest.newMeRequest(null, null)
+
+    assertThat(request).isNotNull
+    assertThat(request.httpMethod).isEqualTo(HttpMethod.GET)
+    assertThat(request.graphPath).isEqualTo("me")
+
+    val requestUrl = request.urlForSingleRequest
+    assertThat(requestUrl).contains("graph.instagram.com")
+    assertThat(requestUrl.contains(FacebookSdk.getGraphApiVersion())).isTrue
   }
 
   @Test
@@ -247,5 +393,335 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val requestMe = GraphRequest(null, "TourEiffel")
     GraphRequest.toHttpConnection(requestMe)
     assertThat(capturedTag).isEqualTo(GraphRequest.TAG)
+  }
+
+  @Test
+  fun testRoutingNoTokenFacebookDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, null, "facebook", mockAppID, "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingNoTokenFacebookDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, null, "facebook", "me", "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingNoTokenGamingDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, null, "gaming", mockAppID, "graph.fb.gg", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingNoTokenGamingDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, null, "gaming", "me", "graph.fb.gg", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingNoTokenInstagramDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, null, "instagram", mockAppID, "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingNoTokenInstagramDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, null, "instagram", "me", "graph.instagram.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenFacebookDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("facebook")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "facebook", mockAppID, "graph.facebook.com", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenFacebookDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("facebook")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "facebook", "me", "graph.facebook.com", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenStringFacebookDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockTokenString, "facebook", mockAppID, "graph.facebook.com", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenStringFacebookDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockTokenString, "facebook", "me", "graph.facebook.com", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenGamingDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("gaming")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "gaming", mockAppID, "graph.fb.gg", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenGamingDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("gaming")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "gaming", "me", "graph.fb.gg", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenStringGamingDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockGamingTokenString, "gaming", mockAppID, "graph.fb.gg", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenStringGamingDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockGamingTokenString, "gaming", "me", "graph.fb.gg", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenInstagramDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("instagram")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "instagram", mockAppID, "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenInstagramDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("instagram")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "instagram", "me", "graph.instagram.com", mockInstagramTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenStringInstagramDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null,
+        mockInstagramTokenString,
+        "instagram",
+        mockAppID,
+        "graph.facebook.com",
+        mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenStringInstagramDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null,
+        mockInstagramTokenString,
+        "instagram",
+        "me",
+        "graph.instagram.com",
+        mockInstagramTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenGamingDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("facebook")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "gaming", mockAppID, "graph.fb.gg", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenGamingDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("facebook")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "gaming", "me", "graph.fb.gg", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenStringGamingDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockTokenString, "gaming", mockAppID, "graph.fb.gg", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenStringGamingDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockTokenString, "gaming", "me", "graph.fb.gg", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenFacebookDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("gaming")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "facebook", mockAppID, "graph.facebook.com", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenFacebookDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("gaming")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "facebook", "me", "graph.facebook.com", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenStringFacebookDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null,
+        mockGamingTokenString,
+        "facebook",
+        mockAppID,
+        "graph.facebook.com",
+        mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingGamingTokenStringFacebookDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockGamingTokenString, "facebook", "me", "graph.facebook.com", mockGamingTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenFacebookDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("instagram")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "facebook", mockAppID, "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenFacebookDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("instagram")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "facebook", "me", "graph.facebook.com", mockInstagramTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenStringFacebookDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null,
+        mockInstagramTokenString,
+        "facebook",
+        mockAppID,
+        "graph.facebook.com",
+        mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingInstagramTokenStringFacebookDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null,
+        mockInstagramTokenString,
+        "facebook",
+        "me",
+        "graph.facebook.com",
+        mockInstagramTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenInstagramDomainApplicationRequest() {
+    val accessToken = createAccessTokenForDomain("facebook")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "instagram", mockAppID, "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenInstagramDomainMeRequest() {
+    val accessToken = createAccessTokenForDomain("facebook")
+    createTestCaseForDomainRoutingAndTokenType(
+        accessToken, null, "instagram", "me", "graph.instagram.com", mockTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenStringInstagramDomainApplicationRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockTokenString, "instagram", mockAppID, "graph.facebook.com", mockAppTokenString)
+  }
+
+  @Test
+  fun testRoutingFacebookTokenStringInstagramDomainMeRequest() {
+    createTestCaseForDomainRoutingAndTokenType(
+        null, mockTokenString, "instagram", "me", "graph.instagram.com", mockTokenString)
+  }
+
+  @Test
+  fun testPrefersTokenStringOverAccessTokenObj() {
+    val accessToken = createAccessTokenForDomain("instagram")
+    val parameters = Bundle()
+    parameters.putString("access_token", mockTokenString)
+    val request = GraphRequest(accessToken, "me", parameters, HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockTokenString)
+  }
+
+  @Test
+  fun testForceApplicationRequestWithProvidedClientToken() {
+    mockLoggedInWithTokenDomain("instagram")
+    val customClientToken = "0000|0000"
+    val parameters = Bundle()
+    parameters.putString("access_token", customClientToken)
+    val request = GraphRequest(null, "", parameters, HttpMethod.GET, null)
+    request.setForceApplicationRequest(true)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getHost()).isEqualTo("graph.facebook.com")
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(customClientToken)
+  }
+
+  @Test
+  fun testForceApplicationRequestWithNoToken() {
+    mockLoggedInWithTokenDomain("instagram")
+    val parameters = Bundle()
+    val request = GraphRequest(null, "", parameters, HttpMethod.GET, null)
+    request.setForceApplicationRequest(true)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getHost()).isEqualTo("graph.facebook.com")
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockAppTokenString)
+  }
+
+  @Test
+  fun testForceApplicationRequestWithInstagramUserToken() {
+    mockLoggedInWithTokenDomain("instagram")
+    val parameters = Bundle()
+    parameters.putString("access_token", mockInstagramTokenString)
+    val request = GraphRequest(null, "", parameters, HttpMethod.GET, null)
+    request.setForceApplicationRequest(true)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+    assertThat(requestUri.getHost()).isEqualTo("graph.facebook.com")
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(mockAppTokenString)
+  }
+
+  fun createAccessTokenForDomain(domain: String): AccessToken {
+    var tokenString: String? = null
+    if (domain == "gaming") {
+      tokenString = mockGamingTokenString
+    } else if (domain == "instagram") {
+      tokenString = mockInstagramTokenString
+    } else {
+      tokenString = mockTokenString
+    }
+    return AccessToken(
+        tokenString, mockAppID, mockUserID, null, null, null, null, null, null, null, domain)
+  }
+
+  fun createTestCaseForDomainRoutingAndTokenType(
+      accessToken: AccessToken?,
+      tokenString: String?,
+      currentTokenDomain: String,
+      graphPath: String,
+      expectedHost: String,
+      expectedTokenToUse: String
+  ) {
+    mockLoggedInWithTokenDomain(currentTokenDomain)
+
+    val parameters = Bundle()
+    if (tokenString != null) {
+      parameters.putString("access_token", tokenString)
+    }
+    val request = GraphRequest(accessToken, graphPath, parameters, HttpMethod.GET, null)
+    val requestUri = Uri.parse(request.urlForSingleRequest)
+
+    assertThat(requestUri.getHost()).isEqualTo(expectedHost)
+    assertThat(requestUri.getQueryParameter("access_token")).isEqualTo(expectedTokenToUse)
+  }
+
+  fun mockLoggedInWithTokenDomain(tokenDomain: String) {
+    val mockAccessToken = createAccessTokenForDomain(tokenDomain)
+    val mockTokenCompanionObject = mock<AccessToken.Companion>()
+    Whitebox.setInternalState(AccessToken::class.java, "Companion", mockTokenCompanionObject)
+    whenever(mockTokenCompanionObject.getCurrentAccessToken()).thenReturn(mockAccessToken)
   }
 }

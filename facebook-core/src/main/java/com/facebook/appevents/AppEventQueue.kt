@@ -178,6 +178,7 @@ internal object AppEventQueue {
     val fetchedAppSettings = queryAppSettings(applicationId, false)
     val postRequest =
         newPostRequest(null, String.format("%s/activities", applicationId), null, null)
+    postRequest.setForceApplicationRequest(true)
     var requestParameters = postRequest.parameters
     if (requestParameters == null) {
       requestParameters = Bundle()
