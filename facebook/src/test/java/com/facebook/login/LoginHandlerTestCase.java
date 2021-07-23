@@ -65,6 +65,28 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
         "5678");
   }
 
+  protected LoginClient.Request createIGAppRequest() {
+    return new LoginClient.Request(
+        LoginBehavior.NATIVE_WITH_FALLBACK,
+        new HashSet<String>(PERMISSIONS),
+        DefaultAudience.FRIENDS,
+        "rerequest",
+        "1234",
+        "5678",
+        LoginTargetApp.INSTAGRAM);
+  }
+
+  protected LoginClient.Request createIGWebRequest() {
+    return new LoginClient.Request(
+        LoginBehavior.WEB_ONLY,
+        new HashSet<String>(PERMISSIONS),
+        DefaultAudience.FRIENDS,
+        "rerequest",
+        "1234",
+        "5678",
+        LoginTargetApp.INSTAGRAM);
+  }
+
   protected void assertDateDiffersWithinDelta(
       Date expected, Date actual, long expectedDifference, long deltaInMsec) {
 

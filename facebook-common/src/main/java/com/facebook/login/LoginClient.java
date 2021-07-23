@@ -33,6 +33,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.common.R;
 import com.facebook.internal.CallbackManagerImpl;
@@ -169,16 +170,22 @@ class LoginClient implements Parcelable {
 
     final LoginBehavior behavior = request.getLoginBehavior();
 
-    if (behavior.allowsGetTokenAuth()) {
-      handlers.add(new GetTokenLoginMethodHandler(this));
-    }
+    if (request.isInstagramLogin()) {
+      if (!FacebookSdk.bypassAppSwitch && behavior.allowsInstagramAppAuth()) {
+        handlers.add(new InstagramAppLoginMethodHandler(this));
+      }
+    } else {
+      // Only use get token auth and native FB4A auth for FB logins
+      if (behavior.allowsGetTokenAuth()) {
+        handlers.add(new GetTokenLoginMethodHandler(this));
+      }
+      if (!FacebookSdk.bypassAppSwitch && behavior.allowsKatanaAuth()) {
+        handlers.add(new KatanaProxyLoginMethodHandler(this));
+      }
 
-    if (behavior.allowsKatanaAuth()) {
-      handlers.add(new KatanaProxyLoginMethodHandler(this));
-    }
-
-    if (behavior.allowsFacebookLiteAuth()) {
-      handlers.add(new FacebookLiteLoginMethodHandler(this));
+      if (!FacebookSdk.bypassAppSwitch && behavior.allowsFacebookLiteAuth()) {
+        handlers.add(new FacebookLiteLoginMethodHandler(this));
+      }
     }
 
     if (behavior.allowsCustomTabAuth()) {
@@ -189,7 +196,7 @@ class LoginClient implements Parcelable {
       handlers.add(new WebViewLoginMethodHandler(this));
     }
 
-    if (behavior.allowsDeviceAuth()) {
+    if (!request.isInstagramLogin() && behavior.allowsDeviceAuth()) {
       handlers.add(new DeviceAuthMethodHandler(this));
     }
 
@@ -282,13 +289,23 @@ class LoginClient implements Parcelable {
     numActivitiesReturned = 0;
     if (numTried > 0) {
       getLogger()
-          .logAuthorizationMethodStart(pendingRequest.getAuthId(), handler.getNameForLogging());
+          .logAuthorizationMethodStart(
+              pendingRequest.getAuthId(),
+              handler.getNameForLogging(),
+              pendingRequest.isFamilyLogin()
+                  ? LoginLogger.EVENT_NAME_FOA_LOGIN_METHOD_START
+                  : LoginLogger.EVENT_NAME_LOGIN_METHOD_START);
       numTotalIntentsFired = numTried;
     } else {
       // We didn't try it, so we don't get any other completion
       // notification -- log that we skipped it.
       getLogger()
-          .logAuthorizationMethodNotTried(pendingRequest.getAuthId(), handler.getNameForLogging());
+          .logAuthorizationMethodNotTried(
+              pendingRequest.getAuthId(),
+              handler.getNameForLogging(),
+              pendingRequest.isFamilyLogin()
+                  ? LoginLogger.EVENT_NAME_FOA_LOGIN_METHOD_NOT_TRIED
+                  : LoginLogger.EVENT_NAME_LOGIN_METHOD_NOT_TRIED);
       addLoggingExtra(LoginLogger.EVENT_EXTRAS_NOT_TRIED, handler.getNameForLogging(), true);
     }
 
@@ -431,7 +448,15 @@ class LoginClient implements Parcelable {
     } else {
       getLogger()
           .logAuthorizationMethodComplete(
-              pendingRequest.getAuthId(), method, result, errorMessage, errorCode, loggingExtras);
+              pendingRequest.getAuthId(),
+              method,
+              result,
+              errorMessage,
+              errorCode,
+              loggingExtras,
+              pendingRequest.isFamilyLogin()
+                  ? LoginLogger.EVENT_NAME_FOA_LOGIN_METHOD_COMPLETE
+                  : LoginLogger.EVENT_NAME_LOGIN_METHOD_COMPLETE);
     }
   }
 
@@ -456,6 +481,9 @@ class LoginClient implements Parcelable {
     private String deviceAuthTargetUserId; // used to target a specific user with device login
     @Nullable private String messengerPageId;
     private boolean resetMessengerState;
+    private final LoginTargetApp targetApp;
+    private boolean isFamilyLogin = false;
+    private boolean shouldSkipAccountDeduplication = false;
 
     Request(
         LoginBehavior loginBehavior,
@@ -464,12 +492,31 @@ class LoginClient implements Parcelable {
         String authType,
         String applicationId,
         String authId) {
+      this(
+          loginBehavior,
+          permissions,
+          defaultAudience,
+          authType,
+          applicationId,
+          authId,
+          LoginTargetApp.FACEBOOK);
+    }
+
+    Request(
+        LoginBehavior loginBehavior,
+        Set<String> permissions,
+        DefaultAudience defaultAudience,
+        String authType,
+        String applicationId,
+        String authId,
+        LoginTargetApp targetApp) {
       this.loginBehavior = loginBehavior;
       this.permissions = permissions != null ? permissions : new HashSet<String>();
       this.defaultAudience = defaultAudience;
       this.authType = authType;
       this.applicationId = applicationId;
       this.authId = authId;
+      this.targetApp = targetApp;
     }
 
     Set<String> getPermissions() {
@@ -483,6 +530,10 @@ class LoginClient implements Parcelable {
 
     LoginBehavior getLoginBehavior() {
       return loginBehavior;
+    }
+
+    LoginTargetApp getLoginTargetApp() {
+      return targetApp;
     }
 
     DefaultAudience getDefaultAudience() {
@@ -503,6 +554,22 @@ class LoginClient implements Parcelable {
 
     void setRerequest(boolean isRerequest) {
       this.isRerequest = isRerequest;
+    }
+
+    boolean isFamilyLogin() {
+      return isFamilyLogin;
+    }
+
+    void setFamilyLogin(boolean isFamilyLogin) {
+      this.isFamilyLogin = isFamilyLogin;
+    }
+
+    boolean shouldSkipAccountDeduplication() {
+      return shouldSkipAccountDeduplication;
+    }
+
+    void setShouldSkipAccountDeduplication(boolean shouldSkipAccountDeduplication) {
+      this.shouldSkipAccountDeduplication = shouldSkipAccountDeduplication;
     }
 
     String getDeviceRedirectUriString() {
@@ -554,6 +621,10 @@ class LoginClient implements Parcelable {
       return false;
     }
 
+    boolean isInstagramLogin() {
+      return targetApp == LoginTargetApp.INSTAGRAM;
+    }
+
     private Request(Parcel parcel) {
       String enumValue = parcel.readString();
       this.loginBehavior = enumValue != null ? LoginBehavior.valueOf(enumValue) : null;
@@ -570,6 +641,10 @@ class LoginClient implements Parcelable {
       this.deviceAuthTargetUserId = parcel.readString();
       this.messengerPageId = parcel.readString();
       this.resetMessengerState = parcel.readByte() != 0;
+      enumValue = parcel.readString();
+      this.targetApp = enumValue != null ? LoginTargetApp.valueOf(enumValue) : null;
+      this.isFamilyLogin = parcel.readByte() != 0;
+      this.shouldSkipAccountDeduplication = parcel.readByte() != 0;
     }
 
     @Override
@@ -590,6 +665,9 @@ class LoginClient implements Parcelable {
       dest.writeString(deviceAuthTargetUserId);
       dest.writeString(messengerPageId);
       dest.writeByte((byte) (resetMessengerState ? 1 : 0));
+      dest.writeString(targetApp != null ? targetApp.name() : null);
+      dest.writeByte((byte) (isFamilyLogin ? 1 : 0));
+      dest.writeByte((byte) (shouldSkipAccountDeduplication ? 1 : 0));
     }
 
     public static final Parcelable.Creator<Request> CREATOR =
@@ -626,14 +704,19 @@ class LoginClient implements Parcelable {
     }
 
     final Code code;
-    final AccessToken token;
-    final String errorMessage;
-    final String errorCode;
+    @Nullable final AccessToken token;
+    @Nullable final String errorMessage;
+    @Nullable final String errorCode;
     final Request request;
     public Map<String, String> loggingExtras;
     public Map<String, String> extraData;
 
-    Result(Request request, Code code, AccessToken token, String errorMessage, String errorCode) {
+    Result(
+        Request request,
+        Code code,
+        @Nullable AccessToken token,
+        @Nullable String errorMessage,
+        @Nullable String errorCode) {
       Validate.notNull(code, "code");
       this.request = request;
       this.token = token;
@@ -646,16 +729,20 @@ class LoginClient implements Parcelable {
       return new Result(request, Code.SUCCESS, token, null, null);
     }
 
-    static Result createCancelResult(Request request, String message) {
+    static Result createCancelResult(Request request, @Nullable String message) {
       return new Result(request, Code.CANCEL, null, message, null);
     }
 
-    static Result createErrorResult(Request request, String errorType, String errorDescription) {
+    static Result createErrorResult(
+        Request request, @Nullable String errorType, @Nullable String errorDescription) {
       return createErrorResult(request, errorType, errorDescription, null);
     }
 
     static Result createErrorResult(
-        Request request, String errorType, String errorDescription, String errorCode) {
+        Request request,
+        @Nullable String errorType,
+        @Nullable String errorDescription,
+        @Nullable String errorCode) {
       String message = TextUtils.join(": ", Utility.asListNoNulls(errorType, errorDescription));
       return new Result(request, Code.ERROR, null, message, errorCode);
     }
