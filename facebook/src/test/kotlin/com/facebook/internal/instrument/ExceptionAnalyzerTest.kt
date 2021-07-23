@@ -25,11 +25,11 @@ import com.facebook.FacebookSdk
 import com.facebook.GraphRequestBatch
 import com.facebook.MockSharedPreference
 import com.facebook.internal.Utility
-import com.facebook.util.common.anyObject
 import java.io.File
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
-import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -46,14 +46,20 @@ import org.powermock.reflect.Whitebox
     ExceptionAnalyzer::class,
     InstrumentUtility::class,
     Utility::class,
-    InstrumentData.Builder::class,
     GraphRequestBatch::class)
 class ExceptionAnalyzerTest : FacebookPowerMockTestCase() {
   private var instrumentDataWritten = "{}"
   private val preference = MockSharedPreference()
+  private lateinit var directory: File
+  private lateinit var root: File
 
   @Before
   fun init() {
+    val rootName = UUID.randomUUID().toString()
+    directory = File(rootName, "instrument")
+    directory.mkdirs()
+    root = File(rootName)
+
     val context = PowerMockito.mock(Context::class.java)
     PowerMockito.`when`(context.getSharedPreferences(anyString(), anyInt())).thenReturn(preference)
     PowerMockito.spy(FacebookSdk::class.java)
@@ -62,20 +68,25 @@ class ExceptionAnalyzerTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(true))
     Whitebox.setInternalState(FacebookSdk::class.java, "applicationContext", context)
     Whitebox.setInternalState(ExceptionAnalyzer::class.java, "enabled", true)
-    PowerMockito.mockStatic(InstrumentUtility::class.java)
+    PowerMockito.spy(InstrumentUtility::class.java)
     PowerMockito.spy(Utility::class.java)
     PowerMockito.doReturn(false).`when`(Utility::class.java, "isDataProcessingRestricted")
-    PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(anyObject())).thenCallRealMethod()
+    PowerMockito.doReturn(directory).`when`(InstrumentUtility::class.java, "getInstrumentReportDir")
+  }
+
+  @After
+  fun clean() {
+    root.deleteRecursively()
   }
 
   @Test
   fun `test execute`() {
     PowerMockito.doReturn(true).`when`(FacebookSdk::class.java, "getAutoLogAppEventsEnabled")
-    PowerMockito.`when`(InstrumentUtility.writeFile(anyString(), anyString())).then {
-      instrumentDataWritten = it.arguments[1] as String
-      return@then Unit
-    }
+    PowerMockito.doAnswer {
+          instrumentDataWritten = it.arguments[1] as String
+          return@doAnswer Unit
+        }
+        .`when`(InstrumentUtility::class.java, "writeFile", anyString(), anyString())
 
     val e = Exception()
     val trace =
@@ -95,11 +106,7 @@ class ExceptionAnalyzerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test send error reports`() {
-    val mockReportFile = PowerMockito.mock(File::class.java)
-    PowerMockito.`when`(InstrumentUtility.listExceptionAnalysisReportFiles())
-        .thenReturn(arrayOf(mockReportFile))
-    val instrumentData = InstrumentData.Builder.build(JSONArray())
-    PowerMockito.`when`(InstrumentData.Builder.load(mockReportFile)).thenReturn(instrumentData)
+    InstrumentUtility.writeFile("analysis_log_1.json", "{\"feature_names\":[],\"timestamp\":1}")
     val mockGraphRequestBatch = PowerMockito.mock(GraphRequestBatch::class.java)
     PowerMockito.whenNew(GraphRequestBatch::class.java)
         .withAnyArguments()
