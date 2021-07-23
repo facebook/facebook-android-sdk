@@ -80,9 +80,6 @@ public final class FacebookSdk {
   private static volatile @Nullable String applicationName;
   private static volatile String appClientToken;
   private static volatile Boolean codelessDebugLogEnabled;
-  private static final String FACEBOOK_COM = "facebook.com";
-  private static final String FB_GG = "fb.gg";
-  private static volatile String facebookDomain = FACEBOOK_COM;
   private static AtomicLong onProgressThreshold = new AtomicLong(65536);
   private static volatile boolean isDebugEnabled = BuildConfig.DEBUG;
   private static boolean isLegacyTokenUpgradeSupported = false;
@@ -91,9 +88,6 @@ public final class FacebookSdk {
   private static int callbackRequestCodeOffset = DEFAULT_CALLBACK_REQUEST_CODE_OFFSET;
   private static final Object LOCK = new Object();
   private static String graphApiVersion = ServerProtocol.getDefaultAPIVersion();
-  public static boolean hasCustomTabsPrefetching = false;
-  public static boolean ignoreAppSwitchToLoggedOut = false;
-
   private static final int MAX_REQUEST_CODE_RANGE = 100;
 
   private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
@@ -155,11 +149,22 @@ public final class FacebookSdk {
   /** The key for state in data processing options. */
   public static final String DATA_PROCESSION_OPTIONS_STATE = "data_processing_options_state";
 
+  public static boolean hasCustomTabsPrefetching = false;
+  public static boolean ignoreAppSwitchToLoggedOut = false;
+  public static boolean bypassAppSwitch = false;
+
+  public static final String INSTAGRAM = "instagram";
   public static final String GAMING = "gaming";
+  public static final String FACEBOOK_COM = "facebook.com";
+  public static final String FB_GG = "fb.gg";
+  public static final String INSTAGRAM_COM = "instagram.com";
 
   private static final AtomicBoolean sdkInitialized = new AtomicBoolean(false);
 
   private static Boolean sdkFullyInitialized = false;
+
+  private static volatile String facebookDomain = FACEBOOK_COM;
+  private static final String instagramDomain = INSTAGRAM_COM;
 
   private static GraphRequestCreator graphRequestCreator =
       new GraphRequestCreator() {
@@ -380,6 +385,17 @@ public final class FacebookSdk {
           }
         });
 
+    FeatureManager.checkFeature(
+        FeatureManager.Feature.BypassAppSwitch,
+        new FeatureManager.Callback() {
+          @Override
+          public void onCompleted(boolean enabled) {
+            if (enabled) {
+              bypassAppSwitch = true;
+            }
+          }
+        });
+
     FutureTask<Void> futureTask =
         new FutureTask<>(
             new Callable<Void>() {
@@ -588,6 +604,10 @@ public final class FacebookSdk {
     return facebookDomain;
   }
 
+  public static String getInstagramDomain() {
+    return instagramDomain;
+  }
+
   /**
    * Gets the base Facebook domain to use when making Graph API requests; in production code this
    * will normally be "facebook.com". However certain Access Tokens are meant to be used with other
@@ -600,21 +620,12 @@ public final class FacebookSdk {
   public static String getGraphDomain() {
     AccessToken currentToken = AccessToken.getCurrentAccessToken();
     String tokenGraphDomain = null;
-    String graphDomain;
 
     if (currentToken != null) {
       tokenGraphDomain = currentToken.getGraphDomain();
     }
 
-    if (tokenGraphDomain == null) {
-      graphDomain = facebookDomain;
-    } else if (tokenGraphDomain.equals(GAMING)) {
-      graphDomain = facebookDomain.replace(FACEBOOK_COM, FB_GG);
-    } else {
-      graphDomain = facebookDomain;
-    }
-
-    return graphDomain;
+    return Utility.getGraphDomainFromTokenDomain(tokenGraphDomain);
   }
 
   /**
@@ -693,7 +704,6 @@ public final class FacebookSdk {
                 FacebookSdk.publishInstallAndWaitForResponse(applicationContext, applicationId);
               }
             });
-
     if (FeatureManager.isEnabled(FeatureManager.Feature.OnDeviceEventProcessing)
         && OnDeviceProcessingManager.isOnDeviceProcessingEnabled()) {
       OnDeviceProcessingManager.sendInstallEventAsync(applicationId, ATTRIBUTION_PREFERENCES);

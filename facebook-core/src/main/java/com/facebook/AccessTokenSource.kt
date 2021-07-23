@@ -60,9 +60,34 @@ enum class AccessTokenSource(private val canExtendToken: Boolean) {
   CLIENT_TOKEN(true),
 
   /** Indicates an access token constructed from facebook.com/device */
-  DEVICE_AUTH(true);
+  DEVICE_AUTH(true),
+
+  /**
+   * Indicates an access token was obtained by the user logging in through the Instagram app for
+   * Android using the web login dialog.
+   */
+  INSTAGRAM_APPLICATION_WEB(true),
+
+  /**
+   * Indicates an access token was obtained by the user logging in to Instagram through the
+   * Web-based dialog on a Chrome Custom Tab.
+   */
+  INSTAGRAM_CUSTOM_CHROME_TAB(true),
+
+  /**
+   * Indicates an access token was obtained by the user logging in to Instagram through the
+   * Web-based dialog.
+   */
+  INSTAGRAM_WEB_VIEW(true);
 
   fun canExtendToken(): Boolean {
     return canExtendToken
+  }
+
+  fun fromInstagram(): Boolean {
+    return when (this) {
+      INSTAGRAM_APPLICATION_WEB, INSTAGRAM_CUSTOM_CHROME_TAB, INSTAGRAM_WEB_VIEW -> true
+      else -> false
+    }
   }
 }

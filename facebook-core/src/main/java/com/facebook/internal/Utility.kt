@@ -112,6 +112,9 @@ object Utility {
   // https://stackoverflow.com/questions/39784415/how-to-detect-programmatically-if-android-app-is-running-in-chrome-book-or-in
   private const val ARC_DEVICE_PATTERN = ".+_cheets|cheets_.+"
 
+  private const val FACEBOOK_PROFILE_FIELDS = "id,name,first_name,middle_name,last_name"
+  private const val INSTAGRAM_PROFILE_FIELDS = "id,name,profile_picture"
+
   /**
    * Each array represents a set of closed or open Range, like so: [0,10,50,60] - Ranges are {0-9},
    * {50-59} [20] - Ranges are {20-} [30,40,100] - Ranges are {30-39}, {100-}
@@ -1061,6 +1064,20 @@ object Utility {
   }
 
   @JvmStatic
+  fun getGraphDomainFromTokenDomain(tokenGraphDomain: String?): String? {
+    val facebookDomain = FacebookSdk.getFacebookDomain()
+    if (tokenGraphDomain == null) {
+      return facebookDomain
+    }
+    return when (tokenGraphDomain) {
+      FacebookSdk.GAMING -> facebookDomain.replace(FacebookSdk.FACEBOOK_COM, FacebookSdk.FB_GG)
+      FacebookSdk.INSTAGRAM ->
+          facebookDomain.replace(FacebookSdk.FACEBOOK_COM, FacebookSdk.INSTAGRAM_COM)
+      else -> facebookDomain
+    }
+  }
+
+  @JvmStatic
   fun getGraphMeRequestWithCacheAsync(
       accessToken: String,
       callback: GraphMeRequestWithCacheCallback
@@ -1099,9 +1116,23 @@ object Utility {
 
   private fun getGraphMeRequestWithCache(accessToken: String): GraphRequest {
     val parameters = Bundle()
-    parameters.putString("fields", "id,name,first_name,middle_name,last_name")
+    parameters.putString(
+        "fields", getProfileFieldsForGraphDomain(getCurrentTokenDomainWithDefault()))
     parameters.putString("access_token", accessToken)
     return GraphRequest(null, "me", parameters, HttpMethod.GET, null)
+  }
+
+  private fun getProfileFieldsForGraphDomain(graphDomain: String?): String {
+    return if (graphDomain == FacebookSdk.INSTAGRAM) {
+      INSTAGRAM_PROFILE_FIELDS
+    } else FACEBOOK_PROFILE_FIELDS
+  }
+
+  private fun getCurrentTokenDomainWithDefault(): String? {
+    val accessToken = AccessToken.getCurrentAccessToken()
+    return if (accessToken != null && accessToken.graphDomain != null) {
+      accessToken.graphDomain
+    } else AccessToken.DEFAULT_GRAPH_DOMAIN
   }
 
   /**
