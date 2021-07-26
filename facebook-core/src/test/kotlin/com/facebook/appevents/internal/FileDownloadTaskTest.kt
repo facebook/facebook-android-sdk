@@ -2,6 +2,7 @@ package com.facebook.appevents.internal
 
 import android.annotation.TargetApi
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.mock
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.io.File
@@ -31,8 +32,8 @@ class FileDownloadTaskTest : FacebookPowerMockTestCase() {
   @Before
   fun `set up`() {
     tempFile = File.createTempFile(fileName, null)
-    mockUrl = PowerMockito.mock(URL::class.java)
-    mockConnection = PowerMockito.mock(URLConnection::class.java)
+    mockUrl = mock()
+    mockConnection = mock()
     mockDataInputStream = DataInputStream(ByteArrayInputStream(content.toByteArray()))
 
     PowerMockito.`when`(mockConnection.contentLength).thenReturn(content.length)
@@ -51,7 +52,7 @@ class FileDownloadTaskTest : FacebookPowerMockTestCase() {
   @Test
   @TargetApi(26)
   fun `test file download`() {
-    val task = PowerMockito.mock(FileDownloadTask::class.java)
+    val task = mock<FileDownloadTask>()
     PowerMockito.`when`(task.doInBackground()).thenCallRealMethod()
     WhiteboxImpl.setInternalState(task, "uriStr", uriStr)
     WhiteboxImpl.setInternalState(task, "destFile", tempFile)
