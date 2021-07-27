@@ -843,6 +843,8 @@ object NativeProtocol {
     private var availableVersions: TreeSet<Int>? = null
     open fun getResponseType(): String =
         ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST
+    open fun onAvailableVersionsNullOrEmpty() = Unit
+
     fun getAvailableVersions(): TreeSet<Int>? {
       if (availableVersions == null || availableVersions?.isEmpty() != false) {
         fetchAvailableVersions(false)
@@ -855,12 +857,29 @@ object NativeProtocol {
       if (force || availableVersions == null || availableVersions?.isEmpty() != false) {
         availableVersions = fetchAllAvailableProtocolVersionsForAppInfo(this)
       }
+      if (availableVersions.isNullOrEmpty()) {
+        onAvailableVersionsNullOrEmpty()
+      }
     }
   }
 
   private class KatanaAppInfo : NativeAppInfo() {
     override fun getLoginActivity() = FACEBOOK_PROXY_AUTH_ACTIVITY
     override fun getPackage() = "com.facebook.katana"
+
+    override fun onAvailableVersionsNullOrEmpty() {
+      if (isAndroidAPIVersionNotLessThan30()) {
+        Log.w(
+            TAG,
+            "Apps that target Android API 30+ (Android 11+) cannot call Facebook native apps unless the package visibility needs are declared. Please follow https://developers.facebook.com/docs/android/troubleshooting/#faq_267321845055988 to make the declaration.")
+      }
+    }
+
+    private fun isAndroidAPIVersionNotLessThan30(): Boolean {
+      val context = FacebookSdk.getApplicationContext()
+      val applicationInfo = context.applicationInfo
+      return applicationInfo.targetSdkVersion >= 30
+    }
   }
 
   private class MessengerAppInfo : NativeAppInfo() {
