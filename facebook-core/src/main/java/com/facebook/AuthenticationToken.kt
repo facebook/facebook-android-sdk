@@ -58,9 +58,7 @@ class AuthenticationToken : Parcelable {
     // TODO: id_token validation
 
     val tokenArray = token.split(".")
-    require(tokenArray.size == 3) {
-      "Invalid IdToken string"
-    }
+    require(tokenArray.size == 3) { "Invalid IdToken string" }
 
     this.token = token
     this.header = tokenArray[0]
@@ -103,15 +101,19 @@ class AuthenticationToken : Parcelable {
     return 0
   }
 
-  companion object CREATOR : Parcelable.Creator<AuthenticationToken> {
-    @JvmStatic
-    override fun createFromParcel(parcel: Parcel): AuthenticationToken {
-      return AuthenticationToken(parcel)
-    }
+  companion object {
+    const val AUTHENTICATION_TOKEN_KEY = "authentication_token"
 
-    @JvmStatic
-    override fun newArray(size: Int): Array<AuthenticationToken?> {
-      return arrayOfNulls(size)
-    }
+    @JvmField
+    val CREATOR: Parcelable.Creator<AuthenticationToken> =
+        object : Parcelable.Creator<AuthenticationToken> {
+          override fun createFromParcel(source: Parcel): AuthenticationToken {
+            return AuthenticationToken(source)
+          }
+
+          override fun newArray(size: Int): Array<AuthenticationToken?> {
+            return arrayOfNulls(size)
+          }
+        }
   }
 }

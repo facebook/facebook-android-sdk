@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import com.facebook.AccessToken;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
 import java.util.Date;
@@ -62,41 +63,23 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   @Test
   public void testProxyAuthHandlesSuccess() {
-    Bundle bundle = new Bundle();
-    bundle.putLong("expires_in", EXPIRES_IN_DELTA);
-    bundle.putString("access_token", ACCESS_TOKEN);
-    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+    testProxyAuthHandlesSuccess(AUTHENTICATION_TOKEN);
+  }
 
-    Intent intent = new Intent();
-    intent.putExtras(bundle);
+  @Test
+  public void testProxyAuthHandlesSuccessWithEmptyAuthenticationToken() {
+    LoginClient.Result result = testProxyAuthHandlesSuccess("");
 
-    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+    AuthenticationToken authenticationToken = result.authenticationToken;
+    assertEquals(authenticationToken, null);
+  }
 
-    LoginClient.Request request = createRequest();
-    when(mockLoginClient.getPendingRequest()).thenReturn(request);
+  @Test
+  public void testProxyAuthHandlesSuccessWithNoAuthenticationToken() {
+    LoginClient.Result result = testProxyAuthHandlesSuccess(null);
 
-    try {
-      handler.tryAuthorize(request);
-    } catch (NullPointerException e) {
-      // continue
-    }
-
-    handler.onActivityResult(0, Activity.RESULT_OK, intent);
-
-    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
-        ArgumentCaptor.forClass(LoginClient.Result.class);
-    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
-
-    LoginClient.Result result = resultArgumentCaptor.getValue();
-
-    assertNotNull(result);
-    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
-
-    AccessToken token = result.token;
-    assertNotNull(token);
-    assertEquals(ACCESS_TOKEN, token.getToken());
-    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
-    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+    AuthenticationToken authenticationToken = result.authenticationToken;
+    assertEquals(authenticationToken, null);
   }
 
   @Test
@@ -181,5 +164,46 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     verify(mockLoginClient, never()).completeAndValidate(any(LoginClient.Result.class));
     verify(mockLoginClient, times(1)).tryNextHandler();
+  }
+
+  private LoginClient.Result testProxyAuthHandlesSuccess(String authenticationString) {
+    Bundle bundle = new Bundle();
+    bundle.putLong("expires_in", EXPIRES_IN_DELTA);
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("authentication_token", authenticationString);
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+
+    Intent intent = new Intent();
+    intent.putExtras(bundle);
+
+    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+
+    LoginClient.Request request = createRequest();
+    when(mockLoginClient.getPendingRequest()).thenReturn(request);
+
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
+    }
+
+    handler.onActivityResult(0, Activity.RESULT_OK, intent);
+
+    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+
+    LoginClient.Result result = resultArgumentCaptor.getValue();
+
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+
+    AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+
+    return result;
   }
 }

@@ -26,8 +26,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 import android.util.Log;
+import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookException;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
@@ -142,6 +144,26 @@ abstract class LoginMethodHandler implements Parcelable {
         new Date(),
         dataAccessExpirationTime,
         graphDomain);
+  }
+
+  /**
+   * WARNING: This feature is currently in development and not intended for external usage.
+   *
+   * @param bundle
+   * @return AuthenticationToken
+   * @throws FacebookException
+   */
+  @Nullable
+  public static AuthenticationToken createAuthenticationTokenFromWebBundle(Bundle bundle)
+      throws FacebookException {
+    String authenticationTokenString =
+        bundle.getString(AuthenticationToken.AUTHENTICATION_TOKEN_KEY);
+
+    if (Utility.isNullOrEmpty(authenticationTokenString)) {
+      return null;
+    }
+
+    return new AuthenticationToken(authenticationTokenString);
   }
 
   public static AccessToken createAccessTokenFromWebBundle(

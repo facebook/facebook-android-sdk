@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
+import com.facebook.AuthenticationToken;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -705,6 +706,7 @@ class LoginClient implements Parcelable {
 
     final Code code;
     @Nullable final AccessToken token;
+    @Nullable final AuthenticationToken authenticationToken;
     @Nullable final String errorMessage;
     @Nullable final String errorCode;
     final Request request;
@@ -717,9 +719,20 @@ class LoginClient implements Parcelable {
         @Nullable AccessToken token,
         @Nullable String errorMessage,
         @Nullable String errorCode) {
+      this(request, code, token, null, errorMessage, errorCode);
+    }
+
+    Result(
+        Request request,
+        Code code,
+        @Nullable AccessToken accessToken,
+        @Nullable AuthenticationToken authenticationToken,
+        @Nullable String errorMessage,
+        @Nullable String errorCode) {
       Validate.notNull(code, "code");
       this.request = request;
-      this.token = token;
+      this.token = accessToken;
+      this.authenticationToken = authenticationToken;
       this.errorMessage = errorMessage;
       this.code = code;
       this.errorCode = errorCode;
@@ -727,6 +740,11 @@ class LoginClient implements Parcelable {
 
     static Result createTokenResult(Request request, AccessToken token) {
       return new Result(request, Code.SUCCESS, token, null, null);
+    }
+
+    static Result createCompositeTokenResult(
+        Request request, AccessToken accessToken, AuthenticationToken authenticationToken) {
+      return new Result(request, Code.SUCCESS, accessToken, authenticationToken, null, null);
     }
 
     static Result createCancelResult(Request request, @Nullable String message) {
@@ -750,6 +768,7 @@ class LoginClient implements Parcelable {
     private Result(Parcel parcel) {
       this.code = Code.valueOf(parcel.readString());
       this.token = parcel.readParcelable(AccessToken.class.getClassLoader());
+      this.authenticationToken = parcel.readParcelable(AuthenticationToken.class.getClassLoader());
       this.errorMessage = parcel.readString();
       this.errorCode = parcel.readString();
       this.request = parcel.readParcelable(Request.class.getClassLoader());
@@ -766,6 +785,7 @@ class LoginClient implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
       dest.writeString(code.name());
       dest.writeParcelable(token, flags);
+      dest.writeParcelable(authenticationToken, flags);
       dest.writeString(errorMessage);
       dest.writeString(errorCode);
       dest.writeParcelable(request, flags);

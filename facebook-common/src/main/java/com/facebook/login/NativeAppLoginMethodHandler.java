@@ -28,6 +28,7 @@ import android.os.Parcel;
 import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
@@ -119,7 +120,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
       AccessToken token =
           createAccessTokenFromWebBundle(
               request.getPermissions(), extras, getTokenSource(), request.getApplicationId());
-      completeLogin(LoginClient.Result.createTokenResult(request, token));
+      AuthenticationToken authenticationToken = createAuthenticationTokenFromWebBundle(extras);
+      completeLogin(
+          LoginClient.Result.createCompositeTokenResult(request, token, authenticationToken));
     } catch (FacebookException ex) {
       completeLogin(LoginClient.Result.createErrorResult(request, null, ex.getMessage()));
     }
