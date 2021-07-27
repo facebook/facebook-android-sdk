@@ -18,12 +18,36 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.bolts;
+package com.facebook.bolts
 
-import com.facebook.FacebookPowerMockTestCase;
-import org.junit.Test;
+import android.content.Intent
+import android.os.Bundle
+import com.facebook.FacebookTestCase
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 
-public class AppLinksTest extends FacebookPowerMockTestCase {
+class AppLinksTest : FacebookTestCase() {
+  companion object {
+    private const val TEST_KEY = "test key"
+    private const val TEST_DATA = "test value"
+  }
+
   @Test
-  public void testGetAppLinkData() throws Exception {}
+  fun `test get app link data`() {
+    val intent = Intent()
+    val bundle = Bundle()
+    val extraBundle = Bundle()
+    extraBundle.putString(TEST_KEY, TEST_DATA)
+    bundle.putBundle(AppLinks.KEY_NAME_EXTRAS, extraBundle)
+    intent.putExtra(AppLinks.KEY_NAME_APPLINK_DATA, bundle)
+
+    assertThat(AppLinks.getAppLinkData(intent)).isEqualTo(bundle)
+    assertThat(AppLinks.getAppLinkExtras(intent)?.getString(TEST_KEY)).isEqualTo(TEST_DATA)
+  }
+
+  @Test
+  fun `test empty intent won't crash`() {
+    val intent = Intent()
+    assertThat(AppLinks.getAppLinkExtras(intent)).isNull()
+  }
 }
