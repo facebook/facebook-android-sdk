@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoHandleExceptions
 final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChangeListener {
-  private static final String TAG = MetadataViewObserver.class.getCanonicalName();
   private static final int MAX_TEXT_LENGTH = 100;
 
   private static final Map<Integer, MetadataViewObserver> observers = new HashMap<>();
