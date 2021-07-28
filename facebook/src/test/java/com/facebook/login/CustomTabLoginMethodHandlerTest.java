@@ -41,6 +41,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
@@ -87,29 +88,23 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   @Test
   public void testCustomTabHandlesSuccess() {
-    mockCustomTabRedirectActivity(true);
-    CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+    testCustomTabHandles(AUTHENTICATION_TOKEN);
+  }
 
-    final Bundle bundle = new Bundle();
-    bundle.putString("access_token", ACCESS_TOKEN);
-    bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
-    bundle.putString("code", "Something else");
-    bundle.putString("signed_request", SIGNED_REQUEST_STR);
-    handler.onComplete(request, bundle, null);
+  @Test
+  public void testCustomTabHandlesSuccessWithEmptyAuthenticationToken() {
+    LoginClient.Result result = testCustomTabHandles("");
 
-    final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
-        ArgumentCaptor.forClass(LoginClient.Result.class);
-    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+    AuthenticationToken authenticationToken = result.authenticationToken;
+    assertEquals(null, authenticationToken);
+  }
 
-    final LoginClient.Result result = resultArgumentCaptor.getValue();
-    assertNotNull(result);
-    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+  @Test
+  public void testCustomTabHandlesSuccessWithNoAuthenticationToken() {
+    LoginClient.Result result = testCustomTabHandles(null);
 
-    final AccessToken token = result.token;
-    assertNotNull(token);
-    assertEquals(ACCESS_TOKEN, token.getToken());
-    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
-    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+    AuthenticationToken authenticationToken = result.authenticationToken;
+    assertEquals(null, authenticationToken);
   }
 
   @Test
@@ -249,5 +244,34 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     mockStatic(Validate.class);
     when(Validate.hasCustomTabRedirectActivity(nullable(Context.class), nullable(String.class)))
         .thenReturn(hasActivity);
+  }
+
+  private LoginClient.Result testCustomTabHandles(String authenticationTokenString) {
+    mockCustomTabRedirectActivity(true);
+    CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
+    final Bundle bundle = new Bundle();
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("authentication_token", authenticationTokenString);
+    bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
+    bundle.putString("code", "Something else");
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+    handler.onComplete(request, bundle, null);
+
+    final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+
+    final LoginClient.Result result = resultArgumentCaptor.getValue();
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+
+    final AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+
+    return result;
   }
 }

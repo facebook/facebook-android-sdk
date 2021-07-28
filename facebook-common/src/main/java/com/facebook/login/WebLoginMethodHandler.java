@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
@@ -162,7 +163,10 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         AccessToken token =
             createAccessTokenFromWebBundle(
                 request.getPermissions(), values, getTokenSource(), request.getApplicationId());
-        outcome = LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token);
+        AuthenticationToken authenticationToken = createAuthenticationTokenFromWebBundle(values);
+        outcome =
+            LoginClient.Result.createCompositeTokenResult(
+                loginClient.getPendingRequest(), token, authenticationToken);
 
         // Ensure any cookies set by the dialog are saved
         // This is to work around a bug where CookieManager may fail to instantiate if

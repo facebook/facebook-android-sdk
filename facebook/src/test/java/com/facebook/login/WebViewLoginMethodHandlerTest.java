@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookSdk;
@@ -59,6 +60,7 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
   public void testWebViewHandlesSuccess() {
     Bundle bundle = new Bundle();
     bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("authentication_token", AUTHENTICATION_TOKEN);
     bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
     bundle.putString("code", "Something else");
     bundle.putString("signed_request", SIGNED_REQUEST_STR);
@@ -81,6 +83,9 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
     assertEquals(ACCESS_TOKEN, token.getToken());
     assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
     TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+
+    AuthenticationToken authenticationToken = result.authenticationToken;
+    assertEquals(AUTHENTICATION_TOKEN, authenticationToken.getToken());
   }
 
   @Test
