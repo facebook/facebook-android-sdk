@@ -15,11 +15,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.internal.WhiteboxImpl
 
-@PrepareForTest(
-    MetadataViewObserver::class,
-    FacebookSdk::class,
-    AttributionIdentifiers::class,
-    FetchedAppSettingsManager::class)
+@PrepareForTest(FacebookSdk::class, AttributionIdentifiers::class, FetchedAppSettingsManager::class)
 class MetadataIndexerTest : FacebookPowerMockTestCase() {
   companion object {
     private const val VALID_RULES_JSON =
@@ -29,15 +25,16 @@ class MetadataIndexerTest : FacebookPowerMockTestCase() {
   private lateinit var mockActivity: Activity
   private lateinit var mockContext: Context
   private lateinit var mockSettings: FetchedAppSettings
-
+  private lateinit var mockCompanion: MetadataViewObserver.Companion
   @Before
   fun init() {
-
     mockActivity = mock()
     mockContext = mock()
     mockSettings = mock()
+    mockCompanion = mock()
 
-    PowerMockito.mockStatic(MetadataViewObserver::class.java)
+    WhiteboxImpl.setInternalState(MetadataViewObserver::class.java, "Companion", mockCompanion)
+
     PowerMockito.mockStatic(AttributionIdentifiers::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
@@ -54,7 +51,7 @@ class MetadataIndexerTest : FacebookPowerMockTestCase() {
   fun testOnActivityResumedWhenDisable() {
     WhiteboxImpl.setInternalState(MetadataIndexer::class.java, "enabled", false)
     var calledTimes = 0
-    PowerMockito.`when`(MetadataViewObserver.startTrackingActivity(mockActivity)).thenAnswer {
+    PowerMockito.`when`(mockCompanion.startTrackingActivity(mockActivity)).thenAnswer {
       calledTimes++
       Unit
     }
@@ -65,7 +62,7 @@ class MetadataIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun testOnActivityResumedWhenEnable() {
     var calledTimes = 0
-    PowerMockito.`when`(MetadataViewObserver.startTrackingActivity(mockActivity)).thenAnswer {
+    PowerMockito.`when`(mockCompanion.startTrackingActivity(mockActivity)).thenAnswer {
       calledTimes++
       Unit
     }

@@ -16,21 +16,23 @@ import org.powermock.reflect.Whitebox
 class MetadataViewObserverTest : FacebookPowerMockTestCase() {
   private lateinit var mockActivity: Activity
   private lateinit var mockObserver: MetadataViewObserver
+
   @Before
   fun init() {
     mockActivity = mock()
     mockObserver = mock()
     PowerMockito.whenNew(MetadataViewObserver::class.java)
-        .withArguments(mockActivity)
+        .withAnyArguments()
         .thenReturn(mockObserver)
-    Whitebox.setInternalState(
-        mockObserver, "activityWeakReference", WeakReference<Activity>(mockActivity))
+    Whitebox.setInternalState(mockObserver, "activityWeakReference", WeakReference(mockActivity))
   }
+
   @Test
   fun testStartTrackingActivity() {
     Whitebox.setInternalState(mockObserver, "isTracking", AtomicBoolean(false))
     Whitebox.setInternalState(
         MetadataViewObserver::class.java, "observers", hashMapOf<Integer, MetadataViewObserver>())
+
     MetadataViewObserver.startTrackingActivity(mockActivity)
     val observers =
         Whitebox.getInternalState<Map<Integer, MetadataViewObserver>>(

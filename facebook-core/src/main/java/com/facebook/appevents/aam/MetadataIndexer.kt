@@ -38,7 +38,7 @@ object MetadataIndexer {
   private var enabled = false
   @UiThread
   @JvmStatic
-  fun onActivityResumed(activity: Activity?) {
+  fun onActivityResumed(activity: Activity) {
     try {
       if (!enabled || getRules().isEmpty()) {
         return
