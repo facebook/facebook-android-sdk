@@ -23,8 +23,6 @@ import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 import android.text.InputType;
 import androidx.annotation.Nullable;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -36,7 +34,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 final class FeatureExtractor {
   private static final int NUM_OF_FEATURES = 30;
