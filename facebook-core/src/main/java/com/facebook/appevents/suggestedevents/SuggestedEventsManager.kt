@@ -116,12 +116,12 @@ object SuggestedEventsManager {
   }
 
   @JvmStatic
-  fun isProductionEvents(event: String): Boolean {
+  internal fun isProductionEvents(event: String): Boolean {
     return productionEvents.contains(event)
   }
 
   @JvmStatic
-  fun isEligibleEvents(event: String): Boolean {
+  internal fun isEligibleEvents(event: String): Boolean {
     return eligibleEvents.contains(event)
   }
 }
