@@ -28,12 +28,15 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.ServerProtocol.getGraphUrlBase
 import com.facebook.internal.Utility
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.support.membermodification.MemberMatcher
@@ -173,6 +176,46 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
         .toReturn(false)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
     assertThat(FacebookSdk.isFullyInitialized()).isFalse
+  }
+
+  @Test
+  fun `test set data processing options will update shared preferences`() {
+    val expectedDataProcessingOptions = arrayOf("option1", "option2")
+    val expectedDataProcessingOptionsJSONObject = JSONObject()
+    expectedDataProcessingOptionsJSONObject.put(
+        FacebookSdk.DATA_PROCESSION_OPTIONS, JSONArray(expectedDataProcessingOptions.toList()))
+    expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_COUNTRY, 1)
+    expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_STATE, 10)
+    val applicationContext = mock<Context>()
+    val mockSharedPreference = MockSharedPreference()
+    whenever(applicationContext.getSharedPreferences(any<String>(), any<Int>()))
+        .thenReturn(mockSharedPreference)
+    FacebookSdk.setApplicationId(TEST_APPLICATION_ID)
+    Whitebox.setInternalState(FacebookSdk::class.java, "applicationContext", applicationContext)
+
+    FacebookSdk.setDataProcessingOptions(expectedDataProcessingOptions, 1, 10)
+
+    assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, ""))
+        .isEqualTo(expectedDataProcessingOptionsJSONObject.toString())
+  }
+
+  @Test
+  fun `test set data processing options to null`() {
+    val expectedDataProcessingOptionsJSONObject = JSONObject()
+    expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS, JSONArray())
+    expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_COUNTRY, 0)
+    expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_STATE, 0)
+    val applicationContext = mock<Context>()
+    val mockSharedPreference = MockSharedPreference()
+    whenever(applicationContext.getSharedPreferences(any<String>(), any<Int>()))
+        .thenReturn(mockSharedPreference)
+    FacebookSdk.setApplicationId(TEST_APPLICATION_ID)
+    Whitebox.setInternalState(FacebookSdk::class.java, "applicationContext", applicationContext)
+
+    FacebookSdk.setDataProcessingOptions(null)
+
+    assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, ""))
+        .isEqualTo(expectedDataProcessingOptionsJSONObject.toString())
   }
 
   companion object {
