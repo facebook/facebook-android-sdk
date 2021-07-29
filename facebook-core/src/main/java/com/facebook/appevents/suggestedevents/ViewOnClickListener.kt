@@ -113,7 +113,7 @@ private constructor(hostView: View, rootView: View, activityName: String) : View
     private val viewsAttachedListener: MutableSet<Int> = HashSet()
 
     @JvmStatic
-    fun attachListener(hostView: View, rootView: View, activityName: String) {
+    internal fun attachListener(hostView: View, rootView: View, activityName: String) {
       val key = hostView.hashCode()
       if (!viewsAttachedListener.contains(key)) {
         ViewHierarchy.setOnClickListener(

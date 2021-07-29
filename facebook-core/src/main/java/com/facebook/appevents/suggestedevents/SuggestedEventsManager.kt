@@ -96,7 +96,7 @@ object SuggestedEventsManager {
   }
 
   @JvmStatic
-  fun trackActivity(activity: Activity?) {
+  fun trackActivity(activity: Activity) {
     try {
       if (enabled.get() &&
           isInitialized() &&
