@@ -28,15 +28,12 @@ import android.view.ViewTreeObserver;
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
   private static final String TAG = ViewObserver.class.getCanonicalName();
@@ -82,7 +79,6 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
     if (observer.isAlive()) {
       observer.addOnGlobalLayoutListener(this);
       process();
-      Activity activity = activityWeakReference.get();
     }
   }
 
