@@ -26,6 +26,8 @@ import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FacebookRequestErrorClassification.Companion.defaultErrorClassification
 import com.facebook.internal.FetchedAppSettingsManager.getAppSettingsWithoutQuery
 import com.facebook.internal.Utility.getStringPropertyAsJSON
+import com.facebook.internal.qualityvalidation.Excuse
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations
 import java.net.HttpURLConnection
 import org.json.JSONException
 import org.json.JSONObject
@@ -38,6 +40,7 @@ import org.json.JSONObject
  * [
  * https://developers.facebook.com/docs/reference/api/errors/](https://developers.facebook.com/docs/reference/api/errors/)
  */
+@ExcusesForDesignViolations(Excuse(type = "KOTLIN_JVM_FIELD", reason = "Legacy migration"))
 class FacebookRequestError
 private constructor(
     /**
@@ -385,6 +388,7 @@ private constructor(
                 ?: return defaultErrorClassification
         return appSettings.errorClassification
       }
+
     @JvmField
     val CREATOR: Parcelable.Creator<FacebookRequestError> =
         object : Parcelable.Creator<FacebookRequestError> {
