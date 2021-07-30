@@ -1064,7 +1064,7 @@ object Utility {
   }
 
   @JvmStatic
-  fun getGraphDomainFromTokenDomain(tokenGraphDomain: String?): String? {
+  fun getGraphDomainFromTokenDomain(tokenGraphDomain: String?): String {
     val facebookDomain = FacebookSdk.getFacebookDomain()
     if (tokenGraphDomain == null) {
       return facebookDomain

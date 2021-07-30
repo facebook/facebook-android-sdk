@@ -100,7 +100,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testLoadDefaults() {
     // Set to null since the value might have been set by another test
-    FacebookSdk.setApplicationId(null)
+    Whitebox.setInternalState(FacebookSdk::class.java, "applicationId", null as String?)
     MemberModifier.stub<Any>(MemberMatcher.method(FacebookSdk::class.java, "isInitialized"))
         .toReturn(true)
     FacebookSdk.loadDefaultsFromMetadata(mockContextWithAppIdAndClientToken())
@@ -169,7 +169,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testNotFullyInitialize() {
     FacebookSdk.setApplicationId("123456789")
-    val field = FacebookSdk::class.java.getDeclaredField("sdkFullyInitialized")
+    val field = FacebookSdk::class.java.getDeclaredField("isFullyInitialized")
     field.isAccessible = true
     field[null] = false
     MemberModifier.stub<Any>(MemberMatcher.method(FacebookSdk::class.java, "getAutoInitEnabled"))

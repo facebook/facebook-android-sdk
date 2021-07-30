@@ -63,7 +63,7 @@ public class InAppPurchaseLoggerManagerTest extends FacebookPowerMockTestCase {
 
     mockPrefs = Mockito.mock(SharedPreferences.class);
     Context context = Mockito.mock(Context.class);
-    Mockito.when(FacebookSdk.getApplicationContext()).thenReturn(context);
+    Whitebox.setInternalState(FacebookSdk.class, "applicationContext", context);
     Mockito.when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(mockPrefs);
     SharedPreferences.Editor editor = Mockito.mock(SharedPreferences.Editor.class);
     Whitebox.setInternalState(InAppPurchaseLoggerManager.class, "sharedPreferences", mockPrefs);

@@ -16,6 +16,8 @@ class FacebookInitProvider : ContentProvider() {
   @SuppressWarnings("deprecation")
   override fun onCreate(): Boolean {
     try {
+      val context = this.context
+      requireNotNull(context)
       FacebookSdk.sdkInitialize(context)
     } catch (ex: Exception) {
       Log.i(TAG, "Failed to auto initialize the Facebook SDK", ex)

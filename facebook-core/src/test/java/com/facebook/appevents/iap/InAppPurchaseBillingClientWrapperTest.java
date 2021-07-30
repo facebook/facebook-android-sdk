@@ -67,7 +67,7 @@ public class InAppPurchaseBillingClientWrapperTest extends FacebookPowerMockTest
     spy(InAppPurchaseBillingClientWrapper.class);
 
     Context mockContext = Mockito.mock(Context.class);
-    when(FacebookSdk.getApplicationContext()).thenReturn(mockContext);
+    Whitebox.setInternalState(FacebookSdk.class, "applicationContext", mockContext);
     inAppPurchaseBillingClientWrapper = Mockito.mock(InAppPurchaseBillingClientWrapper.class);
 
     when(InAppPurchaseBillingClientWrapper.getOrCreateInstance(FacebookSdk.getApplicationContext()))

@@ -39,6 +39,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.math.BigDecimal
 import java.util.Currency
 import java.util.Locale
@@ -205,6 +206,7 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
   @Test
   fun testActivateApp() {
     val mockApplication: Application = mock()
+    whenever(mockApplication.applicationContext).thenReturn(mockApplication)
     PowerMockito.`when`(FacebookSdk.publishInstallAsync(any(), any())).thenCallRealMethod()
     AppEventsLogger.activateApp(mockApplication)
     verify(mockApplication, times(1)).registerActivityLifecycleCallbacks(any())
