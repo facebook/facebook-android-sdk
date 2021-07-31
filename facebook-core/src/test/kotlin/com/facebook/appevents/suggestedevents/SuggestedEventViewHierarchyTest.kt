@@ -20,7 +20,6 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
 import org.mockito.Mockito.mock
 import org.powermock.api.mockito.PowerMockito
-import org.powermock.api.mockito.PowerMockito.*
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.Robolectric
 
