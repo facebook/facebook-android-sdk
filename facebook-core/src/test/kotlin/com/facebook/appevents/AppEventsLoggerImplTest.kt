@@ -19,7 +19,9 @@
  */
 package com.facebook.appevents
 
+import android.os.Build
 import android.os.Bundle
+import android.webkit.WebView
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.GraphRequestCreator
@@ -36,6 +38,7 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import java.math.BigDecimal
 import java.util.Currency
@@ -427,6 +430,22 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         "BRAND",
         mockParams)
     assertThat(appEventQueueCalledTimes).isEqualTo(0)
+  }
+
+  @Test
+  fun `test augmentWebView will run on Android api 17+`() {
+    Whitebox.setInternalState(Build.VERSION::class.java, "RELEASE", "4.2.0")
+    val mockWebView = mock<WebView>()
+    AppEventsLoggerImpl.augmentWebView(mockWebView, RuntimeEnvironment.application)
+    verify(mockWebView).addJavascriptInterface(any(), any())
+  }
+
+  @Test
+  fun `test augmentWebView will not run on Android api less than 17 `() {
+    Whitebox.setInternalState(Build.VERSION::class.java, "RELEASE", "4.0.0")
+    val mockWebView = mock<WebView>()
+    AppEventsLoggerImpl.augmentWebView(mockWebView, RuntimeEnvironment.application)
+    verify(mockWebView, never()).addJavascriptInterface(any(), any())
   }
 
   companion object {

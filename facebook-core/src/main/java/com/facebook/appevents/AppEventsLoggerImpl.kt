@@ -522,7 +522,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
 
     @JvmStatic
     fun augmentWebView(webView: WebView, context: Context?) {
-      val parts = Build.VERSION.RELEASE.split("\\.").toTypedArray()
+      val parts = Build.VERSION.RELEASE.split(".").toTypedArray()
       val majorRelease = if (parts.isNotEmpty()) parts[0].toInt() else 0
       val minorRelease = if (parts.size > 1) parts[1].toInt() else 0
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ||
