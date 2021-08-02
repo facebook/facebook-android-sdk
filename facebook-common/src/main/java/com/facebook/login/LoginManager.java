@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
+import com.facebook.AuthenticationToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookAuthorizationException;
@@ -208,7 +209,8 @@ public class LoginManager {
 
   boolean onActivityResult(int resultCode, Intent data, FacebookCallback<LoginResult> callback) {
     FacebookException exception = null;
-    AccessToken newToken = null;
+    AccessToken accessToken = null;
+    AuthenticationToken authenticationToken = null;
     LoginClient.Result.Code code = LoginClient.Result.Code.ERROR;
     Map<String, String> loggingExtras = null;
     LoginClient.Request originalRequest = null;
@@ -221,7 +223,8 @@ public class LoginManager {
         code = result.code;
         if (resultCode == Activity.RESULT_OK) {
           if (result.code == LoginClient.Result.Code.SUCCESS) {
-            newToken = result.token;
+            accessToken = result.token;
+            authenticationToken = result.authenticationToken;
           } else {
             exception = new FacebookAuthorizationException(result.errorMessage);
           }
@@ -235,7 +238,7 @@ public class LoginManager {
       code = LoginClient.Result.Code.CANCEL;
     }
 
-    if (exception == null && newToken == null && !isCanceled) {
+    if (exception == null && accessToken == null && !isCanceled) {
       exception = new FacebookException("Unexpected call to LoginManager.onActivityResult");
     }
 
@@ -244,7 +247,7 @@ public class LoginManager {
     logCompleteLogin(
         context, code, loggingExtras, exception, wasLoginActivityTried, originalRequest);
 
-    finishLogin(newToken, originalRequest, exception, isCanceled, callback);
+    finishLogin(accessToken, authenticationToken, originalRequest, exception, isCanceled, callback);
 
     return true;
   }
@@ -869,7 +872,9 @@ public class LoginManager {
   }
 
   static LoginResult computeLoginResult(
-      final LoginClient.Request request, final AccessToken newToken) {
+      final LoginClient.Request request,
+      final AccessToken newToken,
+      @Nullable final AuthenticationToken newIdToken) {
     Set<String> requestedPermissions = request.getPermissions();
     Set<String> grantedPermissions = new HashSet<String>(newToken.getPermissions());
 
@@ -881,11 +886,12 @@ public class LoginManager {
 
     Set<String> deniedPermissions = new HashSet<String>(requestedPermissions);
     deniedPermissions.removeAll(grantedPermissions);
-    return new LoginResult(newToken, grantedPermissions, deniedPermissions);
+    return new LoginResult(newToken, newIdToken, grantedPermissions, deniedPermissions);
   }
 
   private void finishLogin(
       AccessToken newToken,
+      @Nullable AuthenticationToken newIdToken,
       LoginClient.Request origRequest,
       FacebookException exception,
       boolean isCanceled,
@@ -896,7 +902,8 @@ public class LoginManager {
     }
 
     if (callback != null) {
-      LoginResult loginResult = newToken != null ? computeLoginResult(origRequest, newToken) : null;
+      LoginResult loginResult =
+          newToken != null ? computeLoginResult(origRequest, newToken, newIdToken) : null;
       // If there are no granted permissions, the operation is treated as cancel.
       if (isCanceled
           || (loginResult != null && loginResult.getRecentlyGrantedPermissions().size() == 0)) {

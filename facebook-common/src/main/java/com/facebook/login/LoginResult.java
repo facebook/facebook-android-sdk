@@ -20,12 +20,15 @@
 
 package com.facebook.login;
 
+import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
+import com.facebook.AuthenticationToken;
 import java.util.Set;
 
 /** This class shows the results of a login operation. */
 public class LoginResult {
   private final AccessToken accessToken;
+  private final AuthenticationToken authenticationToken;
   private final Set<String> recentlyGrantedPermissions;
   private final Set<String> recentlyDeniedPermissions;
 
@@ -40,7 +43,24 @@ public class LoginResult {
       AccessToken accessToken,
       Set<String> recentlyGrantedPermissions,
       Set<String> recentlyDeniedPermissions) {
+    this(accessToken, null, recentlyGrantedPermissions, recentlyDeniedPermissions);
+  }
+
+  /**
+   * The constructor.
+   *
+   * @param accessToken The new access token.
+   * @param authenticationToken The new authentication token
+   * @param recentlyGrantedPermissions The recently granted permissions.
+   * @param recentlyDeniedPermissions The recently denied permissions.
+   */
+  public LoginResult(
+      AccessToken accessToken,
+      @Nullable AuthenticationToken authenticationToken,
+      Set<String> recentlyGrantedPermissions,
+      Set<String> recentlyDeniedPermissions) {
     this.accessToken = accessToken;
+    this.authenticationToken = authenticationToken;
     this.recentlyGrantedPermissions = recentlyGrantedPermissions;
     this.recentlyDeniedPermissions = recentlyDeniedPermissions;
   }
@@ -52,6 +72,15 @@ public class LoginResult {
    */
   public AccessToken getAccessToken() {
     return accessToken;
+  }
+
+  /**
+   * Getter for the new AuthenticationToken.
+   *
+   * @return the new id token or AuthenticationToken.
+   */
+  public AuthenticationToken getAuthenticationToken() {
+    return authenticationToken;
   }
 
   /**

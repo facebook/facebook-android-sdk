@@ -23,6 +23,7 @@ package com.facebook.login;
 import static org.junit.Assert.*;
 
 import com.facebook.AccessToken;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookTestCase;
 import java.util.HashSet;
 import java.util.Set;
@@ -56,8 +57,10 @@ public class LoginResultTest extends FacebookTestCase {
     LoginClient.Request request = createRequest(EMAIL_SET, false);
     AccessToken accessToken =
         createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(), new HashSet<String>());
-    LoginResult result = LoginManager.computeLoginResult(request, accessToken);
+    AuthenticationToken authenticationToken = createAuthenticationToken();
+    LoginResult result = LoginManager.computeLoginResult(request, accessToken, authenticationToken);
     assertEquals(accessToken, result.getAccessToken());
+    assertEquals(authenticationToken, result.getAuthenticationToken());
     assertEquals(PROFILE_EMAIL_SET, result.getRecentlyGrantedPermissions());
     assertEquals(0, result.getRecentlyDeniedPermissions().size());
   }
@@ -67,8 +70,10 @@ public class LoginResultTest extends FacebookTestCase {
     LoginClient.Request request = createRequest(EMAIL_SET, true);
     AccessToken accessToken =
         createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(), new HashSet<String>());
-    LoginResult result = LoginManager.computeLoginResult(request, accessToken);
+    AuthenticationToken authenticationToken = createAuthenticationToken();
+    LoginResult result = LoginManager.computeLoginResult(request, accessToken, authenticationToken);
     assertEquals(accessToken, result.getAccessToken());
+    assertEquals(authenticationToken, result.getAuthenticationToken());
     assertEquals(EMAIL_SET, result.getRecentlyGrantedPermissions());
     assertEquals(0, result.getRecentlyDeniedPermissions().size());
   }
@@ -78,8 +83,10 @@ public class LoginResultTest extends FacebookTestCase {
     LoginClient.Request request = createRequest(LIKES_EMAIL_SET, true);
     AccessToken accessToken =
         createAccessToken(EMAIL_SET, new HashSet<String>(), new HashSet<String>());
-    LoginResult result = LoginManager.computeLoginResult(request, accessToken);
+    AuthenticationToken authenticationToken = createAuthenticationToken();
+    LoginResult result = LoginManager.computeLoginResult(request, accessToken, authenticationToken);
     assertEquals(accessToken, result.getAccessToken());
+    assertEquals(authenticationToken, result.getAuthenticationToken());
     assertEquals(EMAIL_SET, result.getRecentlyGrantedPermissions());
     assertEquals(
         new HashSet<String>() {
@@ -103,6 +110,12 @@ public class LoginResultTest extends FacebookTestCase {
         null,
         null,
         null);
+  }
+
+  private AuthenticationToken createAuthenticationToken() {
+    // TODO T93958663: Need to update this test with real valid id_token string after Validation
+    // added
+    return new AuthenticationToken("HEADER.PAYLOAD.SIGNATURE");
   }
 
   private LoginClient.Request createRequest(Set<String> permissions, boolean isRerequest) {
