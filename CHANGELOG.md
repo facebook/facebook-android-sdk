@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.2.0] - 2021-08-02
+
 ### Added
 - Access token and profile management for Instagram users, support for querying graph.instagram.com, and Instagram login dialogs. NOTE: These changes support a feature currently in alpha testing and not broadly available to developers.
+
+### Fixed
+- Fixed the crash when calling `AppEventsLoggerImpl.augmentWebView(WebView, Context)`.
 
 ## [11.1.1] - 2021-07-16
 
@@ -330,6 +335,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[11.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.1...sdk-version-11.2.0
 [11.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.0...sdk-version-11.1.1
 [11.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.0.0...sdk-version-11.1.0
 [11.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.1...sdk-version-11.0.0
@@ -371,3 +377,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+
