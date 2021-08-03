@@ -17,57 +17,38 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.iap
 
-package com.facebook.appevents.iap;
-
-import android.content.Context;
-import androidx.annotation.RestrictTo;
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import android.content.Context
+import androidx.annotation.RestrictTo
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public class InAppPurchaseAutoLogger {
-  private static final String BILLING_CLIENT_PURCHASE_NAME =
-      "com.android.billingclient.api.Purchase";
+object InAppPurchaseAutoLogger {
+  private const val BILLING_CLIENT_PURCHASE_NAME = "com.android.billingclient.api.Purchase"
 
-  public static void startIapLogging(Context context) {
+  @JvmStatic
+  fun startIapLogging(context: Context?) {
     // check if the app has IAP with Billing Lib
     if (InAppPurchaseUtils.getClass(BILLING_CLIENT_PURCHASE_NAME) == null) {
-      return;
+      return
     }
-    final InAppPurchaseBillingClientWrapper billingClientWrapper =
-        InAppPurchaseBillingClientWrapper.getOrCreateInstance(context);
-    if (billingClientWrapper == null) {
-      return;
-    }
-
+    val billingClientWrapper =
+        InAppPurchaseBillingClientWrapper.getOrCreateInstance(context) ?: return
     if (InAppPurchaseBillingClientWrapper.isServiceConnected.get()) {
       if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
-        billingClientWrapper.queryPurchaseHistory(
-            "inapp",
-            new Runnable() {
-              @Override
-              public void run() {
-                logPurchase();
-              }
-            });
+        billingClientWrapper.queryPurchaseHistory("inapp") { logPurchase() }
       } else {
-        billingClientWrapper.queryPurchase(
-            "inapp",
-            new Runnable() {
-              @Override
-              public void run() {
-                logPurchase();
-              }
-            });
+        billingClientWrapper.queryPurchase("inapp") { logPurchase() }
       }
     }
   }
 
-  private static void logPurchase() {
+  private fun logPurchase() {
     InAppPurchaseLoggerManager.filterPurchaseLogging(
         InAppPurchaseBillingClientWrapper.purchaseDetailsMap,
-        InAppPurchaseBillingClientWrapper.skuDetailsMap);
-    InAppPurchaseBillingClientWrapper.purchaseDetailsMap.clear();
+        InAppPurchaseBillingClientWrapper.skuDetailsMap)
+    InAppPurchaseBillingClientWrapper.purchaseDetailsMap.clear()
   }
 }
