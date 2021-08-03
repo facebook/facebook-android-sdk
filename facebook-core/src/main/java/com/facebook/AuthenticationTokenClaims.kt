@@ -110,7 +110,7 @@ class AuthenticationTokenClaims : Parcelable {
   val userLink: String?
 
   constructor(encodedClaims: String) {
-    Validate.notEmpty(encodedClaims, "token")
+    Validate.notEmpty(encodedClaims, "encodedClaims")
 
     val decodedBytes = Base64.decode(encodedClaims, Base64.DEFAULT)
     val claimsString = String(decodedBytes)
