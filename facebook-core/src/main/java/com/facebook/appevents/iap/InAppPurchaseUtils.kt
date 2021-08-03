@@ -17,23 +17,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.iap
 
-package com.facebook.appevents.iap;
-
-import androidx.annotation.Nullable;
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
 
 @AutoHandleExceptions
-public class InAppPurchaseUtils {
+object InAppPurchaseUtils {
   /** Returns the Class object associated with the class or interface with the given string name */
-  @Nullable
-  public static Class<?> getClass(String className) {
-    try {
-      return Class.forName(className);
-    } catch (ClassNotFoundException e) {
-      return null;
+  @JvmStatic
+  fun getClass(className: String): Class<*>? {
+    return try {
+      Class.forName(className)
+    } catch (e: ClassNotFoundException) {
+      null
     }
   }
 
@@ -41,12 +39,12 @@ public class InAppPurchaseUtils {
    * Returns a Method object that reflects the specified public member method of the class or
    * interface represented by this Class object.
    */
-  @Nullable
-  public static Method getMethod(Class<?> clazz, String methodName, @Nullable Class<?>... args) {
-    try {
-      return clazz.getMethod(methodName, args);
-    } catch (NoSuchMethodException e) {
-      return null;
+  @JvmStatic
+  fun getMethod(clazz: Class<*>, methodName: String, vararg args: Class<*>?): Method? {
+    return try {
+      clazz.getMethod(methodName, *args)
+    } catch (e: NoSuchMethodException) {
+      null
     }
   }
 
@@ -54,20 +52,19 @@ public class InAppPurchaseUtils {
    * Invokes the underlying method represented by this Method object, on the specified object with
    * the specified parameters.
    */
-  @Nullable
-  public static Object invokeMethod(
-      Class<?> clazz, Method method, @Nullable Object obj, @Nullable Object... args) {
+  @JvmStatic
+  fun invokeMethod(clazz: Class<*>, method: Method, obj: Any?, vararg args: Any?): Any? {
+    var obj = obj
     if (obj != null) {
-      obj = clazz.cast(obj);
+      obj = clazz.cast(obj)
     }
-
     try {
-      return method.invoke(obj, args);
-    } catch (IllegalAccessException e) {
+      return method.invoke(obj, *args)
+    } catch (e: IllegalAccessException) {
       /* swallow */
-    } catch (InvocationTargetException e) {
+    } catch (e: InvocationTargetException) {
       /* swallow */
     }
-    return null;
+    return null
   }
 }
