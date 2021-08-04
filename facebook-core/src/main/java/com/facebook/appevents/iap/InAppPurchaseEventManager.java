@@ -28,8 +28,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @AutoHandleExceptions
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InAppPurchaseEventManager {
   private static final HashMap<String, Method> methodMap = new HashMap<>();
