@@ -77,13 +77,8 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
                 lastClearedTime))
 
     // Test duplicate purchase event can be successfully removed from purchase details map
-    val inAppPurchaseLoggerManager = InAppPurchaseLoggerManager()
-    val privateMethod =
-        InAppPurchaseLoggerManager::class.java.getDeclaredMethod(
-            "cacheDeDupPurchase", MutableMap::class.java)
-    privateMethod.isAccessible = true
-    privateMethod.invoke(inAppPurchaseLoggerManager, mockPurchaseDetailsMap)
-    Assertions.assertThat(mockPurchaseDetailsMap).isEmpty()
+    val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap)
+    Assertions.assertThat(cachedMap).isEmpty()
   }
 
   @Test
@@ -98,14 +93,11 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             "AEuhp4LDP2FB_51qEWpJOLSDtCZoq3-jLL1rRPd4V7k9c5RyHc9Phx8iYBQqvJFYhfI=" to
                 lastClearedTime))
 
-    val inAppPurchaseLoggerManager = InAppPurchaseLoggerManager()
-    val privateMethod =
-        InAppPurchaseLoggerManager::class.java.getDeclaredMethod("clearOutdatedProductInfoInCache")
-    privateMethod.isAccessible = true
-    privateMethod.invoke(inAppPurchaseLoggerManager)
+    InAppPurchaseLoggerManager.clearOutdatedProductInfoInCache()
     val cachedPurchaseMap =
         Whitebox.getInternalState<MutableMap<String, Long>>(
             InAppPurchaseLoggerManager::class.java, "cachedPurchaseMap")
+
     Assertions.assertThat(cachedPurchaseMap).isEmpty()
   }
 
@@ -130,8 +122,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testConstructLoggingReadyMap() {
-    val inAppPurchaseLoggerManager = InAppPurchaseLoggerManager()
-    val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = HashMap()
+    val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
     val purchaseDetailJson1 =
         JSONObject(
             "{\"productId\":\"espresso\",\"purchaseToken\":\"ijalfemekipiikbihpefglkb.AO-J1OxmFMlyq76sOLFnOPTowBBRM8PyXFuHzuWuHGtq7sRVilQSaAuMjkJCntoVCf8-X_TzaD1K-ec3ep4CKR6LgNKl60OTn3mQQDS-Wa8E1tnVJfFCDo4\",\"purchaseTime\":1620000000000,\"developerPayload\":null,\"packageName\":\"com.cfsample.coffeeshop\"}")
@@ -141,16 +132,11 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         JSONObject(
             "{\"productId\":\"coffee\",\"type\":\"inapp\",\"price\":\"$2.99\",\"price_amount_micros\":2990000,\"price_currency_code\":\"USD\",\"title\":\"coffee (coffeeshop)\",\"description\":\"Basic coffee \",\"skuDetailsToken\":\"AEuhp4LDP2FB_51qEWpJOLSDtCZoq3-jLL1rRPd4V7k9c5RyHc9Phx8iYBQqvJFYhfI=\"}")
     mockSkuDetailsMap["espresso"] = skuDetailJson
-    val privateMethod =
-        InAppPurchaseLoggerManager::class.java.getDeclaredMethod(
-            "constructLoggingReadyMap", MutableMap::class.java, MutableMap::class.java)
-    privateMethod.isAccessible = true
 
     // Test purchase is too old to log
     val result1 =
-        privateMethod.invoke(
-            inAppPurchaseLoggerManager, mockPurchaseDetailsMap, mockSkuDetailsMap) as
-            Map<String, String>
+        InAppPurchaseLoggerManager.constructLoggingReadyMap(
+            mockPurchaseDetailsMap, mockSkuDetailsMap)
     Assertions.assertThat(result1).isEmpty()
 
     // Test logging ready events can be added into map
@@ -161,9 +147,8 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     mockPurchaseDetailsMap.clear()
     mockPurchaseDetailsMap["espresso"] = newPurchaseDetailStringJson
     val result2 =
-        privateMethod.invoke(
-            inAppPurchaseLoggerManager, mockPurchaseDetailsMap, mockSkuDetailsMap) as
-            Map<String, String>
+        InAppPurchaseLoggerManager.constructLoggingReadyMap(
+            mockPurchaseDetailsMap, mockSkuDetailsMap)
     Assertions.assertThat(result2).isNotEmpty
   }
 }
