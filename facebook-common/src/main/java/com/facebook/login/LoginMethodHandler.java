@@ -163,7 +163,16 @@ abstract class LoginMethodHandler implements Parcelable {
       return null;
     }
 
-    return new AuthenticationToken(authenticationTokenString);
+    try {
+      /**
+       * TODO T96881697: create factory class for authentication token, remove this try-catch and
+       * replace AuthenticationToken with factory method
+       */
+      return new AuthenticationToken(authenticationTokenString);
+    } catch (Exception ex) {
+      // will remove this after factory class created
+      return null;
+    }
   }
 
   public static AccessToken createAccessTokenFromWebBundle(

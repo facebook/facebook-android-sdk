@@ -40,14 +40,11 @@ class AuthenticationToken : Parcelable {
    */
   val token: String
 
-  /** Header component of the id_token TODO: create a class for the Header */
-  val header: String
+  /** Header component of the AuthenticationToken */
+  val header: AuthenticationTokenHeader
 
-  /**
-   * Payload component of the id_token TODO: create a new class to contains the payload or list of
-   * claims
-   */
-  val payload: String
+  /** Payload component of the AuthenticationToken */
+  val claims: AuthenticationTokenClaims
 
   /** Signature component of the id_token TODO: create a new class for the signature part */
   val signature: String
@@ -61,8 +58,8 @@ class AuthenticationToken : Parcelable {
     require(tokenArray.size == 3) { "Invalid IdToken string" }
 
     this.token = token
-    this.header = tokenArray[0]
-    this.payload = tokenArray[1]
+    this.header = AuthenticationTokenHeader(tokenArray[0])
+    this.claims = AuthenticationTokenClaims(tokenArray[1])
     this.signature = tokenArray[2]
   }
 
@@ -72,8 +69,8 @@ class AuthenticationToken : Parcelable {
     this.token = checkNotNull(token)
 
     val tokenArray = token.split(".")
-    this.header = tokenArray[0]
-    this.payload = tokenArray[1]
+    this.header = AuthenticationTokenHeader(tokenArray[0])
+    this.claims = AuthenticationTokenClaims(tokenArray[1])
     this.signature = tokenArray[2]
   }
 

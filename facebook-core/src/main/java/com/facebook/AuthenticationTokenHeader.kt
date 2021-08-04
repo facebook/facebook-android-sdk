@@ -41,10 +41,10 @@ class AuthenticationTokenHeader : Parcelable {
   /** Key identifier used in identifying the key to be used to verify the signature. */
   val kid: String
 
-  constructor(headerString: String) {
-    Validate.notEmpty(headerString, "headerString")
+  constructor(encodedHeaderString: String) {
+    Validate.notEmpty(encodedHeaderString, "encodedHeaderString")
 
-    val decodedBytes = Base64.decode(headerString, Base64.DEFAULT)
+    val decodedBytes = Base64.decode(encodedHeaderString, Base64.DEFAULT)
     val claimsString = String(decodedBytes)
     val jsonObj = JSONObject(claimsString)
 

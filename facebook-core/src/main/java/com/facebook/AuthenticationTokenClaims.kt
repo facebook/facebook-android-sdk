@@ -21,12 +21,18 @@ package com.facebook
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
+import androidx.annotation.VisibleForTesting
+import com.facebook.internal.Utility.convertJSONObjectToHashMap
+import com.facebook.internal.Utility.convertJSONObjectToStringMap
+import com.facebook.internal.Utility.jsonArrayToSet
+import com.facebook.internal.Utility.jsonArrayToStringList
 import com.facebook.internal.Validate
 import java.util.Collections
 import java.util.Date
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -126,21 +132,119 @@ class AuthenticationTokenClaims : Parcelable {
     this.exp = Date(jsonObj.getLong("exp"))
     this.iat = Date(jsonObj.getLong("iat"))
     this.sub = jsonObj.getString("sub")
-    this.name = jsonObj.optString("name")
-    this.givenName = jsonObj.optString("givenName")
-    this.middleName = jsonObj.optString("middleName")
-    this.familyName = jsonObj.optString("familyName")
-    this.email = jsonObj.optString("email")
-    this.picture = jsonObj.optString("picture")
+    this.name = jsonObj.getNullableString("name")
+    this.givenName = jsonObj.getNullableString("givenName")
+    this.middleName = jsonObj.getNullableString("middleName")
+    this.familyName = jsonObj.getNullableString("familyName")
+    this.email = jsonObj.getNullableString("email")
+    this.picture = jsonObj.getNullableString("picture")
 
     // TODO: Validate and test the format of userFriends
-    this.userFriends = jsonObj.optJSONObject("userFriends") as Set<String>?
-    this.userBirthday = jsonObj.optString("userBirthday")
-    this.userAgeRange = jsonObj.optJSONObject("userAgeRange") as Map<String, Int>?
-    this.userHometown = jsonObj.optJSONObject("userHometown") as Map<String, String>?
-    this.userLocation = jsonObj.optJSONObject("userLocation") as Map<String, String>?
-    this.userGender = jsonObj.optString("userGender")
-    this.userLink = jsonObj.optString("userLink")
+    val userFriendsList = jsonObj.optJSONArray("userFriends")
+    this.userFriends =
+        if (userFriendsList == null) null
+        else Collections.unmodifiableSet(jsonArrayToSet(userFriendsList))
+    this.userBirthday = jsonObj.getNullableString("userBirthday")
+    val userAgeRangeJson = jsonObj.optJSONObject("userAgeRange")
+    this.userAgeRange =
+        if (userAgeRangeJson == null) null
+        else {
+          Collections.unmodifiableMap(
+              convertJSONObjectToHashMap(userAgeRangeJson) as Map<String, Int>?)
+        }
+    val userHometownJson = jsonObj.optJSONObject("userHometown")
+    this.userHometown =
+        if (userHometownJson == null) null
+        else Collections.unmodifiableMap(convertJSONObjectToStringMap(userHometownJson))
+    val userLocationJson = jsonObj.optJSONObject("userLocation")
+    this.userLocation =
+        if (userLocationJson == null) null
+        else Collections.unmodifiableMap(convertJSONObjectToStringMap(userLocationJson))
+    this.userGender = jsonObj.getNullableString("userGender")
+    this.userLink = jsonObj.getNullableString("userLink")
+  }
+
+  /**
+   * Creates a the claims component of
+   *
+   * @param jti A unique identifier for the token
+   * @param iss Issuer Identifier for the Issuer of the response
+   * @param aud Audience(s) that this ID Token is intended for
+   * @param nonce String value used to associate a Client session with an ID Token
+   * @param exp Expiration time on or after which the ID Token MUST NOT be accepted for processing
+   * @param iat Time at which the JWT was issued
+   * @param sub Subject - Identifier for the End-User at the Issuer
+   * @param name End-User's full name in displayable form including all name parts
+   * @param givenName End-User's given name in displayable form
+   * @param middleName End-User's middle name in displayable form
+   * @param familyName End-User's family name in displayable form
+   * @param email End-User's preferred e-mail address
+   * @param picture URL of the End-User's profile picture
+   * @param userFriends End-User's friends
+   * @param userBirthday End-User's birthday
+   * @param userAgeRange End-User's age range
+   * @param userHometown End-User's hometown
+   * @param userLocation End-User's location
+   * @param userGender End-User's gender
+   * @param userLink End-User's link
+   */
+  @JvmOverloads
+  constructor(
+      jti: String,
+      iss: String,
+      aud: String,
+      nonce: String,
+      exp: Date,
+      iat: Date,
+      sub: String,
+      name: String? = null,
+      givenName: String? = null,
+      middleName: String? = null,
+      familyName: String? = null,
+      email: String? = null,
+      picture: String? = null,
+      userFriends: Collection<String>? = null,
+      userBirthday: String? = null,
+      userAgeRange: Map<String, Int>? = null,
+      userHometown: Map<String, String>? = null,
+      userLocation: Map<String, String>? = null,
+      userGender: String? = null,
+      userLink: String? = null
+  ) {
+    Validate.notEmpty(jti, "jti")
+    Validate.notEmpty(iss, "iss")
+    Validate.notEmpty(aud, "aud")
+    Validate.notEmpty(nonce, "nonce")
+    Validate.notEmpty(sub, "sub")
+
+    /**
+     * TODO: We do not want developer to consume this constructor directly, need to move this class
+     * to internal folder
+     */
+    this.jti = jti
+    this.iss = iss
+    this.aud = aud
+    this.nonce = nonce
+    this.exp = exp
+    this.iat = iat
+    this.sub = sub
+    this.name = name
+    this.givenName = givenName
+    this.middleName = middleName
+    this.familyName = familyName
+    this.email = email
+    this.picture = picture
+    this.userFriends =
+        if (userFriends != null) Collections.unmodifiableSet(HashSet(userFriends)) else null
+    this.userBirthday = userBirthday
+    this.userAgeRange =
+        if (userAgeRange != null) Collections.unmodifiableMap(HashMap(userAgeRange)) else null
+    this.userHometown =
+        if (userHometown != null) Collections.unmodifiableMap(HashMap(userHometown)) else null
+    this.userLocation =
+        if (userLocation != null) Collections.unmodifiableMap(HashMap(userLocation)) else null
+    this.userGender = userGender
+    this.userLink = userLink
   }
 
   internal constructor(parcel: Parcel) {
@@ -219,17 +323,193 @@ class AuthenticationTokenClaims : Parcelable {
     dest.writeString(userLink)
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) {
+      return true
+    }
+    if (other !is AuthenticationTokenClaims) {
+      return false
+    }
+    return jti == other.jti &&
+        iss == other.iss &&
+        aud == other.aud &&
+        nonce == other.nonce &&
+        exp == other.exp &&
+        iat == other.iat &&
+        sub == other.sub &&
+        name == other.name &&
+        givenName == other.givenName &&
+        middleName == other.middleName &&
+        familyName == other.familyName &&
+        email == other.email &&
+        picture == other.picture &&
+        userFriends == other.userFriends &&
+        userBirthday == other.userBirthday &&
+        userAgeRange == other.userAgeRange &&
+        userHometown == other.userHometown &&
+        userLocation == other.userLocation &&
+        userGender == other.userGender &&
+        userLink == other.userLink
+  }
+
+  override fun hashCode(): Int {
+    var result = 17
+    result = result * 31 + jti.hashCode()
+    result = result * 31 + iss.hashCode()
+    result = result * 31 + aud.hashCode()
+    result = result * 31 + nonce.hashCode()
+    result = result * 31 + exp.hashCode()
+    result = result * 31 + iat.hashCode()
+    result = result * 31 + sub.hashCode()
+    result = result * 31 + (name?.hashCode() ?: 0)
+    result = result * 31 + (givenName?.hashCode() ?: 0)
+    result = result * 31 + (middleName?.hashCode() ?: 0)
+    result = result * 31 + (familyName?.hashCode() ?: 0)
+    result = result * 31 + (email?.hashCode() ?: 0)
+    result = result * 31 + (picture?.hashCode() ?: 0)
+    result = result * 31 + (userFriends?.hashCode() ?: 0)
+    result = result * 31 + (userBirthday?.hashCode() ?: 0)
+    result = result * 31 + (userAgeRange?.hashCode() ?: 0)
+    result = result * 31 + (userHometown?.hashCode() ?: 0)
+    result = result * 31 + (userLocation?.hashCode() ?: 0)
+    result = result * 31 + (userGender?.hashCode() ?: 0)
+    result = result * 31 + (userLink?.hashCode() ?: 0)
+    return result
+  }
+
+  override fun toString(): String {
+    val claimsJsonObject = toJSONObject()
+    return claimsJsonObject.toString()
+  }
+
   override fun describeContents(): Int {
     return 0
   }
 
-  companion object CREATOR : Parcelable.Creator<AuthenticationTokenClaims> {
-    override fun createFromParcel(parcel: Parcel): AuthenticationTokenClaims {
-      return AuthenticationTokenClaims(parcel)
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  fun toEnCodedString(): String {
+    val claimsJsonString = toString()
+    return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.DEFAULT)
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal fun toJSONObject(): JSONObject {
+    val jsonObject = JSONObject()
+    jsonObject.put("jti", this.jti)
+    jsonObject.put("iss", this.iss)
+    jsonObject.put("aud", this.aud)
+    jsonObject.put("nonce", this.nonce)
+    jsonObject.put("exp", this.exp.time)
+    jsonObject.put("iat", this.iat.time)
+    if (this.sub != null) {
+      jsonObject.put("sub", this.sub)
+    }
+    if (this.name != null) {
+      jsonObject.put("name", this.name)
+    }
+    if (this.givenName != null) {
+      jsonObject.put("givenName", this.givenName)
+    }
+    if (this.middleName != null) {
+      jsonObject.put("middleName", this.middleName)
+    }
+    if (this.familyName != null) {
+      jsonObject.put("familyName", this.familyName)
+    }
+    if (this.email != null) {
+      jsonObject.put("email", this.email)
+    }
+    if (this.picture != null) {
+      jsonObject.put("picture", this.picture)
+    }
+    if (this.userFriends != null && this.userFriends.isNotEmpty()) {
+      jsonObject.put("userFriends", JSONArray(this.userFriends))
+    }
+    if (this.userBirthday != null) {
+      jsonObject.put("userBirthday", this.userBirthday)
+    }
+    if (this.userAgeRange != null && this.userAgeRange.isNotEmpty()) {
+      jsonObject.put("userAgeRange", JSONObject(this.userAgeRange))
+    }
+    if (this.userHometown != null && this.userHometown.isNotEmpty()) {
+      jsonObject.put("userHometown", JSONObject(this.userHometown))
+    }
+    if (this.userLocation != null && this.userLocation.isNotEmpty()) {
+      jsonObject.put("userLocation", JSONObject(this.userLocation))
+    }
+    if (this.userGender != null) {
+      jsonObject.put("userGender", this.userGender)
+    }
+    if (this.userLink != null) {
+      jsonObject.put("userLink", this.userLink)
     }
 
-    override fun newArray(size: Int): Array<AuthenticationTokenClaims?> {
-      return arrayOfNulls(size)
+    return jsonObject
+  }
+
+  private fun JSONObject.getNullableString(name: String): String? {
+    if (has(name)) {
+      return getString(name)
     }
+    return null
+  }
+
+  companion object {
+    internal fun createFromJSONObject(jsonObject: JSONObject): AuthenticationTokenClaims {
+      val jti = jsonObject.getString("jti")
+      val iss = jsonObject.getString("iss")
+      val aud = jsonObject.getString("aud")
+      val nonce = jsonObject.getString("nonce")
+      val exp = Date(jsonObject.getLong("exp"))
+      val iat = Date(jsonObject.getLong("iat"))
+      val sub = jsonObject.getString("sub")
+      val name = jsonObject.optString("name")
+      val givenName = jsonObject.optString("givenName")
+      val middleName = jsonObject.optString("middleName")
+      val familyName = jsonObject.optString("familyName")
+      val email = jsonObject.optString("email")
+      val picture = jsonObject.optString("picture")
+      val userFriends = jsonObject.optJSONArray("userFriends")
+      val userBirthday = jsonObject.optString("userBirthday")
+      val userAgeRange = jsonObject.optJSONObject("userAgeRange")
+      val userHometown = jsonObject.optJSONObject("userHometown")
+      val userLocation = jsonObject.optJSONObject("userLocation")
+      val userGender = jsonObject.optString("userGender")
+      val userLink = jsonObject.optString("userLink")
+      return AuthenticationTokenClaims(
+          jti,
+          iss,
+          aud,
+          nonce,
+          exp,
+          iat,
+          sub,
+          if (name.isNullOrEmpty()) null else name,
+          if (givenName.isNullOrEmpty()) null else givenName,
+          if (middleName.isNullOrEmpty()) null else middleName,
+          if (familyName.isNullOrEmpty()) null else familyName,
+          if (email.isNullOrEmpty()) null else email,
+          if (picture.isNullOrEmpty()) null else picture,
+          if (userFriends == null) null else jsonArrayToStringList(userFriends),
+          if (userBirthday.isNullOrEmpty()) null else userBirthday,
+          if (userAgeRange == null) null
+          else convertJSONObjectToHashMap(userAgeRange) as Map<String, Int>?,
+          if (userHometown == null) null else convertJSONObjectToStringMap(userHometown),
+          if (userLocation == null) null else convertJSONObjectToStringMap(userLocation),
+          if (userGender.isNullOrEmpty()) null else userGender,
+          if (userLink.isNullOrEmpty()) null else userLink)
+    }
+
+    @JvmField
+    val CREATOR: Parcelable.Creator<AuthenticationTokenClaims> =
+        object : Parcelable.Creator<AuthenticationTokenClaims> {
+          override fun createFromParcel(source: Parcel): AuthenticationTokenClaims {
+            return AuthenticationTokenClaims(source)
+          }
+
+          override fun newArray(size: Int): Array<AuthenticationTokenClaims?> {
+            return arrayOfNulls(size)
+          }
+        }
   }
 }

@@ -24,7 +24,9 @@ import static org.junit.Assert.*;
 
 import com.facebook.AccessToken;
 import com.facebook.AuthenticationToken;
+import com.facebook.AuthenticationTokenClaims;
 import com.facebook.FacebookTestCase;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
@@ -115,7 +117,22 @@ public class LoginResultTest extends FacebookTestCase {
   private AuthenticationToken createAuthenticationToken() {
     // TODO T93958663: Need to update this test with real valid id_token string after Validation
     // added
-    return new AuthenticationToken("HEADER.PAYLOAD.SIGNATURE");
+    String encodedHeader = "eyJhbGciOiJTSEEyNTYiLCJ0eXAiOiJ0b2tlbl90eXBlIiwia2lkIjoiYWJjIn0=";
+    Date currentDate = new Date();
+    AuthenticationTokenClaims claims =
+        new AuthenticationTokenClaims(
+            "jti",
+            "iss",
+            "aud",
+            "nonce",
+            new Date(currentDate.getTime() + 60), // add 60 minutes for the exp time
+            currentDate,
+            "sub");
+    StringBuilder sb = new StringBuilder();
+    sb.append(encodedHeader).append(".");
+    sb.append(claims.toEnCodedString()).append(".");
+    sb.append("Signature");
+    return new AuthenticationToken(sb.toString());
   }
 
   private LoginClient.Request createRequest(Set<String> permissions, boolean isRerequest) {

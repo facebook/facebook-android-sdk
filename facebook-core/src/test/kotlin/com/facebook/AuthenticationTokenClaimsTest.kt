@@ -1,54 +1,107 @@
 package com.facebook
 
+import android.util.Base64
+import java.util.Calendar
+import java.util.Date
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONException
+import org.json.JSONObject
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
-  companion object {
-    const val ENCODED_CLAIMS_VALID =
-        "eyJqdGkiOiIxMjM0NTY3ODkiLCJzdWIiOiIxMjM0IiwibmFtZSI6IlRlc3QgVXNlciIsImlzcyI6Imh0dHBzOi8vZmFjZWJvb2suY29tL2RpYWxvZy9vYXV0aCIsImF1ZCI6IjQzMjEiLCJub25jZSI6InNvbWVfbm9uY2UiLCJleHAiOjE1MTYyNTkwMjIsImVtYWlsIjoiZW1haWxAZW1haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vd3d3LmZhY2Vib29rLmNvbS9zb21lX3BpY3R1cmUiLCJpYXQiOjE1MTYyMzkwMjJ9"
-    const val ENCODED_CLAIMS_NO_JTI =
-        "eyJzdWIiOiIxMjM0IiwibmFtZSI6IlRlc3QgVXNlciIsImlzcyI6Imh0dHBzOi8vZmFjZWJvb2suY29tL2RpYWxvZy9vYXV0aCIsImF1ZCI6IjQzMjEiLCJub25jZSI6InNvbWVfbm9uY2UiLCJleHAiOjE1MTYyNTkwMjIsImVtYWlsIjoiZW1haWxAZW1haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vd3d3LmZhY2Vib29rLmNvbS9zb21lX3BpY3R1cmUiLCJpYXQiOjE1MTYyMzkwMjJ9"
-    const val ENCODED_CLAIMS_NO_ISS =
-        "eyJqdGkiOiIxMjM0NTY3ODkiLCJzdWIiOiIxMjM0IiwibmFtZSI6IlRlc3QgVXNlciIsImF1ZCI6IjQzMjEiLCJub25jZSI6InNvbWVfbm9uY2UiLCJleHAiOjE1MTYyNTkwMjIsImVtYWlsIjoiZW1haWxAZW1haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vd3d3LmZhY2Vib29rLmNvbS9zb21lX3BpY3R1cmUiLCJpYXQiOjE1MTYyMzkwMjJ9"
-    const val ENCODED_CLAIMS_NO_AUD =
-        "eyJqdGkiOiIxMjM0NTY3ODkiLCJzdWIiOiIxMjM0IiwibmFtZSI6IlRlc3QgVXNlciIsImlzcyI6Imh0dHBzOi8vZmFjZWJvb2suY29tL2RpYWxvZy9vYXV0aCIsIm5vbmNlIjoic29tZV9ub25jZSIsImV4cCI6MTUxNjI1OTAyMiwiZW1haWwiOiJlbWFpbEBlbWFpbC5jb20iLCJwaWN0dXJlIjoiaHR0cHM6Ly93d3cuZmFjZWJvb2suY29tL3NvbWVfcGljdHVyZSIsImlhdCI6MTUxNjIzOTAyMn0="
-    const val ENCODED_CLAIMS_NO_NONCE =
-        "eyJqdGkiOiIxMjM0NTY3ODkiLCJzdWIiOiIxMjM0IiwibmFtZSI6IlRlc3QgVXNlciIsImlzcyI6Imh0dHBzOi8vZmFjZWJvb2suY29tL2RpYWxvZy9vYXV0aCIsImF1ZCI6IjQzMjEiLCJleHAiOjE1MTYyNTkwMjIsImVtYWlsIjoiZW1haWxAZW1haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vd3d3LmZhY2Vib29rLmNvbS9zb21lX3BpY3R1cmUiLCJpYXQiOjE1MTYyMzkwMjJ9"
-    const val ENCODED_CLAIMS_NO_SUB =
-        "eyJqdGkiOiIxMjM0NTY3ODkiLCJuYW1lIjoiVGVzdCBVc2VyIiwiaXNzIjoiaHR0cHM6Ly9mYWNlYm9vay5jb20vZGlhbG9nL29hdXRoIiwiYXVkIjoiNDMyMSIsIm5vbmNlIjoic29tZV9ub25jZSIsImV4cCI6MTUxNjI1OTAyMiwiZW1haWwiOiJlbWFpbEBlbWFpbC5jb20iLCJwaWN0dXJlIjoiaHR0cHM6Ly93d3cuZmFjZWJvb2suY29tL3NvbWVfcGljdHVyZSIsImlhdCI6MTUxNjIzOTAyMn0="
-    const val ENCODED_CLAIMS_INVALID_JSON = "notvalid"
+  private val authenticationTokenClaims =
+      AuthenticationTokenClaims(
+          "jti",
+          "iss",
+          "aud",
+          "nonce",
+          Date(1630191912), // 8/28/2021
+          Calendar.getInstance().time,
+          "sub",
+          "name",
+          "givenName",
+          "middleName",
+          "familyName",
+          "email",
+          "picture",
+          listOf("friend1", "friend2"),
+          "userBirthday",
+          hashMapOf("min" to 20),
+          hashMapOf("id" to "112724962075996", "name" to "Martinez, California"),
+          hashMapOf("id" to "110843418940484", "name" to "Seattle, Washington"),
+          "male",
+          "facebook.com")
+
+  private val authenticationTokenClaimsWithRequiredFieldsOnly =
+      AuthenticationTokenClaims(
+          "jti",
+          "iss",
+          "aud",
+          "nonce",
+          Date(1630191912), // 8/28/2021
+          Calendar.getInstance().time,
+          "sub")
+
+  private var claimsMap = hashMapOf<String, Any>()
+
+  @Before
+  fun before() {
+    claimsMap["jti"] = "jti"
+    claimsMap["sub"] = "1234"
+    claimsMap["iss"] = "https://facebook.com/dialog/oauth"
+    claimsMap["aud"] = "4321"
+    claimsMap["nonce"] = "some nonce"
+    claimsMap["exp"] = 1516259022
+    claimsMap["iat"] = 1516239022
   }
 
   @Test(expected = JSONException::class)
   fun `test missing jti throws`() {
-    AuthenticationTokenClaims(ENCODED_CLAIMS_NO_JTI)
+    claimsMap.remove("jti")
+    val missingJti = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingJti.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString)
   }
 
   @Test(expected = JSONException::class)
   fun `test missing iss throws`() {
-    AuthenticationTokenClaims(ENCODED_CLAIMS_NO_ISS)
+    claimsMap.remove("iss")
+    val missingIss = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingIss.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString)
   }
 
   @Test(expected = JSONException::class)
   fun `test missing aud throws`() {
-    AuthenticationTokenClaims(ENCODED_CLAIMS_NO_AUD)
+    claimsMap.remove("aud")
+    val missingAud = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingAud.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString)
   }
 
   @Test(expected = JSONException::class)
   fun `test empty nonce throws`() {
-    AuthenticationTokenClaims(ENCODED_CLAIMS_NO_NONCE)
+    claimsMap.remove("nonce")
+    val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString)
   }
 
   @Test(expected = JSONException::class)
   fun `test empty sub throws`() {
-    AuthenticationTokenClaims(ENCODED_CLAIMS_NO_SUB)
+    claimsMap.remove("sub")
+    val missingSub = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingSub.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString)
   }
 
   @Test(expected = JSONException::class)
-  fun `test throw - invalid encoded claims string which is invalid json format`() {
-    AuthenticationTokenClaims(ENCODED_CLAIMS_INVALID_JSON)
+  fun `test throw - invalid json format`() {
+    val invalidJson = "123"
+    val encodedClaimsString = Base64.encodeToString(invalidJson.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString)
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -58,14 +111,50 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test constructor with required encoded claims`() {
-    val authenticationToken = AuthenticationTokenClaims(ENCODED_CLAIMS_VALID)
-    Assert.assertEquals(authenticationToken.name, "Test User")
-    Assert.assertEquals(authenticationToken.sub, "1234")
-    Assert.assertEquals(authenticationToken.jti, "123456789")
-    Assert.assertEquals(authenticationToken.iss, "https://facebook.com/dialog/oauth")
-    Assert.assertEquals(authenticationToken.aud, "4321")
-    Assert.assertEquals(authenticationToken.nonce, "some_nonce")
-    Assert.assertEquals(authenticationToken.exp.time, 1516259022)
-    Assert.assertEquals(authenticationToken.iat.time, 1516239022)
+    val encodedClaims = authenticationTokenClaimsWithRequiredFieldsOnly.toEnCodedString()
+    val authenticationToken = AuthenticationTokenClaims(encodedClaims)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.sub, authenticationToken.sub)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.jti, authenticationToken.jti)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.iss, authenticationToken.iss)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.aud, authenticationToken.aud)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.nonce, authenticationToken.nonce)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.exp, authenticationToken.exp)
+    Assert.assertEquals(
+        authenticationTokenClaimsWithRequiredFieldsOnly.iat, authenticationToken.iat)
+  }
+
+  @Test
+  fun `test roundtrip JSONObject`() {
+    // test full claims
+    val jsonObject = authenticationTokenClaims.toJSONObject()
+    val deserializeClaims = AuthenticationTokenClaims.createFromJSONObject(jsonObject)
+    assertThat(authenticationTokenClaims == deserializeClaims).isTrue
+
+    // test only required claims fields with others are null
+    val jsonObjectRequired = authenticationTokenClaimsWithRequiredFieldsOnly.toJSONObject()
+    val deserializeClaimsRequired =
+        AuthenticationTokenClaims.createFromJSONObject(jsonObjectRequired)
+    assertThat(authenticationTokenClaimsWithRequiredFieldsOnly == deserializeClaimsRequired).isTrue
+  }
+
+  @Test
+  fun `test roundtrip decode and encode`() {
+    // test full claims
+    val encodedString = authenticationTokenClaims.toEnCodedString()
+    val newAuthenticationTokenClaims = AuthenticationTokenClaims(encodedString)
+    assertThat(authenticationTokenClaims == newAuthenticationTokenClaims).isTrue
+
+    // test only required claims fields with others are null
+    val encodedStringWithRequiredFields =
+        authenticationTokenClaimsWithRequiredFieldsOnly.toEnCodedString()
+    val newClaimsWithRequiredFields = AuthenticationTokenClaims(encodedStringWithRequiredFields)
+    assertThat(authenticationTokenClaimsWithRequiredFieldsOnly == newClaimsWithRequiredFields)
+        .isTrue
   }
 }
