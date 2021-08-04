@@ -45,9 +45,10 @@ internal class AccessTokenCache(
 
   constructor() :
       this(
-  FacebookSdk.getApplicationContext()
-      .getSharedPreferences(AccessTokenManager.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE),
-  SharedPreferencesTokenCachingStrategyFactory())
+          FacebookSdk.getApplicationContext()
+              .getSharedPreferences(
+                  AccessTokenManager.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE),
+          SharedPreferencesTokenCachingStrategyFactory())
 
   fun load(): AccessToken? {
     var accessToken: AccessToken? = null
