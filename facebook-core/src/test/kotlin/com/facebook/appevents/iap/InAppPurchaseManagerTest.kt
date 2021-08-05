@@ -1,10 +1,14 @@
 package com.facebook.appevents.iap
 
-import androidx.test.core.app.ApplicationProvider
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.FeatureManager
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -20,16 +24,17 @@ import org.powermock.reflect.Whitebox
     InAppPurchaseAutoLogger::class,
     InAppPurchaseManager::class)
 class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
+  private lateinit var mockContext: Context
   override fun setup() {
     super.setup()
+    mockContext = mock()
     PowerMockito.mockStatic(FeatureManager::class.java)
     PowerMockito.mockStatic(InAppPurchaseActivityLifecycleTracker::class.java)
     PowerMockito.mockStatic(InAppPurchaseAutoLogger::class.java)
     PowerMockito.mockStatic(FeatureManager::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
     Whitebox.setInternalState(InAppPurchaseManager::class.java, "enabled", AtomicBoolean(false))
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
-        .thenReturn(ApplicationProvider.getApplicationContext())
+    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
   @Test
@@ -64,11 +69,18 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test start iap logging when billing lib 2+ is available and feature is on`() {
-    MemberModifier.stub<Boolean>(
-            PowerMockito.method(InAppPurchaseManager::class.java, "usingBillingLib2Plus"))
-        .toReturn(true)
     PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2))
         .thenReturn(true)
+    val mockPackageManager: PackageManager = mock()
+    val mockApplicationInfo = ApplicationInfo()
+    val metaData = Bundle()
+    metaData.putString("com.google.android.play.billingclient.version", "2.0.3")
+    PowerMockito.`when`(mockContext.packageManager).thenReturn(mockPackageManager)
+    PowerMockito.`when`(mockContext.packageName).thenReturn("com.facebook.test")
+    PowerMockito.`when`(mockPackageManager.getApplicationInfo(any(), any()))
+        .thenReturn(mockApplicationInfo)
+    mockApplicationInfo.metaData = metaData
+
     var isStartIapLoggingCalled = false
     PowerMockito.`when`(InAppPurchaseAutoLogger.startIapLogging(any())).thenAnswer {
       isStartIapLoggingCalled = true
