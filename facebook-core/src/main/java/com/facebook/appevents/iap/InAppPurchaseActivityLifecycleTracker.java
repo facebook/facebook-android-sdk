@@ -31,8 +31,6 @@ import android.os.IBinder;
 import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +38,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class InAppPurchaseActivityLifecycleTracker {
 
   private static final String TAG = InAppPurchaseActivityLifecycleTracker.class.getCanonicalName();
@@ -74,20 +71,12 @@ public class InAppPurchaseActivityLifecycleTracker {
       return;
     }
 
-    try {
-      Class.forName(SERVICE_INTERFACE_NAME);
-      hasBillingService = true;
-    } catch (ClassNotFoundException ignored) {
-      hasBillingService = false;
+    hasBillingService = InAppPurchaseUtils.getClass(SERVICE_INTERFACE_NAME) != null;
+    if (!hasBillingService) {
       return;
     }
 
-    try {
-      Class.forName(BILLING_ACTIVITY_NAME);
-      hasBiillingActivity = true;
-    } catch (ClassNotFoundException ignored) {
-      hasBiillingActivity = false;
-    }
+    hasBiillingActivity = InAppPurchaseUtils.getClass(BILLING_ACTIVITY_NAME) != null;
 
     InAppPurchaseEventManager.clearSkuDetailsCache();
 
