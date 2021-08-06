@@ -95,6 +95,11 @@ object FacebookTestUtility {
     assertThat(true).isFalse.withFailMessage("JSONArray is not equal")
   }
 
+  fun <T : Any> assertNotNull(actual: T?): T {
+    assertThat(actual).isNotNull
+    return actual as T
+  }
+
   private fun areEqual(expected: JSONObject?, actual: JSONObject?): Boolean {
     // JSONObject.equals does not do an order-independent comparison, so let's roll our own  :(
     if (expected === actual) {

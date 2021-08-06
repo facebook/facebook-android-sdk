@@ -22,6 +22,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getExecutor
 import com.facebook.FacebookSdk.isInitialized
+import com.facebook.FacebookTestUtility.assertNotNull
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import java.util.concurrent.Executor
@@ -56,20 +57,14 @@ class InAppPurchaseSkuDetailsWrapperTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testGetSkuDetailsParams() {
-    val skuDetailsParamsClazz = getClass(CLASSNAME_SKU_DETAILS_PARAMS)
-    val builderClazz = getClass(CLASSNAME_SKU_DETAILS_PARAMS_BUILDER)
-    assertThat(skuDetailsParamsClazz).isNotNull
-    assertThat(builderClazz).isNotNull
+    val skuDetailsParamsClazz = assertNotNull(getClass(CLASSNAME_SKU_DETAILS_PARAMS))
+    val builderClazz = assertNotNull(getClass(CLASSNAME_SKU_DETAILS_PARAMS_BUILDER))
 
-    val newBuilderMethod = skuDetailsParamsClazz?.let { getMethod(it, METHOD_NEW_BUILDER) }
-    val setTypeMethod = builderClazz?.let { getMethod(it, METHOD_SET_TYPE, String::class.java) }
+    val newBuilderMethod = assertNotNull(getMethod(skuDetailsParamsClazz, METHOD_NEW_BUILDER))
+    val setTypeMethod = assertNotNull(getMethod(builderClazz, METHOD_SET_TYPE, String::class.java))
     val setSkusListMethod =
-        builderClazz?.let { getMethod(it, METHOD_SET_SKU_LIST, MutableList::class.java) }
-    val buildMethod = builderClazz?.let { getMethod(it, METHOD_BUILD) }
-    assertThat(newBuilderMethod).isNotNull
-    assertThat(setTypeMethod).isNotNull
-    assertThat(setSkusListMethod).isNotNull
-    assertThat(buildMethod).isNotNull
+        assertNotNull(getMethod(builderClazz, METHOD_SET_SKU_LIST, MutableList::class.java))
+    val buildMethod = assertNotNull(getMethod(builderClazz, METHOD_BUILD))
 
     val inAppPurchaseSkuDetailsWrapper =
         InAppPurchaseSkuDetailsWrapper(
@@ -84,8 +79,7 @@ class InAppPurchaseSkuDetailsWrapperTest : FacebookPowerMockTestCase() {
     val skuDetailsParams = inAppPurchaseSkuDetailsWrapper.getSkuDetailsParams(skuType, skuIDs)
     assertThat(skuDetailsParams).isNotNull
     assertThat((skuDetailsParams as FakeSkuDetailsParams).skuType).isEqualTo(skuType)
-    assertThat((skuDetailsParams as FakeSkuDetailsParams).skusList)
-        .containsExactlyElementsOf(skuIDs)
+    assertThat(skuDetailsParams.skusList).containsExactlyElementsOf(skuIDs)
   }
 
   class FakeSkuDetailsParams {
