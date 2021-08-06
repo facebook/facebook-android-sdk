@@ -118,7 +118,12 @@ internal constructor(
     }
     val intent = Intent(context, CurrentAccessTokenExpirationBroadcastReceiver::class.java)
     intent.action = ACTION_CURRENT_ACCESS_TOKEN_CHANGED
-    val alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+    val alarmIntent =
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+          PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        } else {
+          PendingIntent.getBroadcast(context, 0, intent, 0)
+        }
     try {
       alarmManager[AlarmManager.RTC, accessToken.expires.time] = alarmIntent
     } catch (e: Exception) {
