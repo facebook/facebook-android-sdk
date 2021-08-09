@@ -28,7 +28,6 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
-import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -56,20 +55,6 @@ public final class CodelessManager {
   private static final AtomicBoolean isCodelessEnabled = new AtomicBoolean(true);
   private static final AtomicBoolean isAppIndexingEnabled = new AtomicBoolean(false);
   private static volatile Boolean isCheckingSession = false;
-
-  /** Abstraction for testability. */
-  @VisibleForTesting
-  public interface CodelessSessionChecker {
-    void checkCodelessSession(final String applicationId);
-  }
-
-  private static CodelessSessionChecker codelessSessionChecker =
-      new CodelessSessionChecker() {
-        @Override
-        public void checkCodelessSession(final String applicationId) {
-          CodelessManager.checkCodelessSession(applicationId);
-        }
-      };
 
   public static void onActivityResumed(final Activity activity) {
     if (!isCodelessEnabled.get()) {
@@ -100,7 +85,7 @@ public final class CodelessManager {
                   FacebookSdk.getCodelessSetupEnabled()
                       || (BuildConfig.DEBUG && AppEventUtility.isEmulator());
               if (codelessEventsEnabled && codelessSetupEnabled) {
-                codelessSessionChecker.checkCodelessSession(appId);
+                checkCodelessSession(appId);
               }
             }
           });
@@ -115,7 +100,7 @@ public final class CodelessManager {
     if (isDebugOnEmulator() && !isAppIndexingEnabled.get()) {
       // Check session on start when app launched
       // on emulator and built in DEBUG mode
-      codelessSessionChecker.checkCodelessSession(appId);
+      checkCodelessSession(appId);
     }
   }
 
@@ -231,10 +216,5 @@ public final class CodelessManager {
 
   static void updateAppIndexing(Boolean appIndexingEnabled) {
     isAppIndexingEnabled.set(appIndexingEnabled);
-  }
-
-  @VisibleForTesting
-  static void setCodelessSessionChecker(CodelessSessionChecker codelessSessionChecker) {
-    CodelessManager.codelessSessionChecker = codelessSessionChecker;
   }
 }
