@@ -17,52 +17,48 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.codeless
 
-package com.facebook.appevents.codeless;
-
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import kotlin.math.sqrt
 
 @AutoHandleExceptions
-class ViewIndexingTrigger implements SensorEventListener {
-
-  private static final double SHAKE_THRESHOLD_GRAVITY = 2.3F;
-
-  private OnShakeListener mListener;
-
-  public void setOnShakeListener(OnShakeListener listener) {
-    this.mListener = listener;
+internal class ViewIndexingTrigger : SensorEventListener {
+  private var onShakeListener: OnShakeListener? = null
+  fun setOnShakeListener(listener: OnShakeListener?) {
+    onShakeListener = listener
   }
 
-  public interface OnShakeListener {
-    void onShake();
+  fun interface OnShakeListener {
+    fun onShake()
   }
 
-  @Override
-  public void onSensorChanged(SensorEvent event) {
-    if (mListener != null) {
-      float x = event.values[0];
-      float y = event.values[1];
-      float z = event.values[2];
-
-      double gX = x / SensorManager.GRAVITY_EARTH;
-      double gY = y / SensorManager.GRAVITY_EARTH;
-      double gZ = z / SensorManager.GRAVITY_EARTH;
+  override fun onSensorChanged(event: SensorEvent) {
+    onShakeListener?.let {
+      val x = event.values[0]
+      val y = event.values[1]
+      val z = event.values[2]
+      val gX = (x / SensorManager.GRAVITY_EARTH).toDouble()
+      val gY = (y / SensorManager.GRAVITY_EARTH).toDouble()
+      val gZ = (z / SensorManager.GRAVITY_EARTH).toDouble()
 
       // gForce will be close to 1 when there is no movement.
-      double gForce = Math.sqrt(gX * gX + gY * gY + gZ * gZ);
-
+      val gForce = sqrt(gX * gX + gY * gY + gZ * gZ)
       if (gForce > SHAKE_THRESHOLD_GRAVITY) {
-        mListener.onShake();
+        it.onShake()
       }
     }
   }
 
-  @Override
-  public void onAccuracyChanged(Sensor sensor, int accuracy) {
+  override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
     // no op
+  }
+
+  companion object {
+    private const val SHAKE_THRESHOLD_GRAVITY = 2.3
   }
 }
