@@ -19,19 +19,21 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.codeless.internal.EventBinding
 import com.facebook.appevents.codeless.internal.ParameterComponent
 import com.facebook.appevents.codeless.internal.ViewHierarchy
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.mock
 import kotlin.collections.ArrayList
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.*
-import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(CodelessMatcher.ViewMatcher::class, ViewHierarchy::class)
+@PrepareForTest(ViewHierarchy::class)
 class CodelessMatcherTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockHostView: View
@@ -40,7 +42,7 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
   private lateinit var parameterComponentList: ArrayList<ParameterComponent>
   private lateinit var matchedViews: ArrayList<CodelessMatcher.MatchedView>
   private lateinit var matchedView: CodelessMatcher.MatchedView
-
+  private lateinit var mockCompanion: CodelessMatcher.ViewMatcher.Companion
   private val testName = "test_name"
   private val testValue = "test_value"
   private val path = "{'class_name': 'android.widget.LinearLayout'}"
@@ -48,28 +50,23 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
-    mockRootView = mock(View::class.java)
-    mockHostView = mock(View::class.java)
-    mockMapping = mock(EventBinding::class.java)
+    mockRootView = mock()
+    mockHostView = mock()
+    mockMapping = mock()
 
     parameterComponentList = ArrayList()
     matchedViews = ArrayList()
     matchedView = CodelessMatcher.MatchedView(mockRootView, "map_key")
     matchedViews.add(matchedView)
 
-    mockStatic(CodelessMatcher.ViewMatcher::class.java)
     mockStatic(ViewHierarchy::class.java)
 
-    whenCalled(ViewHierarchy.getTextOfView(isA(View::class.java))).thenReturn(testViewText)
+    whenCalled(ViewHierarchy.getTextOfView(any())).thenReturn(testViewText)
     whenCalled(mockMapping.viewParameters).thenReturn(parameterComponentList)
-    whenCalled(
-            CodelessMatcher.ViewMatcher.findViewByPath(
-                isA(EventBinding::class.java),
-                isA(View::class.java),
-                anyList(),
-                anyInt(),
-                anyInt(),
-                anyString()))
+
+    mockCompanion = mock()
+    Whitebox.setInternalState(CodelessMatcher.ViewMatcher::class.java, "Companion", mockCompanion)
+    whenCalled(mockCompanion.findViewByPath(anyOrNull(), anyOrNull(), any(), any(), any(), any()))
         .thenReturn(matchedViews)
   }
 
@@ -108,18 +105,11 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     val parameterComponentJsonString = "{'name': $testName, 'path': [ $path ]}"
     updateParameterComponentList(parameterComponentJsonString)
 
-    val mockMatchedView = mock(CodelessMatcher.MatchedView::class.java)
-    whenCalled(mockMatchedView.view).thenReturn(null)
+    val mockMatchedView: CodelessMatcher.MatchedView = mock()
+    whenCalled(mockMatchedView.getView()).thenReturn(null)
     val mockMatchedViews = ArrayList<CodelessMatcher.MatchedView>()
     mockMatchedViews.add(mockMatchedView)
-    whenCalled(
-            CodelessMatcher.ViewMatcher.findViewByPath(
-                isA(EventBinding::class.java),
-                isA(View::class.java),
-                anyList(),
-                anyInt(),
-                anyInt(),
-                anyString()))
+    whenCalled(mockCompanion.findViewByPath(anyOrNull(), anyOrNull(), any(), any(), any(), any()))
         .thenReturn(mockMatchedViews)
 
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
@@ -141,8 +131,7 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     updateParameterComponentList(parameterComponentJsonString)
 
     val testViewText2 = "test_view_text_2"
-    whenCalled(ViewHierarchy.getTextOfView(isA(View::class.java)))
-        .thenReturn(testViewText, testViewText2)
+    whenCalled(ViewHierarchy.getTextOfView(any())).thenReturn(testViewText, testViewText2)
 
     val matchedView2 = CodelessMatcher.MatchedView(mockRootView, "map_key")
     matchedViews.add(matchedView2)
