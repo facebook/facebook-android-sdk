@@ -22,14 +22,17 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
 import java.util.concurrent.atomic.AtomicBoolean
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.powermock.api.mockito.PowerMockito.*
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -42,9 +45,9 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
   private lateinit var mockActivity: Activity
   private lateinit var mockAccelerometer: Sensor
   private lateinit var mockSensorManager: SensorManager
-  private lateinit var mockCodelessSessionChecker: CodelessManager.CodelessSessionChecker
   private lateinit var mockExecutor: FacebookSerialExecutor
   private var appId = "123456"
+  private var checkCodelessSessionTimes = 0
 
   @Before
   fun init() {
@@ -54,29 +57,28 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     whenCalled(FacebookSdk.getApplicationId()).thenReturn(appId)
     whenCalled(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
 
-    mockAppSettings = mock(FetchedAppSettings::class.java)
+    mockAppSettings = mock()
     mockStatic(FetchedAppSettingsManager::class.java)
     whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId))
         .thenReturn(mockAppSettings)
 
-    mockSensorManager = mock(SensorManager::class.java)
-    mockAccelerometer = mock(Sensor::class.java)
+    mockSensorManager = mock()
+    mockAccelerometer = mock()
     whenCalled(mockSensorManager.getDefaultSensor(eq(Sensor.TYPE_ACCELEROMETER)))
         .thenReturn(mockAccelerometer)
 
-    mockApplicationContext = mock(Context::class.java)
+    mockApplicationContext = mock()
     whenCalled(mockApplicationContext.getSystemService(eq(Context.SENSOR_SERVICE)))
         .thenReturn(mockSensorManager)
 
-    mockActivity = mock(Activity::class.java)
+    mockActivity = mock()
     whenCalled(mockActivity.applicationContext).thenReturn(mockApplicationContext)
 
-    mockStatic(CodelessManager::class.java)
-    spy(CodelessManager::class.java)
-    mockCodelessSessionChecker = mock(CodelessManager.CodelessSessionChecker::class.java)
-    CodelessManager.setCodelessSessionChecker(mockCodelessSessionChecker)
+    PowerMockito.spy(CodelessManager::class.java)
     ReflectionHelpers.setStaticField(
         CodelessManager::class.java, "isCodelessEnabled", AtomicBoolean(true))
+    ReflectionHelpers.setStaticField(CodelessManager::class.java, "isCheckingSession", true)
+    whenCalled(CodelessManager.checkCodelessSession(appId)).then { checkCodelessSessionTimes++ }
   }
 
   @Test
@@ -89,12 +91,9 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     CodelessManager.onActivityResumed(mockActivity)
     verify(mockApplicationContext, never()).getSystemService(Context.SENSOR_SERVICE)
     verify(mockSensorManager, never())
-        .registerListener(
-            any(ViewIndexingTrigger::class.java),
-            any(Sensor::class.java),
-            eq(SensorManager.SENSOR_DELAY_UI))
+        .registerListener(any<ViewIndexingTrigger>(), any(), eq(SensorManager.SENSOR_DELAY_UI))
 
-    verify(mockCodelessSessionChecker, never()).checkCodelessSession(appId)
+    assertThat(checkCodelessSessionTimes).isEqualTo(0)
   }
 
   @Test
@@ -105,12 +104,9 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     CodelessManager.onActivityResumed(mockActivity)
     verify(mockApplicationContext).getSystemService(Context.SENSOR_SERVICE)
     verify(mockSensorManager)
-        .registerListener(
-            any(ViewIndexingTrigger::class.java),
-            any(Sensor::class.java),
-            eq(SensorManager.SENSOR_DELAY_UI))
+        .registerListener(any<ViewIndexingTrigger>(), any(), eq(SensorManager.SENSOR_DELAY_UI))
 
-    verify(mockCodelessSessionChecker).checkCodelessSession(appId)
+    assertThat(checkCodelessSessionTimes).isEqualTo(1)
   }
 
   @Test
@@ -121,12 +117,9 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     CodelessManager.onActivityResumed(mockActivity)
     verify(mockApplicationContext).getSystemService(Context.SENSOR_SERVICE)
     verify(mockSensorManager)
-        .registerListener(
-            any(ViewIndexingTrigger::class.java),
-            any(Sensor::class.java),
-            eq(SensorManager.SENSOR_DELAY_UI))
+        .registerListener(any<ViewIndexingTrigger>(), any(), eq(SensorManager.SENSOR_DELAY_UI))
 
-    verify(mockCodelessSessionChecker).checkCodelessSession(appId)
+    assertThat(checkCodelessSessionTimes).isEqualTo(1)
   }
 
   @Test
@@ -137,12 +130,9 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     CodelessManager.onActivityResumed(mockActivity)
     verify(mockApplicationContext, never()).getSystemService(Context.SENSOR_SERVICE)
     verify(mockSensorManager, never())
-        .registerListener(
-            any(ViewIndexingTrigger::class.java),
-            any(Sensor::class.java),
-            eq(SensorManager.SENSOR_DELAY_UI))
+        .registerListener(any<ViewIndexingTrigger>(), any(), eq(SensorManager.SENSOR_DELAY_UI))
 
-    verify(mockCodelessSessionChecker, never()).checkCodelessSession(appId)
+    assertThat(checkCodelessSessionTimes).isEqualTo(0)
   }
 
   @Test
@@ -153,11 +143,8 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     CodelessManager.onActivityResumed(mockActivity)
     verify(mockApplicationContext).getSystemService(Context.SENSOR_SERVICE)
     verify(mockSensorManager)
-        .registerListener(
-            any(ViewIndexingTrigger::class.java),
-            any(Sensor::class.java),
-            eq(SensorManager.SENSOR_DELAY_UI))
+        .registerListener(any<ViewIndexingTrigger>(), any(), eq(SensorManager.SENSOR_DELAY_UI))
 
-    verify(mockCodelessSessionChecker, never()).checkCodelessSession(appId)
+    assertThat(checkCodelessSessionTimes).isEqualTo(0)
   }
 }
