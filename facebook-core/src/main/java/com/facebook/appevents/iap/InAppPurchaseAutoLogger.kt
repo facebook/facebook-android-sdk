@@ -29,7 +29,7 @@ object InAppPurchaseAutoLogger {
   private const val BILLING_CLIENT_PURCHASE_NAME = "com.android.billingclient.api.Purchase"
 
   @JvmStatic
-  fun startIapLogging(context: Context?) {
+  fun startIapLogging(context: Context) {
     // check if the app has IAP with Billing Lib
     if (InAppPurchaseUtils.getClass(BILLING_CLIENT_PURCHASE_NAME) == null) {
       return

@@ -49,8 +49,11 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     PowerMockito.doAnswer { Class.forName(className) }
         .`when`(InAppPurchaseUtils::class.java, "getClass", any())
 
-    PowerMockito.`when`(InAppPurchaseBillingClientWrapper.getOrCreateInstance(any()))
-        .thenReturn(mockBillingClientWrapper)
+    Whitebox.setInternalState(
+        InAppPurchaseBillingClientWrapper::class.java, "initialized", AtomicBoolean(true))
+
+    Whitebox.setInternalState(
+        InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapper)
   }
 
   @Test
