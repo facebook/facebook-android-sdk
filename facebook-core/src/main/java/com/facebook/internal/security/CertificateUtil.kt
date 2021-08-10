@@ -13,7 +13,8 @@ import java.security.NoSuchAlgorithmException
 */
 
 object CertificateUtil {
-  @VisibleForTesting const val DELIMITER = ":" // not part of valid characters for base64
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal const val DELIMITER = ":" // not part of valid characters for base64
 
   /** @return String of concatenated signatures, since there can be more than one */
   @JvmStatic
