@@ -17,40 +17,31 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.codeless
 
-package com.facebook.appevents.codeless;
+import android.app.Activity
+import android.widget.LinearLayout
+import android.widget.TextView
+import com.facebook.FacebookPowerMockTestCase
+import org.junit.Before
+import org.robolectric.Robolectric
 
-import android.app.Activity;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import com.facebook.FacebookPowerMockTestCase;
-import org.junit.Before;
-import org.robolectric.Robolectric;
-
-public abstract class CodelessTestBase extends FacebookPowerMockTestCase {
-
-  protected LinearLayout root;
-
-  protected Activity activity;
-
+abstract class CodelessTestBase : FacebookPowerMockTestCase() {
+  protected lateinit var root: LinearLayout
+  protected lateinit var activity: Activity
   @Before
-  @Override
-  public void setup() {
-    super.setup();
-    activity = Robolectric.buildActivity(Activity.class).create().get();
-    root = new LinearLayout(activity);
-
-    activity.setContentView(root);
-
-    TextView outerLabel = new TextView(activity);
-    outerLabel.setText("Outer Label");
-    root.addView(outerLabel);
-
-    LinearLayout inner = new LinearLayout(activity);
-    root.addView(inner);
-
-    TextView innerLabel = new TextView(activity);
-    innerLabel.setText("Inner Label");
-    inner.addView(innerLabel);
+  override fun setup() {
+    super.setup()
+    activity = Robolectric.buildActivity(Activity::class.java).create().get()
+    root = LinearLayout(activity)
+    activity.setContentView(root)
+    val outerLabel = TextView(activity)
+    outerLabel.text = "Outer Label"
+    root.addView(outerLabel)
+    val inner = LinearLayout(activity)
+    root.addView(inner)
+    val innerLabel = TextView(activity)
+    innerLabel.text = "Inner Label"
+    inner.addView(innerLabel)
   }
 }
