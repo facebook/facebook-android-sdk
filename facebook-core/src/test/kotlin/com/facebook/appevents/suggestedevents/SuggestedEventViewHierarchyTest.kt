@@ -13,11 +13,11 @@ import com.facebook.appevents.internal.ViewHierarchyConstants.HINT_KEY
 import com.facebook.appevents.internal.ViewHierarchyConstants.INPUT_TYPE_KEY
 import com.facebook.appevents.internal.ViewHierarchyConstants.IS_INTERACTED_KEY
 import com.facebook.appevents.internal.ViewHierarchyConstants.TEXT_KEY
+import com.nhaarman.mockitokotlin2.any
 import java.util.Collections.emptyList
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.mockito.ArgumentMatchers.isA
 import org.mockito.Mockito.mock
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -79,8 +79,8 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(ViewHierarchy::class.java)
     PowerMockito.`when`(ViewHierarchy.getChildrenOfView(view))
         .thenReturn(listOf<View>(clickableView))
-    PowerMockito.`when`(ViewHierarchy.getTextOfView(isA(View::class.java))).thenReturn("")
-    PowerMockito.`when`(ViewHierarchy.getHintOfView(isA(View::class.java))).thenReturn("")
+    PowerMockito.`when`(ViewHierarchy.getTextOfView(any())).thenReturn("")
+    PowerMockito.`when`(ViewHierarchy.getHintOfView(any())).thenReturn("")
     val obj3 = SuggestedEventViewHierarchy.getDictionaryOfView(view, clickableView)
     assertEquals(
         "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[{\"${IS_INTERACTED_KEY}\":true,\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[]}]}",
@@ -98,9 +98,9 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
         "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0}", json.toString())
 
     PowerMockito.mockStatic(ViewHierarchy::class.java)
-    PowerMockito.`when`(ViewHierarchy.getTextOfView(isA(View::class.java))).thenReturn("Some Text")
-    PowerMockito.`when`(ViewHierarchy.getHintOfView(isA(View::class.java))).thenReturn("Some Hint")
-    PowerMockito.`when`(ViewHierarchy.getClassTypeBitmask(isA(View::class.java))).thenReturn(100)
+    PowerMockito.`when`(ViewHierarchy.getTextOfView(any())).thenReturn("Some Text")
+    PowerMockito.`when`(ViewHierarchy.getHintOfView(any())).thenReturn("Some Hint")
+    PowerMockito.`when`(ViewHierarchy.getClassTypeBitmask(any())).thenReturn(100)
 
     val viewWithText = View(context)
     val jsonWithText = JSONObject()
