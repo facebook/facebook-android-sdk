@@ -21,11 +21,9 @@
 package com.facebook.appevents.codeless.internal;
 
 import android.util.Log;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
+import androidx.annotation.VisibleForTesting;
 import java.lang.reflect.Method;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class UnityReflection {
   private static final String TAG = UnityReflection.class.getCanonicalName();
   private static final String UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
@@ -35,10 +33,15 @@ public class UnityReflection {
   private static final String EVENT_MAPPING_METHOD = "OnReceiveMapping";
   private static Class<?> unityPlayer;
 
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  static Class<?> getUnityPlayerClass() throws ClassNotFoundException {
+    return Class.forName(UNITY_PLAYER_CLASS);
+  }
+
   public static void sendMessage(String unityObject, String unityMethod, String message) {
     try {
       if (unityPlayer == null) {
-        unityPlayer = Class.forName(UNITY_PLAYER_CLASS);
+        unityPlayer = getUnityPlayerClass();
       }
 
       Method method =
