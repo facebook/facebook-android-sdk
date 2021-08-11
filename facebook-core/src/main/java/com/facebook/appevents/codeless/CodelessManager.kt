@@ -162,12 +162,12 @@ object CodelessManager {
   }
 
   @JvmStatic
-  fun isDebugOnEmulator(): Boolean {
+  internal fun isDebugOnEmulator(): Boolean {
     return BuildConfig.DEBUG && isEmulator()
   }
 
   @JvmStatic
-  fun getCurrentDeviceSessionID(): String {
+  internal fun getCurrentDeviceSessionID(): String {
     if (null == deviceSessionID) {
       deviceSessionID = UUID.randomUUID().toString()
     }
@@ -175,12 +175,12 @@ object CodelessManager {
   }
 
   @JvmStatic
-  fun getIsAppIndexingEnabled(): Boolean {
+  internal fun getIsAppIndexingEnabled(): Boolean {
     return isAppIndexingEnabled.get()
   }
 
   @JvmStatic
-  fun updateAppIndexing(appIndexingEnabled: Boolean) {
+  internal fun updateAppIndexing(appIndexingEnabled: Boolean) {
     isAppIndexingEnabled.set(appIndexingEnabled)
   }
 }

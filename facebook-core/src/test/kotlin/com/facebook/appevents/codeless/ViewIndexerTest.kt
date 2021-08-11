@@ -14,17 +14,22 @@
  */
 package com.facebook.appevents.codeless
 
-import com.facebook.*
+import android.app.Activity
+import com.facebook.FacebookPowerMockTestCase
+import com.facebook.GraphRequest
+import com.facebook.GraphResponse
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.*
-import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
+import org.powermock.api.mockito.PowerMockito.spy
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 import org.robolectric.util.ReflectionHelpers
 
 @PrepareForTest(ViewIndexer::class, CodelessManager::class)
@@ -38,20 +43,18 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
-    mockViewIndexer = mock(ViewIndexer::class.java)
-    mockGraphRequest = mock(GraphRequest::class.java)
-    mockGraphResponse = mock(GraphResponse::class.java)
+    val activity: Activity = mock()
+    mockViewIndexer = ViewIndexer(activity)
+    mockGraphRequest = mock()
+    mockGraphResponse = mock()
     whenCalled(mockGraphRequest.executeAndWait()).thenReturn(mockGraphResponse)
 
-    mockStatic(ViewIndexer::class.java)
+    spy(ViewIndexer::class.java)
     ReflectionHelpers.setStaticField(ViewIndexer::class.java, "instance", mockViewIndexer)
-    whenCalled(mockViewIndexer.previousDigest).thenCallRealMethod()
-    whenCalled(mockViewIndexer.processRequest(isA(GraphRequest::class.java), anyString()))
-        .thenCallRealMethod()
 
     mockStatic(CodelessManager::class.java)
     updateAppIndexingHasBeenCalledTime = 0
-    whenCalled(CodelessManager.updateAppIndexing(anyBoolean())).then {
+    whenCalled(CodelessManager.updateAppIndexing(any())).then {
       updateAppIndexingHasBeenCalledTime++
     }
   }
@@ -60,7 +63,8 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   fun `processRequest when graph request is null`() {
     mockViewIndexer.processRequest(null, currentDigest)
     assertEquals(0, updateAppIndexingHasBeenCalledTime)
-    assertNull(mockViewIndexer.previousDigest)
+    val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
+    assertThat(previousDigest).isNull()
   }
 
   @Test
@@ -68,7 +72,8 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     whenCalled(mockGraphResponse.getJSONObject()).thenReturn(null)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     assertEquals(0, updateAppIndexingHasBeenCalledTime)
-    assertNull(mockViewIndexer.previousDigest)
+    val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
+    assertThat(previousDigest).isNull()
   }
 
   @Test
@@ -76,7 +81,8 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     val jsonObject = JSONObject("{'success': 'true'}")
     whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
-    assertEquals(currentDigest, mockViewIndexer.previousDigest)
+    val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
+    assertThat(previousDigest).isEqualTo(currentDigest)
   }
 
   @Test
@@ -84,7 +90,8 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     val jsonObject = JSONObject("{'success': 'false'}")
     whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
-    assertNull(mockViewIndexer.previousDigest)
+    val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
+    assertThat(previousDigest).isNull()
   }
 
   @Test
@@ -92,7 +99,8 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     val jsonObject = JSONObject("{'error': 'user error'}")
     whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
-    assertNull(mockViewIndexer.previousDigest)
+    val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
+    assertThat(previousDigest).isNull()
   }
 
   @Test
