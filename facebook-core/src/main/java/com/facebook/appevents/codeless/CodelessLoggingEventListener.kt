@@ -57,7 +57,7 @@ object CodelessLoggingEventListener {
   }
 
   @JvmStatic
-  fun logEvent(mapping: EventBinding, rootView: View, hostView: View) {
+  internal fun logEvent(mapping: EventBinding, rootView: View, hostView: View) {
     val eventName = mapping.eventName
     val parameters = getParameters(mapping, rootView, hostView)
     updateParameters(parameters)
