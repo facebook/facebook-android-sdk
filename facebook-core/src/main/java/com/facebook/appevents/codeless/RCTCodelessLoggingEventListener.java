@@ -20,28 +20,16 @@
 
 package com.facebook.appevents.codeless;
 
-import android.content.Context;
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.Nullable;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsConstants;
-import com.facebook.appevents.AppEventsLogger;
-import com.facebook.appevents.codeless.internal.Constants;
 import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
-import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.ref.WeakReference;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 public class RCTCodelessLoggingEventListener {
-  private static final String TAG = RCTCodelessLoggingEventListener.class.getCanonicalName();
-
   public static AutoLoggingOnTouchListener getOnTouchListener(
       EventBinding mapping, View rootView, View hostView) {
     return new AutoLoggingOnTouchListener(mapping, rootView, hostView);
@@ -65,43 +53,13 @@ public class RCTCodelessLoggingEventListener {
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-      if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-        logEvent();
+      if (motionEvent.getAction() == MotionEvent.ACTION_UP && mapping != null) {
+        CodelessLoggingEventListener.logEvent(mapping, rootView.get(), hostView.get());
       }
 
       // If there is an existing listener then call its onTouch function else return false
       return this.existingOnTouchListener != null
           && this.existingOnTouchListener.onTouch(view, motionEvent);
-    }
-
-    private void logEvent() {
-      if (null == mapping) {
-        return;
-      }
-
-      final String eventName = mapping.getEventName();
-      final Bundle parameters =
-          CodelessMatcher.getParameters(mapping, rootView.get(), hostView.get());
-
-      if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
-        String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
-        parameters.putDouble(
-            AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, AppEventUtility.normalizePrice(value));
-      }
-
-      parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
-
-      final Bundle params = parameters;
-      FacebookSdk.getExecutor()
-          .execute(
-              new Runnable() {
-                @Override
-                public void run() {
-                  final Context context = FacebookSdk.getApplicationContext();
-                  final AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
-                  appEventsLogger.logEvent(eventName, params);
-                }
-              });
     }
 
     public boolean getSupportCodelessLogging() {
