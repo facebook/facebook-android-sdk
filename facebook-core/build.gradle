@@ -95,7 +95,13 @@ android {
     testOptions {
         unitTests.all {
             jvmArgs '-XX:MaxPermSize=1024m'
-            maxHeapSize = "1024m"
+            maxHeapSize = "4096m"
+            // CrashShieldHandlerDebugTest is only available on Sandcastle and Github Actions
+            // Because local compiling environment may recompile CrashShieldHandler multiple times
+            // and generate false signals
+            if (System.getenv("SANDCASTLE") != "1" && System.getenv("GITHUB_ACTIONS") != "1") {
+                exclude "com/facebook/internal/instrument/crashshield/CrashShieldHandlerDebugTest.class"
+            }
         }
     }
 
@@ -103,6 +109,17 @@ android {
         useOldBackend = true
         // Keep jvm target at 1.6 to maintain compatibility with Android API level < 26
         jvmTarget = "1.6"
+    }
+
+    if (System.getenv("SANDCASTLE") == "1") {
+        testOptions {
+            unitTests.all {
+                systemProperty 'robolectric.dependency.repo.url', 'https://maven.thefacebook.com/nexus/content/repositories/central/'
+                systemProperty 'robolectric.dependency.repo.id', 'central'
+                systemProperty "java.net.preferIPv6Addresses", "true"
+                systemProperty "java.net.preferIPv4Stack", "false"
+            }
+        }
     }
 }
 

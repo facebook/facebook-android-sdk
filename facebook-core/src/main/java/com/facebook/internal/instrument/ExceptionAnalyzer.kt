@@ -37,7 +37,9 @@ import org.json.JSONObject
 object ExceptionAnalyzer {
   private var enabled = false
 
-  @VisibleForTesting @JvmStatic fun isDebug(): Boolean = BuildConfig.DEBUG
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  @JvmStatic
+  internal fun isDebug(): Boolean = BuildConfig.DEBUG
 
   @JvmStatic
   fun enable() {
@@ -65,8 +67,8 @@ object ExceptionAnalyzer {
     }
   }
 
-  @VisibleForTesting
-  fun sendExceptionAnalysisReports() {
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal fun sendExceptionAnalysisReports() {
     if (isDataProcessingRestricted) {
       return
     }
