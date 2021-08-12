@@ -17,23 +17,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.codeless.internal
 
-package com.facebook.appevents.codeless.internal;
-
-public class Constants {
-  public static final int MAX_TREE_DEPTH = 25;
-  public static final String IS_CODELESS_EVENT_KEY = "_is_fb_codeless";
-
-  public static final String EVENT_MAPPING_PATH_TYPE_KEY = "path_type";
-  public static final String PATH_TYPE_RELATIVE = "relative";
-  public static final String PATH_TYPE_ABSOLUTE = "absolute";
-
-  public static final String PLATFORM = "android";
-  public static final int APP_INDEXING_SCHEDULE_INTERVAL_MS = 1000;
-  public static final String APP_INDEXING_ENABLED = "is_app_indexing_enabled";
-  public static final String DEVICE_SESSION_ID = "device_session_id";
-  public static final String EXTINFO = "extinfo";
-
-  public static final String APP_INDEXING = "app_indexing";
-  public static final String BUTTON_SAMPLING = "button_sampling";
+object Constants {
+  const val MAX_TREE_DEPTH = 25
+  const val IS_CODELESS_EVENT_KEY = "_is_fb_codeless"
+  const val EVENT_MAPPING_PATH_TYPE_KEY = "path_type"
+  const val PATH_TYPE_RELATIVE = "relative"
+  const val PATH_TYPE_ABSOLUTE = "absolute"
+  const val PLATFORM = "android"
+  const val APP_INDEXING_SCHEDULE_INTERVAL_MS = 1000
+  const val APP_INDEXING_ENABLED = "is_app_indexing_enabled"
+  const val DEVICE_SESSION_ID = "device_session_id"
+  const val EXTINFO = "extinfo"
+  const val APP_INDEXING = "app_indexing"
+  const val BUTTON_SAMPLING = "button_sampling"
 }
