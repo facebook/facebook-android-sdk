@@ -44,13 +44,17 @@ class InAppPurchaseUtilsTest : FacebookPowerMockTestCase() {
   fun testGetClass() {
     val myTestClass = InAppPurchaseTestClass(Any())
     assertThat(myTestClass).isNotNull
-    val clazz = InAppPurchaseUtils.getClass("com.facebook.appevents.iap.InAppPurchaseTestClass")
+    val clazz =
+        InAppPurchaseUtils.getClass(
+            "com.facebook.appevents.iap.InAppPurchaseUtilsTest\$InAppPurchaseTestClass")
     assertThat(clazz).isNotNull
   }
 
   @Test
   fun testGetMethod() {
-    val clazz = InAppPurchaseUtils.getClass("com.facebook.appevents.iap.InAppPurchaseTestClass")
+    val clazz =
+        InAppPurchaseUtils.getClass(
+            "com.facebook.appevents.iap.InAppPurchaseUtilsTest\$InAppPurchaseTestClass")
     assertThat(clazz).isNotNull
     val testMethod = clazz?.let { InAppPurchaseUtils.getMethod(it, "inAppPurchaseTestMethod") }
     assertThat(testMethod).isNotNull
@@ -59,7 +63,9 @@ class InAppPurchaseUtilsTest : FacebookPowerMockTestCase() {
   @Test
   fun testInvokeMethod() {
     val myTestClass = InAppPurchaseTestClass(Any())
-    val clazz = InAppPurchaseUtils.getClass("com.facebook.appevents.iap.InAppPurchaseTestClass")
+    val clazz =
+        InAppPurchaseUtils.getClass(
+            "com.facebook.appevents.iap.InAppPurchaseUtilsTest\$InAppPurchaseTestClass")
     assertThat(clazz).isNotNull
     val testMethod = clazz?.let { InAppPurchaseUtils.getMethod(it, "inAppPurchaseTestMethod") }
     assertThat(testMethod).isNotNull
@@ -72,5 +78,11 @@ class InAppPurchaseUtilsTest : FacebookPowerMockTestCase() {
           }
         }
     assertThat(result).isNotNull
+  }
+
+  class InAppPurchaseTestClass internal constructor(private val obj: Any) {
+    fun inAppPurchaseTestMethod(): String {
+      return "Test String"
+    }
   }
 }
