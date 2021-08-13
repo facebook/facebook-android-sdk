@@ -63,7 +63,7 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   @Test
   public void testProxyAuthHandlesSuccess() {
-    testProxyAuthHandlesSuccess(AUTHENTICATION_TOKEN);
+    testProxyAuthHandlesSuccess(getEncodedAuthTokenString());
   }
 
   @Test

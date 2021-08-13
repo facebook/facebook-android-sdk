@@ -88,7 +88,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   @Test
   public void testCustomTabHandlesSuccess() {
-    testCustomTabHandles(AUTHENTICATION_TOKEN);
+    testCustomTabHandles(getEncodedAuthTokenString());
   }
 
   @Test

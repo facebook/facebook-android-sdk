@@ -1,63 +1,36 @@
 package com.facebook
 
 import android.util.Base64
-import java.util.Calendar
-import java.util.Date
+import com.facebook.util.common.AuthenticationTokenTestUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.powermock.api.mockito.PowerMockito
+import org.powermock.core.classloader.annotations.PrepareForTest
 
+@PrepareForTest(FacebookSdk::class)
 class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
-  private val authenticationTokenClaims =
-      AuthenticationTokenClaims(
-          "jti",
-          "iss",
-          "aud",
-          "nonce",
-          Date(1630191912), // 8/28/2021
-          Calendar.getInstance().time,
-          "sub",
-          "name",
-          "givenName",
-          "middleName",
-          "familyName",
-          "email",
-          "picture",
-          listOf("friend1", "friend2"),
-          "userBirthday",
-          hashMapOf("min" to 20),
-          hashMapOf("id" to "112724962075996", "name" to "Martinez, California"),
-          hashMapOf("id" to "110843418940484", "name" to "Seattle, Washington"),
-          "male",
-          "facebook.com")
-
-  private val authenticationTokenClaimsWithRequiredFieldsOnly =
-      AuthenticationTokenClaims(
-          "jti",
-          "iss",
-          "aud",
-          "nonce",
-          Date(1630191912), // 8/28/2021
-          Calendar.getInstance().time,
-          "sub")
 
   private var claimsMap = hashMapOf<String, Any>()
 
   @Before
   fun before() {
+    PowerMockito.mockStatic(FacebookSdk::class.java)
+    PowerMockito.`when`(FacebookSdk.getApplicationId())
+        .thenReturn(AuthenticationTokenTestUtil.APP_ID)
     claimsMap["jti"] = "jti"
     claimsMap["sub"] = "1234"
     claimsMap["iss"] = "https://facebook.com/dialog/oauth"
-    claimsMap["aud"] = "4321"
+    claimsMap["aud"] = AuthenticationTokenTestUtil.APP_ID
     claimsMap["nonce"] = "some nonce"
     claimsMap["exp"] = 1516259022
     claimsMap["iat"] = 1516239022
   }
 
-  @Test(expected = JSONException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `test missing jti throws`() {
     claimsMap.remove("jti")
     val missingJti = JSONObject(claimsMap as Map<*, *>).toString()
@@ -65,7 +38,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString)
   }
 
-  @Test(expected = JSONException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `test missing iss throws`() {
     claimsMap.remove("iss")
     val missingIss = JSONObject(claimsMap as Map<*, *>).toString()
@@ -73,7 +46,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString)
   }
 
-  @Test(expected = JSONException::class)
+  @Test(expected = IllegalArgumentException::class)
   fun `test missing aud throws`() {
     claimsMap.remove("aud")
     val missingAud = JSONObject(claimsMap as Map<*, *>).toString()
@@ -81,16 +54,16 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString)
   }
 
-  @Test(expected = JSONException::class)
-  fun `test empty nonce throws`() {
+  @Test(expected = IllegalArgumentException::class)
+  fun `test missing nonce throws`() {
     claimsMap.remove("nonce")
     val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
     AuthenticationTokenClaims(encodedClaimsString)
   }
 
-  @Test(expected = JSONException::class)
-  fun `test empty sub throws`() {
+  @Test(expected = IllegalArgumentException::class)
+  fun `test missing sub throws`() {
     claimsMap.remove("sub")
     val missingSub = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingSub.toByteArray(), Base64.DEFAULT)
@@ -111,50 +84,68 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test constructor with required encoded claims`() {
-    val encodedClaims = authenticationTokenClaimsWithRequiredFieldsOnly.toEnCodedString()
+    val encodedClaims =
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly
+            .toEnCodedString()
     val authenticationToken = AuthenticationTokenClaims(encodedClaims)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.sub, authenticationToken.sub)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.sub,
+        authenticationToken.sub)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.jti, authenticationToken.jti)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.jti,
+        authenticationToken.jti)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.iss, authenticationToken.iss)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.iss,
+        authenticationToken.iss)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.aud, authenticationToken.aud)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.aud,
+        authenticationToken.aud)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.nonce, authenticationToken.nonce)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.nonce,
+        authenticationToken.nonce)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.exp, authenticationToken.exp)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.exp,
+        authenticationToken.exp)
     Assert.assertEquals(
-        authenticationTokenClaimsWithRequiredFieldsOnly.iat, authenticationToken.iat)
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.iat,
+        authenticationToken.iat)
   }
 
   @Test
   fun `test roundtrip JSONObject`() {
     // test full claims
-    val jsonObject = authenticationTokenClaims.toJSONObject()
+    val jsonObject = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST.toJSONObject()
     val deserializeClaims = AuthenticationTokenClaims.createFromJSONObject(jsonObject)
-    assertThat(authenticationTokenClaims == deserializeClaims).isTrue
+    assertThat(AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST == deserializeClaims).isTrue
 
     // test only required claims fields with others are null
-    val jsonObjectRequired = authenticationTokenClaimsWithRequiredFieldsOnly.toJSONObject()
+    val jsonObjectRequired =
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.toJSONObject()
     val deserializeClaimsRequired =
         AuthenticationTokenClaims.createFromJSONObject(jsonObjectRequired)
-    assertThat(authenticationTokenClaimsWithRequiredFieldsOnly == deserializeClaimsRequired).isTrue
+    assertThat(
+            AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly ==
+                deserializeClaimsRequired)
+        .isTrue
   }
 
   @Test
   fun `test roundtrip decode and encode`() {
     // test full claims
-    val encodedString = authenticationTokenClaims.toEnCodedString()
+    val encodedString = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()
     val newAuthenticationTokenClaims = AuthenticationTokenClaims(encodedString)
-    assertThat(authenticationTokenClaims == newAuthenticationTokenClaims).isTrue
+    assertThat(
+            AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST == newAuthenticationTokenClaims)
+        .isTrue
 
     // test only required claims fields with others are null
     val encodedStringWithRequiredFields =
-        authenticationTokenClaimsWithRequiredFieldsOnly.toEnCodedString()
+        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly
+            .toEnCodedString()
     val newClaimsWithRequiredFields = AuthenticationTokenClaims(encodedStringWithRequiredFields)
-    assertThat(authenticationTokenClaimsWithRequiredFieldsOnly == newClaimsWithRequiredFields)
+    assertThat(
+            AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly ==
+                newClaimsWithRequiredFields)
         .isTrue
   }
 }

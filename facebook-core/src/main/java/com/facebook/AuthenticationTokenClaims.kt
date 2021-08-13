@@ -20,6 +20,7 @@ package com.facebook
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.text.format.DateUtils
 import android.util.Base64
 import androidx.annotation.VisibleForTesting
 import com.facebook.internal.Utility.convertJSONObjectToHashMap
@@ -27,6 +28,8 @@ import com.facebook.internal.Utility.convertJSONObjectToStringMap
 import com.facebook.internal.Utility.jsonArrayToSet
 import com.facebook.internal.Utility.jsonArrayToStringList
 import com.facebook.internal.Validate
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.Collections
 import java.util.Date
 import kotlin.collections.ArrayList
@@ -122,8 +125,8 @@ class AuthenticationTokenClaims : Parcelable {
     val claimsString = String(decodedBytes)
     val jsonObj = JSONObject(claimsString)
 
-    // TODO: Additional validation needed
-    // Reference: https://developers.facebook.com/docs/facebook-login/limited-login/token/validating
+    // verify claims
+    require(isValidClaims(jsonObj)) { "Invalid claims" }
 
     this.jti = jsonObj.getString("jti")
     this.iss = jsonObj.getString("iss")
@@ -139,7 +142,6 @@ class AuthenticationTokenClaims : Parcelable {
     this.email = jsonObj.getNullableString("email")
     this.picture = jsonObj.getNullableString("picture")
 
-    // TODO: Validate and test the format of userFriends
     val userFriendsList = jsonObj.optJSONArray("userFriends")
     this.userFriends =
         if (userFriendsList == null) null
@@ -386,6 +388,52 @@ class AuthenticationTokenClaims : Parcelable {
     return 0
   }
 
+  private fun isValidClaims(claimsJson: JSONObject): Boolean {
+    if (claimsJson == null) {
+      return false
+    }
+
+    val jti = claimsJson.optString("jti")
+    if (jti.isEmpty()) {
+      return false
+    }
+
+    try {
+      val iss = claimsJson.optString("iss")
+      if (iss.isEmpty() || URL(iss).host != "facebook.com") {
+        return false
+      }
+    } catch (ex: MalformedURLException) {
+      // since its MalformedURLException, iss is invalid
+      return false
+    }
+
+    val aud = claimsJson.optString("aud")
+    if (aud.isEmpty() || aud != FacebookSdk.getApplicationId()) { // aud matched
+      return false
+    }
+
+    val exp = Date(claimsJson.optLong("exp"))
+    if (Date().after(exp)) { // is expired
+      return false
+    }
+
+    val iat = Date(claimsJson.optLong("iat"))
+    val iatExpireDate = Date(iat.time + MAX_TIME_SINCE_TOKEN_ISSUED)
+    if (Date().after(iatExpireDate)) { // issued too far in the past
+      return false
+    }
+
+    val sub = claimsJson.optString("sub")
+    if (sub.isEmpty()) { // user ID is not valid
+      return false
+    }
+
+    // TODO T97090806: Need to create a configuration class with nonce being specified
+
+    return true
+  }
+
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   fun toEnCodedString(): String {
     val claimsJsonString = toString()
@@ -455,6 +503,8 @@ class AuthenticationTokenClaims : Parcelable {
   }
 
   companion object {
+    const val MAX_TIME_SINCE_TOKEN_ISSUED = DateUtils.MINUTE_IN_MILLIS * 10; // 10 minutes
+
     internal fun createFromJSONObject(jsonObject: JSONObject): AuthenticationTokenClaims {
       val jti = jsonObject.getString("jti")
       val iss = jsonObject.getString("iss")

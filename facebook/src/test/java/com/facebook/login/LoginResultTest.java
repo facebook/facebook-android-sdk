@@ -20,18 +20,24 @@
 
 package com.facebook.login;
 
-import static org.junit.Assert.*;
+import androidx.test.core.app.ApplicationProvider;
+
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.facebook.AccessToken;
 import com.facebook.AuthenticationToken;
-import com.facebook.AuthenticationTokenClaims;
-import com.facebook.FacebookTestCase;
-import java.util.Date;
+import com.facebook.FacebookPowerMockTestCase;
+import com.facebook.FacebookSdk;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
-public class LoginResultTest extends FacebookTestCase {
+@PrepareForTest(FacebookSdk.class)
+public class LoginResultTest extends FacebookPowerMockTestCase {
 
   private final Set<String> EMAIL_SET =
       new HashSet<String>() {
@@ -54,12 +60,21 @@ public class LoginResultTest extends FacebookTestCase {
         }
       };
 
+  @Before
+  public void setUp() {
+    mockStatic(FacebookSdk.class);
+    when(FacebookSdk.isInitialized()).thenReturn(true);
+    when(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID);
+    when(FacebookSdk.getApplicationContext()).thenReturn(ApplicationProvider.getApplicationContext());
+  }
+
   @Test
   public void testInitialLogin() {
     LoginClient.Request request = createRequest(EMAIL_SET, false);
     AccessToken accessToken =
         createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(), new HashSet<String>());
-    AuthenticationToken authenticationToken = createAuthenticationToken();
+    AuthenticationToken authenticationToken =
+        AuthenticationTokenTestUtil.getAuthenticationTokenForTest();
     LoginResult result = LoginManager.computeLoginResult(request, accessToken, authenticationToken);
     assertEquals(accessToken, result.getAccessToken());
     assertEquals(authenticationToken, result.getAuthenticationToken());
@@ -72,7 +87,8 @@ public class LoginResultTest extends FacebookTestCase {
     LoginClient.Request request = createRequest(EMAIL_SET, true);
     AccessToken accessToken =
         createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(), new HashSet<String>());
-    AuthenticationToken authenticationToken = createAuthenticationToken();
+    AuthenticationToken authenticationToken =
+        AuthenticationTokenTestUtil.getAuthenticationTokenForTest();
     LoginResult result = LoginManager.computeLoginResult(request, accessToken, authenticationToken);
     assertEquals(accessToken, result.getAccessToken());
     assertEquals(authenticationToken, result.getAuthenticationToken());
@@ -85,7 +101,8 @@ public class LoginResultTest extends FacebookTestCase {
     LoginClient.Request request = createRequest(LIKES_EMAIL_SET, true);
     AccessToken accessToken =
         createAccessToken(EMAIL_SET, new HashSet<String>(), new HashSet<String>());
-    AuthenticationToken authenticationToken = createAuthenticationToken();
+    AuthenticationToken authenticationToken =
+        AuthenticationTokenTestUtil.getAuthenticationTokenForTest();
     LoginResult result = LoginManager.computeLoginResult(request, accessToken, authenticationToken);
     assertEquals(accessToken, result.getAccessToken());
     assertEquals(authenticationToken, result.getAuthenticationToken());
@@ -112,27 +129,6 @@ public class LoginResultTest extends FacebookTestCase {
         null,
         null,
         null);
-  }
-
-  private AuthenticationToken createAuthenticationToken() {
-    // TODO T93958663: Need to update this test with real valid id_token string after Validation
-    // added
-    String encodedHeader = "eyJhbGciOiJTSEEyNTYiLCJ0eXAiOiJ0b2tlbl90eXBlIiwia2lkIjoiYWJjIn0=";
-    Date currentDate = new Date();
-    AuthenticationTokenClaims claims =
-        new AuthenticationTokenClaims(
-            "jti",
-            "iss",
-            "aud",
-            "nonce",
-            new Date(currentDate.getTime() + 60), // add 60 minutes for the exp time
-            currentDate,
-            "sub");
-    StringBuilder sb = new StringBuilder();
-    sb.append(encodedHeader).append(".");
-    sb.append(claims.toEnCodedString()).append(".");
-    sb.append("Signature");
-    return new AuthenticationToken(sb.toString());
   }
 
   private LoginClient.Request createRequest(Set<String> permissions, boolean isRerequest) {

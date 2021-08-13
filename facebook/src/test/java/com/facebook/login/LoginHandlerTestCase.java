@@ -34,13 +34,6 @@ import org.robolectric.Robolectric;
 
 public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
   protected static final String ACCESS_TOKEN = "An access token";
-  protected static final String AUTH_HEADER_ENCODED =
-      "eyJhbGciOiJTSEEyNTYiLCJ0eXAiOiJ0b2tlbl90eXBlIiwia2lkIjoiYWJjIn0=";
-  protected static final String AUTH_CLAIMS_ENCODED =
-      "eyJqdGkiOiIxMjM0NTY3ODkiLCJzdWIiOiIxMjM0IiwibmFtZSI6IlRlc3QgVXNlciIsImlzcyI6Imh0dHBzOi8vZmFjZWJvb2suY29tL2RpYWxvZy9vYXV0aCIsImF1ZCI6IjQzMjEiLCJub25jZSI6InNvbWVfbm9uY2UiLCJleHAiOjE1MTYyNTkwMjIsImVtYWlsIjoiZW1haWxAZW1haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vd3d3LmZhY2Vib29rLmNvbS9zb21lX3BpY3R1cmUiLCJpYXQiOjE1MTYyMzkwMjJ9";
-  protected static final String AUTH_SIGNATURE_ENCODED = "Signature";
-  protected static final String AUTHENTICATION_TOKEN =
-      AUTH_HEADER_ENCODED + "." + AUTH_CLAIMS_ENCODED + "." + AUTH_SIGNATURE_ENCODED;
   protected static final String USER_ID = "123";
   protected static final long EXPIRES_IN_DELTA = 3600 * 24 * 60;
   protected static final HashSet<String> PERMISSIONS =
@@ -99,5 +92,9 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
 
     long delta = Math.abs(expected.getTime() - actual.getTime()) - expectedDifference;
     assertTrue(delta < deltaInMsec);
+  }
+
+  protected String getEncodedAuthTokenString() {
+    return AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest();
   }
 }

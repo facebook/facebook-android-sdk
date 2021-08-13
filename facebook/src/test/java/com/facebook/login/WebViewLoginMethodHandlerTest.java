@@ -57,10 +57,12 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
           + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
 
   @Test
-  public void testWebViewHandlesSuccess() {
+  public void testWebViewHandlesSuccess() throws Exception {
+    String authenticationTokenString = getEncodedAuthTokenString();
+    mockTryAuthorize();
     Bundle bundle = new Bundle();
     bundle.putString("access_token", ACCESS_TOKEN);
-    bundle.putString("authentication_token", AUTHENTICATION_TOKEN);
+    bundle.putString("authentication_token", authenticationTokenString);
     bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
     bundle.putString("code", "Something else");
     bundle.putString("signed_request", SIGNED_REQUEST_STR);
@@ -85,7 +87,7 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
     TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
 
     AuthenticationToken authenticationToken = result.authenticationToken;
-    assertEquals(AUTHENTICATION_TOKEN, authenticationToken.getToken());
+    assertEquals(authenticationTokenString, authenticationToken.getToken());
   }
 
   @Test
@@ -220,6 +222,7 @@ public class WebViewLoginMethodHandlerTest extends LoginHandlerTestCase {
   private void mockTryAuthorize() throws Exception {
     mockStatic(FacebookSdk.class);
     when(FacebookSdk.isInitialized()).thenReturn(true);
+    when(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID);
     mockStatic(AccessToken.class);
     when(AccessToken.getCurrentAccessToken()).thenReturn(null);
     FacebookDialogFragment dialogFragment = mock(FacebookDialogFragment.class);
