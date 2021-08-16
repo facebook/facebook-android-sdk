@@ -20,12 +20,11 @@
 
 package com.facebook.login;
 
-import androidx.test.core.app.ApplicationProvider;
-
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import androidx.test.core.app.ApplicationProvider;
 import com.facebook.AccessToken;
 import com.facebook.AuthenticationToken;
 import com.facebook.FacebookPowerMockTestCase;
@@ -65,7 +64,8 @@ public class LoginResultTest extends FacebookPowerMockTestCase {
     mockStatic(FacebookSdk.class);
     when(FacebookSdk.isInitialized()).thenReturn(true);
     when(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID);
-    when(FacebookSdk.getApplicationContext()).thenReturn(ApplicationProvider.getApplicationContext());
+    when(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext());
   }
 
   @Test
