@@ -28,13 +28,13 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
 import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(
@@ -54,21 +54,21 @@ class InstallReferrerUtilTest : FacebookPowerMockTestCase() {
   fun init() {
     mockSharedPreference = MockSharedPreference()
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.isFullyInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isFullyInitialized()).thenReturn(true)
     mockApplicationContext = mock(Context::class.java)
-    `when`(
+    whenever(
             mockApplicationContext.getSharedPreferences(
                 FacebookSdk.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE))
         .thenReturn(mockSharedPreference)
-    `when`(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext)
 
     mockReferrerDetails = mock(ReferrerDetails::class.java)
     mockInstallReferrerClient = mock(InstallReferrerClient::class.java)
-    `when`(mockInstallReferrerClient.installReferrer).thenReturn(mockReferrerDetails)
+    whenever(mockInstallReferrerClient.installReferrer).thenReturn(mockReferrerDetails)
     mockInstallReferrerClientBuilder = mock(InstallReferrerClient.Builder::class.java)
-    `when`(mockInstallReferrerClientBuilder.build()).thenReturn(mockInstallReferrerClient)
+    whenever(mockInstallReferrerClientBuilder.build()).thenReturn(mockInstallReferrerClient)
     mockStatic(InstallReferrerClient::class.java)
-    `when`(InstallReferrerClient.newBuilder(mockApplicationContext))
+    whenever(InstallReferrerClient.newBuilder(mockApplicationContext))
         .thenReturn(mockInstallReferrerClientBuilder)
   }
 
@@ -77,8 +77,8 @@ class InstallReferrerUtilTest : FacebookPowerMockTestCase() {
     var connectionCounter = 0
     var didReceivedReferrerUrl = false
     val referrerUrl = "facebook.com"
-    `when`(mockReferrerDetails.installReferrer).thenReturn(referrerUrl)
-    `when`(mockInstallReferrerClient.startConnection(anyObject())).then {
+    whenever(mockReferrerDetails.installReferrer).thenReturn(referrerUrl)
+    whenever(mockInstallReferrerClient.startConnection(anyObject())).then {
       connectionCounter += 1
       val listener = it.getArgument<InstallReferrerStateListener>(0)
       listener.onInstallReferrerSetupFinished(InstallReferrerClient.InstallReferrerResponse.OK)
@@ -104,7 +104,7 @@ class InstallReferrerUtilTest : FacebookPowerMockTestCase() {
   @Test
   fun `test connection twice`() {
     var connectionCounter = 0
-    `when`(mockInstallReferrerClient.startConnection(anyObject())).then {
+    whenever(mockInstallReferrerClient.startConnection(anyObject())).then {
       connectionCounter += 1
       val listener = it.getArgument<InstallReferrerStateListener>(0)
       listener.onInstallReferrerSetupFinished(InstallReferrerClient.InstallReferrerResponse.OK)
@@ -118,7 +118,7 @@ class InstallReferrerUtilTest : FacebookPowerMockTestCase() {
   @Test
   fun `test service unavailable`() {
     var connectionCounter = 0
-    `when`(mockInstallReferrerClient.startConnection(anyObject())).then {
+    whenever(mockInstallReferrerClient.startConnection(anyObject())).then {
       connectionCounter += 1
       val listener = it.getArgument<InstallReferrerStateListener>(0)
       listener.onInstallReferrerSetupFinished(

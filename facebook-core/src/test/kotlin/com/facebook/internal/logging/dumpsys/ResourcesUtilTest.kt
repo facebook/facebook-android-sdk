@@ -2,11 +2,11 @@ package com.facebook.internal.logging.dumpsys
 
 import android.content.res.Resources
 import com.facebook.FacebookTestCase
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
-import org.powermock.api.mockito.PowerMockito.`when`
 
 class ResourcesUtilTest : FacebookTestCase() {
 
@@ -19,14 +19,14 @@ class ResourcesUtilTest : FacebookTestCase() {
   @Before
   fun before() {
     mockResource = mock(Resources::class.java)
-    `when`(mockResource.getResourceTypeName(resourceId1)).thenReturn("type_name1")
-    `when`(mockResource.getResourceEntryName(resourceId1)).thenReturn("entry_name1")
+    whenever(mockResource.getResourceTypeName(resourceId1)).thenReturn("type_name1")
+    whenever(mockResource.getResourceEntryName(resourceId1)).thenReturn("entry_name1")
 
-    `when`(mockResource.getResourceTypeName(resourceId2)).thenReturn("type_name2")
-    `when`(mockResource.getResourceEntryName(resourceId2)).thenReturn("entry_name2")
-    `when`(mockResource.getResourcePackageName(resourceId2)).thenReturn("package_name2")
+    whenever(mockResource.getResourceTypeName(resourceId2)).thenReturn("type_name2")
+    whenever(mockResource.getResourceEntryName(resourceId2)).thenReturn("entry_name2")
+    whenever(mockResource.getResourcePackageName(resourceId2)).thenReturn("package_name2")
 
-    `when`(mockResource.getResourcePackageName(resourceId3))
+    whenever(mockResource.getResourcePackageName(resourceId3))
         .thenThrow(Resources.NotFoundException())
   }
 

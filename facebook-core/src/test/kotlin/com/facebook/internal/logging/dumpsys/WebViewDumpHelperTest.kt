@@ -6,6 +6,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebView
 import com.facebook.FacebookTestCase
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.PrintWriter
 import java.io.StringWriter
 import org.junit.Assert.assertEquals
@@ -14,7 +15,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
-import org.powermock.api.mockito.PowerMockito.`when`
 
 class WebViewDumpHelperTest : FacebookTestCase() {
   private lateinit var mockWebView: WebView
@@ -29,8 +29,8 @@ class WebViewDumpHelperTest : FacebookTestCase() {
     mockResources = mock(Resources::class.java)
     mockDisplayMetrics = mock(DisplayMetrics::class.java)
     mockDisplayMetrics.scaledDensity = 1.0f
-    `when`(mockResources.displayMetrics).thenReturn(mockDisplayMetrics)
-    `when`(mockWebView.resources).thenReturn(mockResources)
+    whenever(mockResources.displayMetrics).thenReturn(mockDisplayMetrics)
+    whenever(mockWebView.resources).thenReturn(mockResources)
 
     dumpHelper = WebViewDumpHelper()
   }
@@ -49,7 +49,7 @@ class WebViewDumpHelperTest : FacebookTestCase() {
   fun `test handle and then dump`() {
     var scriptWithOffset: String? = null
     var valueCallback: ValueCallback<String>? = null
-    `when`(mockWebView.evaluateJavascript(any<String>(), any())).then {
+    whenever(mockWebView.evaluateJavascript(any<String>(), any())).then {
       scriptWithOffset = it.arguments[0] as String
       valueCallback = it.arguments[1] as ValueCallback<String>
       return@then 0

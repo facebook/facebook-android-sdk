@@ -66,7 +66,7 @@ class FetchedAppSettingsTest : FacebookTestCase() {
     assertEquals("APP_INVITES_DIALOG", parseDialogConfig.featureName)
     assertEquals(
         Uri.parse("/connect/dialog/MPlatformAppInvitesJSDialog"), parseDialogConfig.fallbackUrl)
-    assertArrayEquals(intArrayOf(20140701, 20140702, 20140703), parseDialogConfig.versionSpec)
+    assertArrayEquals(intArrayOf(20_140_701, 20_140_702, 20_140_703), parseDialogConfig.versionSpec)
   }
 
   @Test
@@ -113,7 +113,7 @@ class FetchedAppSettingsTest : FacebookTestCase() {
     assertEquals(
         "com.facebook.platform.action.request.APPINVITES_DIALOG", parseDialogConfig.dialogName)
     assertEquals("APP_INVITES_DIALOG", parseDialogConfig.featureName)
-    assertArrayEquals(intArrayOf(20140701, 20140702, 20140703), parseDialogConfig.versionSpec)
+    assertArrayEquals(intArrayOf(20_140_701, 20_140_702, 20_140_703), parseDialogConfig.versionSpec)
   }
 
   @Test

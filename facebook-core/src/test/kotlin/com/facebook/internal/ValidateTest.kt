@@ -26,6 +26,7 @@ import com.facebook.internal.Validate.notEmpty
 import com.facebook.internal.Validate.notNull
 import com.facebook.internal.Validate.notNullOrEmpty
 import com.facebook.internal.Validate.oneOf
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -100,13 +101,13 @@ class ValidateTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testHasAppID() {
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(appID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(appID)
     assertEquals(appID, hasAppID())
   }
 
   @Test(expected = IllegalStateException::class)
   fun testHasNoAppID() {
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(null)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(null)
     hasAppID()
   }
 }

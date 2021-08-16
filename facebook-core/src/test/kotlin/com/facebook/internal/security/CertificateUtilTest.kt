@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -14,7 +15,6 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.powermock.api.mockito.PowerMockito.mock
-import org.powermock.api.mockito.PowerMockito.`when`
 
 class CertificateUtilTest : FacebookPowerMockTestCase() {
   private lateinit var mockContext: Context
@@ -30,16 +30,16 @@ class CertificateUtilTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockSignature1 = mock(Signature::class.java)
-    `when`(mockSignature1.toByteArray()).thenReturn(byteArrayOf(1))
+    whenever(mockSignature1.toByteArray()).thenReturn(byteArrayOf(1))
     mockSignature2 = mock(Signature::class.java)
-    `when`(mockSignature2.toByteArray()).thenReturn(byteArrayOf(2))
+    whenever(mockSignature2.toByteArray()).thenReturn(byteArrayOf(2))
 
     mockContext = mock(Context::class.java)
     mockPackageManager = mock(PackageManager::class.java)
     mockPackageInfo = PackageInfo()
-    `when`(mockContext.packageManager).thenReturn(mockPackageManager)
-    `when`(mockContext.packageName).thenReturn(PACKAGE_NAME)
-    `when`(mockPackageManager.getPackageInfo(anyString(), anyInt())).thenReturn(mockPackageInfo)
+    whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+    whenever(mockContext.packageName).thenReturn(PACKAGE_NAME)
+    whenever(mockPackageManager.getPackageInfo(anyString(), anyInt())).thenReturn(mockPackageInfo)
   }
 
   @Test
@@ -51,7 +51,7 @@ class CertificateUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test exception in access package info`() {
-    `when`(mockPackageManager.getPackageInfo(anyString(), anyInt()))
+    whenever(mockPackageManager.getPackageInfo(anyString(), anyInt()))
         .thenThrow(PackageManager.NameNotFoundException(PACKAGE_NAME))
     val certificateHash = CertificateUtil.getCertificateHash(mockContext)
     assertEquals("", certificateHash)

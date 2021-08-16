@@ -26,11 +26,12 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.InstrumentData
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -47,18 +48,18 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
 
     mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(mockInstrumentData.save()).then {
+    whenever(mockInstrumentData.save()).then {
       return@then Unit
     }
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
+    whenever(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
         .thenReturn(mockInstrumentData)
     PowerMockito.spy(CrashShieldHandler::class.java)
-    PowerMockito.`when`(CrashShieldHandler.isDebug()).thenReturn(false)
+    whenever(CrashShieldHandler.isDebug()).thenReturn(false)
   }
 
   @Test

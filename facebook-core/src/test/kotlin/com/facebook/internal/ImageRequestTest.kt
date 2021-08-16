@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.util.common.assertThrows
+import com.nhaarman.mockitokotlin2.whenever
 import java.net.URLEncoder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -33,8 +34,8 @@ class ImageRequestTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getGraphApiVersion()).thenReturn(apiVersion)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getGraphApiVersion()).thenReturn(apiVersion)
   }
 
   @Test
@@ -54,8 +55,8 @@ class ImageRequestTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `all valid ok no access token`() {
-    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn(clientToken)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(appId)
+    whenever(FacebookSdk.getClientToken()).thenReturn(clientToken)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(appId)
     val uri = ImageRequest.getProfilePictureUri(userId, width, height)
     val expectedToken = URLEncoder.encode("$appId|$clientToken", "utf-8")
     val expectedUri =
@@ -72,8 +73,8 @@ class ImageRequestTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `valid no client token`() {
-    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn("")
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(appId)
+    whenever(FacebookSdk.getClientToken()).thenReturn("")
+    whenever(FacebookSdk.getApplicationId()).thenReturn(appId)
     val uri = ImageRequest.getProfilePictureUri(userId, width, height, "")
     val expectedUri =
         "https://graph.null/$apiVersion/$userId/picture?height=$height&width=$width&migration_overrides=$migrateValueEncoded"
@@ -89,8 +90,8 @@ class ImageRequestTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `valid no application id`() {
-    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn(clientToken)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("")
+    whenever(FacebookSdk.getClientToken()).thenReturn(clientToken)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("")
     val uri = ImageRequest.getProfilePictureUri(userId, width, height, "")
     val expectedUri =
         "https://graph.null/$apiVersion/$userId/picture?height=$height&width=$width&migration_overrides=$migrateValueEncoded"

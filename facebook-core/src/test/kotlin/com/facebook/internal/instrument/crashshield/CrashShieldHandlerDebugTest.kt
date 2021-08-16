@@ -27,6 +27,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.InstrumentData
 import com.facebook.util.common.anyObject
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -48,22 +49,22 @@ class CrashShieldHandlerDebugTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
 
     mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(mockInstrumentData.save()).then {
+    whenever(mockInstrumentData.save()).then {
       return@then Unit
     }
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
+    whenever(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
         .thenReturn(mockInstrumentData)
     PowerMockito.spy(CrashShieldHandler::class.java)
-    PowerMockito.`when`(CrashShieldHandler.isDebug()).thenReturn(true)
+    whenever(CrashShieldHandler.isDebug()).thenReturn(true)
     mockLooper = PowerMockito.mock(Looper::class.java)
     mockHandler = PowerMockito.mock(Handler::class.java)
     PowerMockito.mockStatic(Looper::class.java)
-    PowerMockito.`when`(Looper.getMainLooper()).thenReturn(mockLooper)
+    whenever(Looper.getMainLooper()).thenReturn(mockLooper)
     PowerMockito.whenNew(Handler::class.java).withAnyArguments().thenReturn(mockHandler)
   }
 

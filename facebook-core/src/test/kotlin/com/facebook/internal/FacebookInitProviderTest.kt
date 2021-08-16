@@ -6,6 +6,7 @@ import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -28,7 +29,7 @@ class FacebookInitProviderTest : FacebookPowerMockTestCase() {
   @Test
   fun `test onCreate call FacebookSdk initialization`() {
     var capturedContext: Context? = null
-    PowerMockito.`when`(FacebookSdk.sdkInitialize(any())).thenAnswer {
+    whenever(FacebookSdk.sdkInitialize(any())).thenAnswer {
       capturedContext = it.arguments[0] as Context
       Unit
     }

@@ -26,6 +26,7 @@ import com.facebook.internal.instrument.InstrumentData
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -40,7 +41,7 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   fun init() {
     mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
+    whenever(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
         .thenReturn(mockInstrumentData)
     PowerMockito.mockStatic(Log::class.java)
   }
@@ -48,7 +49,7 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test ui thread violation`() {
     var logMessage: String = ""
-    PowerMockito.`when`(Log.e(anyString(), anyString(), any())).then {
+    whenever(Log.e(anyString(), anyString(), any())).then {
       logMessage = it.arguments[1] as String
       return@then 0
     }
@@ -62,7 +63,7 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test worker thread violation`() {
     var logMessage: String = ""
-    PowerMockito.`when`(Log.e(anyString(), anyString(), any())).then {
+    whenever(Log.e(anyString(), anyString(), any())).then {
       logMessage = it.arguments[1] as String
       return@then 0
     }

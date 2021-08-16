@@ -23,6 +23,7 @@ package com.facebook.internal
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.util.common.CaptureExecutor
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Callable
 import org.junit.Assert
 import org.junit.Before
@@ -45,8 +46,8 @@ class LockOnGetVariableTest : FacebookPowerMockTestCase() {
   fun init() {
     executor = CaptureExecutor()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenReturn(executor)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(executor)
   }
 
   @Test

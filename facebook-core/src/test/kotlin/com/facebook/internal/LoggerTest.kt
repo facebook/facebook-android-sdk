@@ -4,6 +4,7 @@ import android.util.Log
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.LoggingBehavior
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -25,9 +26,8 @@ class LoggerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.mockStatic(Log::class.java)
 
-    PowerMockito.`when`(FacebookSdk.isLoggingBehaviorEnabled(LoggingBehavior.APP_EVENTS))
-        .thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.isLoggingBehaviorEnabled(LoggingBehavior.GRAPH_API_DEBUG_INFO))
+    whenever(FacebookSdk.isLoggingBehaviorEnabled(LoggingBehavior.APP_EVENTS)).thenReturn(true)
+    whenever(FacebookSdk.isLoggingBehaviorEnabled(LoggingBehavior.GRAPH_API_DEBUG_INFO))
         .thenReturn(false)
 
     Logger.registerAccessToken(fbToken)
@@ -37,8 +37,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test easy log`() {
     var callCount = 0
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(content)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(content))).then {
+      callCount++
+    }
     Logger.log(LoggingBehavior.APP_EVENTS, tag, content)
     assertEquals(1, callCount)
   }
@@ -46,8 +47,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test format log`() {
     var callCount = 0
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(content)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(content))).then {
+      callCount++
+    }
     Logger.log(LoggingBehavior.APP_EVENTS, tag, "%s %s", "test", "content")
     assertEquals(1, callCount)
   }
@@ -55,8 +57,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test disable behaviour log`() {
     var callCount = 0
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(content)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(content))).then {
+      callCount++
+    }
     Logger.log(LoggingBehavior.GRAPH_API_DEBUG_INFO, tag, content)
     assertEquals(0, callCount)
   }
@@ -66,8 +69,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
     var callCount = 0
     val newContent = contentWithFBToken.replace(fbToken, "ACCESS_TOKEN_REMOVED")
 
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent))).then {
+      callCount++
+    }
 
     Logger.log(LoggingBehavior.APP_EVENTS, tag, contentWithFBToken)
     assertEquals(1, callCount)
@@ -78,8 +82,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
     var callCount = 0
     val newContent = contentWithIGToken.replace(igToken, "removed")
 
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent))).then {
+      callCount++
+    }
     Logger.log(LoggingBehavior.APP_EVENTS, tag, contentWithIGToken)
     assertEquals(1, callCount)
   }
@@ -103,8 +108,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
     logger.appendKeyValue("key", "value")
     assertEquals(newContent, logger.getContents())
 
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent))).then {
+      callCount++
+    }
 
     logger.log()
     assertEquals(1, callCount)
@@ -119,8 +125,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
     logger.append(contentWithFBToken)
     assertEquals(newContent, logger.getContents())
 
-    PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
-        .then { callCount++ }
+    whenever(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent))).then {
+      callCount++
+    }
 
     logger.log()
     assertEquals(1, callCount)

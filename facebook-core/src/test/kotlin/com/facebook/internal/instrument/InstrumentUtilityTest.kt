@@ -3,6 +3,7 @@ package com.facebook.internal.instrument
 import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.util.UUID
 import org.json.JSONArray
@@ -15,7 +16,6 @@ import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(FacebookSdk::class)
@@ -30,8 +30,8 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
     rootDirectory.mkdir()
     mockStatic(FacebookSdk::class.java)
     val mockContext = mock(Context::class.java)
-    `when`(mockContext.cacheDir).thenReturn(rootDirectory)
-    `when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(mockContext.cacheDir).thenReturn(rootDirectory)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
   @After
@@ -61,7 +61,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 "com.facebook.appevents.codeless.CodelessManager", "onActivityResumed", "file", 10))
     mockStatic(Thread::class.java)
     val thread: Thread = mock(Thread::class.java)
-    `when`(thread.stackTrace).thenReturn(trace)
+    whenever(thread.stackTrace).thenReturn(trace)
     val result = InstrumentUtility.getStackTrace(thread)
     val expected = JSONArray()
     expected.put("com.facebook.appevents.codeless.CodelessManager.onActivityResumed(file:10)")
@@ -75,7 +75,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
     var trace =
         arrayOf(StackTraceElement("com.cfsample.coffeeshop.AnrActivity", "onClick", "file", 10))
-    `when`(thread.stackTrace).thenReturn(trace)
+    whenever(thread.stackTrace).thenReturn(trace)
     assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
 
     // Exclude onClick(), onItemClick() or onTouch() when they are calling app itself's click
@@ -99,7 +99,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 "RCTCodelessLoggingEventListener.java",
                 10),
         )
-    `when`(thread.stackTrace).thenReturn(trace)
+    whenever(thread.stackTrace).thenReturn(trace)
     assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
 
     // If onClick() calls process() and there is an ANR in process(), it's SDK related
@@ -118,7 +118,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
             StackTraceElement(
                 "com.nhaarman.mockitokotlin2.any", "onClick", "ViewOnClickListener.java", 10),
         )
-    `when`(thread.stackTrace).thenReturn(trace)
+    whenever(thread.stackTrace).thenReturn(trace)
     assertTrue(InstrumentUtility.isSDKRelatedThread(thread))
   }
 

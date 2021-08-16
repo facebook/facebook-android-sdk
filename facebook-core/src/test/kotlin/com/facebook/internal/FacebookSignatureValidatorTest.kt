@@ -27,6 +27,7 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -34,7 +35,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 /** Tests for {@link com.facebook.internal.FacebookSignatureValidator}. */
@@ -53,8 +53,8 @@ class FacebookSignatureValidatorTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockStatic(Utility::class.java)
-    `when`(mockActivity.packageManager).thenReturn(mockPackageManager)
-    `when`(mockActivity.applicationInfo).thenReturn(mockApplicationInfo)
+    whenever(mockActivity.packageManager).thenReturn(mockPackageManager)
+    whenever(mockActivity.applicationInfo).thenReturn(mockApplicationInfo)
   }
 
   @Test
@@ -84,17 +84,17 @@ class FacebookSignatureValidatorTest : FacebookPowerMockTestCase() {
   private fun setupPackageManagerForApp(isInstalled: Boolean, hasValidSignature: Boolean) {
     if (isInstalled) {
       val packageInfo = PackageInfo()
-      `when`(mockPackageManager.getPackageInfo(PACKAGE_NAME, PackageManager.GET_SIGNATURES))
+      whenever(mockPackageManager.getPackageInfo(PACKAGE_NAME, PackageManager.GET_SIGNATURES))
           .thenReturn(packageInfo)
       val signature = mock(Signature::class.java)
-      `when`(signature.toByteArray()).thenReturn(byteArrayOf())
+      whenever(signature.toByteArray()).thenReturn(byteArrayOf())
       packageInfo.signatures = arrayOf(signature)
 
       if (hasValidSignature) {
-        `when`(Utility.sha1hash(signature.toByteArray())).thenReturn(APP_HASH)
+        whenever(Utility.sha1hash(signature.toByteArray())).thenReturn(APP_HASH)
       }
     } else {
-      `when`(mockPackageManager.getPackageInfo(PACKAGE_NAME, PackageManager.GET_SIGNATURES))
+      whenever(mockPackageManager.getPackageInfo(PACKAGE_NAME, PackageManager.GET_SIGNATURES))
           .thenThrow(PackageManager.NameNotFoundException())
     }
   }

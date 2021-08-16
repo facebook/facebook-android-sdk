@@ -24,11 +24,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.CallbackManagerImpl.Companion.registerStaticCallback
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -37,9 +37,9 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
-    `when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     // Reset the static state every time so tests don't interfere with each other.
     Whitebox.setInternalState(

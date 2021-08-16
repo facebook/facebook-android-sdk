@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -23,9 +24,9 @@ class ServerProtocolTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", mockExecutor)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
   }
 
@@ -44,7 +45,7 @@ class ServerProtocolTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(
             FacebookSdk.getApplicationSignature(ApplicationProvider.getApplicationContext()))
         .thenReturn("abc123")
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(appId)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(appId)
     val params =
         ServerProtocol.getQueryParamsForPlatformActivityIntentWebFallback(callId, version, Bundle())
     assertNotNull(params)

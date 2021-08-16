@@ -3,6 +3,7 @@ package com.facebook.internal
 import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.io.IOException
 import org.junit.After
@@ -14,7 +15,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -41,14 +41,14 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     testCacheFilePath.mkdir()
 
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
-    `when`(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
-    `when`(FacebookSdk.getCacheDir()).thenReturn(testCacheFilePath)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
+    whenever(FacebookSdk.getCacheDir()).thenReturn(testCacheFilePath)
 
-    `when`(fromUri.toString()).thenReturn(FROM_URI_STRING)
-    `when`(fromUri2.toString()).thenReturn(FROM_URI_STRING2)
-    `when`(toUri.toString()).thenReturn(TO_URI_STRING)
-    `when`(toUriLong.toString()).thenReturn(TO_URI_STRING_LONG)
+    whenever(fromUri.toString()).thenReturn(FROM_URI_STRING)
+    whenever(fromUri2.toString()).thenReturn(FROM_URI_STRING2)
+    whenever(toUri.toString()).thenReturn(TO_URI_STRING)
+    whenever(toUriLong.toString()).thenReturn(TO_URI_STRING_LONG)
 
     val nullCache: FileLruCache? = null
     Whitebox.setInternalState(UrlRedirectCache::class.java, "urlRedirectFileLruCache", nullCache)
@@ -132,8 +132,9 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
   @Test
   fun `test FileLRUCache is broken`() {
     val mockFileLruCache = mock(FileLruCache::class.java)
-    `when`(mockFileLruCache.get(anyString(), anyString())).thenThrow(IOException("mock exception"))
-    `when`(mockFileLruCache.openPutStream(anyString(), anyString()))
+    whenever(mockFileLruCache.get(anyString(), anyString()))
+        .thenThrow(IOException("mock exception"))
+    whenever(mockFileLruCache.openPutStream(anyString(), anyString()))
         .thenThrow(IOException("mock exception"))
 
     Whitebox.setInternalState(

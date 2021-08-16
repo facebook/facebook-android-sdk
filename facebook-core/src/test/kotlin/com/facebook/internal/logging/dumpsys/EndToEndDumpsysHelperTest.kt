@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.PrintWriter
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
@@ -36,9 +37,9 @@ class EndToEndDumpsysHelperTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(mockE2EHelper, "webViewDumpHelper", mockWebViewDumpHelper)
     val mockRoot = PowerMockito.mock(AndroidRootResolver.Root::class.java)
     val mockView = PowerMockito.mock(View::class.java)
-    PowerMockito.`when`(mockView.visibility).thenReturn(View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE)
-    PowerMockito.`when`(mockRoot.view).thenReturn(mockView)
-    PowerMockito.`when`(mockRootResolver.listActiveRoots()).thenReturn(listOf(mockRoot))
+    whenever(mockView.visibility).thenReturn(View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE)
+    whenever(mockRoot.view).thenReturn(mockView)
+    whenever(mockRootResolver.listActiveRoots()).thenReturn(listOf(mockRoot))
   }
 
   @Test

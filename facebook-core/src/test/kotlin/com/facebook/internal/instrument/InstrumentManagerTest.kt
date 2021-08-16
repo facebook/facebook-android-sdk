@@ -31,6 +31,7 @@ import com.facebook.internal.instrument.errorreport.ErrorReportHandler
 import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -62,15 +63,15 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
-    PowerMockito.`when`(FacebookSdk.getAutoLogAppEventsEnabled()).thenAnswer {
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenAnswer {
       return@thenAnswer isLogAppEventsEnable
     }
     listOfCallbacks = arrayListOf()
     PowerMockito.mockStatic(FeatureManager::class.java)
-    PowerMockito.`when`(FeatureManager.checkFeature(any(), any())).then {
+    whenever(FeatureManager.checkFeature(any(), any())).then {
       val callback = it.arguments[1] as FeatureManager.Callback
       listOfCallbacks.add(callback)
       return@then Unit
@@ -87,35 +88,31 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
         .enable()
 
     PowerMockito.mockStatic(ExceptionAnalyzer::class.java)
-    PowerMockito.doAnswer {
-          isExceptionAnalyzerEnable = true
-          Unit
-        }
-        .`when`(ExceptionAnalyzer::class.java, "enable")
+    whenever(ExceptionAnalyzer.enable()).thenAnswer {
+      isExceptionAnalyzerEnable = true
+      Unit
+    }
     PowerMockito.mockStatic(CrashShieldHandler::class.java)
-    PowerMockito.doAnswer {
-          isCrashShieldHandlerEnable = true
-          Unit
-        }
-        .`when`(CrashShieldHandler::class.java, "enable")
+
+    whenever(CrashShieldHandler.enable()).thenAnswer {
+      isCrashShieldHandlerEnable = true
+      Unit
+    }
     PowerMockito.mockStatic(ThreadCheckHandler::class.java)
-    PowerMockito.doAnswer {
-          isThreadCheckHandlerEnable = true
-          Unit
-        }
-        .`when`(ThreadCheckHandler::class.java, "enable")
+    whenever(ThreadCheckHandler.enable()).thenAnswer {
+      isThreadCheckHandlerEnable = true
+      Unit
+    }
     PowerMockito.mockStatic(ErrorReportHandler::class.java)
-    PowerMockito.doAnswer {
-          isErrorReportHandlerEnable = true
-          Unit
-        }
-        .`when`(ErrorReportHandler::class.java, "enable")
+    whenever(ErrorReportHandler.enable()).thenAnswer {
+      isErrorReportHandlerEnable = true
+      Unit
+    }
     PowerMockito.mockStatic(ANRHandler::class.java)
-    PowerMockito.doAnswer {
-          isAnrHandlerEnable = true
-          Unit
-        }
-        .`when`(ANRHandler::class.java, "enable")
+    whenever(ANRHandler.enable()).thenAnswer {
+      isAnrHandlerEnable = true
+      Unit
+    }
   }
 
   @Test
@@ -128,7 +125,7 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test start with all features enable`() {
     isLogAppEventsEnable = true
-    PowerMockito.`when`(FeatureManager.isEnabled(any())).thenReturn(true)
+    whenever(FeatureManager.isEnabled(any())).thenReturn(true)
     InstrumentManager.start()
     listOfCallbacks.forEach { it.onCompleted(true) }
     Assert.assertTrue(isCrashHandlerEnable)

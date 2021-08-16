@@ -2,6 +2,7 @@ package com.facebook.internal.instrument.errorreport
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.instrument.InstrumentUtility
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -9,7 +10,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(InstrumentUtility::class)
@@ -23,7 +23,7 @@ class ErrorReportDataTest : FacebookPowerMockTestCase() {
   fun init() {
     mockStatic(InstrumentUtility::class.java)
     val jsonObject = JSONObject(validJson)
-    `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
+    whenever(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
         .thenReturn(jsonObject)
   }
 
@@ -37,7 +37,7 @@ class ErrorReportDataTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test compare to`() {
-    `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
+    whenever(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
         .thenReturn(JSONObject(validJson), JSONObject(jsonWithoutTimestamp))
     val data1 = ErrorReportData(File("swag1"))
     val data2 = ErrorReportData(File("swag2"))

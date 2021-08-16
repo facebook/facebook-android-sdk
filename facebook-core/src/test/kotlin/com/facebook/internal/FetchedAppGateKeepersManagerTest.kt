@@ -6,6 +6,7 @@ import com.facebook.internal.gatekeeper.GateKeeper
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONObject
 import org.junit.After
@@ -15,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -83,27 +83,27 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
-    `when`(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_NAME)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_NAME)
     loadAsyncTimes = 0
     mockStatic(FetchedAppGateKeepersManager::class.java)
 
-    `when`(
+    whenever(
             FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(
                 eq(APPLICATION_NAME), anyOrNull()))
         .thenCallRealMethod()
 
-    `when`(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), anyOrNull(), any()))
+    whenever(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), anyOrNull(), any()))
         .thenCallRealMethod()
 
-    `when`(FetchedAppGateKeepersManager.getGateKeepersForApplication(anyOrNull()))
+    whenever(FetchedAppGateKeepersManager.getGateKeepersForApplication(anyOrNull()))
         .thenCallRealMethod()
 
-    `when`(FetchedAppGateKeepersManager.setRuntimeGateKeeper(any(), any())).thenCallRealMethod()
+    whenever(FetchedAppGateKeepersManager.setRuntimeGateKeeper(any(), any())).thenCallRealMethod()
 
-    `when`(FetchedAppGateKeepersManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
+    whenever(FetchedAppGateKeepersManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
 
-    `when`(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
+    whenever(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
 
     // because it is a static variable which holds a lot of state about the GKs, we need to reset it
     // every time

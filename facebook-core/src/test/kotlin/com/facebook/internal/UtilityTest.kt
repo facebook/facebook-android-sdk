@@ -61,38 +61,34 @@ class UtilityTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
-    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn(mockClientToken)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
+    whenever(FacebookSdk.getClientToken()).thenReturn(mockClientToken)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
-    PowerMockito.`when`(FacebookSdk.getGraphDomain()).thenCallRealMethod()
-    PowerMockito.`when`(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
-    PowerMockito.`when`(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
+    whenever(FacebookSdk.getGraphDomain()).thenCallRealMethod()
+    whenever(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
+    whenever(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
   }
 
   @Test
-  @Throws(Exception::class)
   fun testGetGraphMeRequestWithCacheAsyncNoGraphDomain() {
     createTestForGetGraphMeRequestWithCacheAsync(null, "id,name,first_name,middle_name,last_name")
   }
 
   @Test
-  @Throws(Exception::class)
   fun testGetGraphMeRequestWithCacheAsyncNullGraphDomain() {
     createTestForGetGraphMeRequestWithCacheAsync(
         "facebook", "id,name,first_name,middle_name,last_name")
   }
 
   @Test
-  @Throws(Exception::class)
   fun testGetGraphMeRequestWithCacheAsyncGGGraphDomain() {
     createTestForGetGraphMeRequestWithCacheAsync(
         "gaming", "id,name,first_name,middle_name,last_name")
   }
 
   @Test
-  @Throws(Exception::class)
   fun testGetGraphMeRequestWithCacheAsyncIGGraphDomain() {
     createTestForGetGraphMeRequestWithCacheAsync("instagram", "id,name,profile_picture")
   }
@@ -109,7 +105,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(graphDomain).isEqualTo("instagram.com")
   }
 
-  @Throws(Exception::class)
   fun createTestForGetGraphMeRequestWithCacheAsync(graphDomain: String?, expectedFields: String) {
     PowerMockito.whenNew(GraphRequest::class.java)
         .withAnyArguments()

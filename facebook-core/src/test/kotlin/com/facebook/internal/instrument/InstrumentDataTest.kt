@@ -2,6 +2,7 @@ package com.facebook.internal.instrument
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.Utility
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.lang.RuntimeException
 import org.json.JSONArray
@@ -14,7 +15,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(InstrumentUtility::class, Utility::class)
@@ -32,13 +32,13 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
   fun init() {
     val fileData = JSONObject(validJson)
     mockStatic(InstrumentUtility::class.java)
-    `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
+    whenever(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
         .thenReturn(fileData)
-    `when`(InstrumentUtility.getCause(isA(Throwable::class.java))).thenCallRealMethod()
-    `when`(InstrumentUtility.getStackTrace(isA(Throwable::class.java))).thenCallRealMethod()
+    whenever(InstrumentUtility.getCause(isA(Throwable::class.java))).thenCallRealMethod()
+    whenever(InstrumentUtility.getStackTrace(isA(Throwable::class.java))).thenCallRealMethod()
 
     mockStatic(Utility::class.java)
-    `when`(Utility.getAppVersion()).thenReturn("0.0.1")
+    whenever(Utility.getAppVersion()).thenReturn("0.0.1")
   }
 
   @Test
@@ -105,7 +105,7 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
   @Test
   fun `test save with exception report`() {
     var didWriteFile = false
-    `when`(InstrumentUtility.writeFile(isA(String::class.java), isA(String::class.java))).then {
+    whenever(InstrumentUtility.writeFile(isA(String::class.java), isA(String::class.java))).then {
       didWriteFile = true
       return@then Unit
     }

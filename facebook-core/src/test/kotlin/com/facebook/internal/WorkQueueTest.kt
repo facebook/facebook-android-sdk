@@ -216,7 +216,7 @@ class WorkQueueTest : FacebookTestCase() {
             }) {
           // Sleep
           try {
-            Thread.sleep(n / 4.toLong())
+            Thread.sleep(n / 4L)
           } catch (e: InterruptedException) {}
         } else if (n <
             trackThisWeight.let {

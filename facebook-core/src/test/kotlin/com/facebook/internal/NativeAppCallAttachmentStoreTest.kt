@@ -25,6 +25,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import org.junit.After
 import org.junit.Assert
@@ -46,8 +47,8 @@ class NativeAppCallAttachmentStoreTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists()
   }

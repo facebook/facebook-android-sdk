@@ -2,11 +2,11 @@ package com.facebook.internal.gatekeeper
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(FacebookSdk::class)
@@ -51,8 +51,8 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
   @Test
   fun `test write to default app Id`() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
-    `when`(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_ID2)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_ID2)
     val cache = GateKeeperRuntimeCache()
     cache.setGateKeeperValue(name = GK1, value = true)
     assertTrue(cache.getGateKeeperValue(name = GK1, defaultValue = false))

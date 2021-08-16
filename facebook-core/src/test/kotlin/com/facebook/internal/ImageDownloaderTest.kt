@@ -3,6 +3,7 @@ package com.facebook.internal
 import android.content.Context
 import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -10,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.eq
 import org.powermock.api.mockito.PowerMockito.mock
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -33,13 +33,13 @@ class ImageDownloaderTest : FacebookPowerMockTestCase() {
     mockRequest = mock(ImageRequest::class.java)
     mockContext = mock(Context::class.java)
 
-    `when`(mockRequest.imageUri).thenReturn(url)
-    `when`(mockRequest.callerTag).thenReturn(tag)
-    `when`(mockRequest.isCachedRedirectAllowed).thenReturn(true)
-    `when`(mockRequest.context).thenReturn(mockContext)
+    whenever(mockRequest.imageUri).thenReturn(url)
+    whenever(mockRequest.callerTag).thenReturn(tag)
+    whenever(mockRequest.isCachedRedirectAllowed).thenReturn(true)
+    whenever(mockRequest.context).thenReturn(mockContext)
 
     mockWorkItem = mock(WorkQueue.WorkItem::class.java)
-    `when`(mockWorkItem.cancel()).thenReturn(false)
+    whenever(mockWorkItem.cancel()).thenReturn(false)
 
     mockDownloaderContext = mock(ImageDownloader.DownloaderContext::class.java)
     whenNew(ImageDownloader.DownloaderContext::class.java)

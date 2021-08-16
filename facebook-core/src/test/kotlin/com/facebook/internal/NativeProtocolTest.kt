@@ -238,7 +238,7 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
 
   fun setUpMockingForNativeIntentGeneration(mockContext: Context) {
     PowerMockito.mockStatic(FacebookSignatureValidator::class.java)
-    PowerMockito.`when`(FacebookSignatureValidator.validateSignature(any(), any())).thenReturn(true)
+    whenever(FacebookSignatureValidator.validateSignature(any(), any())).thenReturn(true)
     val mockPackageManager = mock<PackageManager>()
     val mockResolveInfo = mock<ResolveInfo>()
     val mockActivityInfo = mock<ActivityInfo>()

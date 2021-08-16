@@ -22,6 +22,7 @@ package com.facebook.internal
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
@@ -37,7 +38,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(FacebookSdk::class)
@@ -76,20 +76,20 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.isFullyInitialized()).thenReturn(true)
-    `when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    `when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isFullyInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
-    `when`(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
+    whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
     val tmp = File(UUID.randomUUID().toString())
     tmp.mkdir()
     tmp.deleteOnExit()
-    `when`(FacebookSdk.getCacheDir()).thenReturn(tmp)
+    whenever(FacebookSdk.getCacheDir()).thenReturn(tmp)
   }
 
   @Test
   fun testCacheOutputStream() {
-    val dataSize = 1024
+    val dataSize = 1_024
     val data = generateBytes(dataSize)
     val key = "a"
 
@@ -105,7 +105,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testCacheInputStream() {
-    val dataSize = 1024
+    val dataSize = 1_024
     val data = generateBytes(dataSize)
     val key = "a"
     val stream: InputStream = ByteArrayInputStream(data)
@@ -124,7 +124,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testCacheClear() {
-    val dataSize = 1024
+    val dataSize = 1_024
     val data = generateBytes(dataSize)
     val key = "a"
 
@@ -144,7 +144,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testCacheClearMidBuffer() {
-    val dataSize = 1024
+    val dataSize = 1_024
     val data = generateBytes(dataSize)
     val key = "a"
     val key2 = "b"
@@ -296,7 +296,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
       }
       for (i in 0 until otherCount) {
         put(cache, keepCount + i, data)
-        Thread.sleep(1000)
+        Thread.sleep(1_000)
 
         // By verifying all the keep keys, they should be LRU and survive while the others do not.
         for (keepIndex in 0 until keepCount) {
@@ -337,7 +337,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
         thread.start()
       }
       for (thread in threads) {
-        thread.join(10 * 1000.toLong(), 0)
+        thread.join(10 * 1_000L, 0)
       }
 
       // Verify that the file state ended up consistent in the end
@@ -431,7 +431,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
 
   private fun consumeAndClose(stream: InputStream) {
     try {
-      val buffer = ByteArray(1024)
+      val buffer = ByteArray(1_024)
       while (stream.read(buffer) > -1) {
         // these bytes intentionally ignored
       }

@@ -6,6 +6,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.InstrumentUtility
 import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.util.UUID
 import org.json.JSONArray
@@ -15,7 +16,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
-import org.powermock.api.mockito.PowerMockito.*
+import org.powermock.api.mockito.PowerMockito.mock
+import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(
@@ -39,12 +41,12 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
     directory.mkdirs()
     rootDirectory = File(rootName)
     mockStatic(InstrumentUtility::class.java)
-    `when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
-    `when`(
+    whenever(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
+    whenever(
             InstrumentUtility.writeFile(
                 ArgumentMatchers.isA(String::class.java), ArgumentMatchers.isA(String::class.java)))
         .thenCallRealMethod()
-    `when`(
+    whenever(
             InstrumentUtility.readFile(
                 ArgumentMatchers.isA(String::class.java),
                 ArgumentMatchers.isA(Boolean::class.java)))
@@ -58,13 +60,13 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
     mockStatic(FacebookSdk::class.java)
     val mockContext = mock(Context::class.java)
     val mockSharedPreferences = mock(SharedPreferences::class.java)
-    `when`(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null))
+    whenever(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null))
         .thenReturn(null)
-    `when`(
+    whenever(
             mockContext.getSharedPreferences(
                 FacebookSdk.DATA_PROCESSING_OPTIONS_PREFERENCES, Context.MODE_PRIVATE))
         .thenReturn(mockSharedPreferences)
-    `when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
   @After
@@ -81,7 +83,7 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test send error log`() {
     var errorLogs: JSONArray? = null
-    `when`(InstrumentUtility.sendReports(anyObject(), anyObject(), anyObject())).thenAnswer {
+    whenever(InstrumentUtility.sendReports(anyObject(), anyObject(), anyObject())).thenAnswer {
       errorLogs = it.getArgument(1) as JSONArray
       null
     }

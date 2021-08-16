@@ -4,6 +4,7 @@ import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -14,7 +15,6 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -30,15 +30,15 @@ class ImageResponseCacheTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
 
     mockCache = mock(FileLruCache::class.java)
     mockInputStream = mock(InputStream::class.java)
     mockHttpURLConnection = mock(HttpURLConnection::class.java)
 
-    `when`(mockCache.get(cdnUrl)).thenReturn(mockInputStream)
-    `when`(mockCache.interceptAndPut(anyString(), anyObject())).thenReturn(mockInputStream)
-    `when`(mockHttpURLConnection.url).thenReturn(URL(cdnUrl))
+    whenever(mockCache.get(cdnUrl)).thenReturn(mockInputStream)
+    whenever(mockCache.interceptAndPut(anyString(), anyObject())).thenReturn(mockInputStream)
+    whenever(mockHttpURLConnection.url).thenReturn(URL(cdnUrl))
 
     Whitebox.setInternalState(ImageResponseCache::class.java, "imageCache", mockCache)
   }
@@ -72,14 +72,14 @@ class ImageResponseCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test intercept and cache image`() {
-    `when`(mockHttpURLConnection.responseCode).thenReturn(HttpURLConnection.HTTP_OK)
+    whenever(mockHttpURLConnection.responseCode).thenReturn(HttpURLConnection.HTTP_OK)
     val stream = ImageResponseCache.interceptAndCacheImageStream(mockHttpURLConnection)
     assertEquals(mockInputStream, stream)
   }
 
   @Test
   fun `test intercept and cache image with bad connection`() {
-    `when`(mockHttpURLConnection.responseCode).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST)
+    whenever(mockHttpURLConnection.responseCode).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST)
     val stream = ImageResponseCache.interceptAndCacheImageStream(mockHttpURLConnection)
     assertNull(stream)
   }

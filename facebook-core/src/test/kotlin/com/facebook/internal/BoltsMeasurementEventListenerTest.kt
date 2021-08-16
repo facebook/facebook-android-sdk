@@ -28,6 +28,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -38,20 +39,19 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 class BoltsMeasurementEventListenerTest : FacebookPowerMockTestCase() {
   private lateinit var mockLocalBroadcastManager: LocalBroadcastManager
   private lateinit var mockContext: Context
-  private var capturedReceiver: BroadcastReceiver? = null
-  private var capturedIntentFilter: IntentFilter? = null
+  private lateinit var capturedReceiver: BroadcastReceiver
+  private lateinit var capturedIntentFilter: IntentFilter
 
   @Before
   fun init() {
     mockContext = PowerMockito.mock(Context::class.java)
-    PowerMockito.`when`(mockContext.applicationContext)
-        .thenReturn(ApplicationProvider.getApplicationContext())
+    whenever(mockContext.applicationContext).thenReturn(ApplicationProvider.getApplicationContext())
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
 
     mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
-    PowerMockito.`when`(mockLocalBroadcastManager.registerReceiver(any(), any())).thenAnswer {
+    whenever(mockLocalBroadcastManager.registerReceiver(any(), any())).thenAnswer {
       capturedReceiver = it.arguments[0] as BroadcastReceiver
       capturedIntentFilter = it.arguments[1] as IntentFilter
       Unit

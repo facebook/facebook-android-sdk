@@ -8,6 +8,8 @@ import com.facebook.internal.instrument.InstrumentUtility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.lang.reflect.Field
 import org.junit.Before
 import org.junit.Test
@@ -34,7 +36,7 @@ class ANRDetectorTest : FacebookPowerMockTestCase() {
 
     val stacktrace = "com.facebook.appevents.codeless.CodelessManager.onActivityResumed(file:10)"
     PowerMockito.mockStatic(InstrumentUtility::class.java)
-    PowerMockito.`when`(InstrumentUtility.getStackTrace(any<Thread>())).thenReturn(stacktrace)
+    whenever(InstrumentUtility.getStackTrace(any<Thread>())).thenReturn(stacktrace)
     PowerMockito.`when`(
             InstrumentUtility.writeFile(
                 ArgumentMatchers.isA(String::class.java), ArgumentMatchers.isA(String::class.java)))
@@ -54,10 +56,10 @@ class ANRDetectorTest : FacebookPowerMockTestCase() {
   @Test
   fun `test Anr is not detected when process list is null`() {
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<String>(), any<String>()))
+    whenever(InstrumentData.Builder.build(any<String>(), any<String>()))
         .thenReturn(mockInstrumentData)
-    PowerMockito.`when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
-    PowerMockito.`when`(am.processesInErrorState).thenReturn(null)
+    whenever(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
+    whenever(am.processesInErrorState).thenReturn(null)
     ANRDetector.checkProcessError(am)
     Mockito.verify(mockInstrumentData, never()).save()
   }
@@ -65,16 +67,16 @@ class ANRDetectorTest : FacebookPowerMockTestCase() {
   @Test
   fun `test Anr is not detected when process list does not have right cause`() {
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<String>(), any<String>()))
+    whenever(InstrumentData.Builder.build(any<String>(), any<String>()))
         .thenReturn(mockInstrumentData)
-    PowerMockito.`when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
+    whenever(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
 
     val infoList: MutableList<ActivityManager.ProcessErrorStateInfo> = ArrayList()
     info.condition = ActivityManager.ProcessErrorStateInfo.CRASHED
     info.uid = myUid()
     info.shortMsg = "testCause"
     infoList.add(info)
-    PowerMockito.`when`(am.processesInErrorState).thenReturn(infoList)
+    whenever(am.processesInErrorState).thenReturn(infoList)
 
     ANRDetector.checkProcessError(am)
     Mockito.verify(mockInstrumentData, never()).save()
@@ -83,16 +85,16 @@ class ANRDetectorTest : FacebookPowerMockTestCase() {
   @Test
   fun `test Anr is not detected when the ANR is not SDK related`() {
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<String>(), any<String>()))
+    whenever(InstrumentData.Builder.build(any<String>(), any<String>()))
         .thenReturn(mockInstrumentData)
-    PowerMockito.`when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(false)
+    whenever(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(false)
 
     val infoList: MutableList<ActivityManager.ProcessErrorStateInfo> = ArrayList()
     info.condition = ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING
     info.uid = myUid()
     info.shortMsg = "testCause"
     infoList.add(info)
-    PowerMockito.`when`(am.processesInErrorState).thenReturn(infoList)
+    whenever(am.processesInErrorState).thenReturn(infoList)
 
     ANRDetector.checkProcessError(am)
     Mockito.verify(mockInstrumentData, never()).save()
@@ -101,34 +103,34 @@ class ANRDetectorTest : FacebookPowerMockTestCase() {
   @Test
   fun `test Anr is detected when there is an SDK related ANR`() {
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<String>(), any<String>()))
+    whenever(InstrumentData.Builder.build(any<String>(), any<String>()))
         .thenReturn(mockInstrumentData)
-    PowerMockito.`when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
+    whenever(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
 
     val infoList: MutableList<ActivityManager.ProcessErrorStateInfo> = ArrayList()
     info.condition = ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING
     info.uid = myUid()
     info.shortMsg = "testCause"
     infoList.add(info)
-    PowerMockito.`when`(am.processesInErrorState).thenReturn(infoList)
+    whenever(am.processesInErrorState).thenReturn(infoList)
 
     ANRDetector.checkProcessError(am)
-    Mockito.verify(mockInstrumentData).save()
+    verify(mockInstrumentData).save()
   }
 
   @Test
   fun `test Anr is saved only once when detecting the same ANR`() {
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any<String>(), any<String>()))
+    whenever(InstrumentData.Builder.build(any<String>(), any<String>()))
         .thenReturn(mockInstrumentData)
-    PowerMockito.`when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
+    whenever(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenReturn(true)
 
     val infoList: MutableList<ActivityManager.ProcessErrorStateInfo> = ArrayList()
     info.condition = ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING
     info.uid = myUid()
     info.shortMsg = "testCause"
     infoList.add(info)
-    PowerMockito.`when`(am.processesInErrorState).thenReturn(infoList)
+    whenever(am.processesInErrorState).thenReturn(infoList)
 
     ANRDetector.checkProcessError(am)
     ANRDetector.checkProcessError(am)
