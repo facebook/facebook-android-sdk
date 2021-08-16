@@ -12,6 +12,7 @@ import com.facebook.appevents.internal.ViewHierarchyConstants.TEXT_KEY
 import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONArray
@@ -44,7 +45,7 @@ class PredictionHistoryManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.mockStatic(Utility::class.java)
     PowerMockito.mockStatic(ViewHierarchy::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
     PowerMockito.`when`(
             mockContext.getSharedPreferences(
                 "com.facebook.internal.SUGGESTED_EVENTS_HISTORY", Context.MODE_PRIVATE))
@@ -77,12 +78,12 @@ class PredictionHistoryManagerTest : FacebookPowerMockTestCase() {
                     JSONArray(
                         listOf(
                             mockView.javaClass.simpleName, mockParentView.javaClass.simpleName))))
-    PowerMockito.`when`(Utility.sha256hash(any<String>())).thenAnswer {
+    whenever(Utility.sha256hash(any<String>())).thenAnswer {
       pathRouteStr = it.arguments[0] as String
       ""
     }
 
-    PowerMockito.`when`(ViewHierarchy.getParentOfView(mockView)).thenReturn(mockParentView)
+    whenever(ViewHierarchy.getParentOfView(mockView)).thenReturn(mockParentView)
 
     PredictionHistoryManager.getPathID(mockView, TEXT)
     assertThat(pathRouteStr).isEqualTo(expectedPathRoute.toString())

@@ -24,10 +24,10 @@ import android.widget.TextView
 import com.facebook.appevents.codeless.CodelessTestBase
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils.isSensitiveUserData
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito
 
 class SensitiveUserDataUtilsTest : CodelessTestBase() {
   private lateinit var textView: TextView
@@ -40,31 +40,31 @@ class SensitiveUserDataUtilsTest : CodelessTestBase() {
 
   @Test
   fun testIsSensitiveUserData() {
-    PowerMockito.`when`(textView.text).thenReturn("")
+    whenever(textView.text).thenReturn("")
 
     // input type == Password
-    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PASSWORD)
+    whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PASSWORD)
     Assert.assertTrue(isSensitiveUserData(textView))
 
     // input type == Text
-    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
+    whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
     Assert.assertFalse(isSensitiveUserData(textView))
 
     // input type == Person Name
-    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PERSON_NAME)
+    whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PERSON_NAME)
     Assert.assertTrue(isSensitiveUserData(textView))
 
     // input type == Postal Address
-    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS)
+    whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS)
     Assert.assertTrue(isSensitiveUserData(textView))
 
     // input type == Phone
-    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_CLASS_PHONE)
+    whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_PHONE)
     Assert.assertTrue(isSensitiveUserData(textView))
 
     // Credit Card
-    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
-    PowerMockito.`when`(textView.text).thenReturn("4030122707427751")
+    whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
+    whenever(textView.text).thenReturn("4030122707427751")
     Assert.assertTrue(isSensitiveUserData(textView))
   }
 }

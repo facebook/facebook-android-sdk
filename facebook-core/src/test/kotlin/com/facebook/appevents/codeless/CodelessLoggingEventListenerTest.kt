@@ -26,7 +26,7 @@ import org.junit.Test
 class CodelessLoggingEventListenerTest : FacebookPowerMockTestCase() {
   private lateinit var expectedParameters: Bundle
   private val priceString = "price: $1,234.567. Good deal!"
-  private val priceValueToSum = 1234.567
+  private val priceValueToSum = 1_234.567
 
   @Before
   fun init() {

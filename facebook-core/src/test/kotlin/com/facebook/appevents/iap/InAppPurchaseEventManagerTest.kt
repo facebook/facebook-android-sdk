@@ -6,6 +6,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -17,7 +18,7 @@ import org.powermock.reflect.Whitebox
 @PrepareForTest(InAppPurchaseEventManager::class, FacebookSdk::class)
 class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
   private lateinit var mockContext: Context
-  private val nowSec = System.currentTimeMillis() / 1000L
+  private val nowSec = System.currentTimeMillis() / 1_000L
   private val oneHourAgo = nowSec - 60 * 60
   private val twoHourAgo = nowSec - 60 * 60 * 2
   private val eightDaysAgo = nowSec - 60 * 60 * 24 * 8
@@ -32,11 +33,11 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockContext = mock()
-    PowerMockito.`when`(mockContext.packageName).thenReturn("com.facebook.appevents.iap")
+    whenever(mockContext.packageName).thenReturn("com.facebook.appevents.iap")
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
   @Test

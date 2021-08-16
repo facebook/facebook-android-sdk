@@ -26,6 +26,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
 import java.lang.reflect.Method
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
@@ -46,9 +47,9 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mock())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mock())
 
     PowerMockito.spy(InAppPurchaseBillingClientWrapper::class.java)
     Whitebox.setInternalState(
@@ -90,14 +91,13 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         "{\"productId\":\"coffee\",\"purchaseToken\":\"aedeglbgcjhjcjnabndchooe.AO-J1Oydf8j_hBxWxvsAvKHLC1h8Kw6YPDtGERpjCWDKSB0Hd6asHyo5E_NjbPg1u1hW5rW-s4go3d0D_DjFstxDA6zn9H_85ReDVbQBdgb2VAAyTX39jcM\",\"purchaseTime\":1614677061238,\"developerPayload\":null}\n"
     val mockList: MutableList<Any> = arrayListOf(purchaseHistoryRecord)
     PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
-    PowerMockito.`when`(invokeMethod(anyOrNull(), anyOrNull(), any()))
-        .thenReturn(purchaseHistoryRecord)
+    whenever(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(purchaseHistoryRecord)
     val mockContext: Context = mock()
     Whitebox.setInternalState(inAppPurchaseBillingClientWrapper, "context", mockContext)
-    PowerMockito.`when`(mockContext.packageName).thenReturn("value")
+    whenever(mockContext.packageName).thenReturn("value")
 
     val mockMethod: Method = mock()
-    PowerMockito.`when`(mockMethod.name).thenReturn("onPurchaseHistoryResponse")
+    whenever(mockMethod.name).thenReturn("onPurchaseHistoryResponse")
     purchaseHistoryResponseListenerWrapper.invoke(
         mock(), mockMethod, arrayOf(listOf<String>(), mockList))
 
@@ -117,10 +117,10 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         "{\"productId\":\"coffee\",\"type\":\"inapp\",\"price\":\"$0.99\",\"price_amount_micros\":990000,\"price_currency_code\":\"USD\",\"title\":\"cf (coffeeshop)\",\"description\":\"cf\",\"skuDetailsToken\":\"AEuhp4I4Fby7vHeunJbyRTraiO-Z04Y5GPKRYgZtHVCTfmiIhxHj41Rt7kgywkTtIRxP\"}\n"
     val mockList: MutableList<Any> = arrayListOf(skuDetailExample)
     PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
-    PowerMockito.`when`(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(skuDetailExample)
+    whenever(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(skuDetailExample)
 
     val mockMethod: Method = mock()
-    PowerMockito.`when`(mockMethod.name).thenReturn("onSkuDetailsResponse")
+    whenever(mockMethod.name).thenReturn("onSkuDetailsResponse")
     skuDetailsResponseListenerWrapper.invoke(
         mock(), mockMethod, arrayOf(listOf<String>(), mockList))
     val skuDetailsMap = InAppPurchaseBillingClientWrapper.skuDetailsMap

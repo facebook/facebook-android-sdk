@@ -19,16 +19,16 @@ import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
-import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
@@ -58,20 +58,20 @@ class SessionInfoTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(mockSessionInfo, "sessionLastEventTime", sessionLastEventTime)
     Whitebox.setInternalState(mockSessionInfo, "interruptionCount", interruptionCount)
     Whitebox.setInternalState(mockSessionInfo, "sessionId", sessionId)
-    whenCalled(mockSessionInfo.writeSessionToDisk()).thenCallRealMethod()
+    whenever(mockSessionInfo.writeSessionToDisk()).thenCallRealMethod()
 
     mockStatic(FacebookSdk::class.java)
     mockStatic(PreferenceManager::class.java)
 
-    whenCalled(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
-    whenCalled(FacebookSdk.isInitialized()).thenReturn(true)
-    whenCalled(PreferenceManager.getDefaultSharedPreferences(isA(Context::class.java)))
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(PreferenceManager.getDefaultSharedPreferences(isA(Context::class.java)))
         .thenReturn(mockSharedPreferences)
 
     val mockSourceAppInfoCompanion = mock(SourceApplicationInfo.Companion::class.java)
     WhiteboxImpl.setInternalState(
         SourceApplicationInfo::class.java, "Companion", mockSourceAppInfoCompanion)
-    whenCalled(mockSourceAppInfoCompanion.clearSavedSourceApplicationInfoFromDisk()).then {
+    whenever(mockSourceAppInfoCompanion.clearSavedSourceApplicationInfoFromDisk()).then {
       clearSavedSourceApplicationInfoFromDiskHasBeenCalledTime++
     }
   }

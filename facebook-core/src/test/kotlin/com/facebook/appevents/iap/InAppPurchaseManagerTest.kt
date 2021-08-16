@@ -9,6 +9,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.FeatureManager
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -34,7 +35,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FeatureManager::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
     Whitebox.setInternalState(InAppPurchaseManager::class.java, "enabled", AtomicBoolean(false))
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
   @Test
@@ -43,7 +44,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             PowerMockito.method(InAppPurchaseManager::class.java, "usingBillingLib2Plus"))
         .toReturn(false)
     var isStartIapLoggingCalled = false
-    PowerMockito.`when`(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
+    whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
       isStartIapLoggingCalled = true
       Unit
     }
@@ -56,10 +57,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     MemberModifier.stub<Boolean>(
             PowerMockito.method(InAppPurchaseManager::class.java, "usingBillingLib2Plus"))
         .toReturn(true)
-    PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2))
-        .thenReturn(false)
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2)).thenReturn(false)
     var isStartIapLoggingCalled = false
-    PowerMockito.`when`(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
+    whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
       isStartIapLoggingCalled = true
       Unit
     }
@@ -69,20 +69,18 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test start iap logging when billing lib 2+ is available and feature is on`() {
-    PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2))
-        .thenReturn(true)
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2)).thenReturn(true)
     val mockPackageManager: PackageManager = mock()
     val mockApplicationInfo = ApplicationInfo()
     val metaData = Bundle()
     metaData.putString("com.google.android.play.billingclient.version", "2.0.3")
-    PowerMockito.`when`(mockContext.packageManager).thenReturn(mockPackageManager)
-    PowerMockito.`when`(mockContext.packageName).thenReturn("com.facebook.test")
-    PowerMockito.`when`(mockPackageManager.getApplicationInfo(any(), any()))
-        .thenReturn(mockApplicationInfo)
+    whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+    whenever(mockContext.packageName).thenReturn("com.facebook.test")
+    whenever(mockPackageManager.getApplicationInfo(any(), any())).thenReturn(mockApplicationInfo)
     mockApplicationInfo.metaData = metaData
 
     var isStartIapLoggingCalled = false
-    PowerMockito.`when`(InAppPurchaseAutoLogger.startIapLogging(any())).thenAnswer {
+    whenever(InAppPurchaseAutoLogger.startIapLogging(any())).thenAnswer {
       isStartIapLoggingCalled = true
       Unit
     }

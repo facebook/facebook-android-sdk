@@ -26,6 +26,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.Test
@@ -41,7 +42,7 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
     super.setup()
     PowerMockito.spy(PerformanceGuardian::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
   }
 
   @Test
@@ -49,13 +50,13 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
     // Initialize
     val mockPrefs: SharedPreferences = mock()
     val context: Context = mock()
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(context)
-    PowerMockito.`when`(context.getSharedPreferences(any<String>(), any())).thenReturn(mockPrefs)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
+    whenever(context.getSharedPreferences(any<String>(), any())).thenReturn(mockPrefs)
 
     // Mock return app version
-    PowerMockito.`when`(mockPrefs.getString("app_version", "")).thenReturn("1.2.0")
+    whenever(mockPrefs.getString("app_version", "")).thenReturn("1.2.0")
     PowerMockito.mockStatic(Utility::class.java)
-    PowerMockito.`when`(Utility.getAppVersion()).thenReturn("1.2.0")
+    whenever(Utility.getAppVersion()).thenReturn("1.2.0")
 
     // Mock return banned activity set
     val mockBannedCodelessActivitySet: MutableSet<String> = HashSet()
@@ -96,11 +97,11 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
     val mockPrefs: SharedPreferences = mock()
     Whitebox.setInternalState(PerformanceGuardian::class.java, "sharedPreferences", mockPrefs)
     val editor: SharedPreferences.Editor = mock()
-    PowerMockito.`when`(mockPrefs.edit()).thenReturn(editor)
-    PowerMockito.`when`(editor.putStringSet(any(), any())).thenReturn(editor)
-    PowerMockito.`when`(editor.putString(any(), any())).thenReturn(editor)
+    whenever(mockPrefs.edit()).thenReturn(editor)
+    whenever(editor.putStringSet(any(), any())).thenReturn(editor)
+    whenever(editor.putString(any(), any())).thenReturn(editor)
     PowerMockito.mockStatic(Utility::class.java)
-    PowerMockito.`when`(Utility.getAppVersion()).thenReturn("1.2.0")
+    whenever(Utility.getAppVersion()).thenReturn("1.2.0")
     val mockCodelessActivityMap: MutableMap<String, Int> = HashMap()
     mockCodelessActivityMap["activity_1"] = 1
     mockCodelessActivityMap["activity_2"] = 2
@@ -158,7 +159,7 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
 
     // Current app version returns null and cached version is empty
     PowerMockito.mockStatic(Utility::class.java)
-    PowerMockito.`when`(Utility.getAppVersion()).thenReturn(null)
+    whenever(Utility.getAppVersion()).thenReturn(null)
     result = privateMethod.invoke(PerformanceGuardian, "") as Boolean
     Assertions.assertThat(result).isFalse
 
@@ -167,7 +168,7 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
     Assertions.assertThat(result).isFalse
 
     // Cached app version is empty while current version returns value
-    PowerMockito.`when`(Utility.getAppVersion()).thenReturn("1.2.0")
+    whenever(Utility.getAppVersion()).thenReturn("1.2.0")
     result = privateMethod.invoke(PerformanceGuardian, "") as Boolean
     Assertions.assertThat(result).isFalse
 

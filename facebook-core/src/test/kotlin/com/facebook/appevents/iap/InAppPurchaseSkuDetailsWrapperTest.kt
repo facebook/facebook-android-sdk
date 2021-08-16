@@ -25,6 +25,7 @@ import com.facebook.FacebookSdk.isInitialized
 import com.facebook.FacebookTestUtility.assertNotNull
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -51,8 +52,8 @@ class InAppPurchaseSkuDetailsWrapperTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(isInitialized()).thenReturn(true)
-    PowerMockito.`when`(getExecutor()).thenReturn(mockExecutor)
+    whenever(isInitialized()).thenReturn(true)
+    whenever(getExecutor()).thenReturn(mockExecutor)
   }
 
   @Test

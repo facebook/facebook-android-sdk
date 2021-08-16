@@ -29,6 +29,7 @@ import com.facebook.appevents.codeless.CodelessTestBase
 import com.facebook.appevents.codeless.internal.ViewHierarchy.getDictionaryOfView
 import com.facebook.internal.Utility.sha256hash
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -76,15 +77,15 @@ class ViewHierarchyTest : CodelessTestBase() {
     isAdapterViewItem.isAccessible = true
 
     // mock NestedScrollingChild -> true
-    PowerMockito.`when`(mockView.parent).thenReturn(mockTestNestedScrollingChild)
+    whenever(mockView.parent).thenReturn(mockTestNestedScrollingChild)
     Assert.assertTrue(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
 
     // mock AdapterView -> true
-    PowerMockito.`when`(mockView.parent).thenReturn(mockTestAdapterView)
+    whenever(mockView.parent).thenReturn(mockTestAdapterView)
     Assert.assertTrue(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
 
     // mock other cases -> false
-    PowerMockito.`when`(mockView.parent).thenReturn(mockViewParent)
+    whenever(mockView.parent).thenReturn(mockViewParent)
     Assert.assertFalse(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
   }
 }

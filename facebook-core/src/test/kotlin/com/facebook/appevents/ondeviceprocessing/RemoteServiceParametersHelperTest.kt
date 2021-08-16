@@ -31,6 +31,7 @@ import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -49,14 +50,14 @@ class RemoteServiceParametersHelperTest : FacebookPowerMockTestCase() {
       AppEvent("context_name", "deprecated_event", 0.0, null, false, false, null)
   private val invalidChecksumEvent: AppEvent =
       AppEvent("context_name", "invalid_checksum_event", 0.0, null, false, false, null)
-  private var context: Context? = null
+  private lateinit var context: Context
 
   @Before
   fun setUp() {
     Whitebox.setInternalState(invalidChecksumEvent, "checksum", "invalid_checksum")
     context = ApplicationProvider.getApplicationContext()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(context)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
   }
 
@@ -69,9 +70,9 @@ class RemoteServiceParametersHelperTest : FacebookPowerMockTestCase() {
         "deprecatedEvents",
         HashSet(listOf(deprecatedEvent.name)))
     val mockAppSettings: FetchedAppSettings = mock()
-    PowerMockito.`when`(mockAppSettings.supportsImplicitLogging()).thenReturn(false)
+    whenever(mockAppSettings.supportsImplicitLogging()).thenReturn(false)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-    PowerMockito.`when`(queryAppSettings(any(), any())).thenReturn(mockAppSettings)
+    whenever(queryAppSettings(any(), any())).thenReturn(mockAppSettings)
     val appEvents = listOf(implicitEvent, deprecatedEvent, explicitEvent, invalidChecksumEvent)
     val eventType = RemoteServiceWrapper.EventType.CUSTOM_APP_EVENTS
 

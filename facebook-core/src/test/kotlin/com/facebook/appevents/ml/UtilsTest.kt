@@ -5,6 +5,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.ml.TensorTestUtils.createModelFile
 import com.facebook.appevents.ml.TensorTestUtils.createTestTensor
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
@@ -23,12 +24,12 @@ class UtilsTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     utilsTestFileDir = File(UUID.randomUUID().toString())
     utilsTestFileDir.mkdirs()
     val mockContext = PowerMockito.mock(Context::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
-    PowerMockito.`when`(mockContext.filesDir).thenReturn(utilsTestFileDir)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(mockContext.filesDir).thenReturn(utilsTestFileDir)
   }
 
   @After

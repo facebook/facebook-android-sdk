@@ -34,6 +34,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import org.json.JSONObject
@@ -64,10 +65,9 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("1234")
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
-        .thenReturn(RuntimeEnvironment.application)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("1234")
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application)
 
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
   }
@@ -103,8 +103,7 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(ActivityLifecycleTracker::class.java)
     val activity =
         Robolectric.buildActivity(Activity::class.java).create().start().resume().visible().get()
-    PowerMockito.doCallRealMethod()
-        .`when`(ActivityLifecycleTracker::class.java, "onActivityResumed", activity)
+    whenever(ActivityLifecycleTracker.onActivityCreated(activity)).thenCallRealMethod()
   }
 
   @Test
@@ -115,7 +114,7 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
 
     // Disable Gatekeeper
     PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
-    PowerMockito.`when`(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), any(), any()))
+    whenever(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), any(), any()))
         .thenReturn(false)
 
     // Mock FeatureManger to avoid GK request
@@ -125,13 +124,13 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     val mockAdvertiserID = "fb_mock_advertiserID"
     val mockAttributionID = "fb_mock_attributionID"
     val mockIdentifiers: AttributionIdentifiers = mock()
-    PowerMockito.`when`(mockIdentifiers.androidAdvertiserId).thenReturn(mockAdvertiserID)
-    PowerMockito.`when`(mockIdentifiers.attributionId).thenReturn(mockAttributionID)
+    whenever(mockIdentifiers.androidAdvertiserId).thenReturn(mockAdvertiserID)
+    whenever(mockIdentifiers.attributionId).thenReturn(mockAttributionID)
     val mockAttributionIdentifierCompanion =
         PowerMockito.mock(AttributionIdentifiers.Companion::class.java)
     WhiteboxImpl.setInternalState(
         AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifierCompanion)
-    PowerMockito.`when`(mockAttributionIdentifierCompanion.getAttributionIdentifiers(any()))
+    whenever(mockAttributionIdentifierCompanion.getAttributionIdentifiers(any()))
         .thenReturn(mockIdentifiers)
 
     // Mock App Event Store
@@ -140,7 +139,7 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     val appEvent = AppEvent("ctxName", "eventName2", 0.0, Bundle(), true, true, null)
     val map = hashMapOf(accessTokenAppIdPair to mutableListOf(appEvent))
     val persistedEvents: PersistedEvents = PersistedEvents(map)
-    PowerMockito.`when`(AppEventStore.readAndClearStore()).thenReturn(persistedEvents)
+    whenever(AppEventStore.readAndClearStore()).thenReturn(persistedEvents)
 
     // Mock graph request
     val mockRequest: GraphRequest = mock()

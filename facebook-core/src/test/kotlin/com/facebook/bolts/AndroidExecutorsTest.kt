@@ -25,6 +25,7 @@ import android.os.Looper
 import com.facebook.FacebookPowerMockTestCase
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ThreadPoolExecutor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -42,7 +43,7 @@ class AndroidExecutorsTest : FacebookPowerMockTestCase() {
     mockLooper = mock()
     PowerMockito.whenNew(Handler::class.java).withArguments(mockLooper).thenReturn(mockHandler)
     PowerMockito.mockStatic(Looper::class.java)
-    PowerMockito.`when`(Looper.getMainLooper()).thenReturn(mockLooper)
+    whenever(Looper.getMainLooper()).thenReturn(mockLooper)
   }
 
   @Test

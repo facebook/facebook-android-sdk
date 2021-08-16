@@ -22,6 +22,7 @@ package com.facebook.appevents
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.internal.Constants
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -30,7 +31,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(FacebookSdk::class)
@@ -38,8 +38,8 @@ class AppEventTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
   }
 
   @Test

@@ -8,6 +8,7 @@ import com.facebook.appevents.internal.AppEventUtility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
@@ -33,9 +34,9 @@ class ViewObserverTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(mockObserver, "activityWeakReference", WeakReference(mockActivity))
 
     PowerMockito.mockStatic(AppEventUtility::class.java)
-    PowerMockito.`when`(AppEventUtility.getRootView(any())).thenReturn(mockView)
-    PowerMockito.`when`(mockView.viewTreeObserver).thenReturn(mockViewTreeObserver)
-    PowerMockito.`when`(mockViewTreeObserver.isAlive).thenReturn(true)
+    whenever(AppEventUtility.getRootView(any())).thenReturn(mockView)
+    whenever(mockView.viewTreeObserver).thenReturn(mockViewTreeObserver)
+    whenever(mockViewTreeObserver.isAlive).thenReturn(true)
   }
 
   @Test

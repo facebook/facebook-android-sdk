@@ -14,11 +14,12 @@ import com.facebook.appevents.internal.ViewHierarchyConstants.INPUT_TYPE_KEY
 import com.facebook.appevents.internal.ViewHierarchyConstants.IS_INTERACTED_KEY
 import com.facebook.appevents.internal.ViewHierarchyConstants.TEXT_KEY
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.Collections.emptyList
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.mockito.Mockito.mock
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.Robolectric
@@ -33,7 +34,7 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     assertEquals(emptyList<View>(), SuggestedEventViewHierarchy.getAllClickableViews(blacklistView))
 
     val clickableView = View(context)
-    val mockListener: View.OnClickListener = mock(View.OnClickListener::class.java)
+    val mockListener: View.OnClickListener = mock<View.OnClickListener>()
     clickableView.setOnClickListener(mockListener)
     assertEquals(
         listOf<View>(clickableView),
@@ -44,7 +45,7 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     val view2 = EditText(context)
     val childrenViews = listOf<View>(view1, view2)
     PowerMockito.mockStatic(ViewHierarchy::class.java)
-    PowerMockito.`when`(ViewHierarchy.getChildrenOfView(clickableView)).thenReturn(childrenViews)
+    whenever(ViewHierarchy.getChildrenOfView(clickableView)).thenReturn(childrenViews)
     assertEquals(
         listOf<View>(clickableView),
         SuggestedEventViewHierarchy.getAllClickableViews(clickableView))
@@ -62,7 +63,7 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
 
     val view = View(context)
     val clickableView = View(context)
-    val mockListener: View.OnClickListener = mock(View.OnClickListener::class.java)
+    val mockListener: View.OnClickListener = mock<View.OnClickListener>()
     clickableView.setOnClickListener(mockListener)
 
     val obj1 = SuggestedEventViewHierarchy.getDictionaryOfView(view, clickableView)
@@ -77,10 +78,9 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
 
     // Test with inner children views
     PowerMockito.mockStatic(ViewHierarchy::class.java)
-    PowerMockito.`when`(ViewHierarchy.getChildrenOfView(view))
-        .thenReturn(listOf<View>(clickableView))
-    PowerMockito.`when`(ViewHierarchy.getTextOfView(any())).thenReturn("")
-    PowerMockito.`when`(ViewHierarchy.getHintOfView(any())).thenReturn("")
+    whenever(ViewHierarchy.getChildrenOfView(view)).thenReturn(listOf<View>(clickableView))
+    whenever(ViewHierarchy.getTextOfView(any())).thenReturn("")
+    whenever(ViewHierarchy.getHintOfView(any())).thenReturn("")
     val obj3 = SuggestedEventViewHierarchy.getDictionaryOfView(view, clickableView)
     assertEquals(
         "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[{\"${IS_INTERACTED_KEY}\":true,\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[]}]}",
@@ -98,9 +98,9 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
         "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0}", json.toString())
 
     PowerMockito.mockStatic(ViewHierarchy::class.java)
-    PowerMockito.`when`(ViewHierarchy.getTextOfView(any())).thenReturn("Some Text")
-    PowerMockito.`when`(ViewHierarchy.getHintOfView(any())).thenReturn("Some Hint")
-    PowerMockito.`when`(ViewHierarchy.getClassTypeBitmask(any())).thenReturn(100)
+    whenever(ViewHierarchy.getTextOfView(any())).thenReturn("Some Text")
+    whenever(ViewHierarchy.getHintOfView(any())).thenReturn("Some Hint")
+    whenever(ViewHierarchy.getClassTypeBitmask(any())).thenReturn(100)
 
     val viewWithText = View(context)
     val jsonWithText = JSONObject()
@@ -123,15 +123,14 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(ViewHierarchy::class.java)
 
     val blankView = View(context)
-    PowerMockito.`when`(ViewHierarchy.getTextOfView(blankView)).thenReturn("")
+    whenever(ViewHierarchy.getTextOfView(blankView)).thenReturn("")
     assertEquals("", SuggestedEventViewHierarchy.getTextOfViewRecursively(blankView))
 
     val viewWithText = View(context)
-    PowerMockito.`when`(ViewHierarchy.getTextOfView(viewWithText)).thenReturn("Some Text")
+    whenever(ViewHierarchy.getTextOfView(viewWithText)).thenReturn("Some Text")
     assertEquals("Some Text", SuggestedEventViewHierarchy.getTextOfViewRecursively(viewWithText))
 
-    PowerMockito.`when`(ViewHierarchy.getChildrenOfView(blankView))
-        .thenReturn(listOf<View>(viewWithText))
+    whenever(ViewHierarchy.getChildrenOfView(blankView)).thenReturn(listOf<View>(viewWithText))
     assertEquals("Some Text", SuggestedEventViewHierarchy.getTextOfViewRecursively(blankView))
   }
 }

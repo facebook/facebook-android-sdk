@@ -59,7 +59,6 @@ class CancellationTest {
   }
 
   @Test
-  @Throws(Exception::class)
   fun testTokenCancelAfterDelayCancellation() {
     val cts = CancellationTokenSource()
     val token = cts.token

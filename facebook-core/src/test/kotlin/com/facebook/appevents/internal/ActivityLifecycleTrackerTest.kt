@@ -10,11 +10,12 @@ import com.facebook.internal.FeatureManager
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -49,13 +50,13 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test start tracking`() {
     ActivityLifecycleTracker.startTracking(mockApplication, appID)
-    Mockito.verify(mockApplication, Mockito.times(1)).registerActivityLifecycleCallbacks(any())
+    verify(mockApplication, times(1)).registerActivityLifecycleCallbacks(any())
   }
 
   @Test
   fun `test create activity`() {
     ActivityLifecycleTracker.onActivityCreated(mockActivity)
-    Mockito.verify(mockScheduledExecutor).execute(ArgumentMatchers.any(Runnable::class.java))
+    verify(mockScheduledExecutor).execute(any<Runnable>())
   }
 
   @Test
@@ -64,13 +65,13 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     var metadataIndexerCounter = 0
     var suggestedEventsManagerCounter = 0
 
-    PowerMockito.`when`(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
+    whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
       codelessManagerCounter++
     }
-    PowerMockito.`when`(MetadataIndexer.onActivityResumed(eq(mockActivity))).thenAnswer {
+    whenever(MetadataIndexer.onActivityResumed(eq(mockActivity))).thenAnswer {
       metadataIndexerCounter++
     }
-    PowerMockito.`when`(SuggestedEventsManager.trackActivity(eq(mockActivity))).thenAnswer {
+    whenever(SuggestedEventsManager.trackActivity(eq(mockActivity))).thenAnswer {
       suggestedEventsManagerCounter++
     }
     ActivityLifecycleTracker.onActivityResumed(mockActivity)
@@ -78,7 +79,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     assertEquals(1, metadataIndexerCounter)
     assertEquals(1, suggestedEventsManagerCounter)
 
-    Mockito.verify(mockScheduledExecutor).execute(ArgumentMatchers.any(Runnable::class.java))
+    verify(mockScheduledExecutor).execute(any<Runnable>())
 
     assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
   }

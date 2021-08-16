@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.codeless.internal.ViewHierarchy
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -25,18 +26,18 @@ class MetadataMatcherTest : FacebookPowerMockTestCase() {
     mockViewChild2 = mock()
     PowerMockito.mockStatic(ViewHierarchy::class.java)
 
-    PowerMockito.`when`(ViewHierarchy.getHintOfView(mockViewParent)).thenReturn("hint")
-    PowerMockito.`when`(mockViewParent.tag).thenReturn("tag")
-    PowerMockito.`when`(mockViewParent.contentDescription).thenReturn("content")
-    PowerMockito.`when`(mockViewParent.id).thenReturn(0)
+    whenever(ViewHierarchy.getHintOfView(mockViewParent)).thenReturn("hint")
+    whenever(mockViewParent.tag).thenReturn("tag")
+    whenever(mockViewParent.contentDescription).thenReturn("content")
+    whenever(mockViewParent.id).thenReturn(0)
     val mockResource = mock<Resources>()
-    PowerMockito.`when`(mockResource.getResourceName(0)).thenReturn("123/resource")
-    PowerMockito.`when`(mockViewParent.resources).thenReturn(mockResource)
+    whenever(mockResource.getResourceName(0)).thenReturn("123/resource")
+    whenever(mockViewParent.resources).thenReturn(mockResource)
 
-    PowerMockito.`when`(mockViewChild2.text).thenReturn("TEXT")
+    whenever(mockViewChild2.text).thenReturn("TEXT")
 
-    PowerMockito.`when`(ViewHierarchy.getParentOfView(mockViewChild1)).thenReturn(mockViewParent)
-    PowerMockito.`when`(ViewHierarchy.getChildrenOfView(mockViewParent))
+    whenever(ViewHierarchy.getParentOfView(mockViewChild1)).thenReturn(mockViewParent)
+    whenever(ViewHierarchy.getChildrenOfView(mockViewParent))
         .thenReturn(listOf(mockViewChild1, mockViewChild2))
   }
 

@@ -5,6 +5,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import org.assertj.core.api.Assertions.assertThat
@@ -19,12 +20,12 @@ class AppEventsManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
   }
 
   @Test
   fun testApplicationIdIsEmpty() {
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("")
+    whenever(FacebookSdk.getApplicationId()).thenReturn("")
     AppEventsManager.start()
     val state =
         Whitebox.getInternalState<AtomicReference<FetchedAppSettingsManager.FetchAppSettingState>>(
@@ -38,7 +39,7 @@ class AppEventsManagerTest : FacebookPowerMockTestCase() {
     val mockAppSettings: FetchedAppSettings = mock()
     val fetchedAppSettings = ConcurrentHashMap<String, FetchedAppSettings>()
     fetchedAppSettings[appID] = mockAppSettings
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(appID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(appID)
     Whitebox.setInternalState(
         FetchedAppSettingsManager::class.java, "fetchedAppSettings", fetchedAppSettings)
     AppEventsManager.start()

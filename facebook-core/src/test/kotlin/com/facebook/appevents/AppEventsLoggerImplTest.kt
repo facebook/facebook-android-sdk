@@ -40,6 +40,7 @@ import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.math.BigDecimal
 import java.util.Currency
 import java.util.Locale
@@ -92,29 +93,28 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     // Disable Gatekeeper
     PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
-    PowerMockito.`when`(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), any(), any()))
+    whenever(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), any(), any()))
         .thenReturn(false)
 
     // Enable on-device event processing
     PowerMockito.mockStatic(FeatureManager::class.java)
-    PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.OnDeviceEventProcessing))
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.OnDeviceEventProcessing))
         .thenReturn(true)
 
     // Stub mock IDs for AttributionIdentifiers
     val mockIdentifiers = PowerMockito.mock(AttributionIdentifiers::class.java)
-    PowerMockito.`when`(mockIdentifiers.androidAdvertiserId).thenReturn(mockAdvertiserID)
-    PowerMockito.`when`(mockIdentifiers.attributionId).thenReturn(mockAttributionID)
+    whenever(mockIdentifiers.androidAdvertiserId).thenReturn(mockAdvertiserID)
+    whenever(mockIdentifiers.attributionId).thenReturn(mockAttributionID)
     val mockCompanion: AttributionIdentifiers.Companion = mock()
     WhiteboxImpl.setInternalState(AttributionIdentifiers::class.java, "Companion", mockCompanion)
-    PowerMockito.`when`(mockCompanion.getAttributionIdentifiers(any())).thenReturn(mockIdentifiers)
+    whenever(mockCompanion.getAttributionIdentifiers(any())).thenReturn(mockIdentifiers)
     Whitebox.setInternalState(AppEventsLoggerImpl::class.java, "anonymousAppDeviceGUID", mockAnonID)
     PowerMockito.mockStatic(AutomaticAnalyticsLogger::class.java)
-    PowerMockito.`when`(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled())
-        .thenReturn(true)
+    whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
 
     // Disable AppEventUtility.isMainThread since executor now runs in main thread
     PowerMockito.mockStatic(AppEventUtility::class.java)
-    PowerMockito.`when`(AppEventUtility.assertIsNotMainThread()).doAnswer {}
+    whenever(AppEventUtility.assertIsNotMainThread()).doAnswer {}
   }
 
   @Test
@@ -129,7 +129,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogEvent() {
     var appEventCapture: AppEvent? = null
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventCapture = it.arguments[1] as AppEvent
       Unit
     }
@@ -140,7 +140,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogPurchase() {
     var appEventCapture: AppEvent? = null
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventCapture = it.arguments[1] as AppEvent
       Unit
     }
@@ -159,7 +159,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogProductItemWithGtinMpnBrand() {
     var appEventCapture: AppEvent? = null
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventCapture = it.arguments[1] as AppEvent
       Unit
     }
@@ -208,7 +208,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogProductItemWithoutGtinMpnBrand() {
     var appEventQueueCalledTimes = 0
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventQueueCalledTimes++
       Unit
     }
@@ -251,7 +251,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogPushNotificationOpen() {
     var appEventCapture: AppEvent? = null
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventCapture = it.arguments[1] as AppEvent
       Unit
     }
@@ -270,7 +270,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogPushNotificationOpenWithoutCampaign() {
     var appEventQueueCalledTimes = 0
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventQueueCalledTimes++
       Unit
     }
@@ -284,7 +284,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogPushNotificationOpenWithAction() {
     var appEventCapture: AppEvent? = null
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventCapture = it.arguments[1] as AppEvent
       Unit
     }
@@ -304,7 +304,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testLogPushNotificationOpenWithoutPayload() {
     var appEventQueueCalledTimes = 0
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventQueueCalledTimes++
       Unit
     }
@@ -324,13 +324,12 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     val expectedUrl = "$mockAppID/activities"
     val captor = ArgumentCaptor.forClass(JSONObject::class.java)
     PowerMockito.mockStatic(OnDeviceProcessingManager::class.java)
-    PowerMockito.`when`(OnDeviceProcessingManager.isOnDeviceProcessingEnabled()).thenReturn(true)
+    whenever(OnDeviceProcessingManager.isOnDeviceProcessingEnabled()).thenReturn(true)
     var sendInstallEventTimes = 0
-    PowerMockito.`when`(OnDeviceProcessingManager.sendInstallEventAsync(eq(mockAppID), any()))
-        .thenAnswer {
-          sendInstallEventTimes++
-          Unit
-        }
+    whenever(OnDeviceProcessingManager.sendInstallEventAsync(eq(mockAppID), any())).thenAnswer {
+      sendInstallEventTimes++
+      Unit
+    }
     FacebookSdk.publishInstallAsync(
         FacebookSdk.getApplicationContext(), FacebookSdk.getApplicationId())
     verify(mockGraphRequestCreator)
@@ -349,7 +348,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   fun testSetPushNotificationsRegistrationId() {
     val mockNotificationId = "123"
     var appEventCapture: AppEvent? = null
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventCapture = it.arguments[1] as AppEvent
       Unit
     }
@@ -363,7 +362,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testAppEventsKillSwitchDisabled() {
     var appEventQueueCalledTimes = 0
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventQueueCalledTimes++
       Unit
     }
@@ -399,7 +398,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Test
   fun testAppEventsKillSwitchEnabled() {
     var appEventQueueCalledTimes = 0
-    PowerMockito.`when`(AppEventQueue.add(any(), any())).thenAnswer {
+    whenever(AppEventQueue.add(any(), any())).thenAnswer {
       appEventQueueCalledTimes++
       Unit
     }

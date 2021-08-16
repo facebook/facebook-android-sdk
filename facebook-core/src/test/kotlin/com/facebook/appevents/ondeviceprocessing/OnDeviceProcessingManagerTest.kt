@@ -36,6 +36,7 @@ import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper.sendInstal
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.assertj.core.api.Assertions.assertThat
@@ -54,8 +55,8 @@ class OnDeviceProcessingManagerTest : FacebookPowerMockTestCase() {
   fun setUp() {
     context = ApplicationProvider.getApplicationContext()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(context)
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenCallRealMethod()
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
+    whenever(FacebookSdk.getExecutor()).thenCallRealMethod()
     PowerMockito.mockStatic(RemoteServiceWrapper::class.java)
   }
 
@@ -141,16 +142,16 @@ class OnDeviceProcessingManagerTest : FacebookPowerMockTestCase() {
       isApplicationTrackingEnabled: Boolean,
       isServiceAvailable: Boolean
   ) {
-    PowerMockito.`when`(FacebookSdk.getLimitEventAndDataUsage(context))
+    whenever(FacebookSdk.getLimitEventAndDataUsage(context))
         .thenReturn(!isApplicationTrackingEnabled)
-    PowerMockito.`when`(isServiceAvailable()).thenReturn(isServiceAvailable)
+    whenever(isServiceAvailable()).thenReturn(isServiceAvailable)
   }
 
   private fun setupSendCustomEventsArgumentCaptor(
       latch: CountDownLatch
   ): KArgumentCaptor<List<AppEvent>> {
     val captor = argumentCaptor<List<AppEvent>>()
-    PowerMockito.`when`(sendCustomEvents(any(), captor.capture())).thenAnswer {
+    whenever(sendCustomEvents(any(), captor.capture())).thenAnswer {
       latch.countDown()
       ServiceResult.OPERATION_SUCCESS
     }
@@ -159,7 +160,7 @@ class OnDeviceProcessingManagerTest : FacebookPowerMockTestCase() {
 
   private fun setupSendInstallEventArgumentCaptor(latch: CountDownLatch): KArgumentCaptor<String> {
     val captor = argumentCaptor<String>()
-    PowerMockito.`when`(sendInstallEvent(captor.capture())).thenAnswer {
+    whenever(sendInstallEvent(captor.capture())).thenAnswer {
       latch.countDown()
       ServiceResult.OPERATION_SUCCESS
     }

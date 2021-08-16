@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
@@ -30,13 +31,13 @@ class ViewOnClickListenerTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   private lateinit var mockGraphRequest: GraphRequest
   private lateinit var mockGraphRequestCompanion: GraphRequest.Companion
-  private var param: Bundle? = null
+  private lateinit var param: Bundle
   private lateinit var mockHostView: View
   private lateinit var mockRootView: View
   private lateinit var mockViewListener: View.OnClickListener
   private var setListenerTimes = 0
   private var getListenerTimes = 0
-  private var viewOnClickListener: ViewOnClickListener? = null
+  private lateinit var viewOnClickListener: ViewOnClickListener
 
   companion object {
     private const val APP_ID = "123"
@@ -58,31 +59,30 @@ class ViewOnClickListenerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(SuggestedEventViewHierarchy::class.java)
     PowerMockito.mockStatic(SuggestedEventsManager::class.java)
 
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(APP_ID)
-    PowerMockito.`when`(PredictionHistoryManager.queryEvent(any())).thenReturn(EVENT_NAME)
-    PowerMockito.`when`(PredictionHistoryManager.getPathID(any(), any())).thenReturn(PATH_ID)
-    PowerMockito.`when`(SuggestedEventViewHierarchy.getTextOfViewRecursively(any()))
-        .thenReturn(VIEW_TEXT)
-    PowerMockito.`when`(SuggestedEventsManager.isProductionEvents(any())).thenReturn(false)
-    PowerMockito.`when`(SuggestedEventsManager.isEligibleEvents(any())).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(APP_ID)
+    whenever(PredictionHistoryManager.queryEvent(any())).thenReturn(EVENT_NAME)
+    whenever(PredictionHistoryManager.getPathID(any(), any())).thenReturn(PATH_ID)
+    whenever(SuggestedEventViewHierarchy.getTextOfViewRecursively(any())).thenReturn(VIEW_TEXT)
+    whenever(SuggestedEventsManager.isProductionEvents(any())).thenReturn(false)
+    whenever(SuggestedEventsManager.isEligibleEvents(any())).thenReturn(true)
 
     Whitebox.setInternalState(GraphRequest::class.java, "Companion", mockGraphRequestCompanion)
     PowerMockito.`when`(
             mockGraphRequestCompanion.newPostRequest(isNull(), any(), isNull(), isNull()))
         .thenReturn(mockGraphRequest)
-    PowerMockito.`when`(mockGraphRequest::parameters.set(any())).thenAnswer {
+    whenever(mockGraphRequest::parameters.set(any())).thenAnswer {
       param = it.arguments[0] as Bundle
       Unit
     }
 
-    PowerMockito.`when`(ViewHierarchy.setOnClickListener(eq(mockHostView), any())).thenAnswer {
+    whenever(ViewHierarchy.setOnClickListener(eq(mockHostView), any())).thenAnswer {
       viewOnClickListener = it.arguments[1] as ViewOnClickListener
       setListenerTimes++
       Unit
     }
 
-    PowerMockito.`when`(ViewHierarchy.getExistingOnClickListener(eq(mockHostView))).thenAnswer {
+    whenever(ViewHierarchy.getExistingOnClickListener(eq(mockHostView))).thenAnswer {
       getListenerTimes++
       mockViewListener
     }

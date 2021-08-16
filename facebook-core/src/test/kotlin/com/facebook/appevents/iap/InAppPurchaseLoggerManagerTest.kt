@@ -24,6 +24,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions
 import org.json.JSONObject
@@ -40,22 +41,21 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     val context: Context = mock()
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(context)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
 
     PowerMockito.spy(InAppPurchaseLoggerManager::class.java)
     mockPrefs = mock()
-    PowerMockito.`when`(context.getSharedPreferences(any<String>(), any<Int>()))
-        .thenReturn(mockPrefs)
+    whenever(context.getSharedPreferences(any<String>(), any<Int>())).thenReturn(mockPrefs)
     val editor: SharedPreferences.Editor = mock()
     Whitebox.setInternalState(
         InAppPurchaseLoggerManager::class.java, "sharedPreferences", mockPrefs)
-    PowerMockito.`when`(mockPrefs.edit()).thenReturn(editor)
-    PowerMockito.`when`(editor.putLong(any(), any())).thenReturn(editor)
-    PowerMockito.`when`(editor.putString(any(), any())).thenReturn(editor)
-    PowerMockito.`when`(editor.putStringSet(any(), any())).thenReturn(editor)
+    whenever(mockPrefs.edit()).thenReturn(editor)
+    whenever(editor.putLong(any(), any())).thenReturn(editor)
+    whenever(editor.putString(any(), any())).thenReturn(editor)
+    whenever(editor.putStringSet(any(), any())).thenReturn(editor)
   }
 
   @Test
@@ -68,7 +68,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
     // Construct cached purchase map
-    val lastClearedTime = 1600000000L
+    val lastClearedTime = 1_600_000_000L
     Whitebox.setInternalState(
         InAppPurchaseLoggerManager::class.java,
         "cachedPurchaseMap",
@@ -84,8 +84,8 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testClearOutDatedProductInfoInCache() {
     // Add clear history data into cachedPurchaseMap
-    val lastClearedTime = 1600000000L
-    PowerMockito.`when`(mockPrefs.getLong("LAST_CLEARED_TIME", 0)).thenReturn(lastClearedTime)
+    val lastClearedTime = 1_600_000_000L
+    whenever(mockPrefs.getLong("LAST_CLEARED_TIME", 0)).thenReturn(lastClearedTime)
     Whitebox.setInternalState(
         InAppPurchaseLoggerManager::class.java,
         "cachedPurchaseMap",
@@ -105,7 +105,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
   fun testEligibleQueryPurchaseHistory() {
     // Mock return last query purchase history time
     var mockLastQueryPurchaseTimeStamp: Long = 0
-    PowerMockito.`when`(mockPrefs.getLong("LAST_QUERY_PURCHASE_HISTORY_TIME", 0))
+    whenever(mockPrefs.getLong("LAST_QUERY_PURCHASE_HISTORY_TIME", 0))
         .thenReturn(mockLastQueryPurchaseTimeStamp)
 
     // Test eligible to query purchase history if no last query history time has been set
@@ -113,8 +113,8 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     Assertions.assertThat(result1).isTrue
 
     // Test not eligible to query purchase history if the time interval is shorter than 1 day
-    mockLastQueryPurchaseTimeStamp = System.currentTimeMillis() / 1000L
-    PowerMockito.`when`(mockPrefs.getLong("LAST_QUERY_PURCHASE_HISTORY_TIME", 0))
+    mockLastQueryPurchaseTimeStamp = System.currentTimeMillis() / 1_000L
+    whenever(mockPrefs.getLong("LAST_QUERY_PURCHASE_HISTORY_TIME", 0))
         .thenReturn(mockLastQueryPurchaseTimeStamp)
     val result2 = InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()
     Assertions.assertThat(result2).isFalse

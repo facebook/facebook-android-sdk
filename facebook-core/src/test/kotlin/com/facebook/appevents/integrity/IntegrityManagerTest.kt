@@ -23,6 +23,7 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.ml.ModelManager
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
@@ -38,17 +39,16 @@ class IntegrityManagerTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123")
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123")
 
     PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
-    PowerMockito.`when`(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), any(), any()))
-        .thenReturn(true)
+    whenever(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), any(), any())).thenReturn(true)
     IntegrityManager.enable()
 
     PowerMockito.mockStatic(ModelManager::class.java)
-    PowerMockito.`when`(ModelManager.predict(any(), any(), any())).thenAnswer {
+    whenever(ModelManager.predict(any(), any(), any())).thenAnswer {
       val texts = it.arguments[2] as Array<String>
       val value =
           when (texts[0]) {

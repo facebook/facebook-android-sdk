@@ -30,6 +30,7 @@ import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions
 import org.json.JSONArray
 import org.json.JSONObject
@@ -59,7 +60,7 @@ class EventDeactivationManagerTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
     Whitebox.setInternalState(EventDeactivationManager::class.java, "enabled", true)
   }
 
@@ -78,9 +79,9 @@ class EventDeactivationManagerTest : FacebookPowerMockTestCase() {
     jsonObject.put("fb_test_deprecated_event", jsonObject2)
     val mockResponse = jsonObject.toString()
     val fetchedAppSettings: FetchedAppSettings = mock()
-    PowerMockito.`when`(fetchedAppSettings.restrictiveDataSetting).thenReturn(mockResponse)
+    whenever(fetchedAppSettings.restrictiveDataSetting).thenReturn(mockResponse)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-    PowerMockito.`when`(queryAppSettings(any(), any())).thenReturn(fetchedAppSettings)
+    whenever(queryAppSettings(any(), any())).thenReturn(fetchedAppSettings)
     enable()
     val deprecatedParams =
         Whitebox.getInternalState<List<DeprecatedParamFilter>>(

@@ -48,11 +48,11 @@ class ModelManagerTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
     mockGraphRequestCompanion = mock()
     Whitebox.setInternalState(GraphRequest::class.java, "Companion", mockGraphRequestCompanion)
     PowerMockito.mockStatic(FeatureManager::class.java)
@@ -61,7 +61,7 @@ class ModelManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test enable() checks ModelRequest feature`() {
     var didCheck = false
-    PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest)).thenAnswer {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest)).thenAnswer {
       didCheck = true
       return@thenAnswer true
     }
@@ -72,8 +72,7 @@ class ModelManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test enable() fetches model assets with graph request`() {
-    PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest))
-        .thenReturn(false)
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest)).thenReturn(false)
     var capturedPath: String? = null
     val mockGraphRequest: GraphRequest = mock()
     whenever(mockGraphRequestCompanion.newGraphPathRequest(eq(null), any(), eq(null))).thenAnswer {
@@ -91,14 +90,13 @@ class ModelManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test enable() checks model store in shared preferences`() {
-    PowerMockito.`when`(FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest))
-        .thenReturn(false)
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest)).thenReturn(false)
     whenever(mockGraphRequestCompanion.newGraphPathRequest(any(), any(), any())).thenReturn(mock())
     mockContext = mock()
     val modelStoreKey = "com.facebook.internal.MODEL_STORE"
     whenever(mockContext.getSharedPreferences(modelStoreKey, Context.MODE_PRIVATE))
         .thenReturn(mock())
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
     ModelManager.enable()
     verify(mockContext).getSharedPreferences(modelStoreKey, Context.MODE_PRIVATE)
   }

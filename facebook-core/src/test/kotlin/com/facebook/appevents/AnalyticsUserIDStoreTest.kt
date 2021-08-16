@@ -8,6 +8,7 @@ import com.facebook.MockSharedPreference
 import com.facebook.appevents.internal.AppEventUtility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -26,19 +27,18 @@ class AnalyticsUserIDStoreTest : FacebookPowerMockTestCase() {
   fun init() {
     val mockCompanion: InternalAppEventsLogger.Companion = mock()
     WhiteboxImpl.setInternalState(InternalAppEventsLogger::class.java, "Companion", mockCompanion)
-    PowerMockito.`when`(mockCompanion.getAnalyticsExecutor()).thenReturn(mockExecutor)
+    whenever(mockCompanion.getAnalyticsExecutor()).thenReturn(mockExecutor)
 
     val mockContext: Context = mock()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
 
     PowerMockito.mockStatic(AppEventUtility::class.java)
-    PowerMockito.`when`(AppEventUtility.assertIsMainThread()).then {}
+    whenever(AppEventUtility.assertIsMainThread()).then {}
 
     mockPreference.edit().putString("com.facebook.appevents.AnalyticsUserIDStore.userID", userID)
     PowerMockito.mockStatic(PreferenceManager::class.java)
-    PowerMockito.`when`(PreferenceManager.getDefaultSharedPreferences(any()))
-        .thenReturn(mockPreference)
+    whenever(PreferenceManager.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
   }
 
   @Test

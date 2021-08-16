@@ -23,6 +23,11 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventTestUtilities.BundleMatcher
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import java.math.BigDecimal
 import java.util.Currency
 import java.util.Locale
@@ -31,7 +36,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.powermock.reflect.Whitebox
 import org.robolectric.RuntimeEnvironment
 
@@ -60,47 +64,23 @@ class InternalAppEventsLoggerTest : FacebookPowerMockTestCase() {
     internalLogger.logEventImplicitly(mockEventName, mockPayload)
     internalLogger.logEventImplicitly(mockEventName, mockVal, mockCurrency, mockPayload)
     internalLogger.logPurchaseImplicitly(mockVal, mockCurrency, mockPayload)
-    Mockito.verify(logger, Mockito.never()).logEvent(ArgumentMatchers.anyString())
-    Mockito.verify(logger, Mockito.never())
-        .logEvent(ArgumentMatchers.anyString(), ArgumentMatchers.any(Bundle::class.java))
-    Mockito.verify(logger, Mockito.never())
-        .logEvent(ArgumentMatchers.anyString(), ArgumentMatchers.anyDouble())
-    Mockito.verify(logger, Mockito.never())
-        .logEvent(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.anyDouble(),
-            ArgumentMatchers.any(Bundle::class.java))
-    Mockito.verify(logger, Mockito.never())
+    verify(logger, never()).logEvent(ArgumentMatchers.anyString())
+    verify(logger, never()).logEvent(ArgumentMatchers.anyString(), any<Bundle>())
+    verify(logger, never()).logEvent(ArgumentMatchers.anyString(), ArgumentMatchers.anyDouble())
+    verify(logger, never())
+        .logEvent(ArgumentMatchers.anyString(), ArgumentMatchers.anyDouble(), any<Bundle>())
+    verify(logger, never())
         .logEventImplicitly(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.anyDouble(),
-            ArgumentMatchers.any(Bundle::class.java))
-    Mockito.verify(logger, Mockito.never())
+            ArgumentMatchers.anyString(), ArgumentMatchers.anyDouble(), any<Bundle>())
+    verify(logger, never())
         .logEventImplicitly(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.any(BigDecimal::class.java),
-            ArgumentMatchers.any(Currency::class.java),
-            ArgumentMatchers.any(Bundle::class.java))
-    Mockito.verify(logger, Mockito.never())
+            ArgumentMatchers.anyString(), any<BigDecimal>(), any<Currency>(), any<Bundle>())
+    verify(logger, never()).logPurchase(any<BigDecimal>(), any<Currency>())
+    verify(logger, never()).logPurchase(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+    verify(logger, never())
         .logPurchase(
-            ArgumentMatchers.any(BigDecimal::class.java),
-            ArgumentMatchers.any(Currency::class.java))
-    Mockito.verify(logger, Mockito.never())
-        .logPurchase(
-            ArgumentMatchers.any(BigDecimal::class.java),
-            ArgumentMatchers.any(Currency::class.java),
-            ArgumentMatchers.any(Bundle::class.java))
-    Mockito.verify(logger, Mockito.never())
-        .logPurchase(
-            ArgumentMatchers.any(BigDecimal::class.java),
-            ArgumentMatchers.any(Currency::class.java),
-            ArgumentMatchers.any(Bundle::class.java),
-            ArgumentMatchers.anyBoolean())
-    Mockito.verify(logger, Mockito.never())
-        .logPurchaseImplicitly(
-            ArgumentMatchers.any(BigDecimal::class.java),
-            ArgumentMatchers.any(Currency::class.java),
-            ArgumentMatchers.any(Bundle::class.java))
+            any<BigDecimal>(), any<Currency>(), any<Bundle>(), ArgumentMatchers.anyBoolean())
+    verify(logger, never()).logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
   }
 
   @Test
@@ -111,39 +91,32 @@ class InternalAppEventsLoggerTest : FacebookPowerMockTestCase() {
     FacebookSdk.setAutoLogAppEventsEnabled(true)
     val internalLogger = InternalAppEventsLogger(logger)
     internalLogger.logEvent(mockEventName, null)
-    Mockito.verify(logger, Mockito.times(1)).logEvent(mockEventName, null)
+    verify(logger, times(1)).logEvent(mockEventName, null)
     internalLogger.logEvent(mockEventName, 1.0, mockPayload)
-    Mockito.verify(logger, Mockito.times(1))
-        .logEvent(
-            ArgumentMatchers.eq(mockEventName),
-            ArgumentMatchers.eq(1.0),
-            ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
+    verify(logger, times(1))
+        .logEvent(eq(mockEventName), eq(1.0), ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
     internalLogger.logEventImplicitly(mockEventName)
-    Mockito.verify(logger, Mockito.times(1)).logEventImplicitly(mockEventName, null, null)
+    verify(logger, times(1)).logEventImplicitly(mockEventName, null, null)
     internalLogger.logEventImplicitly(mockEventName, mockPayload)
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEventImplicitly(
-            ArgumentMatchers.eq(mockEventName),
+            eq(mockEventName),
             ArgumentMatchers.isNull(Double::class.java),
             ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
     internalLogger.logEventImplicitly(mockEventName, 1.0, mockPayload)
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEventImplicitly(
-            ArgumentMatchers.eq(mockEventName),
-            ArgumentMatchers.eq(1.0),
-            ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
+            eq(mockEventName), eq(1.0), ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
     internalLogger.logEventImplicitly(mockEventName, mockVal, mockCurrency, mockPayload)
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEventImplicitly(
-            ArgumentMatchers.eq(mockEventName),
-            ArgumentMatchers.eq(mockVal),
-            ArgumentMatchers.eq(mockCurrency),
+            eq(mockEventName),
+            eq(mockVal),
+            eq(mockCurrency),
             ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
     internalLogger.logPurchaseImplicitly(mockVal, mockCurrency, mockPayload)
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logPurchaseImplicitly(
-            ArgumentMatchers.eq(mockVal),
-            ArgumentMatchers.eq(mockCurrency),
-            ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
+            eq(mockVal), eq(mockCurrency), ArgumentMatchers.argThat(BundleMatcher(mockPayload)))
   }
 }

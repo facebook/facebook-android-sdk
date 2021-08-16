@@ -6,6 +6,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.codeless.internal.EventBinding
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -23,15 +24,13 @@ class RCTCodelessLoggingEventListenerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(CodelessLoggingEventListener::class.java)
-    PowerMockito.`when`(CodelessLoggingEventListener.logEvent(any(), any(), any())).thenAnswer {
-      logTimes++
-    }
+    whenever(CodelessLoggingEventListener.logEvent(any(), any(), any())).thenAnswer { logTimes++ }
 
     mapping = mock()
     rootView = mock()
     hostView = mock()
     motionEvent = mock()
-    PowerMockito.`when`(motionEvent.action).thenReturn(MotionEvent.ACTION_UP)
+    whenever(motionEvent.action).thenReturn(MotionEvent.ACTION_UP)
   }
 
   @Test

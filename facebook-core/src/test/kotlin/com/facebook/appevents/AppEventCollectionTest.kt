@@ -6,6 +6,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.AttributionIdentifiers
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -34,9 +35,9 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
     appEventCollection = AppEventCollection()
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", mockExecutor)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
 
     val mockAttributionIdentifierCompanion =
@@ -50,7 +51,7 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
 
     val mockCompanion = PowerMockito.mock(AppEventsLogger.Companion::class.java)
     WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
-    PowerMockito.`when`(mockCompanion.getAnonymousAppDeviceGUID(any())).thenReturn("anonGUID")
+    whenever(mockCompanion.getAnonymousAppDeviceGUID(any())).thenReturn("anonGUID")
   }
 
   @Test

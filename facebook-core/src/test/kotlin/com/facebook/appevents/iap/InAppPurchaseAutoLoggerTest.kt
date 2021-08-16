@@ -22,6 +22,7 @@ import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -61,7 +62,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     var logPurchaseCallTimes = 0
     Whitebox.setInternalState(
         InAppPurchaseBillingClientWrapper::class.java, "isServiceConnected", AtomicBoolean(false))
-    PowerMockito.`when`(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
+    whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
       logPurchaseCallTimes++
       Unit
     }
@@ -74,12 +75,12 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     var runnable: Runnable? = null
     Whitebox.setInternalState(
         InAppPurchaseBillingClientWrapper::class.java, "isServiceConnected", AtomicBoolean(true))
-    PowerMockito.`when`(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(true)
-    PowerMockito.`when`(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
+    whenever(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(true)
+    whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
       logPurchaseCallTimes++
       Unit
     }
-    PowerMockito.`when`(mockBillingClientWrapper.queryPurchaseHistory(any(), any())).thenAnswer {
+    whenever(mockBillingClientWrapper.queryPurchaseHistory(any(), any())).thenAnswer {
       runnable = it.getArgument(1) as Runnable
       Unit
     }
@@ -96,12 +97,12 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     var runnable: Runnable? = null
     Whitebox.setInternalState(
         InAppPurchaseBillingClientWrapper::class.java, "isServiceConnected", AtomicBoolean(true))
-    PowerMockito.`when`(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(false)
-    PowerMockito.`when`(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
+    whenever(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(false)
+    whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
       logPurchaseCallTimes++
       Unit
     }
-    PowerMockito.`when`(mockBillingClientWrapper.queryPurchase(any(), any())).thenAnswer {
+    whenever(mockBillingClientWrapper.queryPurchase(any(), any())).thenAnswer {
       runnable = it.getArgument(1) as Runnable
       Unit
     }

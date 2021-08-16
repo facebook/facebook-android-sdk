@@ -73,7 +73,7 @@ class TaskTest {
             } else if (rand >= 0.4) {
               throw CancellationException()
             }
-            (Math.random() * 1000).toInt()
+            (Math.random() * 1_000).toInt()
           }
       tasks.add(task)
     }
@@ -328,7 +328,7 @@ class TaskTest {
       sync.unlock()
     }
     // wait -> completes
-    assertThat(task.waitForCompletion(1000, TimeUnit.MILLISECONDS)).isTrue
+    assertThat(task.waitForCompletion(1_000, TimeUnit.MILLISECONDS)).isTrue
     // wait -> already completed
     assertThat(task.waitForCompletion(100, TimeUnit.MILLISECONDS)).isTrue
     assertThat(task.result).isEqualTo(5)

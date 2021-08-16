@@ -19,16 +19,16 @@ import android.text.format.DateUtils
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.InternalAppEventsLogger
-import java.util.*
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.*
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito.*
-import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -50,7 +50,7 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
   fun init() {
     doubleArgumentCaptor = ArgumentCaptor.forClass(Double::class.java)
     mockSessionInfo = mock(SessionInfo::class.java)
-    whenCalled(mockSessionInfo.sessionLength).thenReturn(10L)
+    whenever(mockSessionInfo.sessionLength).thenReturn(10L)
     Whitebox.setInternalState(mockSessionInfo, "sessionLastEventTime", sessionLastEventTime)
     Whitebox.setInternalState(mockSessionInfo, "diskRestoreTime", diskRestoreTime)
 
@@ -66,8 +66,7 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
         .thenReturn(mockInternalAppEventsLogger)
 
     mockStatic(SessionLogger::class.java)
-    whenCalled(
-            SessionLogger.logDeactivateApp(anyString(), any(SessionInfo::class.java), anyString()))
+    whenever(SessionLogger.logDeactivateApp(anyString(), any(SessionInfo::class.java), anyString()))
         .thenCallRealMethod()
   }
 
@@ -81,7 +80,7 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
   fun `logDeactivateApp when sessionInfo is not null and sessionLength is negative`() {
     val expectedValueToSum = 0.0
     val sessionLengthNegative = -1L
-    whenCalled(mockSessionInfo.sessionLength).thenReturn(sessionLengthNegative)
+    whenever(mockSessionInfo.sessionLength).thenReturn(sessionLengthNegative)
 
     SessionLogger.logDeactivateApp(activityName, mockSessionInfo, appId)
     verifyNew(Bundle::class.java).withNoArguments()

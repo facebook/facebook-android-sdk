@@ -29,6 +29,7 @@ import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -55,7 +56,7 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
     super.setup()
     PowerMockito.spy(RestrictiveDataManager::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
     Whitebox.setInternalState(RestrictiveDataManager::class.java, "enabled", true)
   }
 
@@ -76,9 +77,9 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
 
     val mockResponse = jsonObject.toString()
     val fetchedAppSettings: FetchedAppSettings = mock()
-    PowerMockito.`when`(fetchedAppSettings.restrictiveDataSetting).thenReturn(mockResponse)
+    whenever(fetchedAppSettings.restrictiveDataSetting).thenReturn(mockResponse)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-    PowerMockito.`when`(queryAppSettings(any(), any())).thenReturn(fetchedAppSettings)
+    whenever(queryAppSettings(any(), any())).thenReturn(fetchedAppSettings)
     val restrictiveParamFilters =
         Whitebox.getInternalState<MutableList<RestrictiveParamFilter>>(
             RestrictiveDataManager::class.java, "restrictiveParamFilters")
@@ -116,7 +117,6 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(Exception::class)
   fun testProcessEvent() {
     val input = "name_should_be_replaced"
     Whitebox.setInternalState(

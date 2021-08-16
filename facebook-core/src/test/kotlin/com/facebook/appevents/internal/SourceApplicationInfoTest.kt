@@ -8,13 +8,13 @@ import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(FacebookSdk::class, PreferenceManager::class)
@@ -31,9 +31,9 @@ class SourceApplicationInfoTest : FacebookPowerMockTestCase() {
     mockStatic(PreferenceManager::class.java)
     mockContext = mock(Context::class.java)
     mockSharedPreferences = MockSharedPreference()
-    `when`(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
-    `when`(FacebookSdk.isInitialized()).thenReturn(true)
-    `when`(PreferenceManager.getDefaultSharedPreferences(mockContext))
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(PreferenceManager.getDefaultSharedPreferences(mockContext))
         .thenReturn(mockSharedPreferences)
     mockSharedPreferences
         .edit()
@@ -65,10 +65,10 @@ class SourceApplicationInfoTest : FacebookPowerMockTestCase() {
     val mockComponentName = mock(ComponentName::class.java)
     val mockIntent = mock(Intent::class.java)
 
-    `when`(mockComponentName.packageName).thenReturn(newCallingApplicationPackage)
-    `when`(mockActivity.packageName).thenReturn(callingApplicationPackage)
-    `when`(mockActivity.getCallingActivity()).thenReturn(mockComponentName)
-    `when`(mockActivity.getIntent()).thenReturn(mockIntent)
+    whenever(mockComponentName.packageName).thenReturn(newCallingApplicationPackage)
+    whenever(mockActivity.packageName).thenReturn(callingApplicationPackage)
+    whenever(mockActivity.getCallingActivity()).thenReturn(mockComponentName)
+    whenever(mockActivity.getIntent()).thenReturn(mockIntent)
     var sourceAppInfo = SourceApplicationInfo.Factory.create(mockActivity)
     assertEquals(false, sourceAppInfo?.isOpenedByAppLink)
     assertEquals(newCallingApplicationPackage, sourceAppInfo?.callingApplicationPackage)

@@ -4,6 +4,7 @@ import com.facebook.AccessToken
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -38,7 +39,7 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     pair3 = AccessTokenAppIdPair(TOKEN_STRING_NEW, APP_ID)
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     testFile = File(UUID.randomUUID().toString())
   }
 
@@ -67,9 +68,9 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testConstructFromAccessToken() {
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(APP_ID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(APP_ID)
     val tokenMock: AccessToken = mock()
-    PowerMockito.`when`(tokenMock.token).thenReturn(TOKEN_STRING)
+    whenever(tokenMock.token).thenReturn(TOKEN_STRING)
 
     val pair = AccessTokenAppIdPair(tokenMock)
     assertThat(pair.accessTokenString).isEqualTo(TOKEN_STRING)

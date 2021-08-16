@@ -6,6 +6,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +26,7 @@ class FacebookSDKJSInterfaceTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
 
     mockContext = mock()
     mockLogger = mock()
@@ -39,7 +40,7 @@ class FacebookSDKJSInterfaceTest : FacebookPowerMockTestCase() {
   @Test
   fun `test with valid json`() {
     var captureParameters: Bundle? = null
-    PowerMockito.`when`(mockLogger.logEvent(any(), any())).thenAnswer {
+    whenever(mockLogger.logEvent(any(), any())).thenAnswer {
       captureParameters = it.arguments[1] as Bundle
       Unit
     }
@@ -55,7 +56,7 @@ class FacebookSDKJSInterfaceTest : FacebookPowerMockTestCase() {
   @Test
   fun `test nonsense json`() {
     var captureParameters: Bundle? = null
-    PowerMockito.`when`(mockLogger.logEvent(any(), any())).thenAnswer {
+    whenever(mockLogger.logEvent(any(), any())).thenAnswer {
       captureParameters = it.arguments[1] as Bundle
       Unit
     }
