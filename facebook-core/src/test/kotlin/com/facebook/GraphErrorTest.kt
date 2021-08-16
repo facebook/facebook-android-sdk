@@ -26,6 +26,7 @@ import com.facebook.AccessToken.Companion.setCurrentAccessToken
 import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.Utility
+import com.nhaarman.mockitokotlin2.whenever
 import java.net.HttpURLConnection
 import org.json.JSONObject
 import org.junit.Assert
@@ -49,8 +50,8 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
   fun before() {
     MemberModifier.suppress(MemberMatcher.method(Utility::class.java, "clearFacebookCookies"))
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
 
     MemberModifier.stub<Any?>(MemberMatcher.method(AccessTokenCache::class.java, "save"))
@@ -58,16 +59,16 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
     val mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
     PowerMockito.mockStatic(LocalBroadcastManager::class.java)
-    PowerMockito.`when`(LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext()))
+    whenever(LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext()))
         .thenReturn(mockLocalBroadcastManager)
   }
 
   @Test
   fun testAccessTokenNotResetOnTokenExpirationError() {
     val accessToken = PowerMockito.mock(AccessToken::class.java)
-    PowerMockito.`when`(accessToken.token).thenReturn("token")
-    PowerMockito.`when`(accessToken.userId).thenReturn("user_id")
-    PowerMockito.`when`(accessToken.applicationId).thenReturn("application_id")
+    whenever(accessToken.token).thenReturn("token")
+    whenever(accessToken.userId).thenReturn("user_id")
+    whenever(accessToken.applicationId).thenReturn("application_id")
     MemberModifier.suppress(
         MemberMatcher.method(Utility::class.java, "isNullOrEmpty", String::class.java))
     setCurrentAccessToken(accessToken)
@@ -80,9 +81,9 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
     error.put("error", errorBody)
     val errorString = error.toString()
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(400)
+    whenever(connection.responseCode).thenReturn(400)
     val request = PowerMockito.mock(GraphRequest::class.java)
-    PowerMockito.`when`(request.accessToken).thenReturn(accessToken)
+    whenever(request.accessToken).thenReturn(accessToken)
     val batch = GraphRequestBatch(request)
     Assert.assertNotNull(getCurrentAccessToken())
     GraphResponse.createResponsesFromString(errorString, connection, batch)
@@ -101,9 +102,9 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
     error.put("error", errorBody)
     val errorString = error.toString()
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(400)
+    whenever(connection.responseCode).thenReturn(400)
     val request = PowerMockito.mock(GraphRequest::class.java)
-    PowerMockito.`when`(request.accessToken).thenReturn(accessToken)
+    whenever(request.accessToken).thenReturn(accessToken)
     val batch = GraphRequestBatch(request)
     Assert.assertNotNull(getCurrentAccessToken())
     GraphResponse.createResponsesFromString(errorString, connection, batch)

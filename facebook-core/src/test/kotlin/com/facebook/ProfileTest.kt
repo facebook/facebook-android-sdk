@@ -47,12 +47,12 @@ class ProfileTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     PowerMockito.mockStatic(LocalBroadcastManager::class.java)
     val mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
-    PowerMockito.`when`(LocalBroadcastManager.getInstance(Matchers.isA(Context::class.java)))
+    whenever(LocalBroadcastManager.getInstance(Matchers.isA(Context::class.java)))
         .thenReturn(mockLocalBroadcastManager)
   }
 

@@ -47,8 +47,8 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     private const val TOKEN_STRING = "A token of my esteem"
     private const val USER_ID = "1000"
     private val PERMISSIONS = listOf("walk", "chew gum")
-    private val EXPIRES = Date(2025, 5, 3)
-    private val LAST_REFRESH = Date(2023, 8, 15)
+    private val EXPIRES = Date(2_025, 5, 3)
+    private val LAST_REFRESH = Date(2_023, 8, 15)
     private const val APP_ID = "1234"
   }
   private lateinit var sharedPreferences: SharedPreferences
@@ -82,7 +82,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test load returns false if no cached or legacy token`() {
-    PowerMockito.`when`(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
+    whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     val accessToken = cache.load()
     Assert.assertNull(accessToken)
@@ -103,8 +103,8 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test load returns false if no cached token and empty legacy token`() {
-    PowerMockito.`when`(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
-    PowerMockito.`when`(cachingStrategy.load()).thenReturn(Bundle())
+    whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
+    whenever(cachingStrategy.load()).thenReturn(Bundle())
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     val accessToken = cache.load()
     Assert.assertNull(accessToken)
@@ -126,9 +126,9 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test load sets current token if no cached token but valid legacy token`() {
-    PowerMockito.`when`(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
+    whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
     val accessToken = createAccessToken()
-    PowerMockito.`when`(cachingStrategy.load())
+    whenever(cachingStrategy.load())
         .thenReturn(AccessTokenTestHelper.toLegacyCacheBundle(accessToken))
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     val loadedAccessToken = cache.load()
@@ -138,9 +138,9 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test load saves token when upgrading from legacy token`() {
-    PowerMockito.`when`(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
+    whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
     val accessToken = createAccessToken()
-    PowerMockito.`when`(cachingStrategy.load())
+    whenever(cachingStrategy.load())
         .thenReturn(AccessTokenTestHelper.toLegacyCacheBundle(accessToken))
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.load()
@@ -155,9 +155,9 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test load clears legacy cache when upgrading from legacy token`() {
-    PowerMockito.`when`(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
+    whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
     val accessToken = createAccessToken()
-    PowerMockito.`when`(cachingStrategy.load())
+    whenever(cachingStrategy.load())
         .thenReturn(AccessTokenTestHelper.toLegacyCacheBundle(accessToken))
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.load()
@@ -191,7 +191,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test clear cache clears legacy cache`() {
-    PowerMockito.`when`(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
+    whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
     val accessToken = createAccessToken()
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.save(accessToken)

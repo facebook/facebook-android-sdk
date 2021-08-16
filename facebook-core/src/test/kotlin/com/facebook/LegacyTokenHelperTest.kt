@@ -2,6 +2,7 @@ package com.facebook
 
 import android.os.Bundle
 import com.facebook.internal.Utility
+import com.nhaarman.mockitokotlin2.whenever
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -17,10 +18,10 @@ class LegacyTokenHelperTest : FacebookPowerMockTestCase() {
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.mockStatic(Utility::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.isFullyInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isFullyInitialized()).thenReturn(true)
     val json = JSONObject("{\"id\":\"swag\"}")
-    PowerMockito.`when`(Utility.awaitGetGraphMeRequestWithCache(anyString())).thenReturn(json)
+    whenever(Utility.awaitGetGraphMeRequestWithCache(anyString())).thenReturn(json)
   }
 
   @Test

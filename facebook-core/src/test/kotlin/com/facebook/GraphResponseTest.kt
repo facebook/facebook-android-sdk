@@ -1,5 +1,6 @@
 package com.facebook
 
+import com.nhaarman.mockitokotlin2.whenever
 import java.net.HttpURLConnection
 import org.json.JSONArray
 import org.junit.Assert.assertEquals
@@ -65,15 +66,15 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.isFullyInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isFullyInitialized()).thenReturn(true)
   }
 
   @Test
   fun `test get 400 response from batch`() {
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(400)
-    PowerMockito.`when`(connection.errorStream).thenReturn(validJson.byteInputStream())
+    whenever(connection.responseCode).thenReturn(400)
+    whenever(connection.errorStream).thenReturn(validJson.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     graphRequestBatch.add(GraphRequest())
@@ -90,8 +91,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     // notice no difference from 400 in terms of still getting parseable response
     // compare to single request
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(200)
-    PowerMockito.`when`(connection.inputStream).thenReturn(validJson.byteInputStream())
+    whenever(connection.responseCode).thenReturn(200)
+    whenever(connection.inputStream).thenReturn(validJson.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     graphRequestBatch.add(GraphRequest())
@@ -106,8 +107,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get 400 response from batch with 400 code in json`() {
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(400)
-    PowerMockito.`when`(connection.errorStream).thenReturn(validJsonWithErrorCode.byteInputStream())
+    whenever(connection.responseCode).thenReturn(400)
+    whenever(connection.errorStream).thenReturn(validJsonWithErrorCode.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     graphRequestBatch.add(GraphRequest())
@@ -124,9 +125,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get 200 response from batch with 200 code in json`() {
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(200)
-    PowerMockito.`when`(connection.inputStream)
-        .thenReturn(validJsonWithSuccessCode.byteInputStream())
+    whenever(connection.responseCode).thenReturn(200)
+    whenever(connection.inputStream).thenReturn(validJsonWithSuccessCode.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     graphRequestBatch.add(GraphRequest())
@@ -141,8 +141,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get 200 response single request`() {
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(200)
-    PowerMockito.`when`(connection.inputStream).thenReturn(validJsonSingle.byteInputStream())
+    whenever(connection.responseCode).thenReturn(200)
+    whenever(connection.inputStream).thenReturn(validJsonSingle.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)
@@ -154,8 +154,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get 200 response single request nested`() {
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(200)
-    PowerMockito.`when`(connection.inputStream).thenReturn(validJsonSingleNested.byteInputStream())
+    whenever(connection.responseCode).thenReturn(200)
+    whenever(connection.inputStream).thenReturn(validJsonSingleNested.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)
@@ -168,8 +168,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get 400 response single request`() {
     val connection = PowerMockito.mock(HttpURLConnection::class.java)
-    PowerMockito.`when`(connection.responseCode).thenReturn(400)
-    PowerMockito.`when`(connection.errorStream).thenReturn(validJsonSingle.byteInputStream())
+    whenever(connection.responseCode).thenReturn(400)
+    whenever(connection.errorStream).thenReturn(validJsonSingle.byteInputStream())
     val graphRequestBatch = GraphRequestBatch()
     graphRequestBatch.add(GraphRequest())
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)

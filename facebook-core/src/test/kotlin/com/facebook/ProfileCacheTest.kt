@@ -25,6 +25,7 @@ import com.facebook.util.common.ProfileTestHelper.assertDefaultObjectGetters
 import com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters
 import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -36,15 +37,15 @@ class ProfileCacheTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     val context = ApplicationProvider.getApplicationContext<Context>()
     context
         .getSharedPreferences(ProfileCache.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
         .edit()
         .clear()
         .commit()
-    PowerMockito.`when`(FacebookSdk.getApplicationContext()).thenReturn(context)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
   }
 
   @Test

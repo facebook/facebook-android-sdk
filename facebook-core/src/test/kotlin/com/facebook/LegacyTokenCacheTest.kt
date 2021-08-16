@@ -24,6 +24,7 @@ import com.facebook.FacebookTestUtility.assertEqualContentsWithoutOrder
 import com.facebook.FacebookTestUtility.assertSameCollectionContents
 import com.facebook.FacebookTestUtility.nowPlusSeconds
 import com.facebook.internal.Utility
+import com.nhaarman.mockitokotlin2.whenever
 import java.lang.reflect.Array
 import java.util.ArrayList
 import java.util.Date
@@ -43,10 +44,9 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
-        .thenReturn(RuntimeEnvironment.application)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application)
     MemberModifier.stub<Any>(
             PowerMockito.method(
                 Utility::class.java, "awaitGetGraphMeRequestWithCache", String::class.java))
@@ -187,7 +187,7 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
     var waitedFor: Long = 0
     try {
       // Don't hold up execution for too long.
-      while (RuntimeEnvironment.application.applicationContext == null && waitedFor <= 2000) {
+      while (RuntimeEnvironment.application.applicationContext == null && waitedFor <= 2_000) {
         Thread.sleep(50)
         waitedFor += 50
       }

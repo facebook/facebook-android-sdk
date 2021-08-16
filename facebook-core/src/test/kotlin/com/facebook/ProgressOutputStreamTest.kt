@@ -22,6 +22,7 @@ package com.facebook
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import org.junit.After
@@ -40,14 +41,14 @@ class ProgressOutputStreamTest : FacebookPowerMockTestCase() {
   private lateinit var stream: ProgressOutputStream
 
   companion object {
-    private const val MAX_PROGRESS = 10.toLong()
+    private const val MAX_PROGRESS = 10L
   }
 
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     r1 = GraphRequest(null, "4")
     r2 = GraphRequest(null, "4")

@@ -58,15 +58,15 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
   override fun setup() {
     super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
-    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn(mockClientToken)
-    PowerMockito.`when`(FacebookSdk.isDebugEnabled()).thenReturn(false)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
+    whenever(FacebookSdk.getClientToken()).thenReturn(mockClientToken)
+    whenever(FacebookSdk.isDebugEnabled()).thenReturn(false)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
-    PowerMockito.`when`(FacebookSdk.getGraphDomain()).thenCallRealMethod()
-    PowerMockito.`when`(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
-    PowerMockito.`when`(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
+    whenever(FacebookSdk.getGraphDomain()).thenCallRealMethod()
+    whenever(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
+    whenever(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
     mockLoggedInWithTokenDomain("facebook")
   }
 
@@ -284,23 +284,23 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
   @Test
   fun testCreatePlacesSearchRequestWithLocation() {
     val location = Location("")
-    location.latitude = 47.6204
-    location.longitude = -122.3491
-    val request = GraphRequest.newPlacesSearchRequest(null, location, 1000, 50, null, null)
+    location.latitude = 47.6_204
+    location.longitude = -122.3_491
+    val request = GraphRequest.newPlacesSearchRequest(null, location, 1_000, 50, null, null)
     assertThat(request.httpMethod).isEqualTo(HttpMethod.GET)
     assertThat(request.graphPath).isEqualTo("search")
   }
 
   @Test
   fun testCreatePlacesSearchRequestWithSearchText() {
-    val request = GraphRequest.newPlacesSearchRequest(null, null, 1000, 50, "Starbucks", null)
+    val request = GraphRequest.newPlacesSearchRequest(null, null, 1_000, 50, "Starbucks", null)
     assertThat(request.httpMethod).isEqualTo(HttpMethod.GET)
     assertThat(request.graphPath).isEqualTo("search")
   }
 
   @Test(expected = FacebookException::class)
   fun testCreatePlacesSearchRequestRequiresLocationOrSearchText() {
-    GraphRequest.newPlacesSearchRequest(null, null, 1000, 50, null, null)
+    GraphRequest.newPlacesSearchRequest(null, null, 1_000, 50, null, null)
   }
 
   @Test
@@ -367,8 +367,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
         .thenReturn(null)
     Whitebox.setInternalState(
         AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanionObject)
-    PowerMockito.doReturn(false)
-        .`when`(FacebookSdk::class.java, "getLimitEventAndDataUsage", any<Context>())
+    whenever(FacebookSdk.getLimitEventAndDataUsage(any<Context>())).thenReturn(false)
     val expectedRequest =
         GraphRequest(
             null, "mockAppID/custom_audience_third_party_id", Bundle(), HttpMethod.GET, null)
@@ -383,10 +382,10 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test GraphRequest raises a warning if no client is set`() {
-    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn(null)
+    whenever(FacebookSdk.getClientToken()).thenReturn(null)
     PowerMockito.mockStatic(Log::class.java)
     var capturedTag: String? = null
-    PowerMockito.`when`(Log.w(any(), any<String>())).thenAnswer {
+    whenever(Log.w(any(), any<String>())).thenAnswer {
       capturedTag = it.arguments[0].toString()
       0
     }

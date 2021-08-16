@@ -2,6 +2,7 @@ package com.facebook
 
 import android.util.Base64
 import com.facebook.util.common.AuthenticationTokenTestUtil
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONException
 import org.json.JSONObject
@@ -19,15 +20,14 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.getApplicationId())
-        .thenReturn(AuthenticationTokenTestUtil.APP_ID)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID)
     claimsMap["jti"] = "jti"
     claimsMap["sub"] = "1234"
     claimsMap["iss"] = "https://facebook.com/dialog/oauth"
     claimsMap["aud"] = AuthenticationTokenTestUtil.APP_ID
     claimsMap["nonce"] = "some nonce"
-    claimsMap["exp"] = 1516259022
-    claimsMap["iat"] = 1516239022
+    claimsMap["exp"] = 1_516_259_022
+    claimsMap["iat"] = 1_516_239_022
   }
 
   @Test(expected = IllegalArgumentException::class)

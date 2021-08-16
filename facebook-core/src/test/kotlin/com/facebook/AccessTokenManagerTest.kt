@@ -55,9 +55,9 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     private const val TOKEN_STRING = "A token of my esteem"
     private const val USER_ID = "1000"
     private val PERMISSIONS = listOf("walk", "chew gum")
-    private val EXPIRES = Date(2025, 5, 3)
-    private val LAST_REFRESH = Date(2023, 8, 15)
-    private val DATA_ACCESS_EXPIRATION_TIME = Date(2025, 5, 3)
+    private val EXPIRES = Date(2_025, 5, 3)
+    private val LAST_REFRESH = Date(2_023, 8, 15)
+    private val DATA_ACCESS_EXPIRATION_TIME = Date(2_025, 5, 3)
     private const val APP_ID = "1234"
   }
   private lateinit var localBroadcastManager: LocalBroadcastManager
@@ -66,8 +66,8 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     MemberModifier.suppress(MemberMatcher.method(Utility::class.java, "clearFacebookCookies"))
     accessTokenCache = mock()
@@ -126,7 +126,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testLoadReturnsTrueIfCachedToken() {
     val accessToken = createAccessToken()
-    PowerMockito.`when`(accessTokenCache.load()).thenReturn(accessToken)
+    whenever(accessTokenCache.load()).thenReturn(accessToken)
     val accessTokenManager = createAccessTokenManager()
     val result = accessTokenManager.loadCurrentAccessToken()
     Assert.assertTrue(result)
@@ -135,7 +135,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testLoadSetsCurrentTokenIfCached() {
     val accessToken = createAccessToken()
-    PowerMockito.`when`(accessTokenCache.load()).thenReturn(accessToken)
+    whenever(accessTokenCache.load()).thenReturn(accessToken)
     val accessTokenManager = createAccessTokenManager()
     accessTokenManager.loadCurrentAccessToken()
     Assert.assertEquals(accessToken, accessTokenManager.currentAccessToken)
@@ -159,7 +159,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testLoadDoesNotSave() {
     val accessToken = createAccessToken()
-    PowerMockito.`when`(accessTokenCache.load()).thenReturn(accessToken)
+    whenever(accessTokenCache.load()).thenReturn(accessToken)
     val accessTokenManager = createAccessTokenManager()
     accessTokenManager.loadCurrentAccessToken()
     verify(accessTokenCache, never()).save(any())
@@ -202,7 +202,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testExtendFBAccessToken() {
     val accessToken = createAccessToken()
-    PowerMockito.`when`(accessTokenCache.load()).thenReturn(accessToken)
+    whenever(accessTokenCache.load()).thenReturn(accessToken)
     val accessTokenManager = createAccessTokenManager()
     accessTokenManager.loadCurrentAccessToken()
 
@@ -245,7 +245,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testExtendIGAccessToken() {
     val accessToken = createAccessToken(TOKEN_STRING, USER_ID, "instagram")
-    PowerMockito.`when`(accessTokenCache.load()).thenReturn(accessToken)
+    whenever(accessTokenCache.load()).thenReturn(accessToken)
     val accessTokenManager = createAccessTokenManager()
     accessTokenManager.loadCurrentAccessToken()
 

@@ -30,6 +30,7 @@ import com.facebook.appevents.InternalAppEventsLogger
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -51,11 +52,11 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
     var getAutoInitEnabledTimes = 0
     var setAutoInitEnabledValue: Boolean? = null
-    PowerMockito.`when`(getAutoInitEnabled()).thenAnswer {
+    whenever(getAutoInitEnabled()).thenAnswer {
       getAutoInitEnabledTimes++
       true
     }
-    PowerMockito.`when`(setAutoInitEnabled(any())).thenAnswer {
+    whenever(setAutoInitEnabled(any())).thenAnswer {
       setAutoInitEnabledValue = it.arguments[0] as Boolean
       Unit
     }
@@ -73,11 +74,11 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
     var getAutoLogAppEventsEnabledTimes = 0
     var setAutoLogAppEventsEnabledbledValue: Boolean? = null
-    PowerMockito.`when`(getAutoLogAppEventsEnabled()).thenAnswer {
+    whenever(getAutoLogAppEventsEnabled()).thenAnswer {
       getAutoLogAppEventsEnabledTimes++
       true
     }
-    PowerMockito.`when`(setAutoLogAppEventsEnabled(any())).thenAnswer {
+    whenever(setAutoLogAppEventsEnabled(any())).thenAnswer {
       setAutoLogAppEventsEnabledbledValue = it.arguments[0] as Boolean
       Unit
     }
@@ -94,11 +95,11 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
     var getAdvertiserIDCollectionEnabledTimes = 0
     var setAdvertiserIDCollectionEnabledValue: Boolean? = null
-    PowerMockito.`when`(getAdvertiserIDCollectionEnabled()).thenAnswer {
+    whenever(getAdvertiserIDCollectionEnabled()).thenAnswer {
       getAdvertiserIDCollectionEnabledTimes++
       true
     }
-    PowerMockito.`when`(setAdvertiserIDCollectionEnabled(any())).thenAnswer {
+    whenever(setAdvertiserIDCollectionEnabled(any())).thenAnswer {
       setAdvertiserIDCollectionEnabledValue = it.arguments[0] as Boolean
       Unit
     }
@@ -114,7 +115,7 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
   fun testCodelessSetupEnabled() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
     var getCodelessSetupEnabledTimes = 0
-    PowerMockito.`when`(getCodelessSetupEnabled()).thenAnswer {
+    whenever(getCodelessSetupEnabled()).thenAnswer {
       getCodelessSetupEnabledTimes++
       true
     }
@@ -125,7 +126,6 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(Exception::class)
   fun testLogIfSDKSettingsChanged() {
     val mockLogger: InternalAppEventsLogger = mock()
     PowerMockito.whenNew(InternalAppEventsLogger::class.java)

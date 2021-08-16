@@ -36,7 +36,7 @@ class CurrentAccessTokenExpirationBroadcastReceiverTest : FacebookPowerMockTestC
   private lateinit var mockAccessTokenManager: AccessTokenManager
   override fun setup() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
     mockAccessTokenManager = mock()
     val mockAccessTokenManagerCompanion: AccessTokenManager.Companion = mock()
     whenever(mockAccessTokenManagerCompanion.getInstance()).thenReturn(mockAccessTokenManager)

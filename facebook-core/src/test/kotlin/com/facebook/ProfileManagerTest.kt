@@ -25,6 +25,7 @@ import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -38,10 +39,10 @@ class ProfileManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
 
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
   }
 
@@ -57,7 +58,7 @@ class ProfileManagerTest : FacebookPowerMockTestCase() {
   fun testLoadCurrentProfileWithCache() {
     val profileCache = PowerMockito.mock(ProfileCache::class.java)
     val profile = createDefaultProfile()
-    PowerMockito.`when`(profileCache.load()).thenReturn(profile)
+    whenever(profileCache.load()).thenReturn(profile)
     val localBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
     val profileManager = ProfileManager(localBroadcastManager, profileCache)
     Assert.assertTrue(profileManager.loadCurrentProfile())

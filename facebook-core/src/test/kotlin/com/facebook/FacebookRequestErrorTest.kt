@@ -19,23 +19,21 @@
  */
 package com.facebook
 
+import com.nhaarman.mockitokotlin2.whenever
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(FacebookSdk::class)
 class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   @Before
-  @Throws(Exception::class)
   fun before() {
     mockStatic(FacebookSdk::class.java)
-    `when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
   }
 
   @Test
@@ -49,7 +47,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleRequestWithoutBody() {
     val withStatusCode = JSONObject()
     withStatusCode.put("code", 400)
@@ -61,7 +58,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleErrorWithBody() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE)
     val withStatusCodeAndBody = JSONObject()
@@ -74,13 +70,12 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(400, error?.requestStatusCode)
     Assert.assertEquals("Unknown path components: /unknown", error?.errorMessage)
     Assert.assertEquals("OAuthException", error?.errorType)
-    Assert.assertEquals(2500, error?.errorCode)
+    Assert.assertEquals(2_500, error?.errorCode)
     Assert.assertTrue(error?.batchRequestResult is JSONObject)
     Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testBatchRequest() {
     val batchResponse = JSONArray(ERROR_BATCH_RESPONSE)
     Assert.assertEquals(2, batchResponse.length())
@@ -92,13 +87,12 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         "An active access token must be used to query information about the current user.",
         error?.errorMessage)
     Assert.assertEquals("OAuthException", error?.errorType)
-    Assert.assertEquals(2500, error?.errorCode)
+    Assert.assertEquals(2_500, error?.errorCode)
     Assert.assertTrue(error?.batchRequestResult is JSONArray)
     Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleThrottledError() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE_THROTTLE)
     val withStatusCodeAndBody = JSONObject()
@@ -117,7 +111,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleServerError() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE_SERVER)
     val withStatusCodeAndBody = JSONObject()
@@ -136,7 +129,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSinglePermissionError() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE_PERMISSION)
     val withStatusCodeAndBody = JSONObject()
@@ -156,7 +148,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleWebLoginError() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE_WEB_LOGIN)
     val withStatusCodeAndBody = JSONObject()
@@ -176,7 +167,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleReloginError() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE_RELOGIN)
     val withStatusCodeAndBody = JSONObject()
@@ -196,7 +186,6 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  @Throws(JSONException::class)
   fun testSingleReloginDeletedAppError() {
     val originalResponse = JSONObject(ERROR_SINGLE_RESPONSE_RELOGIN_DELETED_APP)
     val withStatusCodeAndBody = JSONObject()

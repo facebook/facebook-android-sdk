@@ -24,6 +24,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Pair
 import com.facebook.internal.NativeAppCallAttachmentStore
 import com.facebook.internal.NativeAppCallAttachmentStore.openAttachment
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -143,22 +144,20 @@ class FacebookContentProviderTest : FacebookPowerMockTestCase() {
     }
   }
 
-  @Throws(FileNotFoundException::class)
   private fun getTestAttachmentParcelFileDescriptor(callId: UUID): ParcelFileDescriptor? {
     val attachment = MockAttachmentStore.openAttachment(callId, ATTACHMENT_NAME)
-    PowerMockito.`when`(openAttachment(callId, ATTACHMENT_NAME)).thenReturn(attachment)
+    whenever(openAttachment(callId, ATTACHMENT_NAME)).thenReturn(attachment)
     val uri = Uri.parse(FacebookContentProvider.getAttachmentUrl(APP_ID, callId, ATTACHMENT_NAME))
     return providerUnderTest.openFile(uri, "r")
   }
 
-  internal object MockAttachmentStore {
+  object MockAttachmentStore {
     private val attachments: MutableList<Pair<UUID, String>> = ArrayList()
     private const val DUMMY_FILE_NAME = "dummyfile"
     fun addAttachment(callId: UUID, attachmentName: String) {
       attachments.add(Pair(callId, attachmentName))
     }
 
-    @Throws(FileNotFoundException::class)
     fun openAttachment(callId: UUID, attachmentName: String): File {
       if (attachments.contains(Pair(callId, attachmentName))) {
         val cacheDir = RuntimeEnvironment.application.cacheDir

@@ -28,6 +28,7 @@ import com.facebook.internal.Utility
 import com.facebook.internal.Utility.arrayList
 import com.facebook.internal.Utility.hashSet
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.Date
 import org.json.JSONObject
 import org.junit.Assert
@@ -52,13 +53,13 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
         .toReturn(JSONObject().put("id", mockUserID))
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     PowerMockito.mockStatic(LocalBroadcastManager::class.java)
     val mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
-    PowerMockito.`when`(LocalBroadcastManager.getInstance(Matchers.isA(Context::class.java)))
+    whenever(LocalBroadcastManager.getInstance(Matchers.isA(Context::class.java)))
         .thenReturn(mockLocalBroadcastManager)
   }
 
@@ -182,10 +183,10 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     LegacyTokenHelper.putToken(bundle, token)
     // no app id
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn(applicationId)
-    PowerMockito.`when`(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(applicationId)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     val accessToken = AccessToken.createFromLegacyCache(bundle)
     Assert.assertNotNull(accessToken)
@@ -265,11 +266,11 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     val applicationId = "1000"
     var capturedGraphRequestCallback: Utility.GraphMeRequestWithCacheCallback? = null
     PowerMockito.mockStatic(Utility::class.java)
-    PowerMockito.`when`(Utility.getGraphMeRequestWithCacheAsync(any(), any())).thenAnswer {
+    whenever(Utility.getGraphMeRequestWithCacheAsync(any(), any())).thenAnswer {
       capturedGraphRequestCallback = it.arguments[1] as Utility.GraphMeRequestWithCacheCallback?
       Unit
     }
-    PowerMockito.`when`(Utility.getBundleLongAsDate(any(), any(), any())).thenCallRealMethod()
+    whenever(Utility.getBundleLongAsDate(any(), any(), any())).thenCallRealMethod()
     intent.putExtra(AccessToken.ACCESS_TOKEN_KEY, tokenString)
     intent.putExtra(AccessToken.EXPIRES_IN_KEY, "0")
     var capturedAccessToken: AccessToken? = null
@@ -324,9 +325,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
             listOf("declined permission_1", "declined permission_2"),
             listOf("expired permission_1", "expired permission_2"),
             AccessTokenSource.WEB_VIEW,
-            Date(2015, 3, 3),
-            Date(2015, 1, 1),
-            Date(2015, 3, 3))
+            Date(2_015, 3, 3),
+            Date(2_015, 1, 1),
+            Date(2_015, 3, 3))
     val jsonObject = accessToken.toJSONObject()
     val deserializedAccessToken = AccessToken.createFromJSONObject(jsonObject)
     Assert.assertEquals(accessToken, deserializedAccessToken)
@@ -343,8 +344,8 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
             listOf("declined permission_1", "declined permission_2"),
             listOf(),
             AccessTokenSource.WEB_VIEW,
-            Date(2015, 3, 3),
-            Date(2015, 1, 1),
+            Date(2_015, 3, 3),
+            Date(2_015, 1, 1),
             Date(0))
     val jsonObject = accessToken.toJSONObject()
     jsonObject.remove("data_access_expiration_time")
@@ -405,7 +406,7 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(userId, accessToken.userId)
     // Allow slight variation for test execution time
     val delta = accessToken.lastRefresh.time - Date().time
-    Assert.assertTrue(delta < 1000)
+    Assert.assertTrue(delta < 1_000)
   }
 
   @Test
@@ -414,9 +415,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     val permissions: Set<String?> = hashSet<String?>("walk", "chew gum")
     val declinedPermissions: Set<String?> = hashSet<String?>("jump")
     val expiredPermissions: Set<String?> = hashSet<String?>("smile")
-    val expires = Date(2025, 5, 3)
-    val lastRefresh = Date(2023, 8, 15)
-    val dataAccessExpirationTime = Date(2025, 5, 3)
+    val expires = Date(2_025, 5, 3)
+    val lastRefresh = Date(2_023, 8, 15)
+    val dataAccessExpirationTime = Date(2_025, 5, 3)
     val source = AccessTokenSource.WEB_VIEW
     val applicationId = "1234"
     val userId = "1000"

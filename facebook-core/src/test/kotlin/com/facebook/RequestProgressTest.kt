@@ -42,8 +42,8 @@ class RequestProgressTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getOnProgressThreshold()).thenReturn(100)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getOnProgressThreshold()).thenReturn(100)
     mockRequest = mock()
     mockRequestCallback =
         object : GraphRequest.OnProgressCallback {

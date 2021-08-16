@@ -28,6 +28,7 @@ import com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters
 import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile
 import com.facebook.util.common.mockLocalBroadcastManager
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Matchers
@@ -43,11 +44,11 @@ class ProfileTrackerTest : FacebookPowerMockTestCase() {
     val localBroadcastManager =
         mockLocalBroadcastManager(ApplicationProvider.getApplicationContext())
     PowerMockito.mockStatic(LocalBroadcastManager::class.java)
-    PowerMockito.`when`(LocalBroadcastManager.getInstance(Matchers.isA(Context::class.java)))
+    whenever(LocalBroadcastManager.getInstance(Matchers.isA(Context::class.java)))
         .thenReturn(localBroadcastManager)
     PowerMockito.mockStatic(FacebookSdk::class.java)
-    PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
-    PowerMockito.`when`(FacebookSdk.getApplicationContext())
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     val testProfileTracker = TestProfileTracker()
     // Starts tracking
@@ -73,7 +74,7 @@ class ProfileTrackerTest : FacebookPowerMockTestCase() {
     testProfileTracker.stopTracking()
   }
 
-  internal class TestProfileTracker : ProfileTracker() {
+  class TestProfileTracker : ProfileTracker() {
     var oldProfile: Profile? = null
     var currentProfile: Profile? = null
     var isCallbackCalled = false
