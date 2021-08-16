@@ -17,48 +17,38 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents
 
-package com.facebook.appevents;
+import android.os.Bundle
+import com.facebook.FacebookTestUtility.assertEqualContentsWithoutOrder
+import java.util.UUID
+import org.mockito.ArgumentMatcher
 
-import static com.facebook.FacebookTestUtility.assertEqualContentsWithoutOrder;
-
-import android.os.Bundle;
-import androidx.annotation.Nullable;
-import java.util.UUID;
-import org.mockito.ArgumentMatcher;
-
-public class AppEventTestUtilities {
-  public static AppEvent getTestAppEvent() throws Exception {
-    Bundle customParams = new Bundle();
-    customParams.putString("key1", "value1");
-    customParams.putString("key2", "value2");
-    AppEvent appEvent =
-        new AppEvent(
+object AppEventTestUtilities {
+  fun getTestAppEvent(): AppEvent {
+    val customParams = Bundle()
+    customParams.putString("key1", "value1")
+    customParams.putString("key2", "value2")
+    val appEvent =
+        AppEvent(
             "contextName",
             "eventName",
             1.0,
             customParams,
             false,
             false,
-            UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"));
-    appEvent.isChecksumValid();
-    return appEvent;
+            UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"))
+    appEvent.isChecksumValid
+    return appEvent
   }
 
-  public static class BundleMatcher implements ArgumentMatcher<Bundle> {
-
-    private Bundle wanted;
-
-    public BundleMatcher(Bundle wanted) {
-      this.wanted = wanted;
-    }
-
-    public boolean matches(@Nullable Bundle bundle) {
+  class BundleMatcher(private val wanted: Bundle) : ArgumentMatcher<Bundle> {
+    override fun matches(bundle: Bundle?): Boolean {
       if (bundle == null) {
-        return false;
+        return false
       }
-      assertEqualContentsWithoutOrder(this.wanted, bundle);
-      return true;
+      assertEqualContentsWithoutOrder(wanted, bundle)
+      return true
     }
   }
 }

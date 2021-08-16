@@ -27,7 +27,6 @@ import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 
 class SensitiveUserDataUtilsTest : CodelessTestBase() {
@@ -60,7 +59,7 @@ class SensitiveUserDataUtilsTest : CodelessTestBase() {
     Assert.assertTrue(isSensitiveUserData(textView))
 
     // input type == Phone
-    Mockito.`when`(textView.inputType).thenReturn(InputType.TYPE_CLASS_PHONE)
+    PowerMockito.`when`(textView.inputType).thenReturn(InputType.TYPE_CLASS_PHONE)
     Assert.assertTrue(isSensitiveUserData(textView))
 
     // Credit Card
