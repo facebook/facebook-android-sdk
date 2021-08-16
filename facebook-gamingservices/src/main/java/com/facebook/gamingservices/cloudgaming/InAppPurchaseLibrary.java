@@ -23,17 +23,90 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class InAppPurchaseLibrary {
   // Valid parameter keys
-  public static final String PRODUCT_ID = SDKConstants.PARAM_PRODUCT_ID;
-  public static final String PURCHASE_TOKEN = SDKConstants.PARAM_PURCHASE_TOKEN;
-  public static final String DEVELOPER_PAYLOAD = SDKConstants.PARAM_DEVELOPER_PAYLOAD;
+  @Deprecated public static final String PRODUCT_ID = SDKConstants.PARAM_PRODUCT_ID;
+  @Deprecated public static final String PURCHASE_TOKEN = SDKConstants.PARAM_PURCHASE_TOKEN;
+  @Deprecated public static final String DEVELOPER_PAYLOAD = SDKConstants.PARAM_DEVELOPER_PAYLOAD;
 
   /**
    * Sets a callback to be triggered when Payments operations are available.
    *
+   * @param context the application context
+   * @param callback callback for success and error
+   */
+  public static void onReady(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.ON_READY);
+  }
+
+  /**
+   * Fetches the game's product catalog.
+   *
+   * @param context the application context
+   * @param callback callback for success and error
+   */
+  public static void getCatalog(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.GET_CATALOG);
+  }
+
+  /**
+   * Fetches all of the player's unconsumed purchases. The game must fetch the current player's
+   * purchases as soon as the client indicates that it is ready to perform payments-related
+   * operations, i.e. at game start. The game can then process and consume any purchases that are
+   * waiting to be consumed.
+   *
+   * @param context the application context
+   * @param callback callback for success and error
+   */
+  public static void getPurchases(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.GET_PURCHASES);
+  }
+
+  /**
+   * Begins the purchase flow for a specific product.
+   *
+   * @param context the application context
+   * @param productID the productID of the item to be purchased, obtained from the catalog
+   * @param developerPayload the optional string payload to be associated with the purchase
+   * @param callback callback for success and error
+   */
+  public static void purchase(
+      Context context,
+      String productID,
+      @Nullable String developerPayload,
+      DaemonRequest.Callback callback)
+      throws JSONException {
+    JSONObject parameters =
+        (new JSONObject())
+            .put(SDKConstants.PARAM_PRODUCT_ID, productID)
+            .put(SDKConstants.PARAM_DEVELOPER_PAYLOAD, developerPayload);
+    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.PURCHASE);
+  }
+
+  /**
+   * Consumes a specific purchase belonging to the current player. Before provisioning a product's
+   * effects to the player, the game should request the consumption of the purchased product. Once
+   * the purchase is successfully consumed, the game should immediately provide the player with the
+   * effects of their purchase.
+   *
+   * @param context the application context
+   * @param purchaseToken the purchase token associated with a transaction
+   * @param callback callback for success and error
+   */
+  public static void consumePurchase(
+      Context context, String purchaseToken, DaemonRequest.Callback callback) throws JSONException {
+    JSONObject parameters =
+        (new JSONObject()).put(SDKConstants.PARAM_PURCHASE_TOKEN, purchaseToken);
+    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.CONSUME_PURCHASE);
+  }
+
+  /**
+   * Sets a callback to be triggered when Payments operations are available.
+   *
+   * @deprecated Replaced by the overloaded function
    * @param context the application context
    * @param parameters {}
    * @param callback callback for success and error
@@ -46,6 +119,7 @@ public class InAppPurchaseLibrary {
   /**
    * Fetches the game's product catalog.
    *
+   * @deprecated Replaced by the overloaded function
    * @param context the application context
    * @param parameters {}
    * @param callback callback for success and error
@@ -61,6 +135,7 @@ public class InAppPurchaseLibrary {
    * operations, i.e. at game start. The game can then process and consume any purchases that are
    * waiting to be consumed.
    *
+   * @deprecated Replaced by the overloaded function
    * @param context the application context
    * @param parameters {}
    * @param callback callback for success and error
@@ -73,6 +148,7 @@ public class InAppPurchaseLibrary {
   /**
    * Begins the purchase flow for a specific product.
    *
+   * @deprecated Replaced by the overloaded function
    * @param context the application context
    * @param parameters { PRODUCT_ID: <the productID of the item>, DEVELOPER_PAYLOAD (optional):
    *     <string payload associated with purchase> }
@@ -89,6 +165,7 @@ public class InAppPurchaseLibrary {
    * the purchase is successfully consumed, the game should immediately provide the player with the
    * effects of their purchase.
    *
+   * @deprecated Replaced by the overloaded function
    * @param context the application context
    * @param parameters { PURCHASE_TOKEN: <the purchase token associated with a transaction> }
    * @param callback callback for success and error
