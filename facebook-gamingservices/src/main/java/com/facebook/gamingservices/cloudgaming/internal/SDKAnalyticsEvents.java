@@ -33,6 +33,7 @@ public class SDKAnalyticsEvents {
       "cloud_games_sending_success_response";
   public static final String EVENT_SENDING_ERROR_RESPONSE = "cloud_games_sending_error_response";
   public static final String EVENT_LOGIN_SUCCESS = "cloud_games_login_success";
+  public static final String EVENT_INTERNAL_ERROR = "cloud_games_internal_error";
   public static final String PARAMETER_FUNCTION_TYPE = "function_type";
   public static final String PARAMETER_PAYLOAD = "payload";
   public static final String PARAMETER_ERROR_CODE = "error_code";

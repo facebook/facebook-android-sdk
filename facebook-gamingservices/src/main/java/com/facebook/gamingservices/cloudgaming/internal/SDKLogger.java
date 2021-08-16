@@ -54,6 +54,11 @@ public class SDKLogger {
     return instance;
   }
 
+  // Helper to log an internal error
+  public static void logInternalError(Context context, SDKMessageEnum functionType, Exception e) {
+    SDKLogger.getInstance(context).logInternalError(functionType, e);
+  }
+
   public void logPreparingRequest(String functionType, String requestID, JSONObject payloads) {
     Bundle parameters = this.getParametersWithRequestIDAndFunctionType(requestID, functionType);
     parameters.putString(SDKAnalyticsEvents.PARAMETER_PAYLOAD, payloads.toString());
@@ -84,6 +89,14 @@ public class SDKLogger {
   public void logLoginSuccess() {
     Bundle parameters = this.getInitParameters();
     logger.logEventImplicitly(SDKAnalyticsEvents.EVENT_LOGIN_SUCCESS, parameters);
+  }
+
+  public void logInternalError(SDKMessageEnum functionType, Exception e) {
+    Bundle parameters = this.getInitParameters();
+    parameters.putString(SDKAnalyticsEvents.PARAMETER_FUNCTION_TYPE, functionType.toString());
+    parameters.putString(SDKAnalyticsEvents.PARAMETER_ERROR_TYPE, e.getClass().getName());
+    parameters.putString(SDKAnalyticsEvents.PARAMETER_ERROR_MESSAGE, e.getMessage());
+    logger.logEventImplicitly(SDKAnalyticsEvents.EVENT_INTERNAL_ERROR, parameters);
   }
 
   public void setAppID(String appID) {

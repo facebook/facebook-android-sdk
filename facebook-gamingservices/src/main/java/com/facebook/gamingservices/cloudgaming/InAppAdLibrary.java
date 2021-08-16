@@ -22,6 +22,7 @@ package com.facebook.gamingservices.cloudgaming;
 import android.content.Context;
 import androidx.annotation.Nullable;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
+import com.facebook.gamingservices.cloudgaming.internal.SDKLogger;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,9 +40,13 @@ public class InAppAdLibrary {
    * @param callback callback for success and error
    */
   public static void loadRewardedVideo(
-      Context context, String placementID, DaemonRequest.Callback callback) throws JSONException {
-    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.LOAD_REWARDED_VIDEO);
+      Context context, String placementID, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
+      DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.LOAD_REWARDED_VIDEO);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.LOAD_REWARDED_VIDEO, e);
+    }
   }
 
   /**
@@ -53,9 +58,14 @@ public class InAppAdLibrary {
    * @param callback callback for success and error
    */
   public static void loadInterstitialAd(
-      Context context, String placementID, DaemonRequest.Callback callback) throws JSONException {
-    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.LOAD_INTERSTITIAL_AD);
+      Context context, String placementID, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
+      DaemonRequest.executeAsync(
+          context, parameters, callback, SDKMessageEnum.LOAD_INTERSTITIAL_AD);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.LOAD_INTERSTITIAL_AD, e);
+    }
   }
 
   /**
@@ -67,9 +77,13 @@ public class InAppAdLibrary {
    * @param callback callback for success and error
    */
   public static void showRewardedVideo(
-      Context context, String placementID, DaemonRequest.Callback callback) throws JSONException {
-    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.SHOW_REWARDED_VIDEO);
+      Context context, String placementID, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
+      DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.SHOW_REWARDED_VIDEO);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.SHOW_REWARDED_VIDEO, e);
+    }
   }
 
   /**
@@ -81,9 +95,14 @@ public class InAppAdLibrary {
    * @param callback callback for success and error
    */
   public static void showInterstitialAd(
-      Context context, String placementID, DaemonRequest.Callback callback) throws JSONException {
-    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.SHOW_INTERSTITIAL_AD);
+      Context context, String placementID, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PLACEMENT_ID, placementID);
+      DaemonRequest.executeAsync(
+          context, parameters, callback, SDKMessageEnum.SHOW_INTERSTITIAL_AD);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.SHOW_INTERSTITIAL_AD, e);
+    }
   }
 
   /**

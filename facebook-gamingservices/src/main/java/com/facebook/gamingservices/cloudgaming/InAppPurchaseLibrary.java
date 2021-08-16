@@ -22,6 +22,7 @@ package com.facebook.gamingservices.cloudgaming;
 import android.content.Context;
 import androidx.annotation.Nullable;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
+import com.facebook.gamingservices.cloudgaming.internal.SDKLogger;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,13 +78,16 @@ public class InAppPurchaseLibrary {
       Context context,
       String productID,
       @Nullable String developerPayload,
-      DaemonRequest.Callback callback)
-      throws JSONException {
-    JSONObject parameters =
-        (new JSONObject())
-            .put(SDKConstants.PARAM_PRODUCT_ID, productID)
-            .put(SDKConstants.PARAM_DEVELOPER_PAYLOAD, developerPayload);
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.PURCHASE);
+      DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters =
+          (new JSONObject())
+              .put(SDKConstants.PARAM_PRODUCT_ID, productID)
+              .put(SDKConstants.PARAM_DEVELOPER_PAYLOAD, developerPayload);
+      DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.PURCHASE);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.PURCHASE, e);
+    }
   }
 
   /**
@@ -97,10 +101,14 @@ public class InAppPurchaseLibrary {
    * @param callback callback for success and error
    */
   public static void consumePurchase(
-      Context context, String purchaseToken, DaemonRequest.Callback callback) throws JSONException {
-    JSONObject parameters =
-        (new JSONObject()).put(SDKConstants.PARAM_PURCHASE_TOKEN, purchaseToken);
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.CONSUME_PURCHASE);
+      Context context, String purchaseToken, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters =
+          (new JSONObject()).put(SDKConstants.PARAM_PURCHASE_TOKEN, purchaseToken);
+      DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.CONSUME_PURCHASE);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.CONSUME_PURCHASE, e);
+    }
   }
 
   /**
