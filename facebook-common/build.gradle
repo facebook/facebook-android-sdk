@@ -29,6 +29,7 @@ project.ext.description = 'Facebook Common Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
+    def kotlin_ver = project.ext.kotlinVersion
     // Facebook Dependencies
     api project(':facebook-core')
     // Support Dependencies
@@ -39,6 +40,8 @@ dependencies {
 
     // Third-party Dependencies
     implementation 'com.google.zxing:core:3.3.3'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
 }
 
 android {
