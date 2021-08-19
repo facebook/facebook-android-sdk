@@ -41,12 +41,12 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RuntimeEnvironment;
 
 @PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
-@PrepareForTest({LoginClient.class})
+@PrepareForTest({LoginClient.class, FacebookSdk.class})
 public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
   private static final String SIGNED_REQUEST_STR =
       "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
@@ -56,9 +56,10 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
   @Override
   public void before() throws Exception {
     super.before();
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.setAutoLogAppEventsEnabled(false);
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.getApplicationId())
+        .thenReturn(AuthenticationTokenTestUtil.APP_ID);
+    PowerMockito.when(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false);
   }
 
   @Test
@@ -80,6 +81,51 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     AuthenticationToken authenticationToken = result.authenticationToken;
     assertEquals(authenticationToken, null);
+  }
+
+  @Test
+  public void testProxyAuthHandlesSuccessWithIdTokenAndNonce() {
+    String expectedIdTokenString = AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest();
+    Bundle bundle = new Bundle();
+    bundle.putLong("expires_in", EXPIRES_IN_DELTA);
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("authentication_token", expectedIdTokenString);
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+
+    Intent intent = new Intent();
+    intent.putExtras(bundle);
+
+    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+
+    LoginClient.Request request = createRequestWithNonce();
+    when(mockLoginClient.getPendingRequest()).thenReturn(request);
+
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
+    }
+    handler.onActivityResult(0, Activity.RESULT_OK, intent);
+
+    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+
+    LoginClient.Result result = resultArgumentCaptor.getValue();
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+
+    // make sure id_token get created with correct nonce
+    AuthenticationToken authenticationToken = result.authenticationToken;
+    assertNotNull(authenticationToken);
+    assertEquals(expectedIdTokenString, authenticationToken.getToken());
+
+    // make sure access_token get created
+    AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
   }
 
   @Test
