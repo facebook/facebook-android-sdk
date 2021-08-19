@@ -31,6 +31,7 @@ import org.json.JSONObject;
 public class GamingPayload {
 
   private static final String TAG = GamingPayload.class.getSimpleName();
+  private static final String KEY_CONTEXT_TOKEN_ID = "context_token_id";
   private static final String KEY_GAME_REQUEST_ID = "game_request_id";
   private static final String KEY_PAYLOAD = "payload";
   private static final String KEY_APPLINK_DATA = "al_applink_data";
@@ -107,6 +108,11 @@ public class GamingPayload {
       if (appLinkExtras != null) {
         String gameRequestId = appLinkExtras.getString(KEY_GAME_REQUEST_ID);
         String payload = appLinkExtras.getString(KEY_PAYLOAD);
+        String contextTokenId = appLinkExtras.getString(KEY_CONTEXT_TOKEN_ID);
+
+        if (contextTokenId != null) {
+          GamingContext.setCurrentGamingContext(new GamingContext(contextTokenId));
+        }
 
         loadedPayload.put(KEY_GAME_REQUEST_ID, gameRequestId);
         loadedPayload.put(KEY_PAYLOAD, payload);
