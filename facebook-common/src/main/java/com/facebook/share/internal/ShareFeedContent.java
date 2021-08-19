@@ -22,10 +22,13 @@ package com.facebook.share.internal;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.model.ShareContent;
 
 // This class is used specifically for backwards support in unity for various feed parameters
 // Currently this content is only supported if you set the mode to Feed when sharing.
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ShareFeedContent extends ShareContent<ShareFeedContent, ShareFeedContent.Builder> {
   private final String toId;
   private final String link;

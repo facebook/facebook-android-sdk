@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Describes an Open Graph action
@@ -31,6 +33,7 @@ import androidx.annotation.Nullable;
  * <p>See the documentation for <a
  * href="https://developers.facebook.com/docs/opengraph/actions/">Open Graph Actions</a>.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareOpenGraphAction
     extends ShareOpenGraphValueContainer<ShareOpenGraphAction, ShareOpenGraphAction.Builder> {
 

@@ -25,10 +25,13 @@ import android.os.Parcelable;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class DeviceAuthMethodHandler extends LoginMethodHandler {
   private static ScheduledThreadPoolExecutor backgroundExecutor;
 

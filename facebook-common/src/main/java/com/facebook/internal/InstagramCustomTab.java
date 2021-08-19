@@ -24,9 +24,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.login.CustomTabLoginMethodHandler;
 
 @AutoHandleExceptions
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class InstagramCustomTab extends CustomTab {
 
   public InstagramCustomTab(String action, Bundle parameters) {

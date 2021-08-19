@@ -25,10 +25,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import com.facebook.appevents.InternalAppEventsLogger;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ReferralLogger {
   static final String EVENT_NAME_REFERRAL_START = "fb_mobile_referral_start";
   static final String EVENT_NAME_REFERRAL_SUCCESS = "fb_mobile_referral_success";

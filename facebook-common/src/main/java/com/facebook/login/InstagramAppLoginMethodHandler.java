@@ -24,7 +24,10 @@ import android.os.Parcelable;
 import com.facebook.AccessTokenSource;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class InstagramAppLoginMethodHandler extends NativeAppLoginMethodHandler {
 
   InstagramAppLoginMethodHandler(LoginClient loginClient) {

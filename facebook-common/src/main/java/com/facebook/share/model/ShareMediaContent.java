@@ -22,11 +22,14 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMediaContent
     extends ShareContent<ShareMediaContent, ShareMediaContent.Builder> {
   private final List<ShareMedia> media;

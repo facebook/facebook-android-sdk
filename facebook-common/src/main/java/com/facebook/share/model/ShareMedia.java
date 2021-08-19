@@ -23,10 +23,13 @@ package com.facebook.share.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.List;
 
 /** Base class for shared media (photos, videos, etc). */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class ShareMedia implements ShareModel {
 
   public enum Type {

@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Describes Open Graph content that is to be shared
@@ -32,6 +34,7 @@ import androidx.annotation.Nullable;
  * Graph</a> and for <a href="https://developers.facebook.com/docs/sharing/best-practices">best
  * practices</a>.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareOpenGraphContent
     extends ShareContent<ShareOpenGraphContent, ShareOpenGraphContent.Builder> {
   private final ShareOpenGraphAction action;

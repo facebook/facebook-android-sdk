@@ -23,6 +23,8 @@ package com.facebook.share.internal;
 import android.os.Bundle;
 import com.facebook.FacebookException;
 import com.facebook.internal.Utility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.model.AppGroupCreationContent;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareContent;
@@ -40,6 +42,7 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class WebDialogParameters {
 
   public static Bundle create(AppGroupCreationContent appGroupCreationContent) {

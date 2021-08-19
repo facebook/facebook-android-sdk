@@ -23,6 +23,8 @@ package com.facebook;
 import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.internal.OpenGraphJSONUtility;
 import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
@@ -30,6 +32,7 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ShareGraphRequest {
 
   /**

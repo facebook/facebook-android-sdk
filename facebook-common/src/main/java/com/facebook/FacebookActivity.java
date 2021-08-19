@@ -33,6 +33,8 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.internal.logging.dumpsys.EndToEndDumpsysHelper;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.login.LoginFragment;
 import com.facebook.referrals.ReferralFragment;
 import com.facebook.share.internal.DeviceShareDialogFragment;
@@ -54,6 +56,7 @@ import java.io.PrintWriter;
  *
  * Do not start this activity directly.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FacebookActivity extends FragmentActivity {
 
   public static String PASS_THROUGH_CANCEL_ACTION = "PassThrough";

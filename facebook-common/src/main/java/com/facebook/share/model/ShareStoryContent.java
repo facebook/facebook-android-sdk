@@ -4,11 +4,14 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /** Describes content (video, photo, sticker) to be shared into story. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareStoryContent
     extends ShareContent<ShareStoryContent, ShareStoryContent.Builder> {
   private final ShareMedia mBackgroundAsset; // could be photo or video

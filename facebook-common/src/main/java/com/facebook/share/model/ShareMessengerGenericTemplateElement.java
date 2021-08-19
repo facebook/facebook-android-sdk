@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.net.Uri;
 import android.os.Parcel;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Provide a model for sharing a generic template element to Messenger. This allows specifying
@@ -34,6 +36,7 @@ import android.os.Parcel;
  *     be performed by the native share sheet."
  */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerGenericTemplateElement implements ShareModel {
 
   private final String title;

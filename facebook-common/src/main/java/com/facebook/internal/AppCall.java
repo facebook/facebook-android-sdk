@@ -22,6 +22,8 @@ package com.facebook.internal;
 
 import android.content.Intent;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.UUID;
 
 /**
@@ -30,6 +32,7 @@ import java.util.UUID;
  * removed without warning at any time.
  */
 @AutoHandleExceptions
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class AppCall {
   private static AppCall currentPendingCall;
 

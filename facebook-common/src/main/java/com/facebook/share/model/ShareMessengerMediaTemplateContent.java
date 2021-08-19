@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.net.Uri;
 import android.os.Parcel;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Provides a data model class for Messenger Media Template content to be shared.
@@ -31,6 +33,7 @@ import android.os.Parcel;
  *     be performed by the native share sheet."
  */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerMediaTemplateContent
     extends ShareContent<
         ShareMessengerMediaTemplateContent, ShareMessengerMediaTemplateContent.Builder> {

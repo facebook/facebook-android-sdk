@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.List;
  *
  * <p>Use {@link SharePhotoContent.Builder} to create instances
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class SharePhotoContent
     extends ShareContent<SharePhotoContent, SharePhotoContent.Builder> {
   private final List<SharePhoto> photos;

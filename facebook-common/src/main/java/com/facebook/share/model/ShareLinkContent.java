@@ -24,6 +24,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Describes link content to be shared.
@@ -34,6 +36,7 @@ import androidx.annotation.Nullable;
  * href="https://developers.facebook.com/docs/sharing/best-practices">best practices</a>.
  */
 // TODO: (T24423331) remove all deprecated methods. No longer work and past 90day window in November
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareLinkContent
     extends ShareContent<ShareLinkContent, ShareLinkContent.Builder> {
   @Deprecated private final String contentDescription;

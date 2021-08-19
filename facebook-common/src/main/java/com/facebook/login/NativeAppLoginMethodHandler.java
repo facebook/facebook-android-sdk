@@ -33,7 +33,10 @@ import com.facebook.FacebookException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
   NativeAppLoginMethodHandler(LoginClient loginClient) {

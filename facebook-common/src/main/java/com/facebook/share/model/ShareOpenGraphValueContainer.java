@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -32,6 +34,7 @@ import java.util.Set;
  *
  * <p>Use {@link ShareOpenGraphValueContainer.Builder} to create instances
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class ShareOpenGraphValueContainer<
         P extends ShareOpenGraphValueContainer, E extends ShareOpenGraphValueContainer.Builder>
     implements ShareModel {

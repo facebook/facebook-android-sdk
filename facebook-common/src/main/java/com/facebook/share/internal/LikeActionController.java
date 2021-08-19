@@ -51,6 +51,8 @@ import com.facebook.internal.Logger;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.WorkQueue;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.widget.LikeView;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,6 +71,7 @@ import org.json.JSONObject;
  */
 /** @deprecated LikeView is deprecated */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LikeActionController {
 
   /** @deprecated LikeView is deprecated */

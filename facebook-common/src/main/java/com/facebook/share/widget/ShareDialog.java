@@ -38,6 +38,8 @@ import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeAppCallAttachmentStore;
 import com.facebook.internal.Utility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.CameraEffectFeature;
 import com.facebook.share.internal.LegacyNativeDialogParameters;
@@ -63,6 +65,7 @@ import java.util.List;
 import java.util.UUID;
 
 /** Provides functionality to share content via the Facebook Share Dialog */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareDialog extends FacebookDialogBase<ShareContent, Sharer.Result>
     implements Sharer {
 

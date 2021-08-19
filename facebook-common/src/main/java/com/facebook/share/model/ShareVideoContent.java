@@ -22,12 +22,15 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Provides the interface for video content to be shared.
  *
  * <p>A general use builder is available in {@link ShareVideoContent.Builder}.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareVideoContent
     extends ShareContent<ShareVideoContent, ShareVideoContent.Builder> implements ShareModel {
   private final String contentDescription;

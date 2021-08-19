@@ -57,6 +57,8 @@ import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ScheduledFuture;
@@ -65,6 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class DeviceAuthDialog extends DialogFragment {
   private static final String DEVICE_LOGIN_ENDPOINT = "device/login";
   private static final String DEVICE_LOGIN_STATUS_ENDPOINT = "device/login_status";

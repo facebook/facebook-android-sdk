@@ -22,9 +22,12 @@ package com.facebook.share.model;
 import android.net.Uri;
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** Provides a data model class for a Messenger share URL action button. */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerURLActionButton extends ShareMessengerActionButton {
 
   /** The display height ratio of the webview when shown in the Messenger app. */

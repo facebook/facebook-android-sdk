@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Provide a model for sharing a generic template element to Messenger. This wrapper element allows
@@ -34,6 +36,7 @@ import android.os.Parcelable;
  *     be performed by the native share sheet."
  */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerGenericTemplateContent
     extends ShareContent<
         ShareMessengerGenericTemplateContent, ShareMessengerGenericTemplateContent.Builder> {

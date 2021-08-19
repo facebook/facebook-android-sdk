@@ -22,6 +22,8 @@ package com.facebook.share.model;
 
 import android.net.Uri;
 import android.os.Parcel;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * This share content allows sharing a bubble that plays songs with Open Graph music. See
@@ -33,6 +35,7 @@ import android.os.Parcel;
  *     be performed by the native share sheet."
  */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerOpenGraphMusicTemplateContent
     extends ShareContent<
         ShareMessengerOpenGraphMusicTemplateContent,

@@ -23,6 +23,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.model.ShareMessengerActionButton;
 import com.facebook.share.model.ShareMessengerGenericTemplateContent;
 import com.facebook.share.model.ShareMessengerGenericTemplateContent.ImageAspectRatio;
@@ -43,6 +45,7 @@ import org.json.JSONObject;
  * removed without warning at any time.
  */
 @AutoHandleExceptions
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class MessengerShareContentUtility {
 
   public static final Pattern FACEBOOK_DOMAIN = Pattern.compile("^(.+)\\.(facebook\\.com)$");

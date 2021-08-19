@@ -38,9 +38,12 @@ import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.common.R;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** A base class for a facebook button. */
 @AutoHandleExceptions
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class FacebookButtonBase extends Button {
   private String analyticsButtonCreatedEventName;
   private String analyticsButtonTappedEventName;

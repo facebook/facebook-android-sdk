@@ -32,6 +32,8 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.facebook.common.R;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * This Fragment is a necessary part of the overall Facebook login process but is not meant to be
@@ -39,6 +41,7 @@ import com.facebook.common.R;
  *
  * @see com.facebook.FacebookActivity
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LoginFragment extends Fragment {
   static final String RESULT_KEY = "com.facebook.LoginFragment:Result";
   static final String REQUEST_KEY = "com.facebook.LoginFragment:Request";

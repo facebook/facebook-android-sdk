@@ -24,6 +24,8 @@ import android.os.Bundle;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.internal.AppCall;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -32,6 +34,7 @@ import com.facebook.internal.AppCall;
  *
  * <p>Callback class to allow derivations of FacebookDialogBase to do custom operations
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class ResultProcessor {
   private FacebookCallback appCallback;
 

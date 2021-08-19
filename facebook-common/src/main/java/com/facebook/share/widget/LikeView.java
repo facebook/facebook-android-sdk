@@ -44,12 +44,15 @@ import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.internal.LikeActionController;
 import com.facebook.share.internal.LikeBoxCountView;
 import com.facebook.share.internal.LikeButton;
 
 /** @deprecated LikeView is deprecated */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LikeView extends FrameLayout {
 
   // ***

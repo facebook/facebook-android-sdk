@@ -24,12 +24,15 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Describes a video for sharing.
  *
  * <p>Use {@link ShareVideo.Builder} to create instances
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareVideo extends ShareMedia {
   private final Uri localUrl;
 

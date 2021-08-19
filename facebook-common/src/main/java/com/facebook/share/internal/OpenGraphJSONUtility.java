@@ -22,6 +22,8 @@ package com.facebook.share.internal;
 
 import androidx.annotation.Nullable;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
@@ -39,6 +41,7 @@ import org.json.JSONObject;
  * <p>Utility methods for JSON representation of Open Graph models.
  */
 @AutoHandleExceptions
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class OpenGraphJSONUtility {
   /**
    * Converts an action to a JSONObject.

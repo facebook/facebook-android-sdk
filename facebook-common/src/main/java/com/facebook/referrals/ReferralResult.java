@@ -20,10 +20,13 @@
 
 package com.facebook.referrals;
 
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Collections;
 import java.util.List;
 
 /** This class shows the results of a referral operation. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ReferralResult {
   private final List<String> referralCodes;
 

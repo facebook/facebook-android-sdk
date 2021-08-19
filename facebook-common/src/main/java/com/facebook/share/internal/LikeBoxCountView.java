@@ -28,6 +28,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.facebook.common.R;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -36,6 +38,7 @@ import com.facebook.common.R;
  */
 /** @deprecated LikeView is deprecated */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LikeBoxCountView extends FrameLayout {
 
   public enum LikeBoxCountViewCaretPosition {

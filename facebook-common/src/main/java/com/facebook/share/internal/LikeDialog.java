@@ -32,6 +32,8 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +47,7 @@ import java.util.List;
  * LikeView is deprecated
  */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Result> {
 
   private static final String TAG = "LikeDialog";

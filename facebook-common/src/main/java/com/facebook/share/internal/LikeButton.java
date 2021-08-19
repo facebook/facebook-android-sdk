@@ -26,6 +26,8 @@ import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.FacebookButtonBase;
 import com.facebook.common.R;
 import com.facebook.internal.AnalyticsEvents;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -34,6 +36,7 @@ import com.facebook.internal.AnalyticsEvents;
  */
 /** @deprecated LikeView is deprecated */
 @Deprecated
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LikeButton extends FacebookButtonBase {
   /** @deprecated LikeView is deprecated */
   @Deprecated
