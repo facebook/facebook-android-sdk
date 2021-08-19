@@ -21,6 +21,7 @@ package com.facebook.gamingservices.cloudgaming;
 
 import android.content.Context;
 import androidx.annotation.Nullable;
+import com.facebook.GraphResponse;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
 import com.facebook.gamingservices.cloudgaming.internal.SDKLogger;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
@@ -120,7 +121,13 @@ public class GameFeaturesLibrary {
         context, parameters, callback, SDKMessageEnum.TOURNAMENT_POST_SCORE_ASYNC);
   }
 
-  public static void performHapticFeedbackAsync(Context context, DaemonRequest.Callback callback) {
+  public static void performHapticFeedback(Context context) {
+    DaemonRequest.Callback callback =
+        new DaemonRequest.Callback() {
+          @Override
+          public void onCompleted(GraphResponse response) {}
+        };
+
     DaemonRequest.executeAsync(
         context, null, callback, SDKMessageEnum.PERFORM_HAPTIC_FEEDBACK_ASYNC);
   }
