@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.fragment.app.Fragment;
@@ -473,7 +474,8 @@ public class LoginManager {
   private void logInWithReadPermissions(FragmentWrapper fragment, Collection<String> permissions) {
     validateReadPermissions(permissions);
 
-    logIn(fragment, permissions);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(fragment, loginConfig);
   }
 
   /**
@@ -485,7 +487,39 @@ public class LoginManager {
   public void logInWithReadPermissions(Activity activity, Collection<String> permissions) {
     validateReadPermissions(permissions);
 
-    logIn(activity, permissions);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(activity, loginConfig);
+  }
+
+  /**
+   * Logs the user in with the requested configuration.
+   *
+   * @param fragment The android.support.v4.app.Fragment which is starting the login process.
+   * @param loginConfig The login configuration
+   */
+  public void logInWithConfiguration(Fragment fragment, @NonNull LoginConfiguration loginConfig) {
+    loginWithConfiguration(new FragmentWrapper(fragment), loginConfig);
+  }
+
+  /**
+   * Logs the user in with the requested configuration.
+   *
+   * @param fragment The fragment which is starting the login process.
+   * @param loginConfig The login configuration.
+   */
+  private void loginWithConfiguration(
+      FragmentWrapper fragment, @NonNull LoginConfiguration loginConfig) {
+    logIn(fragment, loginConfig);
+  }
+
+  /**
+   * Logs the user in with the requested configuration.
+   *
+   * @param activity The activity which is starting the login process.
+   * @param loginConfig The login configuration
+   */
+  public void loginWithConfiguration(Activity activity, @NonNull LoginConfiguration loginConfig) {
+    logIn(activity, loginConfig);
   }
 
   /**
@@ -641,6 +675,28 @@ public class LoginManager {
   }
 
   /**
+   * Logs the user in with the requested login configuration.
+   *
+   * @param fragment The fragment which is starting the login process.
+   * @param loginConfig The login config of the request
+   */
+  public void logIn(FragmentWrapper fragment, @NonNull LoginConfiguration loginConfig) {
+    LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
+    startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested configuration.
+   *
+   * @param activity The activity which is starting the login process.
+   * @param loginConfig The login config of the request
+   */
+  public void logIn(Activity activity, @NonNull LoginConfiguration loginConfig) {
+    LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
+    startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+  }
+
+  /**
    * Logs the user in with the requested permissions.
    *
    * @param activity The activity which is starting the login process.
@@ -698,6 +754,28 @@ public class LoginManager {
           }
         };
     return Collections.unmodifiableSet(set);
+  }
+
+  protected LoginClient.Request createLoginRequestWithConfig(LoginConfiguration loginConfig) {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            loginBehavior,
+            Collections.unmodifiableSet(
+                loginConfig.getPermissions() != null
+                    ? new HashSet(loginConfig.getPermissions())
+                    : new HashSet<String>()),
+            defaultAudience,
+            authType,
+            FacebookSdk.getApplicationId(),
+            loginConfig.getNonce(),
+            targetApp,
+            loginConfig.getNonce());
+    request.setRerequest(AccessToken.isCurrentAccessTokenActive());
+    request.setMessengerPageId(messengerPageId);
+    request.setResetMessengerState(resetMessengerState);
+    request.setFamilyLogin(isFamilyLogin);
+    request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication);
+    return request;
   }
 
   protected LoginClient.Request createLoginRequest(Collection<String> permissions) {

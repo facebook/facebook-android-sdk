@@ -41,6 +41,7 @@ class LoginConfiguration {
    * @param nonce an optional nonce to use for the login attempt. A valid nonce must be a non-empty
    * string without whitespace. Creation of the configuration will fail if the nonce is invalid.
    */
+  @JvmOverloads
   constructor(permissions: Collection<String>, nonce: String = UUID.randomUUID().toString()) {
     require(NonceUtil.isValidNonce(nonce))
     this.permissions =
