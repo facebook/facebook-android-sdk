@@ -30,11 +30,11 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test AuthenticationToken constructor`() {
-    val headerString = "eyJhbGciOiJTSEEyNTYiLCJ0eXAiOiJ0b2tlbl90eXBlIiwia2lkIjoiYWJjIn0="
     AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()
     val claimsString = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()
     val signatureString = "signature"
-    val tokenString = "$headerString.$claimsString.$signatureString"
+    val tokenString =
+        "${AuthenticationTokenTestUtil.VALID_HEADER_STRING}.$claimsString.$signatureString"
     val authenticationToken = AuthenticationToken(tokenString, AuthenticationTokenTestUtil.NONCE)
     Assert.assertEquals(tokenString, authenticationToken.token)
     Assert.assertEquals(signatureString, authenticationToken.signature)

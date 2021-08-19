@@ -7,6 +7,7 @@ import java.util.Date
 
 class AuthenticationTokenTestUtil {
   companion object {
+    const val VALID_HEADER_STRING = "eyJhbGciOiJSUzI1NiIsInR5cCI6Imp3dCIsImtpZCI6ImFiYyJ9"
     const val JTI = "jti"
     const val APP_ID = "123456789" // aud
     const val ISS = "https://facebook.com/dialog/oauth"
@@ -51,7 +52,7 @@ class AuthenticationTokenTestUtil {
     @JvmStatic
     fun getEncodedAuthTokenStringForTest(): String {
       val sb = StringBuilder()
-      sb.append("eyJhbGciOiJTSEEyNTYiLCJ0eXAiOiJ0b2tlbl90eXBlIiwia2lkIjoiYWJjIn0=").append(".")
+      sb.append(VALID_HEADER_STRING).append(".")
       sb.append(AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()).append(".")
       sb.append("Signature")
       return sb.toString()

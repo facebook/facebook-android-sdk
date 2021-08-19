@@ -3,6 +3,7 @@ package com.facebook.util.common
 import android.text.format.DateUtils
 import com.facebook.AuthenticationToken
 import com.facebook.AuthenticationTokenClaims
+import com.facebook.AuthenticationTokenHeader
 import java.util.Date
 
 class AuthenticationTokenTestUtil {
@@ -40,6 +41,11 @@ class AuthenticationTokenTestUtil {
             "facebook.com")
 
     @JvmField
+    val AUTH_TOKEN_HEADER_FOR_TEST = AuthenticationTokenHeader("RS256", "token_type", "abc")
+
+    val VALID_HEADER_STRING = AUTH_TOKEN_HEADER_FOR_TEST.toEnCodedString()
+
+    @JvmField
     val authenticationTokenClaimsWithRequiredFieldsOnly =
         AuthenticationTokenClaims(JTI, ISS, APP_ID, NONCE, EXPIRATION_DATE, Date(), SUB)
 
@@ -51,7 +57,7 @@ class AuthenticationTokenTestUtil {
     @JvmStatic
     fun getEncodedAuthTokenStringForTest(): String {
       val sb = StringBuilder()
-      sb.append("eyJhbGciOiJTSEEyNTYiLCJ0eXAiOiJ0b2tlbl90eXBlIiwia2lkIjoiYWJjIn0=").append(".")
+      sb.append(VALID_HEADER_STRING).append(".")
       sb.append(AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()).append(".")
       sb.append("Signature")
       return sb.toString()

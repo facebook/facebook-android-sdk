@@ -21,7 +21,9 @@ package com.facebook
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Base64
+import androidx.annotation.VisibleForTesting
 import com.facebook.internal.Validate
+import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -42,7 +44,8 @@ class AuthenticationTokenHeader : Parcelable {
   val kid: String
 
   constructor(encodedHeaderString: String) {
-    Validate.notEmpty(encodedHeaderString, "encodedHeaderString")
+    // verify header
+    require(isValidHeader(encodedHeaderString)) { "Invalid Header" }
 
     val decodedBytes = Base64.decode(encodedHeaderString, Base64.DEFAULT)
     val claimsString = String(decodedBytes)
@@ -67,6 +70,13 @@ class AuthenticationTokenHeader : Parcelable {
     this.kid = checkNotNull(kid)
   }
 
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  constructor(alg: String, typ: String, kid: String) {
+    this.alg = alg
+    this.typ = typ
+    this.kid = kid
+  }
+
   override fun writeToParcel(dest: Parcel, flags: Int) {
     dest.writeString(alg)
     dest.writeString(typ)
@@ -75,6 +85,54 @@ class AuthenticationTokenHeader : Parcelable {
 
   override fun describeContents(): Int {
     return 0
+  }
+
+  override fun toString(): String {
+    val headerJsonObject = toJSONObject()
+    return headerJsonObject.toString()
+  }
+
+  /**
+   * check if the input header string is a valid id token header
+   *
+   * @param headerString the header string
+   */
+  private fun isValidHeader(headerString: String): Boolean {
+    Validate.notEmpty(headerString, "encodedHeaderString")
+
+    val decodedBytes = Base64.decode(headerString, Base64.DEFAULT)
+    val claimsString = String(decodedBytes)
+
+    return try {
+      val jsonObj = JSONObject(claimsString)
+
+      val alg = jsonObj.optString("alg")
+      val validAlg = alg.isNotEmpty() && alg == "RS256"
+
+      val hasKid = jsonObj.optString("kid").isNotEmpty()
+      val validTyp = jsonObj.optString("typ").isNotEmpty()
+
+      validAlg && hasKid && validTyp
+    } catch (_ex: JSONException) {
+      // return false if there any problem parsing the JSON string
+      false
+    }
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal fun toJSONObject(): JSONObject {
+    val jsonObject = JSONObject()
+    jsonObject.put("alg", this.alg)
+    jsonObject.put("typ", this.typ)
+    jsonObject.put("kid", this.kid)
+
+    return jsonObject
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  fun toEnCodedString(): String {
+    val claimsJsonString = toString()
+    return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.DEFAULT)
   }
 
   companion object CREATOR : Parcelable.Creator<AuthenticationTokenHeader> {
