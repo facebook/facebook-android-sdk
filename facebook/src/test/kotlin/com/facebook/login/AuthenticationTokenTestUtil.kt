@@ -45,7 +45,7 @@ class AuthenticationTokenTestUtil {
 
     @JvmStatic
     fun getAuthenticationTokenForTest(): AuthenticationToken {
-      return AuthenticationToken(getEncodedAuthTokenStringForTest())
+      return AuthenticationToken(getEncodedAuthTokenStringForTest(), NONCE)
     }
 
     @JvmStatic

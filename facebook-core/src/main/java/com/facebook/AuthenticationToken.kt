@@ -40,6 +40,9 @@ class AuthenticationToken : Parcelable {
    */
   val token: String
 
+  /** Expected nonce - used in Login Configuration */
+  val expectedNonce: String
+
   /** Header component of the AuthenticationToken */
   val header: AuthenticationTokenHeader
 
@@ -49,17 +52,19 @@ class AuthenticationToken : Parcelable {
   /** Signature component of the id_token TODO: create a new class for the signature part */
   val signature: String
 
-  constructor(token: String) {
+  @JvmOverloads
+  constructor(token: String, expectedNonce: String = "") {
     Validate.notEmpty(token, "token")
-
-    // TODO: id_token validation
+    // TODO - uncomment this check after integrate with LoginManager
+    // Validate.notEmpty(expectedNonce, "expectedNonce")
 
     val tokenArray = token.split(".")
     require(tokenArray.size == 3) { "Invalid IdToken string" }
 
     this.token = token
+    this.expectedNonce = expectedNonce
     this.header = AuthenticationTokenHeader(tokenArray[0])
-    this.claims = AuthenticationTokenClaims(tokenArray[1])
+    this.claims = AuthenticationTokenClaims(tokenArray[1], expectedNonce)
     this.signature = tokenArray[2]
   }
 
@@ -68,9 +73,13 @@ class AuthenticationToken : Parcelable {
     Validate.notNullOrEmpty(token, "token")
     this.token = checkNotNull(token)
 
+    val expectedNonce = parcel.readString()
+    Validate.notNull(expectedNonce, "expectedNonce")
+    this.expectedNonce = checkNotNull(expectedNonce)
+
     val tokenArray = token.split(".")
     this.header = AuthenticationTokenHeader(tokenArray[0])
-    this.claims = AuthenticationTokenClaims(tokenArray[1])
+    this.claims = AuthenticationTokenClaims(tokenArray[1], expectedNonce)
     this.signature = tokenArray[2]
   }
 

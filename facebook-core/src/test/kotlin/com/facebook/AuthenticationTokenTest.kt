@@ -19,13 +19,13 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
 
   @Test(expected = IllegalArgumentException::class)
   fun `test empty token throws`() {
-    AuthenticationToken("")
+    AuthenticationToken("", "nonce")
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `test invalid token format`() {
     // Correct format should be [abc.def.ghi]
-    AuthenticationToken("abc.def")
+    AuthenticationToken("abc.def", "nonce")
   }
 
   @Test
@@ -35,7 +35,7 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
     val claimsString = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()
     val signatureString = "signature"
     val tokenString = "$headerString.$claimsString.$signatureString"
-    val authenticationToken = AuthenticationToken(tokenString)
+    val authenticationToken = AuthenticationToken(tokenString, AuthenticationTokenTestUtil.NONCE)
     Assert.assertEquals(tokenString, authenticationToken.token)
     Assert.assertEquals(signatureString, authenticationToken.signature)
   }

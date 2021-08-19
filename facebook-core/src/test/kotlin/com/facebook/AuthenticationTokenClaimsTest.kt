@@ -35,7 +35,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     claimsMap.remove("jti")
     val missingJti = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingJti.toByteArray(), Base64.DEFAULT)
-    AuthenticationTokenClaims(encodedClaimsString)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -43,7 +43,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     claimsMap.remove("iss")
     val missingIss = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingIss.toByteArray(), Base64.DEFAULT)
-    AuthenticationTokenClaims(encodedClaimsString)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -51,7 +51,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     claimsMap.remove("aud")
     val missingAud = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingAud.toByteArray(), Base64.DEFAULT)
-    AuthenticationTokenClaims(encodedClaimsString)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -59,7 +59,23 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     claimsMap.remove("nonce")
     val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
-    AuthenticationTokenClaims(encodedClaimsString)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `test nonce does not match throws`() {
+    claimsMap["nonce"] = "not_nonce"
+    val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `test empty nonce throws`() {
+    claimsMap["nonce"] = ""
+    val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
+    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -67,19 +83,19 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     claimsMap.remove("sub")
     val missingSub = JSONObject(claimsMap as Map<*, *>).toString()
     val encodedClaimsString = Base64.encodeToString(missingSub.toByteArray(), Base64.DEFAULT)
-    AuthenticationTokenClaims(encodedClaimsString)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = JSONException::class)
   fun `test throw - invalid json format`() {
     val invalidJson = "123"
     val encodedClaimsString = Base64.encodeToString(invalidJson.toByteArray(), Base64.DEFAULT)
-    AuthenticationTokenClaims(encodedClaimsString)
+    AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `test empty encode claims string throws`() {
-    AuthenticationTokenClaims("")
+    AuthenticationTokenClaims("", AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test
@@ -87,7 +103,8 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     val encodedClaims =
         AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly
             .toEnCodedString()
-    val authenticationToken = AuthenticationTokenClaims(encodedClaims)
+    val authenticationToken =
+        AuthenticationTokenClaims(encodedClaims, AuthenticationTokenTestUtil.NONCE)
     Assert.assertEquals(
         AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.sub,
         authenticationToken.sub)
@@ -133,7 +150,8 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test roundtrip decode and encode`() {
     // test full claims
     val encodedString = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()
-    val newAuthenticationTokenClaims = AuthenticationTokenClaims(encodedString)
+    val newAuthenticationTokenClaims =
+        AuthenticationTokenClaims(encodedString, AuthenticationTokenTestUtil.NONCE)
     assertThat(
             AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST == newAuthenticationTokenClaims)
         .isTrue
@@ -142,7 +160,9 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     val encodedStringWithRequiredFields =
         AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly
             .toEnCodedString()
-    val newClaimsWithRequiredFields = AuthenticationTokenClaims(encodedStringWithRequiredFields)
+    val newClaimsWithRequiredFields =
+        AuthenticationTokenClaims(
+            encodedStringWithRequiredFields, AuthenticationTokenTestUtil.NONCE)
     assertThat(
             AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly ==
                 newClaimsWithRequiredFields)

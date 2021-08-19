@@ -118,7 +118,11 @@ class AuthenticationTokenClaims : Parcelable {
   /** End-User's link */
   val userLink: String?
 
-  constructor(encodedClaims: String) {
+  @JvmOverloads
+  constructor(
+      encodedClaims: String,
+      expectedNonce: String? = null
+  ) { // TODO: Remove optional and null for nonce after integrate with LoginManager
     Validate.notEmpty(encodedClaims, "encodedClaims")
 
     val decodedBytes = Base64.decode(encodedClaims, Base64.DEFAULT)
@@ -126,7 +130,7 @@ class AuthenticationTokenClaims : Parcelable {
     val jsonObj = JSONObject(claimsString)
 
     // verify claims
-    require(isValidClaims(jsonObj)) { "Invalid claims" }
+    require(isValidClaims(jsonObj, expectedNonce)) { "Invalid claims" }
 
     this.jti = jsonObj.getString("jti")
     this.iss = jsonObj.getString("iss")
@@ -191,6 +195,7 @@ class AuthenticationTokenClaims : Parcelable {
    * @param userLink End-User's link
    */
   @JvmOverloads
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   constructor(
       jti: String,
       iss: String,
@@ -388,7 +393,7 @@ class AuthenticationTokenClaims : Parcelable {
     return 0
   }
 
-  private fun isValidClaims(claimsJson: JSONObject): Boolean {
+  private fun isValidClaims(claimsJson: JSONObject, expectedNonce: String?): Boolean {
     if (claimsJson == null) {
       return false
     }
@@ -429,7 +434,15 @@ class AuthenticationTokenClaims : Parcelable {
       return false
     }
 
-    // TODO T97090806: Need to create a configuration class with nonce being specified
+    val nonce = claimsJson.optString("nonce")
+    if (nonce.isEmpty()) {
+      return false
+    }
+
+    // TODO - Remove this check after integrate with LoginManager
+    if (expectedNonce != null) {
+      return nonce == expectedNonce
+    }
 
     return true
   }
