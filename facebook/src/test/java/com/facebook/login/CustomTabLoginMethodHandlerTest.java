@@ -57,6 +57,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
@@ -84,6 +85,9 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
   public void setUp() {
     mockTryAuthorize();
     request = createRequest();
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.getApplicationId())
+        .thenReturn(AuthenticationTokenTestUtil.APP_ID);
   }
 
   @Test
@@ -105,6 +109,39 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     AuthenticationToken authenticationToken = result.authenticationToken;
     assertEquals(null, authenticationToken);
+  }
+
+  @Test
+  public void testIdTokenWithNonceCustomTabHandlesSuccess() {
+    mockCustomTabRedirectActivity(true);
+    LoginClient.Request requestWithNonce = createRequestWithNonce();
+    CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
+    String expectedIdTokenString = AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest();
+    final Bundle bundle = new Bundle();
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("authentication_token", expectedIdTokenString);
+    bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+    handler.onComplete(requestWithNonce, bundle, null);
+
+    final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+
+    final LoginClient.Result result = resultArgumentCaptor.getValue();
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+
+    final AuthenticationToken idToken = result.authenticationToken;
+    assertNotNull(idToken);
+    assertEquals(expectedIdTokenString, idToken.getToken());
+
+    final AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
   }
 
   @Test

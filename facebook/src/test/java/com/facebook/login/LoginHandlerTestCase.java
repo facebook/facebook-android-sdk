@@ -87,6 +87,18 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
         LoginTargetApp.INSTAGRAM);
   }
 
+  protected LoginClient.Request createRequestWithNonce() {
+    return new LoginClient.Request(
+        LoginBehavior.NATIVE_WITH_FALLBACK,
+        new HashSet<String>(PERMISSIONS),
+        DefaultAudience.FRIENDS,
+        "rerequest",
+        "1234",
+        "5678",
+        null,
+        AuthenticationTokenTestUtil.NONCE);
+  }
+
   protected void assertDateDiffersWithinDelta(
       Date expected, Date actual, long expectedDifference, long deltaInMsec) {
 
