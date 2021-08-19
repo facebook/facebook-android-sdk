@@ -53,10 +53,9 @@ class AuthenticationToken : Parcelable {
   val signature: String
 
   @JvmOverloads
-  constructor(token: String, expectedNonce: String = "") {
+  constructor(token: String, expectedNonce: String) {
     Validate.notEmpty(token, "token")
-    // TODO - uncomment this check after integrate with LoginManager
-    // Validate.notEmpty(expectedNonce, "expectedNonce")
+    Validate.notEmpty(expectedNonce, "expectedNonce")
 
     val tokenArray = token.split(".")
     require(tokenArray.size == 3) { "Invalid IdToken string" }

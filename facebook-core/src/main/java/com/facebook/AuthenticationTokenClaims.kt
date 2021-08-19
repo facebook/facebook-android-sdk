@@ -119,10 +119,7 @@ class AuthenticationTokenClaims : Parcelable {
   val userLink: String?
 
   @JvmOverloads
-  constructor(
-      encodedClaims: String,
-      expectedNonce: String? = null
-  ) { // TODO: Remove optional and null for nonce after integrate with LoginManager
+  constructor(encodedClaims: String, expectedNonce: String) {
     Validate.notEmpty(encodedClaims, "encodedClaims")
 
     val decodedBytes = Base64.decode(encodedClaims, Base64.DEFAULT)
@@ -393,7 +390,7 @@ class AuthenticationTokenClaims : Parcelable {
     return 0
   }
 
-  private fun isValidClaims(claimsJson: JSONObject, expectedNonce: String?): Boolean {
+  private fun isValidClaims(claimsJson: JSONObject, expectedNonce: String): Boolean {
     if (claimsJson == null) {
       return false
     }
@@ -435,13 +432,8 @@ class AuthenticationTokenClaims : Parcelable {
     }
 
     val nonce = claimsJson.optString("nonce")
-    if (nonce.isEmpty()) {
+    if (nonce.isEmpty() || nonce != expectedNonce) { // incorrect nonce
       return false
-    }
-
-    // TODO - Remove this check after integrate with LoginManager
-    if (expectedNonce != null) {
-      return nonce == expectedNonce
     }
 
     return true

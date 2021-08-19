@@ -120,7 +120,8 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
       AccessToken token =
           createAccessTokenFromWebBundle(
               request.getPermissions(), extras, getTokenSource(), request.getApplicationId());
-      AuthenticationToken authenticationToken = createAuthenticationTokenFromWebBundle(extras);
+      AuthenticationToken authenticationToken =
+          createAuthenticationTokenFromWebBundle(extras, request.getNonce());
       completeLogin(
           LoginClient.Result.createCompositeTokenResult(request, token, authenticationToken));
     } catch (FacebookException ex) {

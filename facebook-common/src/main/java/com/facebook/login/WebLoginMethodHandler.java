@@ -163,7 +163,8 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         AccessToken token =
             createAccessTokenFromWebBundle(
                 request.getPermissions(), values, getTokenSource(), request.getApplicationId());
-        AuthenticationToken authenticationToken = createAuthenticationTokenFromWebBundle(values);
+        AuthenticationToken authenticationToken =
+            createAuthenticationTokenFromWebBundle(values, request.getNonce());
         outcome =
             LoginClient.Result.createCompositeTokenResult(
                 loginClient.getPendingRequest(), token, authenticationToken);

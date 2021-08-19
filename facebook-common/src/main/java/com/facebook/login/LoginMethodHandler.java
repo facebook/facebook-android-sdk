@@ -150,12 +150,13 @@ abstract class LoginMethodHandler implements Parcelable {
    * WARNING: This feature is currently in development and not intended for external usage.
    *
    * @param bundle
+   * @param expectedNonce the nonce expected to have created with the AuthenticationToken
    * @return AuthenticationToken
    * @throws FacebookException
    */
   @Nullable
-  public static AuthenticationToken createAuthenticationTokenFromWebBundle(Bundle bundle)
-      throws FacebookException {
+  public static AuthenticationToken createAuthenticationTokenFromWebBundle(
+      Bundle bundle, String expectedNonce) throws FacebookException {
     String authenticationTokenString =
         bundle.getString(AuthenticationToken.AUTHENTICATION_TOKEN_KEY);
 
@@ -168,7 +169,7 @@ abstract class LoginMethodHandler implements Parcelable {
        * TODO T96881697: create factory class for authentication token, remove this try-catch and
        * replace AuthenticationToken with factory method
        */
-      return new AuthenticationToken(authenticationTokenString);
+      return new AuthenticationToken(authenticationTokenString, expectedNonce);
     } catch (Exception ex) {
       // will remove this after factory class created
       return null;
