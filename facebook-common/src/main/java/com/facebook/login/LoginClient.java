@@ -485,6 +485,7 @@ class LoginClient implements Parcelable {
     private final LoginTargetApp targetApp;
     private boolean isFamilyLogin = false;
     private boolean shouldSkipAccountDeduplication = false;
+    private String nonce;
 
     Request(
         LoginBehavior loginBehavior,
@@ -511,6 +512,26 @@ class LoginClient implements Parcelable {
         String applicationId,
         String authId,
         LoginTargetApp targetApp) {
+      this(
+          loginBehavior,
+          permissions,
+          defaultAudience,
+          authType,
+          applicationId,
+          authId,
+          targetApp,
+          null);
+    }
+
+    Request(
+        LoginBehavior loginBehavior,
+        Set<String> permissions,
+        DefaultAudience defaultAudience,
+        String authType,
+        String applicationId,
+        String authId,
+        LoginTargetApp targetApp,
+        String nonce) {
       this.loginBehavior = loginBehavior;
       this.permissions = permissions != null ? permissions : new HashSet<String>();
       this.defaultAudience = defaultAudience;
@@ -518,6 +539,7 @@ class LoginClient implements Parcelable {
       this.applicationId = applicationId;
       this.authId = authId;
       this.targetApp = targetApp;
+      this.nonce = nonce;
     }
 
     Set<String> getPermissions() {
@@ -626,6 +648,10 @@ class LoginClient implements Parcelable {
       return targetApp == LoginTargetApp.INSTAGRAM;
     }
 
+    public String getNonce() {
+      return nonce;
+    }
+
     private Request(Parcel parcel) {
       String enumValue = parcel.readString();
       this.loginBehavior = enumValue != null ? LoginBehavior.valueOf(enumValue) : null;
@@ -646,6 +672,7 @@ class LoginClient implements Parcelable {
       this.targetApp = enumValue != null ? LoginTargetApp.valueOf(enumValue) : null;
       this.isFamilyLogin = parcel.readByte() != 0;
       this.shouldSkipAccountDeduplication = parcel.readByte() != 0;
+      this.nonce = parcel.readString();
     }
 
     @Override
@@ -669,6 +696,7 @@ class LoginClient implements Parcelable {
       dest.writeString(targetApp != null ? targetApp.name() : null);
       dest.writeByte((byte) (isFamilyLogin ? 1 : 0));
       dest.writeByte((byte) (shouldSkipAccountDeduplication ? 1 : 0));
+      dest.writeString(nonce);
     }
 
     public static final Parcelable.Creator<Request> CREATOR =
