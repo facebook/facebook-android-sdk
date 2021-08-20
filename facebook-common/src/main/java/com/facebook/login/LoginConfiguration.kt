@@ -42,7 +42,7 @@ class LoginConfiguration {
    * string without whitespace. Creation of the configuration will fail if the nonce is invalid.
    */
   @JvmOverloads
-  constructor(permissions: Collection<String>, nonce: String = UUID.randomUUID().toString()) {
+  constructor(permissions: Collection<String>?, nonce: String = UUID.randomUUID().toString()) {
     require(NonceUtil.isValidNonce(nonce))
     this.permissions =
         Collections.unmodifiableSet(if (permissions != null) HashSet(permissions) else HashSet())
