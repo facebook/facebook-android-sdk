@@ -1966,7 +1966,7 @@ class GraphRequest {
     fun onCompleted(obj: JSONObject?, response: GraphResponse?)
   }
 
-  internal class ParcelableResourceWithMimeType<RESOURCE : Parcelable?> : Parcelable {
+  class ParcelableResourceWithMimeType<RESOURCE : Parcelable?> : Parcelable {
     val mimeType: String?
     val resource: RESOURCE?
 
