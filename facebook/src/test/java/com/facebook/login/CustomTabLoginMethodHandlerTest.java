@@ -51,6 +51,8 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import com.facebook.internal.security.OidcSecurityUtil;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,7 +71,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
   FacebookSdk.class,
   AccessToken.class,
   FetchedAppSettings.class,
-  FetchedAppSettingsManager.class
+  FetchedAppSettingsManager.class,
+  OidcSecurityUtil.class
 })
 public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
   private static final String SIGNED_REQUEST_STR =
@@ -88,6 +91,14 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     PowerMockito.mockStatic(FacebookSdk.class);
     PowerMockito.when(FacebookSdk.getApplicationId())
         .thenReturn(AuthenticationTokenTestUtil.APP_ID);
+
+    // mock and bypass signature verification
+    PowerMockito.mockStatic(OidcSecurityUtil.class);
+    when(OidcSecurityUtil.getRawKeyFromEndPoint(any(String.class))).thenReturn("key");
+    when(OidcSecurityUtil.getPublicKeyFromString(any(String.class)))
+        .thenReturn(PowerMockito.mock(PublicKey.class));
+    when(OidcSecurityUtil.verify(any(PublicKey.class), any(String.class), any(String.class)))
+        .thenReturn(true);
   }
 
   @Test

@@ -37,6 +37,8 @@ import com.facebook.AccessToken;
 import com.facebook.AuthenticationToken;
 import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
+import com.facebook.internal.security.OidcSecurityUtil;
+import java.security.PublicKey;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +48,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
-@PrepareForTest({LoginClient.class, FacebookSdk.class})
+@PrepareForTest({LoginClient.class, FacebookSdk.class, OidcSecurityUtil.class})
 public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
   private static final String SIGNED_REQUEST_STR =
       "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
@@ -60,6 +62,14 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     PowerMockito.when(FacebookSdk.getApplicationId())
         .thenReturn(AuthenticationTokenTestUtil.APP_ID);
     PowerMockito.when(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false);
+
+    // mock and bypass signature verification
+    PowerMockito.mockStatic(OidcSecurityUtil.class);
+    when(OidcSecurityUtil.getRawKeyFromEndPoint(any(String.class))).thenReturn("key");
+    when(OidcSecurityUtil.getPublicKeyFromString(any(String.class)))
+        .thenReturn(PowerMockito.mock(PublicKey.class));
+    when(OidcSecurityUtil.verify(any(PublicKey.class), any(String.class), any(String.class)))
+        .thenReturn(true);
   }
 
   @Test

@@ -22,6 +22,9 @@ package com.facebook
 import android.os.Parcel
 import android.os.Parcelable
 import com.facebook.internal.Validate
+import com.facebook.internal.security.OidcSecurityUtil
+import java.io.IOException
+import java.security.spec.InvalidKeySpecException
 
 /**
  * This class represents an immutable Authentication Token (or so called "id token") for using
@@ -59,12 +62,20 @@ class AuthenticationToken : Parcelable {
 
     val tokenArray = token.split(".")
     require(tokenArray.size == 3) { "Invalid IdToken string" }
+    val rawHeader = tokenArray[0]
+    val rawClaims = tokenArray[1]
+    val rawSignature = tokenArray[2]
 
     this.token = token
     this.expectedNonce = expectedNonce
-    this.header = AuthenticationTokenHeader(tokenArray[0])
-    this.claims = AuthenticationTokenClaims(tokenArray[1], expectedNonce)
-    this.signature = tokenArray[2]
+    this.header = AuthenticationTokenHeader(rawHeader)
+    this.claims = AuthenticationTokenClaims(rawClaims, expectedNonce)
+
+    // validate signature
+    require(isValidSignature(rawHeader, rawClaims, rawSignature, header.kid)) {
+      "Invalid Signature"
+    }
+    this.signature = rawSignature
   }
 
   internal constructor(parcel: Parcel) {
@@ -104,6 +115,25 @@ class AuthenticationToken : Parcelable {
 
   override fun describeContents(): Int {
     return 0
+  }
+
+  private fun isValidSignature(
+      headerString: String,
+      claimsString: String,
+      sigString: String,
+      kid: String
+  ): Boolean {
+    try {
+      val pubKeyString: String = OidcSecurityUtil.getRawKeyFromEndPoint(kid) ?: return false
+      val pubKey = OidcSecurityUtil.getPublicKeyFromString(pubKeyString)
+      return OidcSecurityUtil.verify(pubKey, "$headerString.$claimsString", sigString)
+    } catch (ex: InvalidKeySpecException) {
+      // invalid key
+      return false
+    } catch (_ex: IOException) {
+      // exception happens on
+      return false
+    }
   }
 
   companion object {

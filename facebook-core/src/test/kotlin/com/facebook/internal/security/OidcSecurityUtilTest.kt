@@ -1,11 +1,13 @@
 package com.facebook.internal.security
 
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.spec.InvalidKeySpecException
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -36,30 +38,30 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
     PowerMockito.whenNew(URL::class.java)
         .withArguments(OidcSecurityUtil.OPENID_KEYS_URL_STRING)
         .thenReturn(urlMock)
-    PowerMockito.`when`(urlMock.openConnection()).thenReturn(huc)
+    whenever(urlMock.openConnection()).thenReturn(huc)
 
     val jsonString = "{\"kid\":\"abc\"}"
     val inputStream = ByteArrayInputStream(jsonString.toByteArray())
-    PowerMockito.`when`(huc.inputStream).thenReturn(inputStream)
+    whenever(huc.inputStream).thenReturn(inputStream)
   }
 
   @Test
   fun `test getRawKeyFromEndPoint succeed`() {
     val result = OidcSecurityUtil.getRawKeyFromEndPoint("kid")
-    Assert.assertEquals("abc", result)
+    assertThat("abc").isEqualTo(result)
   }
 
   @Test
   fun `test getRawKeyFromEndPoint kid not found`() {
     val result = OidcSecurityUtil.getRawKeyFromEndPoint("incorrect_kid")
-    Assert.assertEquals("", result)
+    assertThat("").isEqualTo(result)
   }
 
   @Test
   fun `test creating public key and verify succeed`() {
     val pubKey = OidcSecurityUtil.getPublicKeyFromString(pubKeyString)
     val isValid = OidcSecurityUtil.verify(pubKey, "$encodedHeader.$encodedClaims", signature)
-    Assert.assertTrue(isValid)
+    assertThat(isValid).isTrue
   }
 
   @Test(expected = InvalidKeySpecException::class)
@@ -76,6 +78,20 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
   fun `test verify fail with incorrect signature`() {
     val pubKey = OidcSecurityUtil.getPublicKeyFromString(pubKeyString)
     val isValid = OidcSecurityUtil.verify(pubKey, "$encodedHeader.$encodedClaims", "abc")
-    Assert.assertFalse(isValid)
+    assertThat(isValid).isFalse
+  }
+
+  @Test
+  fun `test getRawKeyFromEndPoint return null when IOException happens`() {
+    val urlMock = PowerMockito.mock(URL::class.java)
+    val huc = PowerMockito.mock(HttpURLConnection::class.java)
+    PowerMockito.whenNew(URL::class.java)
+        .withArguments(OidcSecurityUtil.OPENID_KEYS_URL_STRING)
+        .thenReturn(urlMock)
+    whenever(urlMock.openConnection()).thenReturn(huc)
+    whenever(huc.inputStream).thenThrow(IOException::class.java)
+
+    val result = OidcSecurityUtil.getRawKeyFromEndPoint("kid")
+    assertThat(result).isNull()
   }
 }

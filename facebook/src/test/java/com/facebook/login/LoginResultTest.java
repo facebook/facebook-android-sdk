@@ -21,6 +21,8 @@
 package com.facebook.login;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -29,13 +31,15 @@ import com.facebook.AccessToken;
 import com.facebook.AuthenticationToken;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.security.OidcSecurityUtil;
+import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PrepareForTest(FacebookSdk.class)
+@PrepareForTest({FacebookSdk.class, OidcSecurityUtil.class})
 public class LoginResultTest extends FacebookPowerMockTestCase {
 
   private final Set<String> EMAIL_SET =
@@ -66,6 +70,13 @@ public class LoginResultTest extends FacebookPowerMockTestCase {
     when(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID);
     when(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext());
+
+    mockStatic(OidcSecurityUtil.class);
+    when(OidcSecurityUtil.getRawKeyFromEndPoint(any(String.class))).thenReturn("key");
+    when(OidcSecurityUtil.getPublicKeyFromString(any(String.class)))
+        .thenReturn(mock(PublicKey.class));
+    when(OidcSecurityUtil.verify(any(PublicKey.class), any(String.class), any(String.class)))
+        .thenReturn(true);
   }
 
   @Test

@@ -40,6 +40,7 @@ object OidcSecurityUtil {
       val data = connection.inputStream.bufferedReader().readText()
       JSONObject(data).optString(kid)
     } catch (_ex: Exception) {
+      // return null if ANY exception happens
       null
     } finally {
       connection.disconnect()
