@@ -150,6 +150,15 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true");
     }
 
+    // Set Login Connect parameters if they are present
+    if (request.getMessengerPageId() != null) {
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_MESSENGER_PAGE_ID, request.getMessengerPageId());
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_RESET_MESSENGER_STATE,
+          request.getResetMessengerState() ? "1" : "0");
+    }
+
     return parameters;
   }
 
