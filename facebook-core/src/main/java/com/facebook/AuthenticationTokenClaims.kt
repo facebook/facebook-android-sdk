@@ -60,11 +60,14 @@ class AuthenticationTokenClaims : Parcelable {
    */
   val nonce: String
 
-  /** Expiration time on or after which the ID Token MUST NOT be accepted for processing. */
-  val exp: Date
+  /**
+   * Expiration time (in seconds) on or after which the ID Token MUST NOT be accepted for
+   * processing.
+   */
+  val exp: Long
 
-  /** Time at which the JWT was issued. */
-  val iat: Date
+  /** Time (in seconds) at which the JWT was issued. */
+  val iat: Long
 
   /** Subject - Identifier for the End-User at the Issuer. */
   val sub: String
@@ -133,8 +136,8 @@ class AuthenticationTokenClaims : Parcelable {
     this.iss = jsonObj.getString("iss")
     this.aud = jsonObj.getString("aud")
     this.nonce = jsonObj.getString("nonce")
-    this.exp = Date(jsonObj.getLong("exp"))
-    this.iat = Date(jsonObj.getLong("iat"))
+    this.exp = jsonObj.getLong("exp")
+    this.iat = jsonObj.getLong("iat")
     this.sub = jsonObj.getString("sub")
     this.name = jsonObj.getNullableString("name")
     this.givenName = jsonObj.getNullableString("givenName")
@@ -198,8 +201,8 @@ class AuthenticationTokenClaims : Parcelable {
       iss: String,
       aud: String,
       nonce: String,
-      exp: Date,
-      iat: Date,
+      exp: Long,
+      iat: Long,
       sub: String,
       name: String? = null,
       givenName: String? = null,
@@ -268,8 +271,8 @@ class AuthenticationTokenClaims : Parcelable {
     Validate.notNullOrEmpty(nonce, "nonce")
     this.nonce = checkNotNull(nonce)
 
-    this.exp = Date(parcel.readLong())
-    this.iat = Date(parcel.readLong())
+    this.exp = parcel.readLong()
+    this.iat = parcel.readLong()
     val sub = parcel.readString()
     Validate.notNullOrEmpty(sub, "sub")
     this.sub = checkNotNull(sub)
@@ -305,8 +308,8 @@ class AuthenticationTokenClaims : Parcelable {
     dest.writeString(iss)
     dest.writeString(aud)
     dest.writeString(nonce)
-    dest.writeLong(exp.time)
-    dest.writeLong(iat.time)
+    dest.writeLong(exp)
+    dest.writeLong(iat)
     dest.writeString(sub)
     dest.writeString(name)
     dest.writeString(givenName)
@@ -415,13 +418,13 @@ class AuthenticationTokenClaims : Parcelable {
       return false
     }
 
-    val exp = Date(claimsJson.optLong("exp"))
-    if (Date().after(exp)) { // is expired
+    val expDate = Date(claimsJson.optLong("exp") * 1000)
+    if (Date().after(expDate)) { // is expired
       return false
     }
 
-    val iat = Date(claimsJson.optLong("iat"))
-    val iatExpireDate = Date(iat.time + MAX_TIME_SINCE_TOKEN_ISSUED)
+    val iatInSeconds = claimsJson.optLong("iat")
+    val iatExpireDate = Date(iatInSeconds * 1000 + MAX_TIME_SINCE_TOKEN_ISSUED)
     if (Date().after(iatExpireDate)) { // issued too far in the past
       return false
     }
@@ -452,8 +455,8 @@ class AuthenticationTokenClaims : Parcelable {
     jsonObject.put("iss", this.iss)
     jsonObject.put("aud", this.aud)
     jsonObject.put("nonce", this.nonce)
-    jsonObject.put("exp", this.exp.time)
-    jsonObject.put("iat", this.iat.time)
+    jsonObject.put("exp", this.exp)
+    jsonObject.put("iat", this.iat)
     if (this.sub != null) {
       jsonObject.put("sub", this.sub)
     }
@@ -508,15 +511,15 @@ class AuthenticationTokenClaims : Parcelable {
   }
 
   companion object {
-    const val MAX_TIME_SINCE_TOKEN_ISSUED = DateUtils.MINUTE_IN_MILLIS * 10; // 10 minutes
+    const val MAX_TIME_SINCE_TOKEN_ISSUED = DateUtils.MINUTE_IN_MILLIS * 10 // 10 minutes
 
     internal fun createFromJSONObject(jsonObject: JSONObject): AuthenticationTokenClaims {
       val jti = jsonObject.getString("jti")
       val iss = jsonObject.getString("iss")
       val aud = jsonObject.getString("aud")
       val nonce = jsonObject.getString("nonce")
-      val exp = Date(jsonObject.getLong("exp"))
-      val iat = Date(jsonObject.getLong("iat"))
+      val exp = jsonObject.getLong("exp")
+      val iat = jsonObject.getLong("iat")
       val sub = jsonObject.getString("sub")
       val name = jsonObject.optString("name")
       val givenName = jsonObject.optString("givenName")

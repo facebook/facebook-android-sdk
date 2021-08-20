@@ -3,7 +3,6 @@ package com.facebook.login
 import android.text.format.DateUtils
 import com.facebook.AuthenticationToken
 import com.facebook.AuthenticationTokenClaims
-import java.util.Date
 
 class AuthenticationTokenTestUtil {
   companion object {
@@ -13,8 +12,10 @@ class AuthenticationTokenTestUtil {
     const val ISS = "https://facebook.com/dialog/oauth"
     const val SUB = "1234"
     const val NONCE = "nonce"
+    val IAT = System.currentTimeMillis() / 1000
     val EXPIRATION_DATE =
-        Date(Date().time + DateUtils.HOUR_IN_MILLIS) // valid only within 60 minutes
+        (System.currentTimeMillis() + DateUtils.HOUR_IN_MILLIS) /
+            1000 // valid only within 60 minutes
 
     @JvmField
     val AUTH_TOKEN_CLAIMS_FOR_TEST =
@@ -24,7 +25,7 @@ class AuthenticationTokenTestUtil {
             APP_ID,
             NONCE,
             EXPIRATION_DATE, // exp
-            Date(), // iat
+            IAT, // iat
             SUB,
             "name",
             "givenName",
@@ -42,7 +43,7 @@ class AuthenticationTokenTestUtil {
 
     @JvmField
     val authenticationTokenClaimsWithRequiredFieldsOnly =
-        AuthenticationTokenClaims(JTI, ISS, APP_ID, NONCE, EXPIRATION_DATE, Date(), SUB)
+        AuthenticationTokenClaims(JTI, ISS, APP_ID, NONCE, EXPIRATION_DATE, IAT, SUB)
 
     @JvmStatic
     fun getAuthenticationTokenForTest(): AuthenticationToken {
