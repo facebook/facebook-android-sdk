@@ -111,6 +111,7 @@ class AuthenticationToken : Parcelable {
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
     dest.writeString(token)
+    dest.writeString(expectedNonce)
   }
 
   override fun describeContents(): Int {

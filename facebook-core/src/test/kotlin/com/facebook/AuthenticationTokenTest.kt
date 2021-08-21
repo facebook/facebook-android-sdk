@@ -73,4 +73,15 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
     whenever(OidcSecurityUtil.getRawKeyFromEndPoint(any())).thenReturn("invalid_key")
     AuthenticationToken(tokenString, AuthenticationTokenTestUtil.NONCE)
   }
+
+  @Test
+  fun `test AuthenticationToken parceling`() {
+    // bypass signature check, since this is not testing for signature
+    PowerMockito.`when`(OidcSecurityUtil.verify(any(), any(), any())).thenReturn(true)
+
+    val idToken1 = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
+    val idToken2 = FacebookTestUtility.parcelAndUnparcel(idToken1)
+    assertThat(idToken2).isNotNull
+    assertThat(idToken1).isEqualTo(idToken2)
+  }
 }
