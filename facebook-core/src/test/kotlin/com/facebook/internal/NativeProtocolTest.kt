@@ -210,6 +210,7 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `native intent generation for IG app`() {
+    val mockMessengerPageId = "123456789"
     val mockContext = mock<Context>()
     setUpMockingForNativeIntentGeneration(mockContext)
     val instagramIntent =
@@ -223,6 +224,8 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
             DefaultAudience.FRIENDS, // defaultAudience
             "", // clientState
             "", // authType
+            mockMessengerPageId, // messengerPageId
+            true, // resetMessengerState
             true, // isFamilyLogin
             true) // shouldSkipAccountDedupe
 
@@ -233,6 +236,12 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     assertThat(instagramIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
         .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES)
     assertThat(instagramIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
+        .isTrue()
+    assertThat(instagramIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_MESSENGER_PAGE_ID))
+        .isEqualTo(mockMessengerPageId)
+    assertThat(
+            instagramIntent?.getBooleanExtra(
+                ServerProtocol.DIALOG_PARAM_RESET_MESSENGER_STATE, false))
         .isTrue()
   }
 

@@ -58,6 +58,8 @@ class InstagramAppLoginMethodHandler extends NativeAppLoginMethodHandler {
             request.getDefaultAudience(),
             getClientState(request.getAuthId()),
             request.getAuthType(),
+            request.getMessengerPageId(),
+            request.getResetMessengerState(),
             request.isFamilyLogin(),
             request.shouldSkipAccountDeduplication());
 

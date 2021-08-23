@@ -315,6 +315,8 @@ object NativeProtocol {
       defaultAudience: DefaultAudience,
       clientState: String,
       authType: String,
+      messengerPageId: String?,
+      resetMessengerState: Boolean,
       isFamilyLogin: Boolean,
       shouldSkipAccountDedupe: Boolean
   ): Intent? {
@@ -330,8 +332,8 @@ object NativeProtocol {
             clientState,
             authType,
             false,
-            null,
-            false,
+            messengerPageId,
+            resetMessengerState,
             LoginTargetApp.INSTAGRAM,
             isFamilyLogin,
             shouldSkipAccountDedupe)
