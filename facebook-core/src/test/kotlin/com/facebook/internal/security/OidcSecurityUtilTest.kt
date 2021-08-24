@@ -1,6 +1,7 @@
 package com.facebook.internal.security
 
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
 import java.io.IOException
@@ -33,8 +34,8 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
 
   @Before
   fun `before`() {
-    val urlMock = PowerMockito.mock(URL::class.java)
-    val huc = PowerMockito.mock(HttpURLConnection::class.java)
+    val urlMock: URL = mock()
+    val huc: HttpURLConnection = mock()
     PowerMockito.whenNew(URL::class.java)
         .withArguments(OidcSecurityUtil.OPENID_KEYS_URL_STRING)
         .thenReturn(urlMock)
@@ -83,8 +84,8 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test getRawKeyFromEndPoint return null when IOException happens`() {
-    val urlMock = PowerMockito.mock(URL::class.java)
-    val huc = PowerMockito.mock(HttpURLConnection::class.java)
+    val urlMock: URL = mock()
+    val huc: HttpURLConnection = mock()
     PowerMockito.whenNew(URL::class.java)
         .withArguments(OidcSecurityUtil.OPENID_KEYS_URL_STRING)
         .thenReturn(urlMock)
