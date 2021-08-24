@@ -126,6 +126,7 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         parameters.putString(
             ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
             ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST);
+        parameters.putString(ServerProtocol.DIALOG_PARAM_NONCE, request.getNonce());
       } else {
         parameters.putString(
             ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,

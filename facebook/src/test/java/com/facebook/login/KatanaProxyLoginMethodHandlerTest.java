@@ -99,7 +99,7 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     Bundle bundle = new Bundle();
     bundle.putLong("expires_in", EXPIRES_IN_DELTA);
     bundle.putString("access_token", ACCESS_TOKEN);
-    bundle.putString("authentication_token", expectedIdTokenString);
+    bundle.putString(AuthenticationToken.AUTHENTICATION_TOKEN_KEY, expectedIdTokenString);
     bundle.putString("signed_request", SIGNED_REQUEST_STR);
 
     Intent intent = new Intent();

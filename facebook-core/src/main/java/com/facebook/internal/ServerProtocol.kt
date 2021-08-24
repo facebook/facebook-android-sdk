@@ -47,6 +47,7 @@ object ServerProtocol {
   const val DIALOG_PARAM_IES = "ies"
   const val DIALOG_PARAM_LEGACY_OVERRIDE = "legacy_override"
   const val DIALOG_PARAM_LOGIN_BEHAVIOR = "login_behavior"
+  const val DIALOG_PARAM_NONCE = "nonce"
   const val DIALOG_PARAM_REDIRECT_URI = "redirect_uri"
   const val DIALOG_PARAM_RESPONSE_TYPE = "response_type"
   const val DIALOG_PARAM_RETURN_SCOPES = "return_scopes"

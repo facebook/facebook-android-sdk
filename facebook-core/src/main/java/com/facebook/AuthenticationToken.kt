@@ -138,7 +138,7 @@ class AuthenticationToken : Parcelable {
   }
 
   companion object {
-    const val AUTHENTICATION_TOKEN_KEY = "authentication_token"
+    const val AUTHENTICATION_TOKEN_KEY = "id_token"
 
     @JvmField
     val CREATOR: Parcelable.Creator<AuthenticationToken> =

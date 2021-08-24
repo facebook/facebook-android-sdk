@@ -131,7 +131,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     String expectedIdTokenString = AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest();
     final Bundle bundle = new Bundle();
     bundle.putString("access_token", ACCESS_TOKEN);
-    bundle.putString("authentication_token", expectedIdTokenString);
+    bundle.putString(AuthenticationToken.AUTHENTICATION_TOKEN_KEY, expectedIdTokenString);
     bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
     bundle.putString("signed_request", SIGNED_REQUEST_STR);
     handler.onComplete(requestWithNonce, bundle, null);
@@ -300,7 +300,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     final Bundle bundle = new Bundle();
     bundle.putString("access_token", ACCESS_TOKEN);
-    bundle.putString("authentication_token", authenticationTokenString);
+    bundle.putString(AuthenticationToken.AUTHENTICATION_TOKEN_KEY, authenticationTokenString);
     bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
     bundle.putString("code", "Something else");
     bundle.putString("signed_request", SIGNED_REQUEST_STR);
