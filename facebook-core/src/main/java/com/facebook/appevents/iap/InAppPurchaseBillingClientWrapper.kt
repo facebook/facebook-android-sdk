@@ -213,7 +213,7 @@ private constructor(
 
   companion object {
     private val initialized = AtomicBoolean(false)
-    private lateinit var instance: InAppPurchaseBillingClientWrapper
+    private var instance: InAppPurchaseBillingClientWrapper? = null
     val isServiceConnected = AtomicBoolean(false)
 
     // Use ConcurrentHashMap because purchase values may be updated in different threads
@@ -259,7 +259,7 @@ private constructor(
     private const val METHOD_ON_SKU_DETAILS_RESPONSE = "onSkuDetailsResponse"
     @Synchronized
     @JvmStatic
-    fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapper {
+    fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapper? {
       if (initialized.get()) {
         return instance
       }
@@ -335,7 +335,7 @@ private constructor(
               querySkuDetailsAsyncMethod,
               queryPurchaseHistoryAsyncMethod,
               inAppPurchaseSkuDetailsWrapper)
-      instance.startConnection()
+      (instance as InAppPurchaseBillingClientWrapper).startConnection()
     }
 
     private fun createBillingClient(context: Context?, billingClientClazz: Class<*>): Any? {
