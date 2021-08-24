@@ -44,8 +44,14 @@ class LoginConfiguration {
   @JvmOverloads
   constructor(permissions: Collection<String>?, nonce: String = UUID.randomUUID().toString()) {
     require(NonceUtil.isValidNonce(nonce))
-    this.permissions =
-        Collections.unmodifiableSet(if (permissions != null) HashSet(permissions) else HashSet())
+
+    val permissions = if (permissions != null) HashSet(permissions) else HashSet()
+    permissions.add(OPENID)
+    this.permissions = Collections.unmodifiableSet(permissions)
     this.nonce = nonce
+  }
+
+  companion object {
+    const val OPENID = "openid"
   }
 }

@@ -65,6 +65,8 @@ object ServerProtocol {
   const val DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES =
       "token,signed_request,graph_domain,granted_scopes"
   const val DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST = "token,signed_request,graph_domain"
+  const val DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST =
+      "id_token,token,signed_request,graph_domain"
   const val DIALOG_RETURN_SCOPES_TRUE = "true"
   const val DIALOG_REDIRECT_URI = "fbconnect://success"
   const val DIALOG_REDIRECT_CHROME_OS_URI = "fbconnect://chrome_os_success"
