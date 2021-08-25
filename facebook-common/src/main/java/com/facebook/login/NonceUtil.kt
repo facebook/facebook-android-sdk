@@ -20,16 +20,14 @@
 
 package com.facebook.login
 
-class NonceUtil {
-  companion object {
-    @JvmStatic
-    fun isValidNonce(nonce: String?): Boolean {
-      if (nonce.isNullOrEmpty()) {
-        return false
-      }
-
-      val hasWhiteSpace = nonce.indexOf(' ') >= 0
-      return !hasWhiteSpace
+object NonceUtil {
+  @JvmStatic
+  fun isValidNonce(nonce: String?): Boolean {
+    if (nonce.isNullOrEmpty()) {
+      return false
     }
+
+    val hasWhiteSpace = nonce.indexOf(' ') >= 0
+    return !hasWhiteSpace
   }
 }
