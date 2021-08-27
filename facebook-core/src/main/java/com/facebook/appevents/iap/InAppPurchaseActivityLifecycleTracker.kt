@@ -50,6 +50,7 @@ object InAppPurchaseActivityLifecycleTracker {
   private lateinit var intent: Intent
   private var inAppBillingObj: Any? = null
 
+  /** Start iap logging if enable, initialize billing service if not */
   @JvmStatic
   fun startIapLogging() {
     initializeIfNotInitialized()

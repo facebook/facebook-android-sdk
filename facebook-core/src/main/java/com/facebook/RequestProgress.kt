@@ -31,6 +31,11 @@ constructor(private val callbackHandler: Handler?, private val request: GraphReq
   var maxProgress: Long = 0
     private set
 
+  /**
+   * Increase process size
+   *
+   * @param size to increase
+   */
   fun addProgress(size: Long) {
     progress += size
     if (progress >= lastReportedProgress + threshold || progress >= maxProgress) {
@@ -38,10 +43,16 @@ constructor(private val callbackHandler: Handler?, private val request: GraphReq
     }
   }
 
+  /**
+   * Increase maxProgress size
+   *
+   * @param size to increase
+   */
   fun addToMax(size: Long) {
     maxProgress += size
   }
 
+  /** Send requests if process size larger than lastReportedProgress size */
   fun reportProgress() {
     if (progress > lastReportedProgress) {
       val callback = request.callback
