@@ -9,15 +9,12 @@ import android.content.pm.ServiceInfo;
 import androidx.browser.customtabs.CustomTabsService;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @AutoHandleExceptions
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class CustomTabUtils {
   private static final String[] CHROME_PACKAGES = {
     "com.android.chrome", "com.chrome.beta", "com.chrome.dev",
