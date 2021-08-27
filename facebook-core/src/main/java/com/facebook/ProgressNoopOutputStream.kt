@@ -39,6 +39,7 @@ class ProgressNoopOutputStream(private val callbackHandler: Handler?) :
     return progressMap
   }
 
+  /** Add size to currentRequestProgress's process size */
   fun addProgress(size: Long) {
     val currentRequest = this.currentRequest ?: return
     if (currentRequestProgress == null) {

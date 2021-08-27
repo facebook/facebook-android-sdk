@@ -42,6 +42,7 @@ object IntegrityManager {
         getGateKeeperForKey("FBSDKFeatureIntegritySample", FacebookSdk.getApplicationId(), false)
   }
 
+  /** Process integrity parameters */
   @JvmStatic
   fun processParameters(parameters: MutableMap<String, String>) {
     if (!enabled || parameters.isEmpty()) {

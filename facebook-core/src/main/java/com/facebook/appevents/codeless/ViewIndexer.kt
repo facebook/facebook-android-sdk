@@ -162,6 +162,12 @@ class ViewIndexer(activity: Activity) {
             })
   }
 
+  /**
+   * Process graph request
+   *
+   * @param request graphRequest to process
+   * @param currentDigest
+   */
   fun processRequest(request: GraphRequest?, currentDigest: String?) {
     if (request == null) {
       return
@@ -216,6 +222,11 @@ class ViewIndexer(activity: Activity) {
     private const val REQUEST_TYPE = "request_type"
     private var instance: ViewIndexer? = null
 
+    /**
+     * Build current app index request and process it
+     *
+     * @param tree current view tree
+     */
     @JvmStatic
     fun sendToServerUnityInstance(tree: String) {
       instance?.let { it.sendToServer(tree) }

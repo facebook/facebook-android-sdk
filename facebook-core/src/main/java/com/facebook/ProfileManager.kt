@@ -33,6 +33,11 @@ internal constructor(
     get() = currentProfileField
     set(value) = setCurrentProfile(value, true)
 
+  /**
+   * load profile from cache and set it to current profile
+   *
+   * @return if successfully load profile
+   */
   fun loadCurrentProfile(): Boolean {
     val profile = profileCache.load()
     if (profile != null) {

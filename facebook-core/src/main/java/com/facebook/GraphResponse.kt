@@ -353,6 +353,15 @@ internal constructor(
       }
     }
 
+    /**
+     * Build GraphResponse with Error
+     *
+     * @param requests original graph requests
+     * @param connection request url connection
+     * @param error error included in response
+     *
+     * @return graph response with error
+     */
     @JvmStatic
     fun constructErrorResponses(
         requests: List<GraphRequest>,

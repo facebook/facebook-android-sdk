@@ -28,6 +28,12 @@ enum class LoginTargetApp(private val targetApp: String) {
   }
 
   companion object {
+    /**
+     * Return the LoginTargetApp by given string
+     *
+     * @param stringValue
+     * @return LoginTargetApp default return LoginTargetApp.FACEBOOK
+     */
     @JvmStatic
     fun fromString(stringValue: String?): LoginTargetApp {
       for (targetApp in values()) {

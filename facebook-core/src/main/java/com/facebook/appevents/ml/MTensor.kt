@@ -30,6 +30,11 @@ class MTensor(private var shape: IntArray) {
 
   fun getShape(i: Int) = shape[i]
 
+  /**
+   * Reshape the shape
+   *
+   * @param shape to reshape
+   */
   fun reshape(shape: IntArray) {
     this.shape = shape
     val newCapacity = getCapacity(shape)

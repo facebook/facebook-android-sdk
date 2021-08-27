@@ -200,7 +200,17 @@ class AccessToken : Parcelable {
   }
 
   interface AccessTokenRefreshCallback {
+    /**
+     * The method called on a successful refresh of an AccessToken.
+     *
+     * @param accessToken the access token created from the native link intent.
+     */
     fun OnTokenRefreshed(accessToken: AccessToken?)
+    /**
+     * The method called on a failed refresh of an AccessToken.
+     *
+     * @param exception throw from AccessToken creation.
+     */
     fun OnTokenRefreshFailed(exception: FacebookException?)
   }
 
@@ -212,6 +222,11 @@ class AccessToken : Parcelable {
      * @param token the access token created from the native link intent.
      */
     fun onSuccess(token: AccessToken?)
+    /**
+     * The method called on a failed creation of an AccessToken.
+     *
+     * @param error throw from AccessToken creation.
+     */
     fun onError(error: FacebookException?)
   }
 

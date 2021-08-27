@@ -285,6 +285,13 @@ private constructor(
     private const val ERROR_IS_TRANSIENT_KEY = "is_transient"
     internal val HTTP_RANGE_SUCCESS = Range(200, 299)
 
+    /**
+     * Check Response and create error if necessary
+     *
+     * @param singleResult jsonObject result
+     * @param batchResult bach call result
+     * @param connection
+     */
     @JvmStatic
     fun checkResponseAndCreateError(
         singleResult: JSONObject,

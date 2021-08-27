@@ -734,9 +734,8 @@ object FacebookSdk {
         .apply()
   }
 
-  // Package private for testing only
   @JvmStatic
-  fun loadDefaultsFromMetadata(context: Context?) {
+  internal fun loadDefaultsFromMetadata(context: Context?) {
     if (context == null) {
       return
     }

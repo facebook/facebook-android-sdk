@@ -63,6 +63,11 @@ internal constructor(
     override val grantType: String = "ig_refresh_token"
   }
 
+  /**
+   * Load access token from accessTokenCache and set to currentAccessToken
+   *
+   * @return if load access token success
+   */
   fun loadCurrentAccessToken(): Boolean {
     val accessToken = accessTokenCache.load()
     if (accessToken != null) {
@@ -72,6 +77,10 @@ internal constructor(
     return false
   }
 
+  /**
+   * Build intent from currentAccessToken and broadcast the intent to
+   * CurrentAccessTokenExpirationBroadcastReceiver.
+   */
   fun currentAccessTokenChanged() {
     sendCurrentAccessTokenChangedBroadcastIntent(currentAccessToken, currentAccessToken)
   }
@@ -131,6 +140,7 @@ internal constructor(
     }
   }
 
+  /** Refresh currentAccessToken if needed. */
   fun extendAccessTokenIfNeeded() {
     if (!shouldExtendAccessToken()) {
       return
@@ -154,6 +164,11 @@ internal constructor(
     var graphDomain: String? = null
   }
 
+  /**
+   * Refresh currentAccessToken.
+   *
+   * @param callback to be called after access token be refreshed.
+   */
   fun refreshCurrentAccessToken(callback: AccessToken.AccessTokenRefreshCallback?) {
     if (Looper.getMainLooper() == Looper.myLooper()) {
       refreshCurrentAccessTokenImpl(callback)
