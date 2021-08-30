@@ -61,6 +61,7 @@ import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -185,7 +186,8 @@ public class DeviceAuthDialog extends DialogFragment {
     String accessToken = Validate.hasAppID() + "|" + Validate.hasClientToken();
     parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken);
     parameters.putString(
-        DeviceRequestsHelper.DEVICE_INFO_PARAM, DeviceRequestsHelper.getDeviceInfo());
+        DeviceRequestsHelper.DEVICE_INFO_PARAM,
+        DeviceRequestsHelper.getDeviceInfo(additionalDeviceInfo()));
 
     GraphRequest graphRequest =
         new GraphRequest(
@@ -219,6 +221,11 @@ public class DeviceAuthDialog extends DialogFragment {
               }
             });
     graphRequest.executeAsync();
+  }
+
+  @Nullable
+  Map<String, String> additionalDeviceInfo() {
+    return null;
   }
 
   private void setCurrentRequestState(RequestState currentRequestState) {
