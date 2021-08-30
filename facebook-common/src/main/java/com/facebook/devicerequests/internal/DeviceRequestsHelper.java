@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
+import androidx.annotation.Nullable;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
@@ -43,7 +44,6 @@ import com.google.zxing.common.BitMatrix;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -70,19 +70,21 @@ public class DeviceRequestsHelper {
   private static HashMap<String, NsdManager.RegistrationListener> deviceRequestsListeners =
       new HashMap<>();
 
-  public static String getDeviceInfo() {
+  public static String getDeviceInfo(@Nullable Map<String, String> deviceInfo) {
     // Device info
     // We don't need all the information in Utility.setAppEventExtendedDeviceInfoParameters
     // We only want the model so we can show it to the user, so they know which device
     // the login request comes from
-    JSONObject deviceInfo = new JSONObject();
-    try {
-      deviceInfo.put(DEVICE_INFO_DEVICE, Build.DEVICE);
-      deviceInfo.put(DEVICE_INFO_MODEL, Build.MODEL);
-    } catch (JSONException ignored) {
+    if (deviceInfo == null) {
+      deviceInfo = new HashMap<>();
     }
+    deviceInfo.put(DEVICE_INFO_DEVICE, Build.DEVICE);
+    deviceInfo.put(DEVICE_INFO_MODEL, Build.MODEL);
+    return new JSONObject(deviceInfo).toString();
+  }
 
-    return deviceInfo.toString();
+  public static String getDeviceInfo() {
+    return getDeviceInfo(null);
   }
 
   public static boolean startAdvertisementService(String userCode) {
