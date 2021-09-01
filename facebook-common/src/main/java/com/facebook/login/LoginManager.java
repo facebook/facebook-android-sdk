@@ -582,7 +582,8 @@ public class LoginManager {
       FragmentWrapper fragment, Collection<String> permissions) {
     validatePublishPermissions(permissions);
 
-    logIn(fragment, permissions);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    loginWithConfiguration(fragment, loginConfig);
   }
 
   /**
@@ -594,7 +595,8 @@ public class LoginManager {
   public void logInWithPublishPermissions(Activity activity, Collection<String> permissions) {
     validatePublishPermissions(permissions);
 
-    logIn(activity, permissions);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    loginWithConfiguration(activity, loginConfig);
   }
 
   /**
@@ -647,8 +649,8 @@ public class LoginManager {
    * @param permissions The requested permissions.
    */
   public void logIn(FragmentWrapper fragment, Collection<String> permissions) {
-    LoginClient.Request loginRequest = createLoginRequest(permissions);
-    startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(fragment, loginConfig);
   }
 
   /**
@@ -670,8 +672,8 @@ public class LoginManager {
    * @param permissions The requested permissions.
    */
   public void logIn(Activity activity, Collection<String> permissions) {
-    LoginClient.Request loginRequest = createLoginRequest(permissions);
-    startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(activity, loginConfig);
   }
 
   /**
