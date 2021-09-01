@@ -79,6 +79,7 @@ object NativeProtocol {
   const val PROTOCOL_VERSION_20170411 = 2017_04_11 // express login
   const val PROTOCOL_VERSION_20170417 = 2017_04_17
   const val PROTOCOL_VERSION_20171115 = 2017_11_15
+  const val PROTOCOL_VERSION_20210906 = 2021_09_06
   const val EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION"
   const val EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION"
   const val EXTRA_PROTOCOL_CALL_ID = "com.facebook.platform.protocol.CALL_ID"
@@ -453,6 +454,7 @@ object NativeProtocol {
   // Note: be sure this stays sorted in descending order; add new versions at the beginning
   private val KNOWN_PROTOCOL_VERSIONS =
       arrayOf(
+          PROTOCOL_VERSION_20210906,
           PROTOCOL_VERSION_20170417,
           PROTOCOL_VERSION_20160327,
           PROTOCOL_VERSION_20141218,
