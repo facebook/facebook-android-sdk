@@ -91,6 +91,11 @@ public class SDKLogger {
     logger.logEventImplicitly(SDKAnalyticsEvents.EVENT_LOGIN_SUCCESS, parameters);
   }
 
+  public void logGameLoadComplete() {
+    Bundle parameters = this.getInitParameters();
+    logger.logEventImplicitly(SDKAnalyticsEvents.EVENT_GAME_LOAD_COMPLETE, parameters);
+  }
+
   public void logInternalError(SDKMessageEnum functionType, Exception e) {
     Bundle parameters = this.getInitParameters();
     parameters.putString(SDKAnalyticsEvents.PARAMETER_FUNCTION_TYPE, functionType.toString());
