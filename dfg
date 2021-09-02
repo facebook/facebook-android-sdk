@@ -1,0 +1,314 @@
+swagger: "2.0"
+info:
+  description: "The Conversions API (for web) allows advertisers to send web events from their servers directly to Facebook. Conversions API events are linked to a pixel and are processed like browser pixel events. This means that these conversion events are used in measurement, reporting, and optimization in the same way as browser pixel events."
+  version: "1.0.0"
+  title: "Facebook Conversions API (for Web)"
+  termsOfService: "https://www.facebook.com/legal/technology_terms"
+  contact:
+    email: "web_signals_integrations@fb.com"
+host: "graph.facebook.com"
+basePath: "/v8.0"
+tags:
+- name: "Conversions API (for Web)"
+  description: "The Conversions API (for web) allows advertisers to send web events from their servers directly to Facebook. Conversions API events are linked to a pixel and are processed like browser pixel events. This means that these conversion events are used in measurement, reporting, and optimization in the same way as browser pixel events."
+  externalDocs:
+    description: "Find out more"
+    url: "https://developers.facebook.com/docs/marketing-api/conversions-api"
+schemes:
+- "https"
+paths:
+  /{pixelId}/events:
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Facebook Conversions API (for Web) post request"
+        required: true
+        schema:
+          $ref: '#/definitions/event_request'
+      - in: "path"
+        name: "pixelId"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/response_success'
+        default:
+          description: "unsuccessful operation"
+          schema:
+            $ref: '#/definitions/response_error'
+
+securityDefinitions:
+  facebook_api_key:
+    type: "apiKey"
+    name: "access_token"
+    in: "query"
+security:
+  - facebook_api_key: []
+
+definitions:
+  event_request:
+    type: "object"
+    required:
+      - data
+      - partner_agent
+    properties:
+      data:
+        description: "An array of Server Event objects."
+        type: array
+        items:
+          $ref: '#/definitions/event'
+      test_event_code:
+        description: "Code used to verify that your server events are received correctly by Facebook. Use this code to test your server events in the Test Events feature in Events Manager. See Test Events Tool (https://developers.facebook.com/docs/marketing-api/conversions-api/using-the-api#testEvents) for an example."
+        type: "string"
+      partner_agent:
+        description: "Partner agent string."
+        type: "string"
+        enum: ["swagger"]
+        default: "swagger"
+
+  event:
+    type: "object"
+    required:
+      - event_name
+      - event_time
+      - user_data
+      - action_source
+    properties:
+      event_name:
+        type: "string"
+        description: "A Facebook pixel Standard Event or Custom Event name. This field is used to deduplicate events sent by both Facebook Pixel and Conversions API. event_id is also used in deduplication. For the same customer action, event from the browser event match event_name from the server event. If we find a match between events sent within 48 hours of each other, we only consider the first one. If a server and browser event arrive at approximately the same time (within 5 minutes of each other), we favor the browser event."
+      event_time:
+        type: "integer"
+        format: "int64"
+        description: "A Unix timestamp in seconds indicating when the actual event occurred. The specified time may be earlier than the time you send the event to Facebook. This is to enable batch processing and server performance optimization. event_time can be up to 7 days before you send an event to Facebook. If any event_time in data is greater than 7 days in the past, we return an error for the entire request and process no events."
+      event_source_url:
+        type: "string"
+        description: "The browser URL where the event happened."
+      opt_out:
+        type: boolean
+        description: "A flag that indicates we should not use this event for ads delivery optimization. If set to true, we only use the event for attribution."
+      event_id:
+        type: "string"
+        description: "This ID can be any unique string chosen by the advertiser. event_id is used to deduplicate events sent by both Facebook Pixel and Conversions API. event_name is also used in deduplication. For deduplication, the eventID from a browser event must match the event_id in the corresponding server event."
+      action_source:
+        type: "string"
+        description: "This field allows you to specify where your conversions occurred. Knowing where your events took place helps ensure your ads go to the right people. See docs for the allowable values. https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/server-event#action-source"
+      user_data:
+        $ref: '#/definitions/user_data'
+      custom_data:
+        $ref: '#/definitions/custom_data'
+      data_processing_options:
+        type: "array"
+        items:
+          type: "string"
+        description: "Processing options you would like to enable for a specific event. For more details see: https://developers.facebook.com/docs/marketing-apis/data-processing-options."
+        example: ['LDU']
+      data_processing_options_country:
+        type: "integer"
+        description: "The country that you want to associate to this data processing option. If you set a country, you must also set a state. For more details see: https://developers.facebook.com/docs/marketing-apis/data-processing-options"
+      data_processing_options_state:
+        type: "integer"
+        description: "The state that you want to associate with this data processing option. For more details see: https://developers.facebook.com/docs/marketing-apis/data-processing-options."
+
+
+  custom_data:
+    type: "object"
+    description: "An object that includes additional business data about the event which can be used for ads delivery optimization. If our predefined object properties don't suit your needs, you can include your own, custom properties. Custom properties can be used with both standard and custom events, and can help you further define custom audiences."
+    properties:
+      value:
+        type: "number"
+        multipleOf: 0.01  # 2 decimal points
+        description: "A numeric value associated with this event. This could be a monetary value or a value in some other metric."
+        example: 142.54
+      currency:
+        type: "string"
+        description: "The currency for the value specified, if applicable. Currency must be a valid ISO 4217 (https://en.wikipedia.org/wiki/ISO_4217) three digit currency code."
+        example: "USD"
+      content_name:
+        type: "string"
+        description: "The name of the page or product associated with the event."
+        example: "lettuce"
+      content_category:
+        type: "string"
+        description: "The category of the content associated with the event."
+        example: "grocery"
+      content_ids:
+        type: "array"
+        items:
+          type: "string"
+        description: "The content IDs associated with the event, such as product SKUs for items in an AddToCart event: ['ABC123', 'XYZ789']. If content_type is a product, then your content IDs must be an array with a single string value. Otherwise, this array can contain any number of string values."
+        example: ['ABC123', 'XYZ789']
+      contents:
+        type: "array"
+        items:
+          $ref: '#/definitions/content'
+        description: "A list of Content objects that contain the product IDs associated with the event plus information about the products. id, quantity, and item_price are available fields."
+        example:
+          - id: "ABC123"
+            quantity: 2
+            item_price: 5.99
+          - id: "XYZ789"
+            quantity: 2
+            item_price: 9.99
+      content_type:
+        type: "string"
+        description: "It should be set to 'product' or 'product_group'. Use 'product', if the keys you send represent products. Sent keys could be content_ids or contents. Use product_group, if the keys you send in content_ids represent product groups. Product groups are used to distinguish products that are identical but have variations such as color, material, size or pattern."
+      order_id:
+        type: "string"
+        description: "The order ID for this transaction as a String."
+        example: 'order1234'
+      predicted_ltv:
+        type: "number"
+        description: "The predicted lifetime value of a conversion event, as a String."
+        example: 432.12
+      num_items:
+        type: "integer"
+        description: "Use only with InitiateCheckout events. The number of items that a user tries to buy during checkout."
+        example: '4'
+      search_string:
+        type: "string"
+        description: "Use only with Search events. A search query made by a user."
+        example: "lettuce"
+      status:
+        type: "string"
+        description: "Use only with CompleteRegistration events. The status of the registration event"
+        example: "registered"
+
+
+  content:
+    type: "object"
+    description: "An object that contain the product IDs associated with the event plus information about the products."
+    properties:
+      id:
+        type: "string"
+        description: "Product Id"
+      quantity:
+        type: "integer"
+        description: "number of product"
+      item_price:
+        type: "number"
+        format: "float"
+        description: "Item Price."
+
+
+  user_data:
+    type: "object"
+    description: "user_data is a set of identifiers Facebook can use for targeted attribution. You must provide at least one of the following user_data keys in your request"
+    properties:
+      em:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed email address in lower case using SHA-256 algorithm."
+        example: "joe@eg.com"
+      ph:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed phone number using SHA-256 algorithm. Include only digits with country code, area code, and number."
+        example: "16505551212"
+      ge:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed gender (f or m) using SHA-256 algorithm."
+        example: "f"
+      db:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed date of birth given as year, month, and day using SHA-256 algorithm"
+        example: "19971226 for December 26, 1997"
+      ln:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed last name in lowercase using SHA-256 algorithm."
+        example: "smith"
+      fn:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed first name in lowercase using SHA-256 algorithm."
+        example:
+      ct:
+        type: "string"
+        format: "SHA-256"
+        description: "A hashed city in lower-case without spaces or punctuation using SHA-256 algorithm."
+        example: "menlopark"
+      country:
+        type: "string"
+        format: "SHA256"
+        description: "A hashed two-letter country code in lowercase using SHA-256 algorithm."
+        example: "us"
+      st:
+        type: "string"
+        format: "SHA256"
+        description: "A hashed two-letter state code in lowercase using SHA-256 algorithm."
+        example: "ca"
+      zp:
+        type: "string"
+        format: "SHA256"
+        description: "A hashed zip code using SHA-256 algorithm. If you are in the United States, this is a five-digit zip code. For other locations, follow each country's standards."
+        example: "94035"
+      external_id:
+        type: "string"
+        format: "SHA256"
+        description: "Any unique ID from the advertiser, such as loyalty membership IDs, user IDs, and external cookie IDs. If External ID is being sent via other channels, it should be sent in the same format via Conversions API. Hashing external_id using SHA-256 algorithm is optional."
+      client_ip_address:
+        type: "string"
+        description: "The IP address of the browser corresponding to the event."
+      client_user_agent:
+        type: "string"
+        description: "The user agent for the browser corresponding to the event."
+      fbc:
+        type: "string"
+        description: "The Facebook click ID value stored in the _fbc browser cookie under your domain. See Managing fbc and fbp Parameters for how to get this value (https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc), or generate this value from a fbclid query parameter."
+      fbp:
+        type: "string"
+        description: "The Facebook browser ID value stored in the _fbp browser cookie under your domain. See Managing fbc and fbp Parameters for how to get this value (https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc)."
+      subscription_id:
+        type: "string"
+        description: "The subscription ID for the user in this transaction. This is similar to the order ID for an individual product."
+        example: "anid1234"
+
+  response_success:
+    type: "object"
+    properties:
+      events_received:
+        type: "integer"
+      messages:
+        type: "array"
+        items:
+          type: "string"
+      fbtrace_id:
+        type: "string"
+
+  response_error:
+    type: "object"
+    properties:
+      error:
+        type: "object"
+        properties:
+          code:
+            type: "string"
+          messages:
+            type: "string"
+          type:
+            type: "string"
+          fbtrace_id:
+            type: "string"
+          error_subcode:
+            type: "string"
+          is_transient:
+            type: "string"
+          error_user_title:
+            type: "string"
+          error_user_msg:
+            type: "string"
+
+externalDocs:
+  description: "Find out more about Facebook Conversions API"
+  url: "https://developers.facebook.com/docs/marketing-api/conversions-api"
+
