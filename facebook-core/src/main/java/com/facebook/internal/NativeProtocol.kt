@@ -300,7 +300,8 @@ object NativeProtocol {
             resetMessengerState,
             LoginTargetApp.FACEBOOK,
             isFamilyLogin,
-            shouldSkipAccountDedupe)
+            shouldSkipAccountDedupe,
+            "")
     intent = validateActivityIntent(context, intent, appInfo)
     return intent
   }
@@ -337,7 +338,8 @@ object NativeProtocol {
             resetMessengerState,
             LoginTargetApp.INSTAGRAM,
             isFamilyLogin,
-            shouldSkipAccountDedupe)
+            shouldSkipAccountDedupe,
+            "")
     intent = validateActivityIntent(context, intent, appInfo)
     return intent
   }
@@ -356,7 +358,8 @@ object NativeProtocol {
       resetMessengerState: Boolean,
       targetApp: LoginTargetApp,
       isFamilyLogin: Boolean,
-      shouldSkipAccountDedupe: Boolean
+      shouldSkipAccountDedupe: Boolean,
+      nonce: String
   ): Intent? {
     val activityName = appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
@@ -373,6 +376,7 @@ object NativeProtocol {
     }
     intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState)
     intent.putExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, appInfo.getResponseType())
+    intent.putExtra(ServerProtocol.DIALOG_PARAM_NONCE, nonce)
     intent.putExtra(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
     if (isForPublish) {
@@ -413,7 +417,8 @@ object NativeProtocol {
       messengerPageId: String?,
       resetMessengerState: Boolean,
       isFamilyLogin: Boolean,
-      shouldSkipAccountDedupe: Boolean
+      shouldSkipAccountDedupe: Boolean,
+      nonce: String,
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
@@ -430,7 +435,8 @@ object NativeProtocol {
           resetMessengerState,
           LoginTargetApp.FACEBOOK,
           isFamilyLogin,
-          shouldSkipAccountDedupe)
+          shouldSkipAccountDedupe,
+          nonce)
     }
   }
 
@@ -846,7 +852,7 @@ object NativeProtocol {
     abstract fun getLoginActivity(): String?
     private var availableVersions: TreeSet<Int>? = null
     open fun getResponseType(): String =
-        ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST
+        ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST
     open fun onAvailableVersionsNullOrEmpty() = Unit
 
     fun getAvailableVersions(): TreeSet<Int>? {

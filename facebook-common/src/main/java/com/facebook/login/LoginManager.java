@@ -769,7 +769,7 @@ public class LoginManager {
             defaultAudience,
             authType,
             FacebookSdk.getApplicationId(),
-            loginConfig.getNonce(),
+            UUID.randomUUID().toString(),
             targetApp,
             loginConfig.getNonce());
     request.setRerequest(AccessToken.isCurrentAccessTokenActive());

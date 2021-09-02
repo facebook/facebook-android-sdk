@@ -63,7 +63,8 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
             request.getMessengerPageId(),
             request.getResetMessengerState(),
             request.isFamilyLogin(),
-            request.shouldSkipAccountDeduplication());
+            request.shouldSkipAccountDeduplication(),
+            request.getNonce());
 
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
