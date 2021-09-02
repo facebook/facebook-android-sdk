@@ -2,7 +2,7 @@ Facebook welcomes contributions to our SDKs.
 
 All contributors must sign a CLA (contributor license agreement) here:
 
-  https://developers.facebook.com/opensource/cla
+https://code.facebook.com/cla
 
 To contribute on behalf of your employer, sign the company CLA
 To contribute on behalf of yourself, sign the individual CLA
