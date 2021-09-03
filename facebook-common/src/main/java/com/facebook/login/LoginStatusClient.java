@@ -37,13 +37,15 @@ final class LoginStatusClient extends PlatformServiceClient {
       final String applicationId,
       final String loggerRef,
       final String graphApiVersion,
-      final long toastDurationMs) {
+      final long toastDurationMs,
+      final String nonce) {
     super(
         context,
         NativeProtocol.MESSAGE_GET_LOGIN_STATUS_REQUEST,
         NativeProtocol.MESSAGE_GET_LOGIN_STATUS_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20170411,
-        applicationId);
+        applicationId,
+        nonce);
     this.loggerRef = loggerRef;
     this.graphApiVersion = graphApiVersion;
     this.toastDurationMs = toastDurationMs;

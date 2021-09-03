@@ -153,6 +153,7 @@ object NativeProtocol {
   const val EXTRA_LOGGER_REF = "com.facebook.platform.extra.LOGGER_REF"
   const val EXTRA_TOAST_DURATION_MS = "com.facebook.platform.extra.EXTRA_TOAST_DURATION_MS"
   const val EXTRA_GRAPH_API_VERSION = "com.facebook.platform.extra.GRAPH_API_VERSION"
+  const val EXTRA_NONCE = "com.facebook.platform.extra.NONCE"
 
   // Extras returned by setResult() for ACTION_LOGIN_DIALOG
   const val EXTRA_ACCESS_TOKEN = "com.facebook.platform.extra.ACCESS_TOKEN"

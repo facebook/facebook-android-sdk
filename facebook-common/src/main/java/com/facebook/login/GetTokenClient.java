@@ -33,7 +33,8 @@ final class GetTokenClient extends PlatformServiceClient {
         NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REQUEST,
         NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20121101,
-        request.getApplicationId());
+        request.getApplicationId(),
+        request.getNonce());
   }
 
   @Override

@@ -1014,7 +1014,12 @@ public class LoginManager {
 
     final LoginStatusClient client =
         new LoginStatusClient(
-            context, applicationId, loggerRef, FacebookSdk.getGraphApiVersion(), toastDurationMs);
+            context,
+            applicationId,
+            loggerRef,
+            FacebookSdk.getGraphApiVersion(),
+            toastDurationMs,
+            null); // TODO T99739388: replace null with actual nonce
 
     final LoginStatusClient.CompletedListener callback =
         new LoginStatusClient.CompletedListener() {

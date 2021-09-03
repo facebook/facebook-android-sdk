@@ -47,7 +47,8 @@ final class LikeStatusClient extends PlatformServiceClient {
         NativeProtocol.MESSAGE_GET_LIKE_STATUS_REQUEST,
         NativeProtocol.MESSAGE_GET_LIKE_STATUS_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20141001,
-        applicationId);
+        applicationId,
+        null);
 
     this.objectId = objectId;
   }

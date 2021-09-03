@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.*;
+import androidx.annotation.Nullable;
 import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
@@ -44,13 +45,15 @@ public abstract class PlatformServiceClient implements ServiceConnection {
   private int replyMessage;
   private final String applicationId;
   private final int protocolVersion;
+  @Nullable private final String nonce;
 
   public PlatformServiceClient(
       Context context,
       int requestMessage,
       int replyMessage,
       int protocolVersion,
-      String applicationId) {
+      String applicationId,
+      String nonce) {
     Context applicationContext = context.getApplicationContext();
 
     this.context = (applicationContext != null) ? applicationContext : context;
@@ -58,6 +61,7 @@ public abstract class PlatformServiceClient implements ServiceConnection {
     this.replyMessage = replyMessage;
     this.applicationId = applicationId;
     this.protocolVersion = protocolVersion;
+    this.nonce = nonce;
 
     handler =
         new Handler() {
@@ -74,6 +78,10 @@ public abstract class PlatformServiceClient implements ServiceConnection {
 
   protected Context getContext() {
     return context;
+  }
+
+  public String getNonce() {
+    return nonce;
   }
 
   public boolean start() {
@@ -120,6 +128,9 @@ public abstract class PlatformServiceClient implements ServiceConnection {
   private void sendMessage() {
     Bundle data = new Bundle();
     data.putString(NativeProtocol.EXTRA_APPLICATION_ID, applicationId);
+    if (nonce != null) {
+      data.putString(NativeProtocol.EXTRA_NONCE, nonce);
+    }
 
     populateRequestBundle(data);
 
