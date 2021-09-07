@@ -48,7 +48,8 @@ import java.util.List;
  *
  * <p>The dialog can also dismiss itself after the device code has expired.
  *
- * @deprecated Sharing from devices will no longer work as of Nov 2nd 2020
+ * @deprecated Sharing from devices will no longer work as of Nov 2nd 2020 and this class will be
+ *     removed from v13.0.0 release
  */
 @Deprecated
 public class DeviceShareDialog extends FacebookDialogBase<ShareContent, DeviceShareDialog.Result> {
