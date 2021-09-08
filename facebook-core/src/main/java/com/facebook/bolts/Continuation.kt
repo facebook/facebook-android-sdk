@@ -17,22 +17,22 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook.bolts;
-
-import android.net.Uri;
+package com.facebook.bolts
 
 /**
- * Implement this interface to provide an alternate strategy for resolving App Links that may
- * include pre-fetching, caching, or querying for App Link data from an index provided by a service
- * provider.
+ * A function to be called after a task completes.
+ *
+ * If you wish to have the Task from a Continuation that does not return a Task be cancelled then
+ * throw a [java.util.concurrent.CancellationException] from the Continuation.
+ *
+ * @see Task
  */
-public interface AppLinkResolver {
+fun interface Continuation<TTaskResult, TContinuationResult> {
   /**
-   * Asynchronously resolves App Link data for a given URL.
+   * The function to be called when the task in the parameter is competed.
    *
-   * @param url the URL to resolve into an App Link.
-   * @return the {@link AppLink} for the given URL.
+   * @param task the completed task. See [Task.continueWith] for more details.
+   * @return a nullable result of this function.
    */
-  public Task<AppLink> getAppLinkFromUrlInBackground(Uri url);
+  @Throws(Exception::class) fun then(task: Task<TTaskResult>): TContinuationResult?
 }
