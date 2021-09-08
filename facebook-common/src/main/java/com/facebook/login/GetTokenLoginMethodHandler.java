@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
@@ -115,11 +116,20 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
   }
 
   void onComplete(final LoginClient.Request request, final Bundle result) {
-    AccessToken token =
-        createAccessTokenFromNativeLogin(
-            result, AccessTokenSource.FACEBOOK_APPLICATION_SERVICE, request.getApplicationId());
-    LoginClient.Result outcome =
-        LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token);
+    LoginClient.Result outcome;
+
+    try {
+      AccessToken token =
+          createAccessTokenFromNativeLogin(
+              result, AccessTokenSource.FACEBOOK_APPLICATION_SERVICE, request.getApplicationId());
+      AuthenticationToken authenticationToken =
+          createAuthenticationTokenFromNativeLogin(result, request.getNonce());
+      outcome = LoginClient.Result.createCompositeTokenResult(request, token, authenticationToken);
+    } catch (FacebookException ex) {
+      outcome =
+          LoginClient.Result.createErrorResult(
+              loginClient.getPendingRequest(), null, ex.getMessage());
+    }
     loginClient.completeAndValidate(outcome);
   }
 

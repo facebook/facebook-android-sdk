@@ -118,6 +118,23 @@ abstract class LoginMethodHandler implements Parcelable {
     logger.logEventImplicitly(AnalyticsEvents.EVENT_WEB_LOGIN_COMPLETE, null, parameters);
   }
 
+  @Nullable
+  static AuthenticationToken createAuthenticationTokenFromNativeLogin(
+      Bundle bundle, String expectedNonce) throws FacebookException {
+    String authenticationTokenString = bundle.getString(NativeProtocol.EXTRA_AUTHENTICATION_TOKEN);
+
+    if (Utility.isNullOrEmpty(authenticationTokenString)) {
+      return null;
+    }
+
+    try {
+      return new AuthenticationToken(authenticationTokenString, expectedNonce);
+    } catch (Exception _ex) {
+      // any exception happens we need to bubble that to FacebookException
+      throw new FacebookException(_ex.getMessage());
+    }
+  }
+
   static AccessToken createAccessTokenFromNativeLogin(
       Bundle bundle, AccessTokenSource source, String applicationId) {
     Date expires =

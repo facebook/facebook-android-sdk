@@ -161,6 +161,7 @@ object NativeProtocol {
       "com.facebook.platform.extra.EXPIRES_SECONDS_SINCE_EPOCH"
   const val EXTRA_DATA_ACCESS_EXPIRATION_TIME =
       "com.facebook.platform.extra.EXTRA_DATA_ACCESS_EXPIRATION_TIME"
+  const val EXTRA_AUTHENTICATION_TOKEN = "com.facebook.platform.extra.ID_TOKEN"
 
   // EXTRA_PERMISSIONS
   const val RESULT_ARGS_ACCESS_TOKEN = "access_token"
