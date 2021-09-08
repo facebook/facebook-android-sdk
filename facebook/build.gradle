@@ -98,19 +98,8 @@ android {
 
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
-        test {
-            java {
-                exclude '**/MonitorTest.java'
-                exclude '**/MonitorLoggingManagerTest.java'
-                exclude '**/UserSettingsManagerTest.java'
-                exclude '**/LoginManagerTest.java'
-
-                if (System.getenv("GITHUB_ACTIONS") == "1") {
-                    exclude '**/OnDeviceProcessingManagerTest.java'
-                }
-            }
-        }
     }
+
     testOptions {
         unitTests.all {
             jvmArgs '-XX:MaxPermSize=1024m'

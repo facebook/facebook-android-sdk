@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -75,6 +74,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest({FacebookSdk.class, AccessToken.class, Profile.class})
@@ -410,15 +412,23 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testOnActivityResultDoesNotModifyCurrentAccessTokenOnCancelResultCode() {
+  public void testOnActivityResultDoesNotModifyCurrentAccessTokenOnCancelResultCode()
+      throws Exception {
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
-
+    final int[] setTokenTimes = {0};
+    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", any(AccessToken.class))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setTokenTimes[0]++;
+                return null;
+              }
+            });
     loginManager.onActivityResult(Activity.RESULT_CANCELED, null, mockCallback);
-
-    verifyStatic(AccessToken.class, never());
-    AccessToken.setCurrentAccessToken(any(AccessToken.class));
+    assertEquals(0, setTokenTimes[0]);
   }
 
   @Test
@@ -494,16 +504,25 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testOnActivityResultDoesNotModifyCurrentAccessTokenOnErrorResultCode() {
+  public void testOnActivityResultDoesNotModifyCurrentAccessTokenOnErrorResultCode()
+      throws Exception {
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
+    final int[] setTokenTimes = {0};
+    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", any(AccessToken.class))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setTokenTimes[0]++;
+                return null;
+              }
+            });
 
     loginManager.onActivityResult(
         Activity.RESULT_CANCELED, createErrorResultIntent(), mockCallback);
-
-    verifyStatic(AccessToken.class, never());
-    AccessToken.setCurrentAccessToken(any(AccessToken.class));
+    assertEquals(0, setTokenTimes[0]);
   }
 
   @Test
@@ -511,7 +530,6 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
-
     boolean result =
         loginManager.onActivityResult(
             Activity.RESULT_OK, createSuccessResultIntent(), mockCallback);
@@ -534,17 +552,22 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testOnActivityResultSetsCurrentAccessTokenOnSuccessResult() {
+  public void testOnActivityResultSetsCurrentAccessTokenOnSuccessResult() throws Exception {
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
-
-    boolean result =
-        loginManager.onActivityResult(
-            Activity.RESULT_OK, createSuccessResultIntent(), mockCallback);
-
-    verifyStatic(AccessToken.class, times(1));
-    AccessToken.setCurrentAccessToken(eq(createAccessToken()));
+    final int[] setTokenTimes = {0};
+    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", eq(createAccessToken()))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setTokenTimes[0]++;
+                return null;
+              }
+            });
+    loginManager.onActivityResult(Activity.RESULT_OK, createSuccessResultIntent(), mockCallback);
+    assertEquals(1, setTokenTimes[0]);
   }
 
   @Test

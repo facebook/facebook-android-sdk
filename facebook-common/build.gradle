@@ -92,11 +92,6 @@ android {
 
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
-        test {
-            java {
-                exclude '**/LoginManagerTest.java'
-            }
-        }
     }
 
     testOptions {
