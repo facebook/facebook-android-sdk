@@ -115,7 +115,12 @@ class TaskTest {
     val delayed = Task.delay(200)
     Thread.sleep(50)
     assertThat(delayed.isCompleted).isFalse
-    Thread.sleep(200)
+
+    // make sure that all scheduled commands with 200ms in `BoltsExecutors.scheduled()` are cleared
+    // before assertions since the current implementation `BoltsExecutors.schedule()` promises that
+    // the commands are executed sequentially.
+    BoltsExecutors.scheduled().schedule({}, 200, TimeUnit.MILLISECONDS).get()
+
     assertThat(delayed.isCompleted).isTrue
     assertThat(delayed.isFaulted).isFalse
     assertThat(delayed.isCancelled).isFalse
