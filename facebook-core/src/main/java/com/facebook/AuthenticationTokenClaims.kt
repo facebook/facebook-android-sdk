@@ -405,7 +405,8 @@ class AuthenticationTokenClaims : Parcelable {
 
     try {
       val iss = claimsJson.optString("iss")
-      if (iss.isEmpty() || URL(iss).host != "facebook.com") {
+      if (iss.isEmpty() ||
+          ((URL(iss).host != "facebook.com") && (URL(iss).host != "www.facebook.com"))) {
         return false
       }
     } catch (ex: MalformedURLException) {
