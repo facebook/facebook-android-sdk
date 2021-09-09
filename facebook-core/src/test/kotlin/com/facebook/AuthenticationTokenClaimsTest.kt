@@ -168,4 +168,12 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
                 newClaimsWithRequiredFields)
         .isTrue
   }
+
+  @Test
+  fun `test parceling`() {
+    val claims1 = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST
+    val claims2 = FacebookTestUtility.parcelAndUnparcel(claims1)
+    assertThat(claims2).isNotNull
+    assertThat(claims1).isEqualTo(claims2)
+  }
 }
