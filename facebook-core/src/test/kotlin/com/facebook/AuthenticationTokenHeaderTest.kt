@@ -2,22 +2,19 @@ package com.facebook
 
 import android.util.Base64
 import com.facebook.util.common.AuthenticationTokenTestUtil
-import java.util.*
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
 class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
-  private var headerMap = hashMapOf<String, Any>()
+  private lateinit var headerMap: HashMap<String, String>
 
   @Before
   fun before() {
-    headerMap["alg"] = "RS256"
-    headerMap["typ"] = "token_type"
-    headerMap["kid"] = "abc"
+    headerMap = hashMapOf("alg" to "RS256", "typ" to "token_type", "kid" to "abc")
   }
-
   @Test(expected = IllegalArgumentException::class)
   fun `test missing alg throws`() {
     headerMap.remove("alg")
@@ -59,5 +56,15 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(authenticationHeader.alg, "RS256")
     Assert.assertEquals(authenticationHeader.typ, "token_type")
     Assert.assertEquals(authenticationHeader.kid, "abc")
+  }
+
+  @Test
+  fun `test parceling`() {
+    val idTokenHeader1 = AuthenticationTokenHeader("alg", "typ", "kid")
+    val idTokenHeader2 = FacebookTestUtility.parcelAndUnparcel(idTokenHeader1)
+    assertThat(idTokenHeader2).isNotNull
+    assertThat(idTokenHeader1.alg).isEqualTo(idTokenHeader2?.alg)
+    assertThat(idTokenHeader1.typ).isEqualTo(idTokenHeader2?.typ)
+    assertThat(idTokenHeader1.kid).isEqualTo(idTokenHeader2?.kid)
   }
 }
