@@ -443,7 +443,7 @@ object Utility {
   @JvmStatic
   fun convertJSONObjectToHashMap(jsonObject: JSONObject): Map<String, Any> {
     val map = HashMap<String, Any>()
-    val keys = jsonObject.names()
+    val keys = jsonObject.names() ?: return map
     for (i in 0 until keys.length()) {
       var key: String
       try {
