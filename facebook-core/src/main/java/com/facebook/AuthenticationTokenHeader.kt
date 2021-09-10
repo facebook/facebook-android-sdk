@@ -92,6 +92,24 @@ class AuthenticationTokenHeader : Parcelable {
     return headerJsonObject.toString()
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) {
+      return true
+    }
+    if (other !is AuthenticationTokenHeader) {
+      return false
+    }
+    return alg == other.alg && typ == other.typ && kid == other.kid
+  }
+
+  override fun hashCode(): Int {
+    var result = 17
+    result = result * 31 + alg.hashCode()
+    result = result * 31 + typ.hashCode()
+    result = result * 31 + kid.hashCode()
+    return result
+  }
+
   /**
    * check if the input header string is a valid id token header
    *

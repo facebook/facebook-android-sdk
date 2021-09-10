@@ -87,10 +87,14 @@ class AuthenticationToken : Parcelable {
     Validate.notNull(expectedNonce, "expectedNonce")
     this.expectedNonce = checkNotNull(expectedNonce)
 
-    val tokenArray = token.split(".")
-    this.header = AuthenticationTokenHeader(tokenArray[0])
-    this.claims = AuthenticationTokenClaims(tokenArray[1], expectedNonce)
-    this.signature = tokenArray[2]
+    this.header =
+        checkNotNull(parcel.readParcelable(AuthenticationTokenHeader::class.java.classLoader))
+    this.claims =
+        checkNotNull(parcel.readParcelable(AuthenticationTokenClaims::class.java.classLoader))
+
+    val signature = parcel.readString()
+    Validate.notNullOrEmpty(signature, "signature")
+    this.signature = checkNotNull(signature)
   }
 
   override fun equals(other: Any?): Boolean {
@@ -100,18 +104,29 @@ class AuthenticationToken : Parcelable {
     if (other !is AuthenticationToken) {
       return false
     }
-    return token == other.token
+    return token == other.token &&
+        expectedNonce == other.expectedNonce &&
+        header == other.header &&
+        claims == other.claims &&
+        signature == other.signature
   }
 
   override fun hashCode(): Int {
     var result = 17
     result = result * 31 + token.hashCode()
+    result = result * 31 + expectedNonce.hashCode()
+    result = result * 31 + header.hashCode()
+    result = result * 31 + claims.hashCode()
+    result = result * 31 + signature.hashCode()
     return result
   }
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
     dest.writeString(token)
     dest.writeString(expectedNonce)
+    dest.writeParcelable(header, flags)
+    dest.writeParcelable(claims, flags)
+    dest.writeString(signature)
   }
 
   override fun describeContents(): Int {
