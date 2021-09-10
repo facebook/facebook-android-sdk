@@ -283,21 +283,25 @@ class AuthenticationTokenClaims : Parcelable {
     this.email = parcel.readString()
     this.picture = parcel.readString()
 
-    val userFriendsList = ArrayList<String>()
-    parcel.readStringList(userFriendsList)
-    this.userFriends = Collections.unmodifiableSet(HashSet(userFriendsList))
+    val userFriendsList = parcel.createStringArrayList()
+    this.userFriends =
+        if (userFriendsList != null) Collections.unmodifiableSet(HashSet(userFriendsList)) else null
+
     this.userBirthday = parcel.readString()
 
     val userAgeRangeMap = parcel.readHashMap(Int.javaClass.classLoader) as? (HashMap<String, Int>)
-    this.userAgeRange = Collections.unmodifiableMap(userAgeRangeMap)
+    this.userAgeRange =
+        if (userAgeRangeMap != null) Collections.unmodifiableMap(userAgeRangeMap) else null
 
     val userHometownMap =
         parcel.readHashMap(String.javaClass.classLoader) as? (HashMap<String, String>)
-    this.userHometown = Collections.unmodifiableMap(userHometownMap)
+    this.userHometown =
+        if (userHometownMap != null) Collections.unmodifiableMap(userHometownMap) else null
 
     val userLocationMap =
         parcel.readHashMap(String.javaClass.classLoader) as? (HashMap<String, String>)
-    this.userLocation = Collections.unmodifiableMap(userLocationMap)
+    this.userLocation =
+        if (userLocationMap != null) Collections.unmodifiableMap(userLocationMap) else null
 
     this.userGender = parcel.readString()
     this.userLink = parcel.readString()
@@ -479,19 +483,19 @@ class AuthenticationTokenClaims : Parcelable {
     if (this.picture != null) {
       jsonObject.put("picture", this.picture)
     }
-    if (this.userFriends != null && this.userFriends.isNotEmpty()) {
+    if (this.userFriends != null) {
       jsonObject.put("userFriends", JSONArray(this.userFriends))
     }
     if (this.userBirthday != null) {
       jsonObject.put("userBirthday", this.userBirthday)
     }
-    if (this.userAgeRange != null && this.userAgeRange.isNotEmpty()) {
+    if (this.userAgeRange != null) {
       jsonObject.put("userAgeRange", JSONObject(this.userAgeRange))
     }
-    if (this.userHometown != null && this.userHometown.isNotEmpty()) {
+    if (this.userHometown != null) {
       jsonObject.put("userHometown", JSONObject(this.userHometown))
     }
-    if (this.userLocation != null && this.userLocation.isNotEmpty()) {
+    if (this.userLocation != null) {
       jsonObject.put("userLocation", JSONObject(this.userLocation))
     }
     if (this.userGender != null) {
@@ -504,15 +508,15 @@ class AuthenticationTokenClaims : Parcelable {
     return jsonObject
   }
 
-  private fun JSONObject.getNullableString(name: String): String? {
-    if (has(name)) {
-      return getString(name)
-    }
-    return null
-  }
-
   companion object {
     const val MAX_TIME_SINCE_TOKEN_ISSUED = DateUtils.MINUTE_IN_MILLIS * 10 // 10 minutes
+
+    internal fun JSONObject.getNullableString(name: String): String? {
+      if (has(name)) {
+        return getString(name)
+      }
+      return null
+    }
 
     internal fun createFromJSONObject(jsonObject: JSONObject): AuthenticationTokenClaims {
       val jti = jsonObject.getString("jti")
@@ -522,19 +526,19 @@ class AuthenticationTokenClaims : Parcelable {
       val exp = jsonObject.getLong("exp")
       val iat = jsonObject.getLong("iat")
       val sub = jsonObject.getString("sub")
-      val name = jsonObject.optString("name")
-      val givenName = jsonObject.optString("givenName")
-      val middleName = jsonObject.optString("middleName")
-      val familyName = jsonObject.optString("familyName")
-      val email = jsonObject.optString("email")
-      val picture = jsonObject.optString("picture")
+      val name = jsonObject.getNullableString("name")
+      val givenName = jsonObject.getNullableString("givenName")
+      val middleName = jsonObject.getNullableString("middleName")
+      val familyName = jsonObject.getNullableString("familyName")
+      val email = jsonObject.getNullableString("email")
+      val picture = jsonObject.getNullableString("picture")
       val userFriends = jsonObject.optJSONArray("userFriends")
-      val userBirthday = jsonObject.optString("userBirthday")
+      val userBirthday = jsonObject.getNullableString("userBirthday")
       val userAgeRange = jsonObject.optJSONObject("userAgeRange")
       val userHometown = jsonObject.optJSONObject("userHometown")
       val userLocation = jsonObject.optJSONObject("userLocation")
-      val userGender = jsonObject.optString("userGender")
-      val userLink = jsonObject.optString("userLink")
+      val userGender = jsonObject.getNullableString("userGender")
+      val userLink = jsonObject.getNullableString("userLink")
       return AuthenticationTokenClaims(
           jti,
           iss,
@@ -543,20 +547,20 @@ class AuthenticationTokenClaims : Parcelable {
           exp,
           iat,
           sub,
-          if (name.isNullOrEmpty()) null else name,
-          if (givenName.isNullOrEmpty()) null else givenName,
-          if (middleName.isNullOrEmpty()) null else middleName,
-          if (familyName.isNullOrEmpty()) null else familyName,
-          if (email.isNullOrEmpty()) null else email,
-          if (picture.isNullOrEmpty()) null else picture,
+          name,
+          givenName,
+          middleName,
+          familyName,
+          email,
+          picture,
           if (userFriends == null) null else jsonArrayToStringList(userFriends),
-          if (userBirthday.isNullOrEmpty()) null else userBirthday,
+          userBirthday,
           if (userAgeRange == null) null
           else convertJSONObjectToHashMap(userAgeRange) as Map<String, Int>?,
           if (userHometown == null) null else convertJSONObjectToStringMap(userHometown),
           if (userLocation == null) null else convertJSONObjectToStringMap(userLocation),
-          if (userGender.isNullOrEmpty()) null else userGender,
-          if (userLink.isNullOrEmpty()) null else userLink)
+          userGender,
+          userLink)
     }
 
     @JvmField

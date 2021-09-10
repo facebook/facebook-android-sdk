@@ -135,6 +135,16 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     val deserializeClaims = AuthenticationTokenClaims.createFromJSONObject(jsonObject)
     assertThat(AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST == deserializeClaims).isTrue
 
+    // test claims with empty optional fields
+    val jsonObjectEmptyOptionalFields =
+        AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_WITH_EMPTY_OPTIONAL_FIELDS.toJSONObject()
+    val deserializeClaimsEmptyOptionalFields =
+        AuthenticationTokenClaims.createFromJSONObject(jsonObjectEmptyOptionalFields)
+    assertThat(
+            AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_WITH_EMPTY_OPTIONAL_FIELDS ==
+                deserializeClaimsEmptyOptionalFields)
+        .isTrue
+
     // test only required claims fields with others are null
     val jsonObjectRequired =
         AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.toJSONObject()
@@ -170,8 +180,24 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test parceling`() {
+  fun `test parceling with all fields`() {
     val claims1 = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST
+    val claims2 = FacebookTestUtility.parcelAndUnparcel(claims1)
+    assertThat(claims2).isNotNull
+    assertThat(claims1).isEqualTo(claims2)
+  }
+
+  @Test
+  fun `test parceling with empty optional fields`() {
+    val claims1 = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_WITH_EMPTY_OPTIONAL_FIELDS
+    val claims2 = FacebookTestUtility.parcelAndUnparcel(claims1)
+    assertThat(claims2).isNotNull
+    assertThat(claims1).isEqualTo(claims2)
+  }
+
+  @Test
+  fun `test parceling only required fields while other are null`() {
+    val claims1 = AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly
     val claims2 = FacebookTestUtility.parcelAndUnparcel(claims1)
     assertThat(claims2).isNotNull
     assertThat(claims1).isEqualTo(claims2)
