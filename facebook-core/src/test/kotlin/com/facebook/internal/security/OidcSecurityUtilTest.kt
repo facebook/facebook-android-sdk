@@ -1,6 +1,7 @@
 package com.facebook.internal.security
 
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
@@ -14,7 +15,7 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(OidcSecurityUtil::class)
+@PrepareForTest(OidcSecurityUtil::class, FacebookSdk::class)
 class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
   private val encodedHeader = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9"
   private val encodedClaims =
@@ -34,10 +35,13 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
 
   @Before
   fun `before`() {
+    PowerMockito.mockStatic(FacebookSdk::class.java)
+    whenever(FacebookSdk.getFacebookDomain()).thenReturn("facebook.com")
+
     val urlMock: URL = mock()
     val huc: HttpURLConnection = mock()
     PowerMockito.whenNew(URL::class.java)
-        .withArguments(OidcSecurityUtil.OPENID_KEYS_URL_STRING)
+        .withArguments("https", "www.facebook.com", OidcSecurityUtil.OPENID_KEYS_PATH)
         .thenReturn(urlMock)
     whenever(urlMock.openConnection()).thenReturn(huc)
 
@@ -87,7 +91,7 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
     val urlMock: URL = mock()
     val huc: HttpURLConnection = mock()
     PowerMockito.whenNew(URL::class.java)
-        .withArguments(OidcSecurityUtil.OPENID_KEYS_URL_STRING)
+        .withArguments("https", "www.facebook.com", OidcSecurityUtil.OPENID_KEYS_PATH)
         .thenReturn(urlMock)
     whenever(urlMock.openConnection()).thenReturn(huc)
     whenever(huc.inputStream).thenThrow(IOException::class.java)

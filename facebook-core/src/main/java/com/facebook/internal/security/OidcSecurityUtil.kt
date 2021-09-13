@@ -20,6 +20,7 @@
 package com.facebook.internal.security
 
 import android.util.Base64
+import com.facebook.FacebookSdk
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.KeyFactory
@@ -29,12 +30,13 @@ import java.security.spec.X509EncodedKeySpec
 import org.json.JSONObject
 
 object OidcSecurityUtil {
-  val OPENID_KEYS_URL_STRING = "https://www.facebook.com/.well-known/oauth/openid/keys/"
+  val OPENID_KEYS_PATH = "/.well-known/oauth/openid/keys/"
   const val SIGNATURE_ALGORITHM_SHA256 = "SHA256withRSA"
 
   @JvmStatic
   fun getRawKeyFromEndPoint(kid: String): String? {
-    val openIdKeyUrl = URL(OPENID_KEYS_URL_STRING)
+    val host = "www.${FacebookSdk.getFacebookDomain()}"
+    val openIdKeyUrl = URL("https", host, OPENID_KEYS_PATH)
     val connection = openIdKeyUrl.openConnection() as HttpURLConnection
     return try {
       val data = connection.inputStream.bufferedReader().readText()
