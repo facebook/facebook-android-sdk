@@ -22,12 +22,9 @@ package com.facebook.appevents
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.webkit.WebView
 import androidx.annotation.RestrictTo
 import com.facebook.AccessToken
-import com.facebook.GraphRequest
-import com.facebook.appevents.internal.AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled
 import java.math.BigDecimal
 import java.util.Currency
 
@@ -213,23 +210,6 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
     loggerImpl.logPurchase(purchaseAmount, currency, parameters)
   }
 
-  @Deprecated(
-      """Use {@link AppEventsLogger#logPurchase( java.math.BigDecimal, java.util.Currency,
-   *     android.os.Bundle)} instead.""")
-  fun logPurchaseImplicitly(purchaseAmount: BigDecimal?, currency: Currency?, parameters: Bundle?) {
-    var errMsg =
-        "Function logPurchaseImplicitly() is deprecated " +
-            "and your purchase events cannot be logged with this function. "
-    errMsg +=
-        if (isImplicitPurchaseLoggingEnabled()) {
-          "Auto-logging of in-app purchase has been enabled in the SDK, " +
-              "so you don't have to manually log purchases"
-        } else {
-          "Please use logPurchase() function instead."
-        }
-    Log.e(TAG, errMsg)
-  }
-
   /**
    * Logs an app event that tracks that the application was open via Push Notification.
    *
@@ -318,15 +298,6 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
   }
 
   /**
-   * This method is only for internal and use by the Facebook SDK account kit for legacy reason.
-   * Other usage is not allowed.
-   */
-  @Deprecated("")
-  fun logSdkEvent(eventName: String, valueToSum: Double?, parameters: Bundle?) {
-    loggerImpl.logSdkEvent(eventName, valueToSum, parameters)
-  }
-
-  /**
    * Returns the app ID this logger was configured to log to.
    *
    * @return the Facebook app ID
@@ -368,37 +339,6 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
     @JvmStatic
     fun activateApp(application: Application, applicationId: String?) {
       AppEventsLoggerImpl.activateApp(application, applicationId)
-    }
-
-    @Deprecated("Use {@link AppEventsLogger#activateApp(Application)} ")
-    @JvmStatic
-    fun activateApp(context: Context?) {
-      activateApp(context, null)
-    }
-
-    @Deprecated("Use {@link AppEventsLogger#activateApp(Application)} ")
-    @JvmStatic
-    fun activateApp(context: Context?, str: String?) {
-      AppEventsLoggerImpl.functionDEPRECATED(
-          "Please use activateApp(Application) " +
-              "or activateApp(Application, String), activateApp(Context) and activateApp(Context, String) will be removed since v12")
-    }
-
-    @Deprecated(
-        """When using {@link AppEventsLogger#activateApp(Application)} deactivate app will be
-        logged automatically.""")
-    @JvmStatic
-    fun deactivateApp(context: Context?) {
-      deactivateApp(null, null)
-    }
-
-    @Deprecated(
-        """When using {@link AppEventsLogger#activateApp(Application)} deactivate app will be
-        logged automatically.""")
-    @JvmStatic
-    fun deactivateApp(context: Context?, str: String?) {
-      AppEventsLoggerImpl.functionDEPRECATED(
-          "Deactivate app will be logged automatically, AppEventsLogger#deactivateApp will be removed since v12")
     }
 
     /**
@@ -570,24 +510,6 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
      *
      * The user data will be persisted between application instances.
      *
-     * @param userData user data to identify the user. User data should be formated as a bundle of
-     * data type name and value. Supported data types and names are: Email: em First Name: fn Last
-     * Name: ln Phone: ph Date of Birth: db Gender: ge City: ct State: st Zip: zp Country: country
-     */
-    @Deprecated("")
-    @JvmStatic
-    fun setUserData(userData: Bundle?) {
-      AppEventsLoggerImpl.functionDEPRECATED(
-          "AppEventsLogger#setUserData(Bundle) is deprecated and it will be removed since v12")
-      UserDataStore.setUserDataAndHash(userData)
-    }
-
-    /**
-     * Sets user data to associate with all app events. All user data are hashed and used to match
-     * Facebook user from this instance of an application.
-     *
-     * The user data will be persisted between application instances.
-     *
      * @param email user's email
      * @param firstName user's first name
      * @param lastName user's last name
@@ -626,23 +548,6 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
     @JvmStatic
     fun clearUserData() {
       UserDataStore.clear()
-    }
-
-    @Deprecated("")
-    @JvmStatic
-    fun updateUserProperties(parameters: Bundle?, callback: GraphRequest.Callback?) {
-      updateUserProperties(null, null, null)
-    }
-
-    @Deprecated("")
-    @JvmStatic
-    fun updateUserProperties(
-        parameters: Bundle?,
-        applicationID: String?,
-        callback: GraphRequest.Callback?
-    ) {
-      AppEventsLoggerImpl.functionDEPRECATED(
-          "AppEventsLogger#updateUserProperties is deprecated and it will be removed since v12")
     }
 
     /**

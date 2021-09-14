@@ -141,11 +141,6 @@ class ViewIndexer(activity: Activity) {
     }
   }
 
-  @Deprecated("Plase use sendToServerUnityInstance and sendToServerUnity will be removed soon.")
-  fun sendToServerUnity(tree: String) {
-    instance?.sendToServer(tree)
-  }
-
   private fun sendToServer(tree: String) {
     getExecutor()
         .execute(
