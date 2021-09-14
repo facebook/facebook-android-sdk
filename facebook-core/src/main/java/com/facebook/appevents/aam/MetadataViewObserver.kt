@@ -108,7 +108,7 @@ internal class MetadataViewObserver private constructor(activity: Activity) :
       if (aroundTextIndicators == null) {
         aroundTextIndicators = getAroundViewIndicators(view)
       }
-      if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.keyRules)) {
+      if (matchIndicator(aroundTextIndicators, rule.keyRules)) {
         putUserData(userData, rule.name, normalizedText)
       }
     }
