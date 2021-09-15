@@ -19,7 +19,7 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
   fun `test missing alg throws`() {
     headerMap.remove("alg")
     val missingAlg = JSONObject(headerMap as Map<*, *>).toString()
-    val encodedHeaderString = Base64.encodeToString(missingAlg.toByteArray(), Base64.URL_SAFE)
+    val encodedHeaderString = Base64.encodeToString(missingAlg.toByteArray(), Base64.DEFAULT)
     AuthenticationTokenHeader(encodedHeaderString)
   }
 
@@ -27,7 +27,7 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
   fun `test missing typ throws`() {
     headerMap.remove("typ")
     val missingAlg = JSONObject(headerMap as Map<*, *>).toString()
-    val encodedHeaderString = Base64.encodeToString(missingAlg.toByteArray(), Base64.URL_SAFE)
+    val encodedHeaderString = Base64.encodeToString(missingAlg.toByteArray(), Base64.DEFAULT)
     AuthenticationTokenHeader(encodedHeaderString)
   }
 
@@ -35,7 +35,7 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
   fun `test missing kid throws`() {
     headerMap.remove("kid")
     val missingAlg = JSONObject(headerMap as Map<*, *>).toString()
-    val encodedHeaderString = Base64.encodeToString(missingAlg.toByteArray(), Base64.URL_SAFE)
+    val encodedHeaderString = Base64.encodeToString(missingAlg.toByteArray(), Base64.DEFAULT)
     AuthenticationTokenHeader(encodedHeaderString)
   }
 

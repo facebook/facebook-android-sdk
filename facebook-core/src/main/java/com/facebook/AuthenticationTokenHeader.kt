@@ -47,7 +47,7 @@ class AuthenticationTokenHeader : Parcelable {
     // verify header
     require(isValidHeader(encodedHeaderString)) { "Invalid Header" }
 
-    val decodedBytes = Base64.decode(encodedHeaderString, Base64.URL_SAFE)
+    val decodedBytes = Base64.decode(encodedHeaderString, Base64.DEFAULT)
     val claimsString = String(decodedBytes)
     val jsonObj = JSONObject(claimsString)
 
@@ -118,7 +118,7 @@ class AuthenticationTokenHeader : Parcelable {
   private fun isValidHeader(headerString: String): Boolean {
     Validate.notEmpty(headerString, "encodedHeaderString")
 
-    val decodedBytes = Base64.decode(headerString, Base64.URL_SAFE)
+    val decodedBytes = Base64.decode(headerString, Base64.DEFAULT)
     val claimsString = String(decodedBytes)
 
     return try {
@@ -150,7 +150,7 @@ class AuthenticationTokenHeader : Parcelable {
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   fun toEnCodedString(): String {
     val claimsJsonString = toString()
-    return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.URL_SAFE)
+    return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.DEFAULT)
   }
 
   companion object CREATOR : Parcelable.Creator<AuthenticationTokenHeader> {
