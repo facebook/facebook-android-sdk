@@ -153,13 +153,17 @@ class AuthenticationTokenHeader : Parcelable {
     return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.DEFAULT)
   }
 
-  companion object CREATOR : Parcelable.Creator<AuthenticationTokenHeader> {
-    override fun createFromParcel(parcel: Parcel): AuthenticationTokenHeader {
-      return AuthenticationTokenHeader(parcel)
-    }
+  companion object {
+    @JvmField
+    val CREATOR: Parcelable.Creator<AuthenticationTokenHeader> =
+        object : Parcelable.Creator<AuthenticationTokenHeader> {
+          override fun createFromParcel(source: Parcel): AuthenticationTokenHeader {
+            return AuthenticationTokenHeader(source)
+          }
 
-    override fun newArray(size: Int): Array<AuthenticationTokenHeader?> {
-      return arrayOfNulls(size)
-    }
+          override fun newArray(size: Int): Array<AuthenticationTokenHeader?> {
+            return arrayOfNulls(size)
+          }
+        }
   }
 }
