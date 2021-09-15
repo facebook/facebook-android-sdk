@@ -125,7 +125,7 @@ class AuthenticationTokenClaims : Parcelable {
   constructor(encodedClaims: String, expectedNonce: String) {
     Validate.notEmpty(encodedClaims, "encodedClaims")
 
-    val decodedBytes = Base64.decode(encodedClaims, Base64.DEFAULT)
+    val decodedBytes = Base64.decode(encodedClaims, Base64.URL_SAFE)
     val claimsString = String(decodedBytes)
     val jsonObj = JSONObject(claimsString)
 
@@ -450,7 +450,7 @@ class AuthenticationTokenClaims : Parcelable {
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   fun toEnCodedString(): String {
     val claimsJsonString = toString()
-    return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.DEFAULT)
+    return Base64.encodeToString(claimsJsonString.toByteArray(), Base64.URL_SAFE)
   }
 
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

@@ -34,7 +34,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test missing jti throws`() {
     claimsMap.remove("jti")
     val missingJti = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingJti.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingJti.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
@@ -42,7 +42,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test missing iss throws`() {
     claimsMap.remove("iss")
     val missingIss = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingIss.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingIss.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
@@ -50,7 +50,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test missing aud throws`() {
     claimsMap.remove("aud")
     val missingAud = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingAud.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingAud.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
@@ -58,7 +58,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test missing nonce throws`() {
     claimsMap.remove("nonce")
     val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
@@ -66,7 +66,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test nonce does not match throws`() {
     claimsMap["nonce"] = "not_nonce"
     val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
@@ -74,7 +74,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test empty nonce throws`() {
     claimsMap["nonce"] = ""
     val missingNonce = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingNonce.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
@@ -82,14 +82,14 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
   fun `test missing sub throws`() {
     claimsMap.remove("sub")
     val missingSub = JSONObject(claimsMap as Map<*, *>).toString()
-    val encodedClaimsString = Base64.encodeToString(missingSub.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(missingSub.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
   @Test(expected = JSONException::class)
   fun `test throw - invalid json format`() {
     val invalidJson = "123"
-    val encodedClaimsString = Base64.encodeToString(invalidJson.toByteArray(), Base64.DEFAULT)
+    val encodedClaimsString = Base64.encodeToString(invalidJson.toByteArray(), Base64.URL_SAFE)
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
