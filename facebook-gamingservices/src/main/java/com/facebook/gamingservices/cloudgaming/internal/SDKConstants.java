@@ -123,4 +123,7 @@ public class SDKConstants {
 
   // Outlinking
   public static final String PARAM_URL = "url";
+
+  // Tournamet
+  public static final String PARAM_TOURNAMENT_ID = "tournamentId";
 }
