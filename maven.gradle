@@ -70,7 +70,7 @@ uploadArchives {
             licenses {
                 license {
                     name 'Facebook Platform License'
-                    url 'https://github.com/facebook/facebook-android-sdk/blob/master/LICENSE.txt'
+                    url 'https://github.com/facebook/facebook-android-sdk/blob/main/LICENSE.txt'
                     distribution 'repo'
                 }
             }

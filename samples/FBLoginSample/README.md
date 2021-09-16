@@ -34,11 +34,11 @@ You can also join the Facebook Developers Group on Facebook (https://www.faceboo
 Contributing
 -------------
 We are able to accept contributions to the Facebook Login Sample App for Android. To contribute please do the following.
-- Follow the instructions in the [CONTRIBUTING.md](https://github.com/facebook/facebook-android-sdk/tree/master/samples/FBLoginSample/CONTRIBUTING.md).
-- Submit your pull request to the [dev](https://github.com/facebook/facebook-android-sdk/tree/dev) branch. This allows us to merge your change into our internal master and then push out the change in the next release.
+- Follow the instructions in the [CONTRIBUTING.md](https://github.com/facebook/facebook-android-sdk/tree/main/samples/FBLoginSample/CONTRIBUTING.md).
+- Submit your pull request to the [dev](https://github.com/facebook/facebook-android-sdk/tree/dev) branch. This allows us to merge your change into our internal main and then push out the change in the next release.
 
 License
 -------
-Except as otherwise noted, the Facebook Login Sample for Android is licensed under the Facebook Platform License (https://github.com/facebook/facebook-android-sdk/tree/master/samples/FBLoginSample/LICENSE).
+Except as otherwise noted, the Facebook Login Sample for Android is licensed under the Facebook Platform License (https://github.com/facebook/facebook-android-sdk/tree/main/samples/FBLoginSample/LICENSE).
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
