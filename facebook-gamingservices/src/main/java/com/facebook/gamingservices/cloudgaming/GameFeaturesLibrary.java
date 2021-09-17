@@ -130,8 +130,7 @@ public class GameFeaturesLibrary {
   public static void joinTournamentAsync(
       Context context, String tournamentId, DaemonRequest.Callback callback) throws JSONException {
     JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_TOURNAMENT_ID, tournamentId);
-    DaemonRequest.executeAsync(
-        context, parameters, callback, SDKMessageEnum.TOURNAMENT_POST_SCORE_ASYNC);
+    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.TOURNAMENT_JOIN_ASYNC);
   }
 
   public static void performHapticFeedback(Context context) {
