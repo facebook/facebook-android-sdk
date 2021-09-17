@@ -17,43 +17,36 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** A callback class for the Facebook SDK. */
-public interface FacebookCallback<RESULT> {
+interface FacebookCallback<RESULT> {
   /**
    * Called when the dialog completes without error.
    *
-   * <p>Note: This will be called instead of {@link #onCancel()} if any of the following conditions
-   * are true.
+   * Note: This will be called instead of [.onCancel] if any of the following conditions are true.
    *
-   * <ul>
-   *   <li>{@link com.facebook.share.widget.MessageDialog} is used.
-   *   <li>The logged in Facebook user has not authorized the app that has initiated the dialog.
-   * </ul>
+   * * [com.facebook.share.widget.MessageDialog] is used.
+   * * The logged in Facebook user has not authorized the app that has initiated the dialog.
    *
    * @param result Result from the dialog
    */
-  public void onSuccess(RESULT result);
+  fun onSuccess(result: RESULT)
 
   /**
    * Called when the dialog is canceled.
    *
-   * <p>Note: {@link #onSuccess(Object)} will be called instead if any of the following conditions
-   * are true.
+   * Note: [.onSuccess] will be called instead if any of the following conditions are true.
    *
-   * <ul>
-   *   <li>{@link com.facebook.share.widget.MessageDialog} is used.
-   *   <li>The logged in Facebook user has not authorized the app that has initiated the dialog.
-   * </ul>
+   * * [com.facebook.share.widget.MessageDialog] is used.
+   * * The logged in Facebook user has not authorized the app that has initiated the dialog.
    */
-  public void onCancel();
+  fun onCancel()
 
   /**
    * Called when the dialog finishes with an error.
    *
    * @param error The error that occurred
    */
-  public void onError(FacebookException error);
+  fun onError(error: FacebookException)
 }
