@@ -384,7 +384,9 @@ class LoginClient implements Parcelable {
       if (previousToken != null
           && newToken != null
           && previousToken.getUserId().equals(newToken.getUserId())) {
-        result = Result.createTokenResult(pendingRequest, pendingResult.token);
+        result =
+            Result.createCompositeTokenResult(
+                pendingRequest, pendingResult.token, pendingResult.authenticationToken);
       } else {
         result =
             Result.createErrorResult(
