@@ -43,6 +43,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -239,5 +240,29 @@ public class GetTokenLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     assertNotNull(result);
     assertEquals(LoginClient.Result.Code.ERROR, result.code);
+  }
+
+  /**
+   * Make sure we fallback to try next handler when permission contains openid but the result
+   * returned does not contains id_token
+   */
+  @Test
+  public void testGetTokenToTryNextHandlerWithOpenIdButNoIdToken() {
+    HashSet<String> openIdPermission = new HashSet<String>(Arrays.asList("openid"));
+    Bundle bundle = new Bundle();
+    bundle.putStringArrayList(NativeProtocol.EXTRA_PERMISSIONS, new ArrayList<>(openIdPermission));
+    bundle.putLong(
+        NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH,
+        new Date().getTime() / 1000 + EXPIRES_IN_DELTA);
+    bundle.putString(NativeProtocol.EXTRA_ACCESS_TOKEN, ACCESS_TOKEN);
+
+    GetTokenLoginMethodHandler handler = new GetTokenLoginMethodHandler(mockLoginClient);
+
+    LoginClient.Request request = createRequestWithNonce();
+
+    handler.getTokenCompleted(request, bundle);
+
+    verify(mockLoginClient, never()).completeAndValidate(any(LoginClient.Result.class));
+    verify(mockLoginClient, times(1)).tryNextHandler();
   }
 }

@@ -89,6 +89,14 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
       ArrayList<String> currentPermissions =
           result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
       Set<String> permissions = request.getPermissions();
+      String idTokenString = result.getString(NativeProtocol.EXTRA_AUTHENTICATION_TOKEN);
+
+      // if request param has openid but result does not have id_token
+      // fallback to try next handler to get id_token
+      if (permissions.contains("openid") && (idTokenString == null || idTokenString.isEmpty())) {
+        loginClient.tryNextHandler();
+      }
+
       if ((currentPermissions != null)
           && ((permissions == null) || currentPermissions.containsAll(permissions))) {
         // We got all the permissions we needed, so we can complete the auth now.
