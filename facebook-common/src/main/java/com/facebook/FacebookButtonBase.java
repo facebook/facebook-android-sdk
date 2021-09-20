@@ -32,6 +32,8 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import androidx.activity.result.ActivityResultRegistryOwner;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.facebook.appevents.InternalAppEventsLogger;
@@ -111,6 +113,15 @@ public abstract class FacebookButtonBase extends Button {
    */
   public android.app.Fragment getNativeFragment() {
     return (parentFragment != null) ? parentFragment.getNativeFragment() : null;
+  }
+
+  @Nullable
+  public ActivityResultRegistryOwner getAndroidxActivityResultRegistryOwner() {
+    Activity activity = getActivity();
+    if (activity instanceof ActivityResultRegistryOwner) {
+      return (ActivityResultRegistryOwner) activity;
+    }
+    return null;
   }
 
   @Override

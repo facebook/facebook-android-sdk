@@ -585,6 +585,53 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     createTestForFamilyLoginExperience(true, false);
   }
 
+  @Test
+  public void testLogInWithAndroidxComponentActivity() {
+    androidx.activity.result.ActivityResultRegistry mockRegistry =
+        PowerMockito.mock(androidx.activity.result.ActivityResultRegistry.class);
+    androidx.activity.ComponentActivity mockActivity =
+        PowerMockito.mock(androidx.activity.ComponentActivity.class);
+    androidx.activity.result.ActivityResultLauncher mockLauncher =
+        PowerMockito.mock(androidx.activity.result.ActivityResultLauncher.class);
+    PowerMockito.when(
+            mockRegistry.register(
+                anyString(),
+                any(androidx.activity.result.contract.ActivityResultContract.class),
+                any(androidx.activity.result.ActivityResultCallback.class)))
+        .thenReturn(mockLauncher);
+    PowerMockito.when(mockActivity.getActivityResultRegistry()).thenReturn(mockRegistry);
+
+    Set<String> permissions = Sets.newSet("public_profile", "user_friends");
+    LoginManager.getInstance()
+        .logInWithReadPermissions(mockActivity, new CallbackManagerImpl(), permissions);
+    verify(mockLauncher).launch(any(Intent.class));
+  }
+
+  @Test
+  public void testLogInWithAndroidxFragment() {
+    androidx.activity.result.ActivityResultRegistry mockRegistry =
+        PowerMockito.mock(androidx.activity.result.ActivityResultRegistry.class);
+    androidx.fragment.app.FragmentActivity mockActivity =
+        PowerMockito.mock(androidx.fragment.app.FragmentActivity.class);
+    androidx.fragment.app.Fragment mockFragment =
+        PowerMockito.mock(androidx.fragment.app.Fragment.class);
+    androidx.activity.result.ActivityResultLauncher mockLauncher =
+        PowerMockito.mock(androidx.activity.result.ActivityResultLauncher.class);
+    PowerMockito.when(mockFragment.getActivity()).thenReturn(mockActivity);
+    PowerMockito.when(
+            mockRegistry.register(
+                anyString(),
+                any(androidx.activity.result.contract.ActivityResultContract.class),
+                any(androidx.activity.result.ActivityResultCallback.class)))
+        .thenReturn(mockLauncher);
+    PowerMockito.when(mockActivity.getActivityResultRegistry()).thenReturn(mockRegistry);
+
+    Set<String> permissions = Sets.newSet("public_profile", "user_friends");
+    LoginManager.getInstance()
+        .logInWithReadPermissions(mockFragment, new CallbackManagerImpl(), permissions);
+    verify(mockLauncher).launch(any(Intent.class));
+  }
+
   private void createTestForFamilyLoginExperience(boolean isEnabled, boolean shouldSkip) {
     LoginManager loginManager = new LoginManager();
     loginManager.setFamilyLogin(isEnabled);

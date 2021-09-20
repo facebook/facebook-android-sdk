@@ -22,9 +22,10 @@ package com.facebook.login;
 
 import android.app.Activity;
 import android.content.Intent;
+import androidx.annotation.Nullable;
 
 interface StartActivityDelegate {
   public void startActivityForResult(Intent intent, int requestCode);
 
-  public Activity getActivityContext();
+  public @Nullable Activity getActivityContext();
 }

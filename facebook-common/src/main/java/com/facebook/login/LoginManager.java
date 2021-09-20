@@ -27,6 +27,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
+import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistryOwner;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
@@ -67,6 +74,7 @@ public class LoginManager {
   private static final String EXPRESS_LOGIN_ALLOWED = "express_login_allowed";
   private static final String PREFERENCE_LOGIN_MANAGER = "com.facebook.loginManager";
   private static final Set<String> OTHER_PUBLISH_PERMISSIONS = getOtherPublishPermissions();
+  private static final String TAG = LoginManager.class.toString();
 
   private static volatile LoginManager instance;
 
@@ -131,11 +139,37 @@ public class LoginManager {
    * Starts the login process to resolve the error defined in the response. The registered login
    * callbacks will be called on completion.
    *
+   * <p>This method is deprecated and it's better to use the method with a CallbackManager as the
+   * second parameter. The new method with the CallbackManager as a parameter will use AndroidX
+   * activity result APIs so you won't need to override onActivityResult method on the fragment.
+   *
    * @param fragment The fragment which is starting the login process.
    * @param response The response that has the error.
    */
+  @Deprecated
   public void resolveError(Fragment fragment, final GraphResponse response) {
     this.resolveError(new FragmentWrapper(fragment), response);
+  }
+
+  /**
+   * Starts the login process to resolve the error defined in the response. The registered login
+   * callbacks will be called on completion.
+   *
+   * @param fragment The fragment which is starting the login process.
+   * @param callbackManager The callback manager which is used to register callbacks.
+   * @param response The response that has the error.
+   */
+  public void resolveError(
+      @NonNull Fragment fragment,
+      @NonNull CallbackManager callbackManager,
+      @NonNull final GraphResponse response) {
+    ComponentActivity activity = fragment.getActivity();
+    if (activity != null) {
+      this.resolveError(activity, callbackManager, response);
+    } else {
+      throw new FacebookException(
+          "Cannot obtain activity context on the fragment " + fragment.toString());
+    }
   }
 
   /**
@@ -159,6 +193,25 @@ public class LoginManager {
   private void resolveError(final FragmentWrapper fragment, final GraphResponse response) {
     startLogin(
         new FragmentStartActivityDelegate(fragment), createLoginRequestFromResponse(response));
+  }
+
+  /**
+   * Starts the login process to resolve the error defined in the response. The registered login
+   * callbacks will be called on completion.
+   *
+   * @param activityResultRegistryOwner The activity result register owner. Normally it is an
+   *     androidx ComponentActivity.
+   * @param callbackManager The callback manager from Facebook SDK.
+   * @param response The response that has the error.
+   */
+  public void resolveError(
+      @NonNull final ActivityResultRegistryOwner activityResultRegistryOwner,
+      @NonNull final CallbackManager callbackManager,
+      @NonNull final GraphResponse response) {
+    startLogin(
+        new AndroidxActivityResultRegistryOwnerStartActivityDelegate(
+            activityResultRegistryOwner, callbackManager),
+        createLoginRequestFromResponse(response));
   }
 
   private LoginClient.Request createLoginRequestFromResponse(final GraphResponse response) {
@@ -447,11 +500,36 @@ public class LoginManager {
   /**
    * Logs the user in with the requested read permissions.
    *
-   * @param fragment The android.support.v4.app.Fragment which is starting the login process.
+   * <p>This method is deprecated and it's better to use the method with a CallbackManager as the
+   * second parameter. The new method with the CallbackManager as a parameter will use AndroidX
+   * activity result APIs so you won't need to override onActivityResult method on the fragment.
+   *
+   * @param fragment The androidx.fragment.Fragment which is starting the login process.
    * @param permissions The requested permissions.
    */
+  @Deprecated
   public void logInWithReadPermissions(Fragment fragment, Collection<String> permissions) {
     logInWithReadPermissions(new FragmentWrapper(fragment), permissions);
+  }
+
+  /**
+   * Logs the user in with the requested read permissions.
+   *
+   * @param fragment The androidx.fragment.Fragment which is starting the login process.
+   * @param callbackManager The callback manager which is used to register callbacks.
+   * @param permissions The requested permissions.
+   */
+  public void logInWithReadPermissions(
+      @NonNull Fragment fragment,
+      @NonNull CallbackManager callbackManager,
+      @NonNull Collection<String> permissions) {
+    ComponentActivity activity = fragment.getActivity();
+    if (activity != null) {
+      logInWithReadPermissions(activity, callbackManager, permissions);
+    } else {
+      throw new FacebookException(
+          "Cannot obtain activity context on the fragment " + fragment.toString());
+    }
   }
 
   /**
@@ -491,6 +569,22 @@ public class LoginManager {
     logIn(activity, loginConfig);
   }
 
+  /**
+   * Logs the user in with the requested read permissions.
+   *
+   * @param activityResultRegistryOwner The activity result register owner. Normally it is an
+   *     androidx ComponentActivity.
+   * @param callbackManager The callback manager from Facebook SDK.
+   * @param permissions The requested permissions.
+   */
+  public void logInWithReadPermissions(
+      @NonNull ActivityResultRegistryOwner activityResultRegistryOwner,
+      @NonNull CallbackManager callbackManager,
+      @NonNull Collection<String> permissions) {
+    validateReadPermissions(permissions);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(activityResultRegistryOwner, callbackManager, loginConfig);
+  }
   /**
    * Logs the user in with the requested configuration.
    *
@@ -554,11 +648,36 @@ public class LoginManager {
   /**
    * Logs the user in with the requested publish permissions.
    *
-   * @param fragment The android.support.v4.app.Fragment which is starting the login process.
+   * <p>This method is deprecated and it's better to use the method with a CallbackManager as the
+   * second parameter. The new method with the CallbackManager as a parameter will use AndroidX
+   * activity result APIs so you won't need to override onActivityResult method on the fragment.
+   *
+   * @param fragment The androidx.fragment.Fragment which is starting the login process.
    * @param permissions The requested permissions.
    */
+  @Deprecated
   public void logInWithPublishPermissions(Fragment fragment, Collection<String> permissions) {
     logInWithPublishPermissions(new FragmentWrapper(fragment), permissions);
+  }
+
+  /**
+   * Logs the user in with the requested publish permissions.
+   *
+   * @param fragment The androidx.fragment.Fragment which is starting the login process.
+   * @param callbackManager The callback manager which is used to register callbacks.
+   * @param permissions The requested permissions.
+   */
+  public void logInWithPublishPermissions(
+      @NonNull Fragment fragment,
+      @NonNull CallbackManager callbackManager,
+      @NonNull Collection<String> permissions) {
+    ComponentActivity activity = fragment.getActivity();
+    if (activity != null) {
+      logInWithPublishPermissions(activity, callbackManager, permissions);
+    } else {
+      throw new FacebookException(
+          "Cannot obtain activity context on the fragment " + fragment.toString());
+    }
   }
 
   /**
@@ -597,6 +716,23 @@ public class LoginManager {
 
     LoginConfiguration loginConfig = new LoginConfiguration(permissions);
     loginWithConfiguration(activity, loginConfig);
+  }
+
+  /**
+   * Logs the user in with the requested read permissions.
+   *
+   * @param activityResultRegistryOwner The activity result register owner. Normally it is an
+   *     androidx ComponentActivity.
+   * @param callbackManager The callback manager from Facebook SDK.
+   * @param permissions The requested permissions.
+   */
+  public void logInWithPublishPermissions(
+      @NonNull ActivityResultRegistryOwner activityResultRegistryOwner,
+      @NonNull CallbackManager callbackManager,
+      @NonNull Collection<String> permissions) {
+    validatePublishPermissions(permissions);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(activityResultRegistryOwner, callbackManager, loginConfig);
   }
 
   /**
@@ -694,6 +830,11 @@ public class LoginManager {
    * @param loginConfig The login config of the request
    */
   public void logIn(Activity activity, @NonNull LoginConfiguration loginConfig) {
+    if (activity instanceof ActivityResultRegistryOwner) {
+      Log.w(
+          TAG,
+          "You're calling logging in Facebook with an activity supports androidx activity result APIs. Please follow our document to upgrade to new APIs to avoid overriding onActivityResult().");
+    }
     LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
     startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
   }
@@ -708,6 +849,63 @@ public class LoginManager {
   public void logIn(Activity activity, Collection<String> permissions, String loggerID) {
     LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
     startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested configuration. This method is specialized for using
+   * androidx activity results APIs.
+   *
+   * @param activityResultRegistryOwner The activity result register owner. Normally it is an
+   *     androidx ComponentActivity.
+   * @param callbackManager The callback manager from Facebook SDK.
+   * @param loginConfig The login config of the request.
+   */
+  private void logIn(
+      @NonNull ActivityResultRegistryOwner activityResultRegistryOwner,
+      @NonNull CallbackManager callbackManager,
+      @NonNull LoginConfiguration loginConfig) {
+    LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
+    startLogin(
+        new AndroidxActivityResultRegistryOwnerStartActivityDelegate(
+            activityResultRegistryOwner, callbackManager),
+        loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
+   * @param activityResultRegistryOwner The activity result register owner. Normally it is an
+   *     androidx ComponentActivity.
+   * @param callbackManager The callback manager from Facebook SDK.
+   * @param permissions The requested permissions.
+   * @param loggerID Override the default logger ID for the request
+   */
+  public void logIn(
+      @NonNull ActivityResultRegistryOwner activityResultRegistryOwner,
+      @NonNull CallbackManager callbackManager,
+      @NonNull Collection<String> permissions,
+      String loggerID) {
+    LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
+    startLogin(
+        new AndroidxActivityResultRegistryOwnerStartActivityDelegate(
+            activityResultRegistryOwner, callbackManager),
+        loginRequest);
+  }
+
+  /**
+   * Logs the user in with the requested permissions.
+   *
+   * @param activityResultRegistryOwner The activity result register owner. Normally it is an
+   *     androidx ComponentActivity.
+   * @param callbackManager The callback manager from Facebook SDK.
+   * @param permissions The requested permissions.
+   */
+  public void logIn(
+      @NonNull ActivityResultRegistryOwner activityResultRegistryOwner,
+      @NonNull CallbackManager callbackManager,
+      @NonNull Collection<String> permissions) {
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    logIn(activityResultRegistryOwner, callbackManager, loginConfig);
   }
 
   private void validateReadPermissions(Collection<String> permissions) {
@@ -868,7 +1066,7 @@ public class LoginManager {
     }
   }
 
-  private void logStartLogin(Context context, LoginClient.Request loginRequest) {
+  private void logStartLogin(@Nullable Context context, LoginClient.Request loginRequest) {
     LoginLogger loginLogger = LoginLoggerHolder.getLogger(context);
     if (loginLogger != null && loginRequest != null) {
       loginLogger.logStartLogin(
@@ -880,7 +1078,7 @@ public class LoginManager {
   }
 
   private void logCompleteLogin(
-      Context context,
+      @Nullable Context context,
       LoginClient.Result.Code result,
       Map<String, String> resultExtras,
       Exception exception,
@@ -1113,6 +1311,68 @@ public class LoginManager {
     final Exception exception = new FacebookException(errorType + ": " + errorDescription);
     logger.logLoginStatusError(loggerRef, exception);
     responseCallback.onError(exception);
+  }
+
+  private static class AndroidxActivityResultRegistryOwnerStartActivityDelegate
+      implements StartActivityDelegate {
+    private ActivityResultRegistryOwner activityResultRegistryOwner;
+    private CallbackManager callbackManager;
+
+    AndroidxActivityResultRegistryOwnerStartActivityDelegate(
+        @NonNull ActivityResultRegistryOwner activityResultRegistryOwner,
+        @NonNull CallbackManager callbackManager) {
+      this.activityResultRegistryOwner = activityResultRegistryOwner;
+      this.callbackManager = callbackManager;
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+      class LauncherHolder {
+        private ActivityResultLauncher<Intent> launcher = null;
+      }
+      final LauncherHolder launcherHolder = new LauncherHolder();
+      launcherHolder.launcher =
+          activityResultRegistryOwner
+              .getActivityResultRegistry()
+              .register(
+                  "facebook-login",
+                  new ActivityResultContract<Intent, Pair<Integer, Intent>>() {
+                    @NonNull
+                    @Override
+                    public Intent createIntent(@NonNull Context context, Intent input) {
+                      return input;
+                    }
+
+                    @Override
+                    public Pair<Integer, Intent> parseResult(
+                        int resultCode, @Nullable Intent intent) {
+                      return Pair.create(resultCode, intent);
+                    }
+                  },
+                  new ActivityResultCallback<Pair<Integer, Intent>>() {
+                    @Override
+                    public void onActivityResult(Pair<Integer, Intent> result) {
+                      callbackManager.onActivityResult(
+                          CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(),
+                          result.first,
+                          result.second);
+                      if (launcherHolder.launcher != null) {
+                        launcherHolder.launcher.unregister();
+                        launcherHolder.launcher = null;
+                      }
+                    }
+                  });
+      launcherHolder.launcher.launch(intent);
+    }
+
+    @Override
+    public Activity getActivityContext() {
+      if (activityResultRegistryOwner instanceof Activity) {
+        return (Activity) activityResultRegistryOwner;
+      } else {
+        return null;
+      }
+    }
   }
 
   private static class ActivityStartActivityDelegate implements StartActivityDelegate {

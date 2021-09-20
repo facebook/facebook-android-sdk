@@ -29,6 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -124,6 +125,7 @@ public class LoginButton extends FacebookButtonBase {
   private ToolTipPopup toolTipPopup;
   private AccessTokenTracker accessTokenTracker;
   private LoginManager loginManager;
+  private CallbackManager callbackManager = null;
 
   static class LoginButtonProperties {
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
@@ -543,6 +545,15 @@ public class LoginButton extends FacebookButtonBase {
   public void registerCallback(
       final CallbackManager callbackManager, final FacebookCallback<LoginResult> callback) {
     getLoginManager().registerCallback(callbackManager, callback);
+    if (this.callbackManager == null) {
+      this.callbackManager = callbackManager;
+    } else if (this.callbackManager != callbackManager) {
+      Log.w(
+          TAG,
+          "You're registering a callback on the one Facebook login button with two different callback managers. "
+              + "It's almost wrong and may cause unexpected results. "
+              + "Only the first callback manager will be used for handling activity result with androidx.");
+    }
   }
 
   /**
@@ -848,7 +859,16 @@ public class LoginButton extends FacebookButtonBase {
 
     protected void performLogin() {
       final LoginManager loginManager = getLoginManager();
-      if (LoginButton.this.getFragment() != null) {
+      if (getAndroidxActivityResultRegistryOwner() != null) {
+        // if no callback manager is registered with the button, an empty callback manager is
+        // created for calling the static callbacks.
+        CallbackManager callbackManager =
+            LoginButton.this.callbackManager != null
+                ? LoginButton.this.callbackManager
+                : new CallbackManagerImpl();
+        loginManager.logIn(
+            getAndroidxActivityResultRegistryOwner(), callbackManager, properties.permissions);
+      } else if (LoginButton.this.getFragment() != null) {
         loginManager.logIn(LoginButton.this.getFragment(), properties.permissions);
       } else if (LoginButton.this.getNativeFragment() != null) {
         loginManager.logIn(LoginButton.this.getNativeFragment(), properties.permissions);

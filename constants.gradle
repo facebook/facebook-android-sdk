@@ -20,6 +20,8 @@
 
 project.ext {
     androidxVersion = "1.1.0"
+    androidxActivityVersion = "1.2.0"
+    androidxFragmentVersion = "1.3.0"
     androidxAnnotationVersion = "1.1.0"
     androidxCardviewVersion = "1.0.0"
     androidxBrowserVersion = "1.0.0"
