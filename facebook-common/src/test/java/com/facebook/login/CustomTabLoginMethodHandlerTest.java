@@ -295,6 +295,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
   }
 
   private LoginClient.Result testCustomTabHandles(String authenticationTokenString) {
+    LoginClient.Request requestWithNonce = createRequestWithNonce();
     mockCustomTabRedirectActivity(true);
     CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
 
@@ -304,7 +305,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
     bundle.putString("code", "Something else");
     bundle.putString("signed_request", SIGNED_REQUEST_STR);
-    handler.onComplete(request, bundle, null);
+    handler.onComplete(requestWithNonce, bundle, null);
 
     final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
         ArgumentCaptor.forClass(LoginClient.Result.class);

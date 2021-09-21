@@ -180,7 +180,7 @@ abstract class LoginMethodHandler implements Parcelable {
     String authenticationTokenString =
         bundle.getString(AuthenticationToken.AUTHENTICATION_TOKEN_KEY);
 
-    if (Utility.isNullOrEmpty(authenticationTokenString)) {
+    if (Utility.isNullOrEmpty(authenticationTokenString) || Utility.isNullOrEmpty(expectedNonce)) {
       return null;
     }
 
@@ -191,8 +191,7 @@ abstract class LoginMethodHandler implements Parcelable {
        */
       return new AuthenticationToken(authenticationTokenString, expectedNonce);
     } catch (Exception ex) {
-      // will remove this after factory class created
-      return null;
+      throw new FacebookException(ex.getMessage(), ex);
     }
   }
 
