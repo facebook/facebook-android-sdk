@@ -28,9 +28,9 @@ project.ext {
     androidxLegacyVersion = "1.0.0"
     junitVersion = "4.13"
 
-    kotlinVersion = '1.5.10'
+    kotlinVersion = "1.5.10"
     gradleVersion = "3.5.2"
-    dokkaVersion = '1.4.30'
+    dokkaVersion = "1.4.30"
     buildTools = "29.0.2"
     minSdk = 15
     compileSdk = 29
