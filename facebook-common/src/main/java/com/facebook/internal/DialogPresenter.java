@@ -25,6 +25,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Pair;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistry;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.facebook.CallbackManager;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
@@ -70,6 +78,59 @@ public class DialogPresenter {
     fragmentWrapper.startActivityForResult(appCall.getRequestIntent(), appCall.getRequestCode());
 
     appCall.setPending();
+  }
+
+  public static void present(
+      @NonNull AppCall appCall,
+      @NonNull ActivityResultRegistry registry,
+      @Nullable CallbackManager callbackManager) {
+    startActivityForResultWithAndroidX(
+        registry, callbackManager, appCall.getRequestIntent(), appCall.getRequestCode());
+    appCall.setPending();
+  }
+
+  public static void startActivityForResultWithAndroidX(
+      @NonNull final ActivityResultRegistry registry,
+      @Nullable final CallbackManager callbackManager,
+      @NonNull final Intent intent,
+      final int requestCode) {
+    class LauncherHolder {
+      private ActivityResultLauncher<Intent> launcher = null;
+    }
+    final LauncherHolder launcherHolder = new LauncherHolder();
+
+    launcherHolder.launcher =
+        registry.register(
+            String.format("facebook-dialog-request-%d", requestCode),
+            new ActivityResultContract<Intent, Pair<Integer, Intent>>() {
+              @NonNull
+              @Override
+              public Intent createIntent(@NonNull Context context, Intent input) {
+                return input;
+              }
+
+              @Override
+              public Pair<Integer, Intent> parseResult(int resultCode, @Nullable Intent intent) {
+                return Pair.create(resultCode, intent);
+              }
+            },
+            new ActivityResultCallback<Pair<Integer, Intent>>() {
+              @Override
+              public void onActivityResult(Pair<Integer, Intent> result) {
+                CallbackManager innerCallbackManager = callbackManager;
+                if (innerCallbackManager == null) {
+                  innerCallbackManager = new CallbackManagerImpl();
+                }
+                innerCallbackManager.onActivityResult(requestCode, result.first, result.second);
+                synchronized (launcherHolder) {
+                  if (launcherHolder.launcher != null) {
+                    launcherHolder.launcher.unregister();
+                    launcherHolder.launcher = null;
+                  }
+                }
+              }
+            });
+    launcherHolder.launcher.launch(intent);
   }
 
   public static boolean canPresentNativeDialogWithFeature(DialogFeature feature) {

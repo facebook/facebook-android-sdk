@@ -82,6 +82,7 @@ public final class SendButton extends ShareButtonBase {
     } else {
       dialog = new MessageDialog(getActivity(), getRequestCode());
     }
+    dialog.setCallbackManager(getCallbackManager());
     return dialog;
   }
 }

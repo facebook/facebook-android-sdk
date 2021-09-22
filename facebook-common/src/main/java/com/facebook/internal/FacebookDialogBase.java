@@ -23,6 +23,9 @@ package com.facebook.internal;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import androidx.activity.result.ActivityResultRegistryOwner;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookDialog;
@@ -50,12 +53,14 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
   private final FragmentWrapper fragmentWrapper;
   private List<ModeHandler> modeHandlers;
   private int requestCode;
+  private CallbackManager callbackManager;
 
   protected FacebookDialogBase(final Activity activity, int requestCode) {
     Validate.notNull(activity, "activity");
     this.activity = activity;
     this.fragmentWrapper = null;
     this.requestCode = requestCode;
+    this.callbackManager = null;
   }
 
   protected FacebookDialogBase(final FragmentWrapper fragmentWrapper, int requestCode) {
@@ -70,6 +75,19 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
     }
   }
 
+  /**
+   * Set the callback manager that will handle callbacks for this dialog. It will be used if the
+   * androidx activity result APIs are available.
+   */
+  public void setCallbackManager(@Nullable CallbackManager callbackManager) {
+    this.callbackManager = callbackManager;
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  CallbackManager getCallbackManager() {
+    return this.callbackManager;
+  }
+
   @Override
   public final void registerCallback(
       final CallbackManager callbackManager, final FacebookCallback<RESULT> callback) {
@@ -77,6 +95,7 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
       throw new FacebookException(
           "Unexpected CallbackManager, " + "please use the provided Factory.");
     }
+    memorizeCallbackManager(callbackManager);
     registerCallbackImpl((CallbackManagerImpl) callbackManager, callback);
   }
 
@@ -85,6 +104,7 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
       final CallbackManager callbackManager,
       final FacebookCallback<RESULT> callback,
       final int requestCode) {
+    memorizeCallbackManager(callbackManager);
     setRequestCode(requestCode);
     registerCallback(callbackManager, callback);
   }
@@ -150,7 +170,13 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
   protected void showImpl(final CONTENT content, final Object mode) {
     AppCall appCall = createAppCallForMode(content, mode);
     if (appCall != null) {
-      if (fragmentWrapper != null) {
+      if (getActivityContext() instanceof ActivityResultRegistryOwner) {
+        ActivityResultRegistryOwner registryOwner =
+            (ActivityResultRegistryOwner) getActivityContext();
+        DialogPresenter.present(
+            appCall, registryOwner.getActivityResultRegistry(), callbackManager);
+        appCall.setPending();
+      } else if (fragmentWrapper != null) {
         DialogPresenter.present(appCall, fragmentWrapper);
       } else {
         DialogPresenter.present(appCall, activity);
@@ -179,7 +205,14 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
 
   protected void startActivityForResult(Intent intent, int requestCode) {
     String error = null;
-    if (activity != null) {
+    Activity activity = getActivityContext();
+    if (activity instanceof ActivityResultRegistryOwner) {
+      DialogPresenter.startActivityForResultWithAndroidX(
+          ((ActivityResultRegistryOwner) activity).getActivityResultRegistry(),
+          callbackManager,
+          intent,
+          requestCode);
+    } else if (activity != null) {
       activity.startActivityForResult(intent, requestCode);
     } else if (fragmentWrapper != null) {
       if (fragmentWrapper.getNativeFragment() != null) {
@@ -224,6 +257,18 @@ public abstract class FacebookDialogBase<CONTENT, RESULT>
     }
 
     return appCall;
+  }
+
+  private void memorizeCallbackManager(CallbackManager callbackManager) {
+    if (this.callbackManager == null) {
+      this.callbackManager = callbackManager;
+    } else if (this.callbackManager != callbackManager) {
+      Log.w(
+          TAG,
+          "You're registering a callback on a Facebook dialog with two different callback managers. "
+              + "It's almost wrong and may cause unexpected results. "
+              + "Only the first callback manager will be used for handling activity result with androidx.");
+    }
   }
 
   private List<ModeHandler> cachedModeHandlers() {

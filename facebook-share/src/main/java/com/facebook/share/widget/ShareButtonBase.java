@@ -22,6 +22,7 @@ package com.facebook.share.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookButtonBase;
@@ -37,6 +38,7 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
   private ShareContent shareContent;
   private int requestCode = 0;
   private boolean enabledExplicitlySet = false;
+  private CallbackManager callbackManager;
 
   protected ShareButtonBase(
       final Context context,
@@ -122,6 +124,7 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
    */
   public void registerCallback(
       final CallbackManager callbackManager, final FacebookCallback<Sharer.Result> callback) {
+    memorizeCallbackManager(callbackManager);
     ShareInternalUtility.registerSharerCallback(getRequestCode(), callbackManager, callback);
   }
 
@@ -174,5 +177,21 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
   private void internalSetEnabled(boolean enabled) {
     setEnabled(enabled);
     enabledExplicitlySet = false;
+  }
+
+  private void memorizeCallbackManager(CallbackManager callbackManager) {
+    if (this.callbackManager == null) {
+      this.callbackManager = callbackManager;
+    } else if (this.callbackManager != callbackManager) {
+      Log.w(
+          ShareButtonBase.class.toString(),
+          "You're registering a callback on a Facebook Share Button with two different callback managers. "
+              + "It's almost wrong and may cause unexpected results. "
+              + "Only the first callback manager will be used for handling activity result with androidx.");
+    }
+  }
+
+  protected CallbackManager getCallbackManager() {
+    return callbackManager;
   }
 }
