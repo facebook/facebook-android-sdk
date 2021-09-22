@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `com.facebook.bolts.AppLinkResolver` will only receive nonnull parameters and return nonnull values. `com.facebook.bolts.Capture` is removed.
 - Removed deprecated functions in `com.facebook.appevents.AppEventsLogger`
 - Removed deprecated function `ViewIndexer.sendToServerUnity(String)`
-- Login kits now fully supports AndroidX Activity Result APIs. No need to override the `onActivityResult()` if you're using `androidx.activity` v1.2.0+.
+- Login and share kits now fully supports AndroidX Activity Result APIs. No need to override the `onActivityResult()` if you're passing activity/fragment from `androidx.activity` v1.2.0+ or `androidx.fragment` v1.3.0+ as the context to `LoginButton` and `ShareButton`.
 
 ## [11.3.0] - 2021-09-06
 
