@@ -170,7 +170,7 @@ internal object UserSettingsManager {
       val jsonObject = JSONObject()
       jsonObject.put(VALUE, userSetting.value)
       jsonObject.put(LAST_TIMESTAMP, userSetting.lastTS)
-      userSettingPref.edit().putString(userSetting.key, jsonObject.toString()).commit()
+      userSettingPref.edit().putString(userSetting.key, jsonObject.toString()).apply()
       logIfSDKSettingsChanged()
     } catch (e: Exception) {
       logd(TAG, e)
@@ -242,7 +242,7 @@ internal object UserSettingsManager {
     bitmask = bitmask or ((if (monitorEnabled.getValue()) 1 else 0) shl bit++)
     val previousBitmask = userSettingPref.getInt(USER_SETTINGS_BITMASK, 0)
     if (previousBitmask != bitmask) {
-      userSettingPref.edit().putInt(USER_SETTINGS_BITMASK, bitmask).commit()
+      userSettingPref.edit().putInt(USER_SETTINGS_BITMASK, bitmask).apply()
       var initialBitmask = 0
       var usageBitmask = 0
       try {
