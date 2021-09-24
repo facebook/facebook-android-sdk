@@ -33,8 +33,7 @@ class AuthenticationTokenCache(private val sharedPreferences: SharedPreferences)
       this(
           FacebookSdk.getApplicationContext()
               .getSharedPreferences(
-                  AccessTokenManager.SHARED_PREFERENCES_NAME,
-                  Context.MODE_PRIVATE)) // TODO replace with AuthenticationTokenManager
+                  AuthenticationTokenManager.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE))
 
   fun load(): AuthenticationToken? {
     var authenticationToken: AuthenticationToken? = null
