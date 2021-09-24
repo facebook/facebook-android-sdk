@@ -14,6 +14,6 @@ jobs:
       - name: Run GamingServicesKit tests
         run:  GITHUB_ACTIONS=1 ./gradlew :facebook-gamingservices:test -i
       - name: Run CommonKit tests
-          run: GITHUB_ACTIONS=1 ./gradlew :facebook-common:test -i
+        run: GITHUB_ACTIONS=1 ./gradlew :facebook-common:test -i
       - name: Run all tests
         run:  GITHUB_ACTIONS=1 ./gradlew :facebook:test -i
