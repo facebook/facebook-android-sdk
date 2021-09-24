@@ -87,11 +87,13 @@ public class LoginButton extends FacebookButtonBase {
     public static ToolTipMode fromInt(int enumValue) {
       for (ToolTipMode mode : values()) {
         if (mode.getValue() == enumValue) {
+		
           return mode;
         }
       }
 
       return null;
+
     }
 
     private String stringValue;
@@ -108,6 +110,7 @@ public class LoginButton extends FacebookButtonBase {
     }
 
     public int getValue() {
+
       return intValue;
     }
   }
@@ -115,6 +118,7 @@ public class LoginButton extends FacebookButtonBase {
   private static final String TAG = LoginButton.class.getName();
   private boolean confirmLogout;
   private String loginText;
+  private String hztest;
   private String logoutText;
   private LoginButtonProperties properties = new LoginButtonProperties();
   private String loginLogoutEventName = AnalyticsEvents.EVENT_LOGIN_VIEW_USAGE;
