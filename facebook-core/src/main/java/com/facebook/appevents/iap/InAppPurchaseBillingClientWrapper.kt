@@ -124,6 +124,7 @@ private constructor(
     invokeMethod(billingClientClazz, method, billingClient, listenerObj)
   }
 
+  @AutoHandleExceptions
   internal class BillingClientStateListenerWrapper : InvocationHandler {
     override fun invoke(proxy: Any, m: Method, args: Array<Any>): Any? {
       if (m.name == METHOD_ON_BILLING_SETUP_FINISHED) {
@@ -135,6 +136,7 @@ private constructor(
     }
   }
 
+  @AutoHandleExceptions
   internal class PurchasesUpdatedListenerWrapper : InvocationHandler {
     // dummy function, no need to implement onPurchasesUpdated
     override fun invoke(proxy: Any, m: Method, args: Array<Any>): Any? {
@@ -142,6 +144,7 @@ private constructor(
     }
   }
 
+  @AutoHandleExceptions
   internal inner class PurchaseHistoryResponseListenerWrapper(var runnable: Runnable) :
       InvocationHandler {
     override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any? {
@@ -180,6 +183,7 @@ private constructor(
     }
   }
 
+  @AutoHandleExceptions
   internal inner class SkuDetailsResponseListenerWrapper(var runnable: Runnable) :
       InvocationHandler {
     override fun invoke(proxy: Any, m: Method, args: Array<Any>): Any? {
