@@ -37,6 +37,7 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
   fun `before`() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getFacebookDomain()).thenReturn("facebook.com")
+    whenever(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
 
     val urlMock: URL = mock()
     val huc: HttpURLConnection = mock()

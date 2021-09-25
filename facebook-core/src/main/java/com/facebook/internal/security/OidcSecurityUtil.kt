@@ -27,26 +27,38 @@ import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import org.json.JSONObject
 
 object OidcSecurityUtil {
   val OPENID_KEYS_PATH = "/.well-known/oauth/openid/keys/"
   const val SIGNATURE_ALGORITHM_SHA256 = "SHA256withRSA"
-
+  const val TIMEOUT_IN_MILLISECONDS: Long = 1000
   @JvmStatic
   fun getRawKeyFromEndPoint(kid: String): String? {
     val host = "www.${FacebookSdk.getFacebookDomain()}"
     val openIdKeyUrl = URL("https", host, OPENID_KEYS_PATH)
-    val connection = openIdKeyUrl.openConnection() as HttpURLConnection
-    return try {
-      val data = connection.inputStream.bufferedReader().readText()
-      JSONObject(data).optString(kid)
-    } catch (_ex: Exception) {
-      // return null if ANY exception happens
-      null
-    } finally {
-      connection.disconnect()
+    val lock = ReentrantLock()
+    val condition = lock.newCondition()
+    var result: String? = null
+    FacebookSdk.getExecutor().execute {
+      val connection = openIdKeyUrl.openConnection() as HttpURLConnection
+      result =
+          try {
+            val data = connection.inputStream.bufferedReader().readText()
+            JSONObject(data).optString(kid)
+          } catch (_ex: Exception) {
+            // return null if ANY exception happens
+            null
+          } finally {
+            connection.disconnect()
+            lock.withLock { condition.signal() }
+          }
     }
+    lock.withLock { condition.await(TIMEOUT_IN_MILLISECONDS, TimeUnit.MILLISECONDS) }
+    return result
   }
 
   /**
