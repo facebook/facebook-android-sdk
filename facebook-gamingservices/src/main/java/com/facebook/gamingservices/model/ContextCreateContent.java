@@ -27,23 +27,23 @@ import com.facebook.share.model.ShareModelBuilder;
 
 public class ContextCreateContent implements ShareModel {
 
-  private final @Nullable String suggestedPlayerIDs;
+  private final @Nullable String suggestedPlayerID;
 
   private ContextCreateContent(final Builder builder) {
-    this.suggestedPlayerIDs = builder.suggestedPlayerIDs;
+    this.suggestedPlayerID = builder.suggestedPlayerID;
   }
 
   ContextCreateContent(final Parcel in) {
-    this.suggestedPlayerIDs = in.readString();
+    this.suggestedPlayerID = in.readString();
   }
 
-  public @Nullable String getSuggestedPlayerIDs() {
-    return this.suggestedPlayerIDs;
+  public @Nullable String getSuggestedPlayerID() {
+    return this.suggestedPlayerID;
   }
 
   @Override
   public void writeToParcel(final Parcel out, final int flags) {
-    out.writeString(this.suggestedPlayerIDs);
+    out.writeString(this.suggestedPlayerID);
   }
 
   @Override
@@ -53,16 +53,16 @@ public class ContextCreateContent implements ShareModel {
 
   /** Builder class for a concrete instance of ContextCreateContent */
   public static class Builder implements ShareModelBuilder<ContextCreateContent, Builder> {
-    private @Nullable String suggestedPlayerIDs;
+    private @Nullable String suggestedPlayerID;
 
     /**
-     * Sets the string of one or more suggested playerIDs.
+     * Sets the string of the id of the suggested player
      *
-     * @param suggestedPlayerIDs string of suggested playerIDs
+     * @param suggestedPlayerID string of the id of the suggested player
      * @return the builder
      */
-    public Builder setSuggestedPlayerIDs(final @Nullable String suggestedPlayerIDs) {
-      this.suggestedPlayerIDs = suggestedPlayerIDs;
+    public Builder setSuggestedPlayerID(final @Nullable String suggestedPlayerID) {
+      this.suggestedPlayerID = suggestedPlayerID;
       return this;
     }
 
@@ -76,7 +76,7 @@ public class ContextCreateContent implements ShareModel {
       if (content == null) {
         return this;
       }
-      return this.setSuggestedPlayerIDs(content.getSuggestedPlayerIDs());
+      return this.setSuggestedPlayerID(content.getSuggestedPlayerID());
     }
 
     Builder readFrom(final Parcel parcel) {

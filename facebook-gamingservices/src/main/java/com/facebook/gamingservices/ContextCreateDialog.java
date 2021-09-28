@@ -41,9 +41,7 @@ import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.share.internal.ResultProcessor;
 import com.facebook.share.internal.ShareInternalUtility;
-import java.util.Arrays;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -128,20 +126,8 @@ public class ContextCreateDialog
 
     JSONObject parameters = new JSONObject();
     try {
-      if (content.getSuggestedPlayerIDs() != null) {
-        String suggestedPlayersString = content.getSuggestedPlayerIDs();
-        List<String> playerIDsList = Arrays.asList(suggestedPlayersString.split("\\s*,\\s*"));
-        if (!playerIDsList.isEmpty()) {
-          if (playerIDsList.size() == 1) {
-            parameters.put(SDKConstants.PARAM_CONTEXT_ID, playerIDsList.get(0));
-          } else {
-            JSONArray playerIDs = new JSONArray();
-            for (int i = 0; i < playerIDsList.size(); i++) {
-              playerIDs.put(playerIDsList.get(i));
-            }
-            parameters.put(SDKConstants.PARAM_CONTEXT_ID, playerIDs);
-          }
-        }
+      if (content.getSuggestedPlayerID() != null) {
+        parameters.put(SDKConstants.PARAM_CONTEXT_ID, content.getSuggestedPlayerID());
       }
 
       DaemonRequest.executeAsync(
