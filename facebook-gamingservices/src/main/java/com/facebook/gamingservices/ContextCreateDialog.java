@@ -159,7 +159,14 @@ public class ContextCreateDialog
                     callback.onError(new FacebookException(results.getString("error_message")));
                     return;
                   }
-                  callback.onSuccess(new Result(results));
+                  if (results.getString(SDKConstants.PARAM_CONTEXT_ID) != null) {
+                    GamingContext.setCurrentGamingContext(
+                        new GamingContext(results.getString(SDKConstants.PARAM_CONTEXT_ID)));
+                    callback.onSuccess(new Result(results));
+                  }
+                  callback.onError(
+                      new FacebookException(
+                          results.getString("Invalid response received from server.")));
                 } else {
                   onCancel(appCall);
                 }
