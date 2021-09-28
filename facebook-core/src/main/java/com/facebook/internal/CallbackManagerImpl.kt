@@ -61,7 +61,10 @@ class CallbackManagerImpl : CallbackManager {
     DeviceShare(8),
     GamingFriendFinder(9),
     GamingGroupIntegration(10),
-    Referral(11);
+    Referral(11),
+    GamingContextCreate(12),
+    GamingContextSwitch(13),
+    GamingContextChoose(14);
 
     fun toRequestCode(): Int {
       return FacebookSdk.getCallbackRequestCodeOffset() + offset
