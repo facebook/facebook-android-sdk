@@ -23,12 +23,14 @@ package com.facebook.gamingservices;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 import com.facebook.GraphResponse;
 import com.facebook.gamingservices.cloudgaming.CloudGameLoginHandler;
 import com.facebook.gamingservices.cloudgaming.DaemonRequest;
@@ -39,8 +41,10 @@ import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.NativeProtocol;
 import com.facebook.share.internal.ResultProcessor;
 import com.facebook.share.internal.ShareInternalUtility;
+import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +54,7 @@ public class ContextSwitchDialog
     extends FacebookDialogBase<ContextSwitchContent, ContextSwitchDialog.Result> {
 
   private static final int DEFAULT_REQUEST_CODE =
-      CallbackManagerImpl.RequestCodeOffset.GameRequest.toRequestCode();
+      CallbackManagerImpl.RequestCodeOffset.GamingContextSwitch.toRequestCode();
   private @Nullable FacebookCallback mCallback;
 
   /**
@@ -100,6 +104,7 @@ public class ContextSwitchDialog
       this.showForCloud(content, mode);
       return;
     }
+    super.showImpl(content, mode);
   }
 
   private void showForCloud(final ContextSwitchContent content, final Object mode) {
@@ -157,6 +162,10 @@ public class ContextSwitchDialog
               @Override
               public void onSuccess(AppCall appCall, Bundle results) {
                 if (results != null) {
+                  if (results.getString("error_message") != null) {
+                    callback.onError(new FacebookException(results.getString("error_message")));
+                    return;
+                  }
                   callback.onSuccess(new Result(results));
                 } else {
                   onCancel(appCall);
@@ -177,12 +186,15 @@ public class ContextSwitchDialog
 
   @Override
   protected List<ModeHandler> getOrderedModeHandlers() {
-    return null;
+    ArrayList<ModeHandler> handlers = new ArrayList<>();
+    handlers.add(new FacebookAppHandler());
+
+    return handlers;
   }
 
   @Override
   protected AppCall createBaseAppCall() {
-    return null;
+    return new AppCall(getRequestCode());
   }
 
   /*
@@ -216,6 +228,49 @@ public class ContextSwitchDialog
      */
     public @Nullable String getContextID() {
       return contextID;
+    }
+  }
+
+  private class FacebookAppHandler extends ModeHandler {
+    @Override
+    public boolean canShow(final ContextSwitchContent content, boolean isBestEffort) {
+      PackageManager packageManager = getActivityContext().getPackageManager();
+      Intent intent = new Intent("com.facebook.games.gaming_services.DEEPLINK");
+      intent.setType("text/plain");
+      boolean fbAppCanShow = intent.resolveActivity(packageManager) != null;
+
+      AccessToken currentToken = AccessToken.getCurrentAccessToken();
+      boolean isGamingLoggedIn =
+          currentToken != null
+              && currentToken.getGraphDomain() != null
+              && FacebookSdk.GAMING.equals(currentToken.getGraphDomain());
+      return fbAppCanShow && isGamingLoggedIn;
+    }
+
+    @Override
+    public AppCall createAppCall(final ContextSwitchContent content) {
+      AppCall appCall = createBaseAppCall();
+
+      Intent intent = new Intent("com.facebook.games.gaming_services.DEEPLINK");
+      intent.setType("text/plain");
+
+      AccessToken accessToken = AccessToken.getCurrentAccessToken();
+      Bundle args = new Bundle();
+      args.putString("deeplink", "CONTEXT_SWITCH");
+      if (accessToken != null) {
+        args.putString("game_id", accessToken.getApplicationId());
+      } else {
+        args.putString("game_id", FacebookSdk.getApplicationId());
+      }
+
+      if (content.getContextID() != null) {
+        args.putString("context_token_id", content.getContextID());
+      }
+
+      NativeProtocol.setupProtocolRequestIntent(
+          intent, appCall.getCallId().toString(), "", NativeProtocol.getLatestKnownVersion(), args);
+      appCall.setRequestIntent(intent);
+      return appCall;
     }
   }
 }
