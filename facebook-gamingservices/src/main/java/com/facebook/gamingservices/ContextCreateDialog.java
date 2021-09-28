@@ -94,7 +94,11 @@ public class ContextCreateDialog
    */
   @Override
   public boolean canShow(ContextCreateContent content) {
-    return true;
+    if (CloudGameLoginHandler.isRunningInCloud()) {
+      return true;
+    } else {
+      return new FacebookAppHandler().canShow(content, true);
+    }
   }
 
   @Override

@@ -95,7 +95,11 @@ public class ContextSwitchDialog
    */
   @Override
   public boolean canShow(ContextSwitchContent content) {
-    return true;
+    if (CloudGameLoginHandler.isRunningInCloud()) {
+      return true;
+    } else {
+      return new FacebookAppHandler().canShow(content, true);
+    }
   }
 
   @Override

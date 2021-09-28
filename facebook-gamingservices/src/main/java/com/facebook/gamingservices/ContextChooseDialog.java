@@ -95,7 +95,11 @@ public class ContextChooseDialog
    */
   @Override
   public boolean canShow(ContextChooseContent content) {
-    return true;
+    if (CloudGameLoginHandler.isRunningInCloud()) {
+      return true;
+    } else {
+      return new FacebookAppHandler().canShow(content, true);
+    }
   }
 
   @Override
