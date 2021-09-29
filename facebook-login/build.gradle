@@ -29,11 +29,14 @@ project.ext.description = 'Facebook Login Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
+    def kotlin_ver = project.ext.kotlinVersion
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
     // Support Dependencies
     implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
 }
 
 android {
