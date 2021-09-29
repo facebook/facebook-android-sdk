@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.0.0] - 2021-10-04
+
 ### Changed
 - `com.facebook.bolts.AppLinkResolver` will only receive nonnull parameters and return nonnull values. `com.facebook.bolts.Capture` is removed.
 - Removed deprecated functions in `com.facebook.appevents.AppEventsLogger`
 - Removed deprecated function `ViewIndexer.sendToServerUnity(String)`
 - Login and share kits now fully supports AndroidX Activity Result APIs. No need to override the `onActivityResult()` if you're passing activity/fragment from `androidx.activity` v1.2.0+ or `androidx.fragment` v1.3.0+ as the context to `LoginButton` and `ShareButton`.
+
+### Added
+- Added the ability to perform login based on OpenID Connect standard. NOTE: This feature is currently in beta testing and not broadly available to developers
 
 ## [11.3.0] - 2021-09-06
 
@@ -348,6 +353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[12.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.3.0...sdk-version-12.0.0
 [11.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.2.0...sdk-version-11.3.0
 [11.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.1...sdk-version-11.2.0
 [11.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.0...sdk-version-11.1.1
@@ -391,5 +397,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
-
