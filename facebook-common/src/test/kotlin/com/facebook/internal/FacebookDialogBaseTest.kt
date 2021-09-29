@@ -57,15 +57,15 @@ class FacebookDialogBaseTest : FacebookPowerMockTestCase() {
         callback: FacebookCallback<Void>
     ) = Unit
 
-    override fun getOrderedModeHandlers(): MutableList<ModeHandler> = mutableListOf()
+    override val orderedModeHandlers = mutableListOf<ModeHandler>()
 
     override fun createBaseAppCall(): AppCall = mockAppCall
-    override fun canShowImpl(content: Int?, mode: Any?): Boolean {
+    override fun canShowImpl(content: Int, mode: Any): Boolean {
       capturedMode = mode
       return true
     }
 
-    val defaultMode: Any? = BASE_AUTOMATIC_MODE
+    val defaultMode: Any = BASE_AUTOMATIC_MODE
 
     init {
       whenever(mockAppCall.requestIntent).thenReturn(mockIntent)

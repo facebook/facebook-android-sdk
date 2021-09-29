@@ -17,52 +17,48 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** Represents dialogs provided by Facebook */
-public interface FacebookDialog<CONTENT, RESULT> {
-
+interface FacebookDialog<CONTENT, RESULT> {
   /**
    * Indicates whether the dialog can be shown for the content passed in.
    *
    * @param content the content to check
    * @return true if the dialog can be shown
    */
-  public boolean canShow(CONTENT content);
+  fun canShow(content: CONTENT): Boolean
 
   /**
    * Shows the dialog for the content passed in.
    *
    * @param content the content to show
    */
-  public void show(CONTENT content);
+  fun show(content: CONTENT)
 
   /**
    * Allows the registration of a callback that will be executed once the dialog is closed, with
-   * success, cancel or error details. This should be called in the {@link
-   * android.app.Activity#onCreate(android.os.Bundle)} or {@link
-   * androidx.fragment.app.Fragment#onCreate(android.os.Bundle)} methods.
+   * success, cancel or error details. This should be called in the [ ]
+   * [android.app.Activity.onCreate] or [ ][androidx.fragment.app.Fragment.onCreate] methods.
    *
    * @param callbackManager CallbackManager instance that will handle the onActivityResult
    * @param callback Callback to be called upon dialog completion
    */
-  public void registerCallback(
-      final CallbackManager callbackManager, final FacebookCallback<RESULT> callback);
+  fun registerCallback(callbackManager: CallbackManager, callback: FacebookCallback<RESULT>)
 
   /**
    * Allows the registration of a callback that will be executed once the dialog is closed, with
-   * success, cancel or error details. This should be called in the {@link
-   * android.app.Activity#onCreate(android.os.Bundle)} or {@link
-   * androidx.fragment.app.Fragment#onCreate(android.os.Bundle)} methods.
+   * success, cancel or error details. This should be called in the [ ]
+   * [android.app.Activity.onCreate] or [ ][androidx.fragment.app.Fragment.onCreate] methods.
    *
    * @param callbackManager CallbackManager instance that will handle the Activity Result
    * @param callback Callback to be called upon dialog completion
    * @param requestCode The request code to use, this should be outside of the range of those
-   *     reserved for the Facebook SDK {@link com.facebook.FacebookSdk#isFacebookRequestCode(int)}.
+   * reserved for the Facebook SDK [com.facebook.FacebookSdk.isFacebookRequestCode].
    */
-  public void registerCallback(
-      final CallbackManager callbackManager,
-      final FacebookCallback<RESULT> callback,
-      final int requestCode);
+  fun registerCallback(
+      callbackManager: CallbackManager,
+      callback: FacebookCallback<RESULT>,
+      requestCode: Int
+  )
 }
