@@ -29,7 +29,7 @@ project.ext {
     junitVersion = "4.13"
 
     kotlinVersion = "1.5.10"
-    gradleVersion = "3.5.4"
+    gradleVersion = "4.2.0"
     dokkaVersion = "1.4.30"
     buildTools = "29.0.2"
     minSdk = 15
