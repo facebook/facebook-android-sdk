@@ -118,9 +118,8 @@ public class CloudGameLoginHandler {
    *
    * @param context application context
    */
-  public static void gameLoadComplete(Context context) {
-    mLogger = SDKLogger.getInstance(context);
-    mLogger.logGameLoadComplete();
+  public static void gameLoadComplete(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.MARK_GAME_LOADED);
   }
 
   private static void setPackageName(JSONObject jsonObject, Context context) {
