@@ -1,0 +1,13 @@
+name: Assemble build with gradle
+# https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
+on: [push, pull_request]
+
+jobs:
+  build:
+    # will have android sdk installed, see https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu1804-README.md look for android, 29.0.2 is there woop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Assemble
+        run: ./gradlew assembleRelease
