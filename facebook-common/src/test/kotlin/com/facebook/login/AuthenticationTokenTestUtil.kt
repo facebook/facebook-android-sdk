@@ -41,6 +41,30 @@ object AuthenticationTokenTestUtil {
           "facebook.com")
 
   @JvmField
+  val AUTH_TOKEN_CLAIMS_WITH_EMPTY_OPTIONAL_FIELDS =
+      AuthenticationTokenClaims(
+          JTI,
+          ISS,
+          APP_ID,
+          NONCE,
+          EXPIRATION_DATE, // exp
+          IAT, // iat
+          SUB,
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          listOf(),
+          "",
+          hashMapOf(),
+          hashMapOf(),
+          hashMapOf(),
+          "",
+          "")
+
+  @JvmField
   val authenticationTokenClaimsWithRequiredFieldsOnly =
       AuthenticationTokenClaims(JTI, ISS, APP_ID, NONCE, EXPIRATION_DATE, IAT, SUB)
 
@@ -50,11 +74,29 @@ object AuthenticationTokenTestUtil {
   }
 
   @JvmStatic
+  fun getAuthenticationTokenEmptyOptionalClaimsForTest(): AuthenticationToken {
+    return AuthenticationToken(getEncodedAuthTokenStringWithEmptyOptionalClaimsForTest(), NONCE)
+  }
+
+  @JvmStatic
   fun getEncodedAuthTokenStringForTest(): String {
-    val sb = StringBuilder()
-    sb.append(VALID_HEADER_STRING).append(".")
-    sb.append(AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString()).append(".")
-    sb.append("Signature")
-    return sb.toString()
+    return buildString {
+      append(VALID_HEADER_STRING)
+      append(".")
+      append(AUTH_TOKEN_CLAIMS_FOR_TEST.toEnCodedString())
+      append(".")
+      append("Signature")
+    }
+  }
+
+  @JvmStatic
+  fun getEncodedAuthTokenStringWithEmptyOptionalClaimsForTest(): String {
+    return buildString {
+      append(AuthenticationTokenTestUtil.VALID_HEADER_STRING)
+      append(".")
+      append(AUTH_TOKEN_CLAIMS_WITH_EMPTY_OPTIONAL_FIELDS.toEnCodedString())
+      append(".")
+      append("Signature")
+    }
   }
 }
