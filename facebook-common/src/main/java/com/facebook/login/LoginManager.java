@@ -1179,6 +1179,10 @@ public class LoginManager {
       Profile.fetchProfileForCurrentAccessToken();
     }
 
+    if (newIdToken != null) {
+      AuthenticationToken.setCurrentAuthenticationToken(newIdToken);
+    }
+
     if (callback != null) {
       LoginResult loginResult =
           newToken != null ? computeLoginResult(origRequest, newToken, newIdToken) : null;

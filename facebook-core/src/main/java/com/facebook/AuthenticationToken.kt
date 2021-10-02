@@ -155,6 +155,26 @@ class AuthenticationToken : Parcelable {
   companion object {
     const val AUTHENTICATION_TOKEN_KEY = "id_token"
 
+    /**
+     * Getter for the authentication token that is current for the application.
+     *
+     * @return The authentication token that is current for the application.
+     */
+    @JvmStatic
+    fun getCurrentAuthenticationToken(): AuthenticationToken? {
+      return AuthenticationTokenManager.getInstance().currentAuthenticationToken
+    }
+
+    /**
+     * Setter for the authentication token that is current for the application.
+     *
+     * @param authenticationToken The authentication token to set.
+     */
+    @JvmStatic
+    fun setCurrentAuthenticationToken(authenticationToken: AuthenticationToken?) {
+      AuthenticationTokenManager.getInstance().currentAuthenticationToken = authenticationToken
+    }
+
     @JvmField
     val CREATOR: Parcelable.Creator<AuthenticationToken> =
         object : Parcelable.Creator<AuthenticationToken> {

@@ -1,5 +1,7 @@
 package com.facebook
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.util.common.AuthenticationTokenTestUtil
 import com.nhaarman.mockitokotlin2.any
@@ -11,7 +13,7 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSdk::class, OidcSecurityUtil::class)
+@PrepareForTest(FacebookSdk::class, OidcSecurityUtil::class, LocalBroadcastManager::class)
 class AuthenticationTokenTest : FacebookPowerMockTestCase() {
   val publicKeyString =
       "-----BEGIN PUBLIC KEY-----\n" +
@@ -32,10 +34,16 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
   fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID)
+    whenever(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext())
     PowerMockito.mockStatic(OidcSecurityUtil::class.java)
     whenever(OidcSecurityUtil.getRawKeyFromEndPoint(any())).thenReturn(publicKeyString)
     val pubKey = PowerMockito.mock(PublicKey::class.java)
     whenever(OidcSecurityUtil.getPublicKeyFromString(publicKeyString)).thenReturn(pubKey)
+
+    PowerMockito.mockStatic(LocalBroadcastManager::class.java)
+    val mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
+    whenever(LocalBroadcastManager.getInstance(any())).thenReturn(mockLocalBroadcastManager)
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -83,5 +91,16 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
     val idToken2 = FacebookTestUtility.parcelAndUnparcel(idToken1)
     assertThat(idToken2).isNotNull
     assertThat(idToken1).isEqualTo(idToken2)
+  }
+
+  @Test
+  fun `test setting and getting the current AuthenticationToken to or from cache`() {
+    // bypass signature check, since this is not testing for signature
+    PowerMockito.`when`(OidcSecurityUtil.verify(any(), any(), any())).thenReturn(true)
+
+    val expectedToken = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
+    AuthenticationToken.setCurrentAuthenticationToken(expectedToken)
+    val actualToken = AuthenticationToken.getCurrentAuthenticationToken()
+    assertThat(expectedToken).isEqualTo(actualToken)
   }
 }

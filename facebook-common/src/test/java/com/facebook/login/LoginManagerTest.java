@@ -54,6 +54,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.AuthenticationToken;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -62,6 +63,8 @@ import com.facebook.FacebookSdk;
 import com.facebook.FacebookSdkNotInitializedException;
 import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.security.OidcSecurityUtil;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -79,10 +82,16 @@ import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PrepareForTest({FacebookSdk.class, AccessToken.class, Profile.class})
+@PrepareForTest({
+  FacebookSdk.class,
+  AccessToken.class,
+  AuthenticationToken.class,
+  Profile.class,
+  OidcSecurityUtil.class
+})
 public class LoginManagerTest extends FacebookPowerMockTestCase {
 
-  private static final String MOCK_APP_ID = "1234";
+  private static final String MOCK_APP_ID = AuthenticationTokenTestUtil.APP_ID;
   private static final String USER_ID = "1000";
   private final String TOKEN_STRING = "A token of my esteem";
   private final List<String> PERMISSIONS = Arrays.asList("walk", "chew gum");
@@ -108,6 +117,9 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     mockStatic(AccessToken.class);
     when(AccessToken.getCurrentAccessToken()).thenReturn(null);
 
+    mockStatic(AuthenticationToken.class);
+    when(AuthenticationToken.getCurrentAuthenticationToken()).thenReturn(null);
+
     mockStatic(Profile.class);
 
     when(FacebookSdk.isInitialized()).thenReturn(true);
@@ -128,6 +140,14 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     when(mockApplicationContext.getMainLooper()).thenReturn(mockLooper);
     when(mockApplicationContext.getApplicationContext()).thenReturn(mockApplicationContext);
     when(mockPackageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(resolveInfo);
+
+    // mock and bypass signature verification
+    mockStatic(OidcSecurityUtil.class);
+    when(OidcSecurityUtil.getRawKeyFromEndPoint(any(String.class))).thenReturn("key");
+    when(OidcSecurityUtil.getPublicKeyFromString(any(String.class)))
+        .thenReturn(PowerMockito.mock(PublicKey.class));
+    when(OidcSecurityUtil.verify(any(PublicKey.class), any(String.class), any(String.class)))
+        .thenReturn(true);
   }
 
   @Test
@@ -526,6 +546,30 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
+  public void testOnActivityResultDoesNotModifyCurrentAuthenticationTokenOnErrorResultCode()
+      throws Exception {
+    LoginManager loginManager = new LoginManager();
+    loginManager.logInWithReadPermissions(
+        mockActivity, Arrays.asList("public_profile", "user_friends", "openid"));
+    final int[] setTokenTimes = {0};
+    PowerMockito.when(
+            AuthenticationToken.class,
+            "setCurrentAuthenticationToken",
+            eq(createAuthenticationToken()))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setTokenTimes[0]++;
+                return null;
+              }
+            });
+    loginManager.onActivityResult(
+        Activity.RESULT_CANCELED, createSuccessResultIntentForOIDC(), mockCallback);
+    assertEquals(0, setTokenTimes[0]);
+  }
+
+  @Test
   public void testOnActivityResultReturnsTrueAndCallsCallbackOnSuccessResult() {
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
@@ -567,6 +611,29 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
               }
             });
     loginManager.onActivityResult(Activity.RESULT_OK, createSuccessResultIntent(), mockCallback);
+    assertEquals(1, setTokenTimes[0]);
+  }
+
+  @Test
+  public void testOnActivityResultSetsCurrentAuthenticationTokenOnSuccessResult() throws Exception {
+    LoginManager loginManager = new LoginManager();
+    loginManager.logInWithReadPermissions(
+        mockActivity, Arrays.asList("public_profile", "user_friends", "openid"));
+    final int[] setTokenTimes = {0};
+    PowerMockito.when(
+            AuthenticationToken.class,
+            "setCurrentAuthenticationToken",
+            eq(createAuthenticationToken()))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setTokenTimes[0]++;
+                return null;
+              }
+            });
+    loginManager.onActivityResult(
+        Activity.RESULT_OK, createSuccessResultIntentForOIDC(), mockCallback);
     assertEquals(1, setTokenTimes[0]);
   }
 
@@ -666,6 +733,30 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     return intent;
   }
 
+  private Intent createSuccessResultIntentForOIDC() {
+    Intent intent = new Intent();
+
+    Set<String> permissions = Sets.newSet("public_profile", "user_friends", "opendid");
+    LoginClient.Request request =
+        new LoginClient.Request(
+            null,
+            permissions,
+            null,
+            null,
+            null,
+            null,
+            LoginTargetApp.FACEBOOK,
+            AuthenticationTokenTestUtil.NONCE);
+
+    AccessToken accessToken = createAccessToken();
+    AuthenticationToken authenticationToken = createAuthenticationToken();
+    LoginClient.Result result =
+        LoginClient.Result.createCompositeTokenResult(request, accessToken, authenticationToken);
+    intent.putExtra(LoginFragment.RESULT_KEY, result);
+
+    return intent;
+  }
+
   private Intent createErrorResultIntent() {
     Intent intent = new Intent();
 
@@ -700,5 +791,11 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         EXPIRES,
         LAST_REFRESH,
         DATA_ACCESS_EXPIRATION_TIME);
+  }
+
+  private AuthenticationToken createAuthenticationToken() {
+    return new AuthenticationToken(
+        AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest(),
+        AuthenticationTokenTestUtil.NONCE);
   }
 }
