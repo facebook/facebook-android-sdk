@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Neočekivana pogreška prilikom preuzimanja slike.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Podijeli</string>
     <string name="com_facebook_send_button_text" gender="unknown">Pošalji</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Posjetitw &lt;b&gt;facebook.com/device&lt;/b&gt; i unesite gore prikazani kôd.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Za povezivanje svog računa otvorite aplikaciju Facebook na mobilnom uređaju i pročitajte obavijesti.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ILI -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potvrdi prijavu</string>

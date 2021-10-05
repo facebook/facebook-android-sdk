@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Lỗi không mong muốn khi tải hình ảnh xuống.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Chia sẻ</string>
     <string name="com_facebook_send_button_text" gender="unknown">Gửi</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Truy cập &lt;b&gt;facebook.com/device&lt;/b&gt; và nhập mã được hiển thị bên trên.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Để kết nối tài khoản của bạn, hãy mở ứng dụng Facebook trên thiết bị di động và kiểm tra thông báo.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- HOẶC -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Xác nhận đăng nhập</string>

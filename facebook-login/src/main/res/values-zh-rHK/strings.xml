@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">下載圖像時發生沒有預期的錯誤。</string>
     <string name="com_facebook_share_button_text" gender="unknown">分享</string>
     <string name="com_facebook_send_button_text" gender="unknown">送出</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">前往&lt;b&gt;facebook.com/device&lt;/b&amp;gt，並輸入上方顯示的代碼。</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">若要連結帳戶，請在流動裝置上開啟 Facebook 應用程式，然後查看通知。</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- 或 -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">確認登入</string>

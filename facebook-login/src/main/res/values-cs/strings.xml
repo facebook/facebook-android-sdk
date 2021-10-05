@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Neočekávaná chyba při stahování obrázku.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Sdílet</string>
     <string name="com_facebook_send_button_text" gender="unknown">Odeslat</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Přejděte na &lt;b&gt;facebook.com/device&lt;/b&gt; a zadejte nahoře uvedený kód.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Pokud chcete připojit svůj účet, spusťte aplikaci Facebook ve svém mobilním zařízení a zkontrolujte upozornění.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- NEBO -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potvrďte přihlášení</string>

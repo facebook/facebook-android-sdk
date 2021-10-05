@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Nieoczekiwany błąd podczas pobierania obrazu.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Udostępnij</string>
     <string name="com_facebook_send_button_text" gender="unknown">Wyślij</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Odwiedź stronę &lt;b&gt;facebook.com/device&lt;/b&gt; i wprowadź powyższy kod.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Aby połączyć konto, otwórz aplikację Facebook na urządzeniu mobilnym i sprawdź powiadomienia.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- LUB -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potwierdź logowanie</string>

@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Onvoorsiene fout terwyl die prent afgelaai is.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Deel</string>
     <string name="com_facebook_send_button_text" gender="unknown">Stuur</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Besoek &lt;b&gt;facebook.com/device&lt;/b&gt; en voer die kode wat hierbo gewys word, in.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Maak die Facebook-toepassing op jou mobiele toestel oop en soek kennisgewings om jou rekening te koppel.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- OF -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Bevestig aanmelding</string>

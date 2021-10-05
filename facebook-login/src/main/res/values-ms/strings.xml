@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Ralat tidak dijangka semasa memuat turun imej.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Kongsi</string>
     <string name="com_facebook_send_button_text" gender="unknown">Hantar</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Lawati &lt;b&gt;facebook.com/device&lt;/b&gt; dan masukkan kod yang ditunjukkan di atas.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Untuk menyambungkan akaun anda, buka aplikasi Facebook pada peranti mudah alih anda, dan semak untuk pemberitahuan.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ATAU -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Sahkan Log Masuk</string>

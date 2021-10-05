@@ -20,7 +20,6 @@
     <string name="com_facebook_tooltip_default" gender="unknown">Du har kontrollen – Vælg, hvilke informationer du vil dele med apps.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Uventet fejl under download af billede.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Del</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Gå til &lt;b&gt;facebook.com/device&lt;/b&gt; og indtast koden, som er vist ovenfor.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">For at tilslutte din konto skal du åbne Facebook-appen på din mobilenhed og se efter, om der er notifikationer.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ELLER -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Bekræft login</string>

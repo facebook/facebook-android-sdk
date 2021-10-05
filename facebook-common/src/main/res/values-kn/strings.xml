@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">ಚಿತ್ರವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡುವಾಗ ಅನಿರೀಕ್ಷಿತ ದೋಷ.</string>
     <string name="com_facebook_share_button_text" gender="unknown">ಹಂಚಿರಿ</string>
     <string name="com_facebook_send_button_text" gender="unknown">ಕಳುಹಿಸಿ</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; ಗೆ ಭೇಟಿ ನೀಡಿ ಮತ್ತು ಮೇಲೆ ತೋರಿಸಿದ ಕೋಡ್ ಅನ್ನು ನಮೂದಿಸಿ.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಸಂಪರ್ಕಿಸಲು, ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಾಧನದಲ್ಲಿ Facebook ಅಪ್ಲಿಕೇಶನ್ ತೆರೆಯಿರಿ ಮತ್ತು ಅಧಿಸೂಚನೆಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸಿ.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ಅಥವಾ -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ಲಾಗಿನ್ ಖಚಿತಪಡಿಸಿ</string>

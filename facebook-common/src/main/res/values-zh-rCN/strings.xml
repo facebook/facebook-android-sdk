@@ -21,7 +21,6 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">下载图片时出现意外错误。</string>
     <string name="com_facebook_share_button_text" gender="unknown">分享</string>
     <string name="com_facebook_send_button_text" gender="unknown">发送</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">请访问&lt;b&gt;facebook.com/device&lt;/b&gt;并输入以上验证码。</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">要关联帐户，请在移动设备上打开 Facebook 应用并查看通知。</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- 或 -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">确认登录</string>
