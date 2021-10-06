@@ -43,6 +43,7 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
   private val activity: Activity?
   private val fragmentWrapper: FragmentWrapper?
   private var modeHandlers: List<ModeHandler>? = null
+  private var requestCodeField: Int
 
   @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   internal var callbackManager: CallbackManager? = null
@@ -57,14 +58,14 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
   protected constructor(activity: Activity, requestCode: Int) {
     this.activity = activity
     fragmentWrapper = null
-    this.requestCode = requestCode
+    requestCodeField = requestCode
     callbackManager = null
   }
 
   protected constructor(fragmentWrapper: FragmentWrapper, requestCode: Int) {
     this.fragmentWrapper = fragmentWrapper
     activity = null
-    this.requestCode = requestCode
+    requestCodeField = requestCode
     requireNotNull(fragmentWrapper.activity) {
       "Cannot use a fragment that is not attached to an activity"
     }
@@ -98,18 +99,19 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
 
   /** Request code used for this dialog. */
   var requestCode: Int
+    get() = requestCodeField
     /**
      * Set the request code for the startActivityForResult call. The requestCode should be outside
      * of the range of those reserved for the Facebook SDK [ ]
      * [com.facebook.FacebookSdk.isFacebookRequestCode].
      *
-     * @param requestCode the request code to use.
+     * @param value the request code to use.
      */
     set(value) {
       require(!isFacebookRequestCode(value)) {
         ("Request code $value cannot be within the range reserved by the Facebook SDK.")
       }
-      field = value
+      requestCodeField = value
     }
 
   override fun canShow(content: CONTENT): Boolean {

@@ -34,6 +34,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.lang.IllegalArgumentException
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -48,7 +49,8 @@ class FacebookDialogBaseTest : FacebookPowerMockTestCase() {
   private lateinit var mockLauncher: ActivityResultLauncher<Intent>
   private lateinit var callbackManager: CallbackManagerImpl
 
-  class TestDialog(activity: Activity) : FacebookDialogBase<Int, Void>(activity, 0) {
+  class TestDialog(activity: Activity, requestCode: Int = 0) :
+      FacebookDialogBase<Int, Void>(activity, requestCode) {
     val mockAppCall: AppCall = mock()
     val mockIntent: Intent = mock()
     var capturedMode: Any? = null
@@ -91,6 +93,8 @@ class FacebookDialogBaseTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
     PowerMockito.`when`(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
+    PowerMockito.`when`(FacebookSdk.getCallbackRequestCodeOffset()).thenReturn(0xface)
+    PowerMockito.`when`(FacebookSdk.isFacebookRequestCode(any())).thenCallRealMethod()
     PowerMockito.mockStatic(Validate::class.java)
   }
 
@@ -127,5 +131,16 @@ class FacebookDialogBaseTest : FacebookPowerMockTestCase() {
     val dialog = TestDialog(mockAndroidxActivity)
     dialog.canShow(1)
     assertThat(dialog.capturedMode).isEqualTo(dialog.defaultMode)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `test set request code`() {
+    val dialog = TestDialog(mockAndroidxActivity)
+    dialog.requestCode = FacebookSdk.getCallbackRequestCodeOffset() + 1
+  }
+
+  @Test
+  fun `test create a dialog with sdk request code code`() {
+    TestDialog(mockAndroidxActivity, FacebookSdk.getCallbackRequestCodeOffset() + 1)
   }
 }
