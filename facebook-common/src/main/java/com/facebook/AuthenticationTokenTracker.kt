@@ -91,11 +91,11 @@ abstract class AuthenticationTokenTracker {
         val oldAuthenticationToken =
             intent.getParcelableExtra<Parcelable>(
                 AuthenticationTokenManager.EXTRA_OLD_AUTHENTICATION_TOKEN) as
-                AuthenticationToken
+                AuthenticationToken?
         val newAuthenticationToken =
             intent.getParcelableExtra<Parcelable>(
                 AuthenticationTokenManager.EXTRA_NEW_AUTHENTICATION_TOKEN) as
-                AuthenticationToken
+                AuthenticationToken?
         onCurrentAuthenticationTokenChanged(oldAuthenticationToken, newAuthenticationToken)
       }
     }

@@ -44,6 +44,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.facebook.AuthenticationTokenManager$CurrentAuthenticationTokenChangedBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_AUTHENTICATION_TOKEN_CHANGED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
