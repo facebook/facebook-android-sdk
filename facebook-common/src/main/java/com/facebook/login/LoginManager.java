@@ -462,6 +462,7 @@ public class LoginManager {
   /** Logs out the user. */
   public void logOut() {
     AccessToken.setCurrentAccessToken(null);
+    AuthenticationToken.setCurrentAuthenticationToken(null);
     Profile.setCurrentProfile(null);
     setExpressLoginStatus(false);
   }

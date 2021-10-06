@@ -653,6 +653,34 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
+  public void testLogoutToEnsureAccessTokenAndAuthenticationTokenSetToNull() throws Exception {
+    LoginManager loginManager = new LoginManager();
+    final int[] setAccessTokenTimes = {0};
+    final int[] setAuthenticationTokenTimes = {0};
+    PowerMockito.when(AuthenticationToken.class, "setCurrentAuthenticationToken", eq(null))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setAuthenticationTokenTimes[0]++;
+                return null;
+              }
+            });
+    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", eq(null))
+        .thenAnswer(
+            new Answer() {
+              @Override
+              public Void answer(InvocationOnMock invocation) throws Throwable {
+                setAccessTokenTimes[0]++;
+                return null;
+              }
+            });
+    loginManager.logOut();
+    assertThat(setAccessTokenTimes[0]).isEqualTo(1);
+    assertThat(setAuthenticationTokenTimes[0]).isEqualTo(1);
+  }
+
+  @Test
   public void testLogInWithAndroidxComponentActivity() {
     androidx.activity.result.ActivityResultRegistry mockRegistry =
         PowerMockito.mock(androidx.activity.result.ActivityResultRegistry.class);
