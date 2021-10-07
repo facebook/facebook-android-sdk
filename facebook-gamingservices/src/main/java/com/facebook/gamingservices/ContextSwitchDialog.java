@@ -39,6 +39,7 @@ import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
 import com.facebook.gamingservices.model.ContextSwitchContent;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeProtocol;
@@ -98,7 +99,8 @@ public class ContextSwitchDialog
     if (CloudGameLoginHandler.isRunningInCloud()) {
       return true;
     } else {
-      return new FacebookAppHandler().canShow(content, true);
+      return new FacebookAppHandler().canShow(content, true)
+          || new WebHandler().canShow(content, true);
     }
   }
 
@@ -173,7 +175,14 @@ public class ContextSwitchDialog
                   if (results.getString(SDKConstants.PARAM_CONTEXT_ID) != null) {
                     GamingContext.setCurrentGamingContext(
                         new GamingContext(results.getString(SDKConstants.PARAM_CONTEXT_ID)));
-                    callback.onSuccess(new Result(results));
+                    callback.onSuccess(
+                        new Result(results.getString(SDKConstants.PARAM_CONTEXT_ID)));
+                  } else if (results.getString(SDKConstants.PARAM_CONTEXT_CONTEXT_ID) != null) {
+                    GamingContext.setCurrentGamingContext(
+                        new GamingContext(
+                            results.getString(SDKConstants.PARAM_CONTEXT_CONTEXT_ID)));
+                    callback.onSuccess(
+                        new Result(results.getString(SDKConstants.PARAM_CONTEXT_CONTEXT_ID)));
                   }
                   callback.onError(
                       new FacebookException(
@@ -199,6 +208,7 @@ public class ContextSwitchDialog
   protected List<ModeHandler> getOrderedModeHandlers() {
     ArrayList<ModeHandler> handlers = new ArrayList<>();
     handlers.add(new FacebookAppHandler());
+    handlers.add(new WebHandler());
 
     return handlers;
   }
@@ -214,8 +224,8 @@ public class ContextSwitchDialog
   public static final class Result {
     @Nullable String contextID;
 
-    private Result(Bundle results) {
-      this.contextID = results.getString(SDKConstants.PARAM_CONTEXT_ID);
+    private Result(String contextID) {
+      this.contextID = contextID;
     }
 
     private Result(GraphResponse response) {
@@ -239,6 +249,23 @@ public class ContextSwitchDialog
      */
     public @Nullable String getContextID() {
       return contextID;
+    }
+  }
+
+  private class WebHandler extends ModeHandler {
+    @Override
+    public boolean canShow(final ContextSwitchContent content, boolean isBestEffort) {
+      return true;
+    }
+
+    @Override
+    public AppCall createAppCall(final ContextSwitchContent content) {
+      AppCall appCall = createBaseAppCall();
+      Bundle webParams = new Bundle();
+      webParams.putString("context_id", content.getContextID());
+      DialogPresenter.setupAppCallForWebDialog(appCall, "context", webParams);
+
+      return appCall;
     }
   }
 

@@ -100,6 +100,7 @@ public class SDKConstants {
   public static final String PARAM_CONTEXT_MIN_SIZE = "minSize";
   public static final String PARAM_CONTEXT_MAX_SIZE = "maxSize";
   public static final String PARAM_CONTEXT_ID = "id";
+  public static final String PARAM_CONTEXT_CONTEXT_ID = "context_id";
   public static final String PARAM_CONTEXT_FILTERS = "filters";
 
   // Update
