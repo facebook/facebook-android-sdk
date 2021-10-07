@@ -102,6 +102,9 @@ android {
             if (System.getenv("SANDCASTLE") != "1" && System.getenv("GITHUB_ACTIONS") != "1") {
                 exclude "com/facebook/internal/instrument/crashshield/CrashShieldHandlerDebugTest.class"
             }
+            if (System.getenv("GITHUB_ACTIONS") == "1") {
+                exclude "com/facebook/appevents/ondeviceprocessing/OnDeviceProcessingManagerTest.class"
+            }
         }
     }
 
