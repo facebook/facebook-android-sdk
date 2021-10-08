@@ -21,7 +21,8 @@ package com.facebook
 
 import android.content.Context
 import android.content.SharedPreferences
-import java.lang.IllegalArgumentException
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * This class is an wrapper class which handles load/save/clear of the Authentication Token cache
@@ -45,18 +46,19 @@ class AuthenticationTokenCache(private val sharedPreferences: SharedPreferences)
   }
 
   fun save(authenticationToken: AuthenticationToken) {
-    sharedPreferences
-        .edit()
-        .putString(
-            CACHED_AUTHENTICATION_TOKEN_KEY,
-            authenticationToken.token) // TODO: save the jsonString instead of actual token
-        .putString(CACHED_AUTHENTICATION_TOKEN_NONCE_KEY, authenticationToken.expectedNonce)
-        .apply()
+    try {
+      val jsonObject = authenticationToken.toJSONObject()
+      sharedPreferences
+          .edit()
+          .putString(CACHED_AUTHENTICATION_TOKEN_KEY, jsonObject.toString())
+          .apply()
+    } catch (e: JSONException) {
+      // can't recover
+    }
   }
 
   fun clear() {
     sharedPreferences.edit().remove(CACHED_AUTHENTICATION_TOKEN_KEY).apply()
-    sharedPreferences.edit().remove(CACHED_AUTHENTICATION_TOKEN_NONCE_KEY).apply()
   }
 
   private fun hasCachedAuthenticationToken(): Boolean {
@@ -65,13 +67,12 @@ class AuthenticationTokenCache(private val sharedPreferences: SharedPreferences)
 
   private val cachedAuthenticationToken: AuthenticationToken?
     get() {
-      val idTokenString = sharedPreferences.getString(CACHED_AUTHENTICATION_TOKEN_KEY, null)
-      val idTokenExpectedNonce =
-          sharedPreferences.getString(CACHED_AUTHENTICATION_TOKEN_NONCE_KEY, null)
-      return if (!idTokenString.isNullOrEmpty() && !idTokenExpectedNonce.isNullOrEmpty()) {
+      val jsonString = sharedPreferences.getString(CACHED_AUTHENTICATION_TOKEN_KEY, null)
+      return if (jsonString != null) {
         try {
-          AuthenticationToken(idTokenString, idTokenExpectedNonce)
-        } catch (e: IllegalArgumentException) {
+          val jsonObject = JSONObject(jsonString)
+          AuthenticationToken(jsonObject)
+        } catch (e: JSONException) {
           // in case if exception happens on reconstructing the id token
           null
         }
@@ -81,7 +82,5 @@ class AuthenticationTokenCache(private val sharedPreferences: SharedPreferences)
   companion object {
     const val CACHED_AUTHENTICATION_TOKEN_KEY =
         "com.facebook.AuthenticationManager.CachedAuthenticationToken"
-    const val CACHED_AUTHENTICATION_TOKEN_NONCE_KEY =
-        "com.facebook.AuthenticationManager.CachedAuthenticationTokenNonce"
   }
 }

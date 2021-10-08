@@ -52,10 +52,9 @@ internal class AuthenticationTokenCacheTest : FacebookPowerMockTestCase() {
         .thenReturn(PowerMockito.mock(PublicKey::class.java))
     PowerMockito.`when`(OidcSecurityUtil.verify(any(), any(), any())).thenReturn(true)
 
-    // TODO: Replace AccessTokenManager with AuthenticationTokenManger
     sharedPreferences =
         RuntimeEnvironment.application.getSharedPreferences(
-            AccessTokenManager.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+            AuthenticationTokenManager.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
     sharedPreferences.edit().clear().apply()
     MemberModifier.stub<Any>(
             PowerMockito.method(
@@ -72,7 +71,10 @@ internal class AuthenticationTokenCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test load returns null if empty authentication token`() {
-    sharedPreferences.edit().putString(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY, "").apply()
+    sharedPreferences
+        .edit()
+        .putString(AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_KEY, "")
+        .apply()
     val cache = AuthenticationTokenCache(sharedPreferences)
     val authenticationToken = cache.load()
     assertThat(authenticationToken).isNull()
@@ -84,10 +86,8 @@ internal class AuthenticationTokenCacheTest : FacebookPowerMockTestCase() {
     sharedPreferences
         .edit()
         .putString(
-            AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_KEY, authenticationToken.token)
-        .putString(
-            AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_NONCE_KEY,
-            authenticationToken.expectedNonce)
+            AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_KEY,
+            authenticationToken.toJSONObject().toString())
         .apply()
     val cache = AuthenticationTokenCache(sharedPreferences)
     val loadedAuthenticationToken = cache.load()
@@ -101,7 +101,6 @@ internal class AuthenticationTokenCacheTest : FacebookPowerMockTestCase() {
     sharedPreferences
         .edit()
         .remove(AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_KEY)
-        .remove(AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_NONCE_KEY)
         .apply()
     assertThat(cache.load()).isNull()
 
@@ -112,20 +111,11 @@ internal class AuthenticationTokenCacheTest : FacebookPowerMockTestCase() {
     assertThat(
             sharedPreferences.getString(
                 AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_KEY, ""))
-        .isEqualTo(authenticationToken.token)
-    assertThat(authenticationToken.expectedNonce).isNotEmpty
-    assertThat(
-            sharedPreferences.getString(
-                AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_NONCE_KEY, ""))
-        .isEqualTo(authenticationToken.expectedNonce)
+        .isEqualTo(authenticationToken.toJSONObject().toString())
 
     // clear
     cache.clear()
     assertThat(sharedPreferences.contains(AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_KEY))
-        .isFalse
-    assertThat(
-            sharedPreferences.contains(
-                AuthenticationTokenCache.CACHED_AUTHENTICATION_TOKEN_NONCE_KEY))
         .isFalse
   }
 }
