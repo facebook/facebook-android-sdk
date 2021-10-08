@@ -67,4 +67,11 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
     assertThat(idTokenHeader1.typ).isEqualTo(idTokenHeader2?.typ)
     assertThat(idTokenHeader1.kid).isEqualTo(idTokenHeader2?.kid)
   }
+
+  @Test
+  fun `test json roundtrip`() {
+    val jsonObject = AuthenticationTokenTestUtil.AUTH_TOKEN_HEADER_FOR_TEST.toJSONObject()
+    val deserializeHeader = AuthenticationTokenHeader(jsonObject)
+    assertThat(AuthenticationTokenTestUtil.AUTH_TOKEN_HEADER_FOR_TEST).isEqualTo(deserializeHeader)
+  }
 }

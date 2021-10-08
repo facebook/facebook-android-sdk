@@ -70,6 +70,17 @@ class AuthenticationTokenHeader : Parcelable {
     this.kid = checkNotNull(kid)
   }
 
+  /**
+   * This constructor is only for caching only. NOTE: Using the following constructor is strongly
+   * discouraged, it will bypass any validation
+   */
+  @Throws(JSONException::class)
+  internal constructor(jsonObject: JSONObject) {
+    this.alg = jsonObject.getString("alg")
+    this.typ = jsonObject.getString("typ")
+    this.kid = jsonObject.getString("kid")
+  }
+
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   constructor(alg: String, typ: String, kid: String) {
     this.alg = alg
@@ -137,7 +148,6 @@ class AuthenticationTokenHeader : Parcelable {
     }
   }
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   internal fun toJSONObject(): JSONObject {
     val jsonObject = JSONObject()
     jsonObject.put("alg", this.alg)
