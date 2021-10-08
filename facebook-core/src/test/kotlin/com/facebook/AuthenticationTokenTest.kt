@@ -103,4 +103,15 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
     val actualToken = AuthenticationToken.getCurrentAuthenticationToken()
     assertThat(expectedToken).isEqualTo(actualToken)
   }
+
+  @Test
+  fun `test json roundtrip`() {
+    // bypass signature check, since this is not testing for signature
+    PowerMockito.`when`(OidcSecurityUtil.verify(any(), any(), any())).thenReturn(true)
+
+    val authenticationToken = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
+    val jsonObject = authenticationToken.toJSONObject()
+    val deserializeToken = AuthenticationToken(jsonObject)
+    assertThat(authenticationToken).isEqualTo(deserializeToken)
+  }
 }

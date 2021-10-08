@@ -36,6 +36,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -538,6 +539,8 @@ class AuthenticationTokenClaims : Parcelable {
       return null
     }
 
+    @Throws(JSONException::class)
+    @JvmStatic
     internal fun createFromJSONObject(jsonObject: JSONObject): AuthenticationTokenClaims {
       val jti = jsonObject.getString(JSON_KEY_JIT)
       val iss = jsonObject.getString(JSON_KEY_ISS)

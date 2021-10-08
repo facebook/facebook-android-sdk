@@ -25,6 +25,8 @@ import com.facebook.internal.Validate
 import com.facebook.internal.security.OidcSecurityUtil
 import java.io.IOException
 import java.security.spec.InvalidKeySpecException
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * This class represents an immutable Authentication Token (or so called "id token") for using
@@ -97,6 +99,34 @@ class AuthenticationToken : Parcelable {
     this.signature = checkNotNull(signature)
   }
 
+  /**
+   * internal constructor for caching only NOTE: This constructor will skip the benefit of token
+   * validation
+   */
+  @Throws(JSONException::class)
+  internal constructor(jsonObject: JSONObject) {
+    this.token = jsonObject.getString(TOKEN_STRING_KEY)
+    this.expectedNonce = jsonObject.getString(EXPECTED_NONCE_KEY)
+    this.signature = jsonObject.getString(SIGNATURE_KEY)
+
+    val headerJSONObject = jsonObject.getJSONObject((HEADER_KEY))
+    val claimsJSONObject = jsonObject.getJSONObject(CLAIMS_KEY)
+    this.header = AuthenticationTokenHeader(headerJSONObject)
+    this.claims = AuthenticationTokenClaims.createFromJSONObject(claimsJSONObject)
+  }
+
+  /** convert current AuthenticationToken object to JSON */
+  @Throws(JSONException::class)
+  internal fun toJSONObject(): JSONObject {
+    val jsonObject = JSONObject()
+    jsonObject.put(TOKEN_STRING_KEY, token)
+    jsonObject.put(EXPECTED_NONCE_KEY, expectedNonce)
+    jsonObject.put(HEADER_KEY, header.toJSONObject())
+    jsonObject.put(CLAIMS_KEY, claims.toJSONObject())
+    jsonObject.put(SIGNATURE_KEY, signature)
+    return jsonObject
+  }
+
   override fun equals(other: Any?): Boolean {
     if (this === other) {
       return true
@@ -154,6 +184,13 @@ class AuthenticationToken : Parcelable {
 
   companion object {
     const val AUTHENTICATION_TOKEN_KEY = "id_token"
+
+    // JSON serialization Key
+    private const val TOKEN_STRING_KEY = "token_string"
+    private const val EXPECTED_NONCE_KEY = "expected_nonce"
+    private const val HEADER_KEY = "header"
+    private const val CLAIMS_KEY = "claims"
+    private const val SIGNATURE_KEY = "signature"
 
     /**
      * Getter for the authentication token that is current for the application.
