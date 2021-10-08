@@ -1,5 +1,7 @@
 name: 'Close stale issues and PRs'
-on: [pull_request]
+on: 
+  schedule:
+    - cron: '30 1 * * *'
 
 jobs:
   stale:
