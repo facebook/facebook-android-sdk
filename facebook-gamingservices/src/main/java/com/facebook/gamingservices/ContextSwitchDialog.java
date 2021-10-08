@@ -263,6 +263,10 @@ public class ContextSwitchDialog
       AppCall appCall = createBaseAppCall();
       Bundle webParams = new Bundle();
       webParams.putString("context_id", content.getContextID());
+      AccessToken currentToken = AccessToken.getCurrentAccessToken();
+      if (currentToken != null) {
+        webParams.putString("dialog_access_token", currentToken.getToken());
+      }
       DialogPresenter.setupAppCallForWebDialog(appCall, "context", webParams);
 
       return appCall;

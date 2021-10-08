@@ -256,6 +256,10 @@ public class ContextCreateDialog
       AppCall appCall = createBaseAppCall();
       Bundle webParams = new Bundle();
       webParams.putString("player_id", content.getSuggestedPlayerID());
+      AccessToken currentToken = AccessToken.getCurrentAccessToken();
+      if (currentToken != null) {
+        webParams.putString("dialog_access_token", currentToken.getToken());
+      }
       DialogPresenter.setupAppCallForWebDialog(appCall, "context", webParams);
 
       return appCall;
