@@ -13,4 +13,5 @@ jobs:
           days-before-stale: 90
           days-before-close: 7
           enable-statistics: true
+          operations-per-run: 60
      
