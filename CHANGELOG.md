@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.0.1] - 2021-10-12
+
+### Added
+- Added AuthenticationToken Cache to enhance OIDC experience. NOTE: This feature is currently in beta testing and not broadly available to developers
+
 ## [12.0.0] - 2021-10-04
 
 ### Changed
@@ -353,6 +358,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[12.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.0...sdk-version-12.0.1
 [12.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.3.0...sdk-version-12.0.0
 [11.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.2.0...sdk-version-11.3.0
 [11.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.1...sdk-version-11.2.0
@@ -397,3 +403,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+
