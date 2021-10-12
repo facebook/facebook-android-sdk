@@ -361,7 +361,7 @@ object NativeProtocol {
       targetApp: LoginTargetApp,
       isFamilyLogin: Boolean,
       shouldSkipAccountDedupe: Boolean,
-      nonce: String
+      nonce: String?
   ): Intent? {
     val activityName = appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
@@ -420,7 +420,7 @@ object NativeProtocol {
       resetMessengerState: Boolean,
       isFamilyLogin: Boolean,
       shouldSkipAccountDedupe: Boolean,
-      nonce: String,
+      nonce: String?,
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
