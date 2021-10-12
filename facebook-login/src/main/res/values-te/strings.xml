@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">ఒక చిత్రాన్ని డౌన్‌లోడ్ చేయడంలో అనుకోని లోపం సంభవించింది.</string>
     <string name="com_facebook_share_button_text" gender="unknown">షేర్ చేయి</string>
     <string name="com_facebook_send_button_text" gender="unknown">పంపండి</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt;ని సందర్శించి పైన చూపిన కోడ్‌ను నమోదు చేయండి.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">మీ ఖాతాను కనెక్ట్ చేసేందుకు, మీ మొబైల్ పరికరంలో Facebook యాప్‌ని తెరిచి, నోటిఫికేషన్‌లను తనిఖీ చేయండి.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- లేదా -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">లాగిన్‌ను నిర్ధారించండి</string>
