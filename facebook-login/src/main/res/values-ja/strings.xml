@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">画像のダウンロードで何らかのエラーが発生しました。</string>
     <string name="com_facebook_share_button_text" gender="unknown">シェア</string>
     <string name="com_facebook_send_button_text" gender="unknown">送信</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt;にアクセスして、上記のコードを入力してください。</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">アカウントをリンクするには、モバイル機器でFacebookアプリを開いて、お知らせをご確認ください。</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- または -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ログインを実行</string>
