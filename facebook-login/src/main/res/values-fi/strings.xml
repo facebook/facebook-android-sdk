@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Kuvaa ladattaessa tapahtui yllättävä virhe.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Jaa</string>
     <string name="com_facebook_send_button_text" gender="unknown">Lähetä</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Siirry osoitteeseen &lt;b&gt;facebook.com/device&lt;/b&gt; ja anna yllä oleva koodi.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Liitä tilisi avaamalla Facebook-sovellus matkapuhelimellasi ja tarkistamalla ilmoitukset.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- TAI -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Vahvista sisäänkirjautuminen</string>
