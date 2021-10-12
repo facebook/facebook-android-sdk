@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Eroare neaşteptată la descărcarea unei imagini.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Distribuie</string>
     <string name="com_facebook_send_button_text" gender="unknown">Trimite</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Vizitează &lt;b&gt;facebook.com/device&lt;/b&gt; şi introdu codul afişat mai sus.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Pentru a te conecta la contul tău, deschide aplicaţia Facebook de pe dispozitivul mobil şi verifică notificările.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- SAU -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Confirmă conectarea</string>
