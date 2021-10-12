@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">ഒരു ചിത്രം ഡൗൺലോഡുചെയ്യുമ്പോൾ അജ്ഞാതമായ പിശക് സംഭവിച്ചു.</string>
     <string name="com_facebook_share_button_text" gender="unknown">പങ്കിടുക</string>
     <string name="com_facebook_send_button_text" gender="unknown">അയയ്ക്കുക</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; സന്ദർശിച്ച് മുകളിൽ കാണിച്ചിരിക്കുന്ന കോഡ് നൽകുക.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">നിങ്ങളുടെ അക്കൗണ്ട് കണക്‌റ്റ്ചെയ്യാൻ, നിങ്ങളുടെ മൊബൈൽ ഉപകരണത്തിലെ Facebook ആപ്പ് തുറന്ന് അറിയിപ്പുകൾ പരിശോധിക്കുക.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- അല്ലെങ്കിൽ -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ലോഗിൻ സ്ഥിരീകരിക്കുക</string>
