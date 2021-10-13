@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Erro inesperado ao baixar uma imagem.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Compartilhar</string>
     <string name="com_facebook_send_button_text" gender="unknown">Enviar</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Acesse &lt;b&gt;facebook.com/device&lt;/b&gt; e insira o código mostrado acima.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Para conectar sua conta, abra o aplicativo do Facebook no seu dispositivo móvel e verifique se há notificações.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- OU -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Confirmar login</string>
