@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Une erreur inattendue s’est produite pendant le téléchargement d’une image.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Partager</string>
     <string name="com_facebook_send_button_text" gender="unknown">Envoyer</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Consultez &lt;b&gt;facebook.com/device&lt;/b&gt; et entrez le code affiché ci-dessus.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Pour associer votre compte, ouvrez l’application Facebook sur votre appareil mobile et consultez les notifications.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">– OU –</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Confirmer la connexion</string>
