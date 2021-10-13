@@ -17,26 +17,25 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook.internal;
+package com.facebook.internal
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-public interface DialogFeature {
+interface DialogFeature {
   /** This method is for internal use only. */
-  String getAction();
+  fun getAction(): String
 
   /** This method is for internal use only. */
-  int getMinVersion();
+  fun getMinVersion(): Int
 
   /**
    * This method is for internal use only.
    *
-   * <p>For all Enums that implement this interface, the name() method is already present. It
-   * returns the String representation of the Enum value, verbatim.
+   * For all Enums that implement this interface, the name() method is already present. It returns
+   * the String representation of the Enum value, verbatim.
    */
-  String name();
+  fun name(): String
 }
