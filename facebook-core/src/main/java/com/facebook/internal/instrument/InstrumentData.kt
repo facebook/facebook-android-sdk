@@ -43,26 +43,26 @@ class InstrumentData {
     ThreadCheck;
 
     override fun toString(): String {
-      when (this) {
-        Analysis -> return "Analysis"
-        AnrReport -> return "AnrReport"
-        CrashReport -> return "CrashReport"
-        CrashShield -> return "CrashShield"
-        ThreadCheck -> return "ThreadCheck"
+      return when (this) {
+        Analysis -> "Analysis"
+        AnrReport -> "AnrReport"
+        CrashReport -> "CrashReport"
+        CrashShield -> "CrashShield"
+        ThreadCheck -> "ThreadCheck"
+        else -> UNKNOWN
       }
-      return UNKNOWN
     }
 
     val logPrefix: String
       get() {
-        when (this) {
-          Analysis -> return InstrumentUtility.ANALYSIS_REPORT_PREFIX
-          AnrReport -> return InstrumentUtility.ANR_REPORT_PREFIX
-          CrashReport -> return InstrumentUtility.CRASH_REPORT_PREFIX
-          CrashShield -> return InstrumentUtility.CRASH_SHIELD_PREFIX
-          ThreadCheck -> return InstrumentUtility.THREAD_CHECK_PREFIX
+        return when (this) {
+          Analysis -> InstrumentUtility.ANALYSIS_REPORT_PREFIX
+          AnrReport -> InstrumentUtility.ANR_REPORT_PREFIX
+          CrashReport -> InstrumentUtility.CRASH_REPORT_PREFIX
+          CrashShield -> InstrumentUtility.CRASH_SHIELD_PREFIX
+          ThreadCheck -> InstrumentUtility.THREAD_CHECK_PREFIX
+          else -> UNKNOWN
         }
-        return UNKNOWN
       }
   }
 
@@ -131,13 +131,13 @@ class InstrumentData {
 
   val isValid: Boolean
     get() {
-      when (type) {
-        Type.Analysis -> return featureNames != null && timestamp != null
-        Type.AnrReport -> return stackTrace != null && cause != null && timestamp != null
+      return when (type) {
+        Type.Analysis -> featureNames != null && timestamp != null
+        Type.AnrReport -> stackTrace != null && cause != null && timestamp != null
         Type.CrashReport, Type.CrashShield, Type.ThreadCheck ->
-            return stackTrace != null && timestamp != null
+            stackTrace != null && timestamp != null
+        else -> false
       }
-      return false
     }
 
   fun save() {
@@ -158,12 +158,12 @@ class InstrumentData {
 
   private val parameters: JSONObject?
     private get() {
-      when (type) {
-        Type.Analysis -> return analysisReportParameters
+      return when (type) {
+        Type.Analysis -> analysisReportParameters
         Type.AnrReport, Type.CrashReport, Type.CrashShield, Type.ThreadCheck ->
-            return exceptionReportParameters
+            exceptionReportParameters
+        else -> null
       }
-      return null
     }
 
   private val analysisReportParameters: JSONObject?

@@ -76,6 +76,7 @@ object PerformanceGuardian {
     when (useCase) {
       UseCase.CODELESS -> return bannedCodelessActivitySet.contains(activityName)
       UseCase.SUGGESTED_EVENT -> return bannedSuggestedEventActivitySet.contains(activityName)
+      else -> {}
     }
     return false
   }
@@ -99,6 +100,7 @@ object PerformanceGuardian {
       UseCase.SUGGESTED_EVENT ->
           updateActivityMap(
               useCase, activityName, activityProcessTimeMapSe, bannedSuggestedEventActivitySet)
+      else -> {}
     }
   }
 
