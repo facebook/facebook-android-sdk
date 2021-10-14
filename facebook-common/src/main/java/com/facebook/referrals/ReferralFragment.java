@@ -25,11 +25,11 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 /**
- * This Fragment is a necessary part of the Facebook referral process but is not meant to be used
- * directly.
- *
+ * @deprecated Referral is deprecated. This class will be removed in a future release. This Fragment
+ *     is a necessary part of the Facebook referral process but is not meant to be used directly.
  * @see com.facebook.FacebookActivity
  */
+@Deprecated
 public class ReferralFragment extends Fragment {
   public static final String TAG = "ReferralFragment";
 

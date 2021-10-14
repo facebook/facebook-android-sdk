@@ -31,6 +31,8 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/** @deprecated Referral is deprecated. This class will be removed in a future release. */
+@Deprecated
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ReferralLogger {
   static final String EVENT_NAME_REFERRAL_START = "fb_mobile_referral_start";

@@ -25,7 +25,11 @@ import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Collections;
 import java.util.List;
 
-/** This class shows the results of a referral operation. */
+/**
+ * @deprecated Referral is deprecated. This class will be removed in a future release. This class
+ *     shows the results of a referral operation.
+ */
+@Deprecated
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ReferralResult {
   private final List<String> referralCodes;

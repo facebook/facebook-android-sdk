@@ -36,6 +36,8 @@ import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.login.CustomTabPrefetchHelper;
 
+/** @deprecated Referral is deprecated. This class will be removed in a future release. */
+@Deprecated
 class ReferralClient {
   private Fragment fragment;
   private String currentPackage;

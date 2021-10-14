@@ -39,7 +39,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-/** This class manages referrals for Facebook. */
+/**
+ * @deprecated Referral is deprecated. This class will be removed in a future release. This class
+ *     manages referrals for Facebook.
+ */
+@Deprecated
 public class ReferralManager {
   private static volatile ReferralManager instance;
 
