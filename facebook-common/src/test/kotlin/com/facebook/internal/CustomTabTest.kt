@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsIntent
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.FacebookSdk
 import com.facebook.login.CustomTabLoginMethodHandler.OAUTH_DIALOG
 import com.facebook.login.CustomTabPrefetchHelper
 import com.nhaarman.mockitokotlin2.any
@@ -41,8 +42,9 @@ class CustomTabTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get URI for action`() {
     val uri = CustomTab.getURIForAction(OAUTH_DIALOG, parameters)
+    val version = FacebookSdk.getGraphApiVersion()
     assertThat(uri.toString())
-        .isEqualTo("https://m.facebook.com/v12.0/dialog/oauth?scope=user_name%2Cuser_birthday")
+        .isEqualTo("https://m.facebook.com/$version/dialog/oauth?scope=user_name%2Cuser_birthday")
   }
 
   @Test
