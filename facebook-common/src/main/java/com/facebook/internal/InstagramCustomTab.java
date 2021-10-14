@@ -37,7 +37,7 @@ public class InstagramCustomTab extends CustomTab {
     if (parameters == null) {
       parameters = new Bundle();
     }
-    uri = getURIForAction(action, parameters);
+    this.setUri(getURIForAction(action, parameters));
   }
 
   public static Uri getURIForAction(String action, Bundle parameters) {
