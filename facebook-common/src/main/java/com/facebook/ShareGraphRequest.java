@@ -32,6 +32,8 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/** This feature already be deprecated and we will remove this class in feature release. */
+@Deprecated
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ShareGraphRequest {
 
