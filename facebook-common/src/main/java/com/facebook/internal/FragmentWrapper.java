@@ -25,10 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FragmentWrapper {
   private Fragment supportFragment;
   private android.app.Fragment nativeFragment;
