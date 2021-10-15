@@ -174,13 +174,7 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
     } else if (activity != null) {
       activity.startActivityForResult(intent, requestCode)
     } else if (fragmentWrapper != null) {
-      if (fragmentWrapper.nativeFragment !== null) {
-        fragmentWrapper.nativeFragment.startActivityForResult(intent, requestCode)
-      } else if (fragmentWrapper.supportFragment != null) {
-        fragmentWrapper.supportFragment.startActivityForResult(intent, requestCode)
-      } else {
-        error = "Failed to find Activity or Fragment to startActivityForResult "
-      }
+      fragmentWrapper.startActivityForResult(intent, requestCode)
     } else {
       error = "Failed to find Activity or Fragment to startActivityForResult "
     }
