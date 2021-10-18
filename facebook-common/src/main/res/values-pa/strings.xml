@@ -21,6 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">ਇੱਕ ਚਿੱਤਰ ਡਾਉਨਲੋਡ ਕਰਨ ਦੌਰਾਨ ਅਕਲਪਿਤ ਤਰੁੱਟੀ।</string>
     <string name="com_facebook_share_button_text" gender="unknown">ਸਾਂਝਾ ਕਰੋ</string>
     <string name="com_facebook_send_button_text" gender="unknown">ਭੇਜੋ</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; \'ਤੇ ਜਾਓ ਅਤੇ ਉੱਤੇ ਦਿੱਤਾ ਕੋਡ ਪਾਓ।</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">ਆਪਣੇ ਖਾਤੇ ਨੂੰ ਕਨੈਕਟ ਕਰਨ ਲਈ, ਮੋਬਾਈਲ ਡਿਵਾਈਸ \'ਤੇ Facebook ਐਪ ਖੋਲ੍ਹੋ ਅਤੇ ਸੂਚਨਾਵਾਂ ਦੀ ਜਾਂਚ ਕਰੋ।</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ਜਾਂ -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ਲੌਗ ਇਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</string>
