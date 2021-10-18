@@ -125,6 +125,12 @@ public class SDKConstants {
   // Outlinking
   public static final String PARAM_URL = "url";
 
+  // Debug Print
+  public static final String PARAM_DEBUG_MESSAGE = "msg";
+  public static final String PARAM_DEBUG_MESSAGE_TAG = "tag";
+  public static final String PARAM_DEBUG_MESSAGE_SEVERITY = "severity";
+  public static final String PARAM_DEBUG_MESSAGE_TIMESTAMP = "timestamp";
+
   // Tournamet
   public static final String PARAM_TOURNAMENT_ID = "tournamentId";
 }
