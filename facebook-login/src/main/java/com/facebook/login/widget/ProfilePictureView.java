@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -35,6 +36,8 @@ import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.internal.*;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.R;
@@ -112,6 +115,7 @@ public class ProfilePictureView extends FrameLayout {
   private ImageRequest lastRequest;
   private OnErrorListener onErrorListener;
   private Bitmap customizedDefaultProfilePicture = null;
+  private ProfileTracker profileTracker;
 
   /**
    * Constructor
@@ -255,6 +259,30 @@ public class ProfilePictureView extends FrameLayout {
   }
 
   /**
+   * Set whether the ProfilePictureView should update it's image to reflect the currently logged in
+   * user's profile picture.
+   *
+   * @param shouldUpdateOnProfileChange Whether the ProfilePictureView should subscribe to Profile
+   *     updates
+   */
+  public final void setShouldUpdateOnProfileChange(boolean shouldUpdateOnProfileChange) {
+    if (shouldUpdateOnProfileChange) {
+      profileTracker.startTracking();
+    } else {
+      profileTracker.stopTracking();
+    }
+  }
+
+  /**
+   * Returns whether the ProfilePictureView has subscribed to Profile updates.
+   *
+   * @return The boolean indicating whether the ProfilePictureView has subscribed to updates.
+   */
+  public final boolean getShouldUpdateOnProfileChange() {
+    return profileTracker.isTracking();
+  }
+
+  /**
    * Overriding onMeasure to handle the case where WRAP_CONTENT might be specified in the layout.
    * Since we don't know the dimensions of the profile photo, we need to handle this case
    * specifically.
@@ -374,6 +402,15 @@ public class ProfilePictureView extends FrameLayout {
     // the layout bounds as best as possible.
     image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     addView(image);
+
+    profileTracker =
+        new ProfileTracker() {
+          @Override
+          protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+            setProfileId(currentProfile != null ? currentProfile.getId() : null);
+            refreshImage(true);
+          }
+        };
   }
 
   @AutoHandleExceptions
@@ -442,11 +479,18 @@ public class ProfilePictureView extends FrameLayout {
         AccessToken.isCurrentAccessTokenActive()
             ? AccessToken.getCurrentAccessToken().getToken()
             : "";
+    Uri profilePictureUri =
+        ImageRequest.getProfilePictureUri(profileId, queryWidth, queryHeight, accessToken);
 
-    ImageRequest.Builder requestBuilder =
-        new ImageRequest.Builder(
-            getContext(),
-            ImageRequest.getProfilePictureUri(profileId, queryWidth, queryHeight, accessToken));
+    Profile currentProfile = Profile.getCurrentProfile();
+    if (AccessToken.isLoggedInWithInstagram() && currentProfile != null) {
+      Uri instagramProfilePictureUri = currentProfile.getProfilePictureUri(queryWidth, queryHeight);
+      if (instagramProfilePictureUri != null) {
+        profilePictureUri = instagramProfilePictureUri;
+      }
+    }
+
+    ImageRequest.Builder requestBuilder = new ImageRequest.Builder(getContext(), profilePictureUri);
 
     ImageRequest request =
         requestBuilder
