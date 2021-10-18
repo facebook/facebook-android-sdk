@@ -17,30 +17,25 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
-
-public class WebDialog {
-
-  private WebDialog() {
-    /* no instances */
-  }
-
+object WebDialog {
   /**
-   * Gets the theme used by {@link com.facebook.internal.WebDialog}
+   * Gets the theme used by [com.facebook.internal.WebDialog]
    *
    * @return the theme
    */
-  public static int getWebDialogTheme() {
-    return com.facebook.internal.WebDialog.getWebDialogTheme();
+  @JvmStatic
+  fun getWebDialogTheme(): Int {
+    return com.facebook.internal.WebDialog.getWebDialogTheme()
   }
-
   /**
-   * Sets the theme used by {@link com.facebook.internal.WebDialog}
+   * Sets the theme used by [com.facebook.internal.WebDialog]
    *
    * @param theme A theme to use
    */
-  public static void setWebDialogTheme(int theme) {
-    com.facebook.internal.WebDialog.setWebDialogTheme(theme);
+  @JvmStatic
+  fun setWebDialogTheme(theme: Int) {
+    com.facebook.internal.WebDialog.setWebDialogTheme(theme)
   }
 }

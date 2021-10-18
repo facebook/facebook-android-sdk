@@ -17,26 +17,24 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** A callback class for getting the Login Status of a user. */
-public interface LoginStatusCallback {
-
+interface LoginStatusCallback {
   /**
    * Called when an access token is able to be retrieved successfully.
    *
    * @param accessToken The access token retrieved for the user
    */
-  void onCompleted(final AccessToken accessToken);
+  fun onCompleted(accessToken: AccessToken)
 
   /** Called when an access token could not be retrieved. */
-  void onFailure();
+  fun onFailure()
 
   /**
    * Called when there was an error getting the login status of a user.
    *
    * @param exception The error that occurred
    */
-  void onError(final Exception exception);
+  fun onError(exception: Exception)
 }
