@@ -138,6 +138,24 @@ public abstract class FacebookButtonBase extends Button {
     return getDefaultRequestCode();
   }
 
+  /**
+   * Gets the logger eventName when login button is created
+   *
+   * @return an button creation eventName string
+   */
+  protected String getAnalyticsButtonCreatedEventName() {
+    return this.analyticsButtonCreatedEventName;
+  }
+
+  /**
+   * Gets the logger eventName when login button is tap
+   *
+   * @return an button tap eventName string
+   */
+  protected String getAnalyticsButtonTappedEventName() {
+    return this.analyticsButtonTappedEventName;
+  }
+
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
@@ -230,12 +248,12 @@ public abstract class FacebookButtonBase extends Button {
     internalOnClickListener = l;
   }
 
-  private void logButtonCreated(final Context context) {
+  protected void logButtonCreated(final Context context) {
     InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
     logger.logEventImplicitly(analyticsButtonCreatedEventName);
   }
 
-  private void logButtonTapped(final Context context) {
+  protected void logButtonTapped(final Context context) {
     InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
     logger.logEventImplicitly(analyticsButtonTappedEventName);
   }
@@ -294,7 +312,6 @@ public abstract class FacebookButtonBase extends Button {
           a.getResourceId(2, 0),
           a.getResourceId(3, 0));
       setCompoundDrawablePadding(a.getDimensionPixelSize(4, 0));
-
     } finally {
       a.recycle();
     }
@@ -360,7 +377,8 @@ public abstract class FacebookButtonBase extends Button {
         context.getTheme().obtainStyledAttributes(attrs, attrsResources, defStyleAttr, defStyleRes);
     try {
       setTextSize(TypedValue.COMPLEX_UNIT_PX, a.getDimensionPixelSize(0, 0));
-      setTypeface(Typeface.defaultFromStyle(a.getInt(1, Typeface.BOLD)));
+      Typeface typeface = getTypeface();
+      setTypeface(Typeface.create(typeface, Typeface.BOLD));
       setText(a.getString(2));
     } finally {
       a.recycle();
