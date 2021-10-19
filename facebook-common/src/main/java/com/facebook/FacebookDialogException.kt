@@ -17,52 +17,35 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** Represents an error condition relating to displaying a Facebook Web dialog. */
-public class FacebookDialogException extends FacebookException {
-  static final long serialVersionUID = 1;
-  private int errorCode;
-  private String failingUrl;
-
-  /** Constructs a new FacebookException. */
-  public FacebookDialogException(String message, int errorCode, String failingUrl) {
-    super(message);
-    this.errorCode = errorCode;
-    this.failingUrl = failingUrl;
-  }
-
-  /**
-   * Gets the error code received by the WebView. See:
-   * http://developer.android.com/reference/android/webkit/WebViewClient.html
-   *
-   * @return the error code
-   */
-  public int getErrorCode() {
-    return errorCode;
-  }
-
-  /**
-   * Gets the URL that the dialog was trying to load.
-   *
-   * @return the URL
-   */
-  public String getFailingUrl() {
-    return failingUrl;
-  }
-
-  @Override
-  public final String toString() {
-    return new StringBuilder()
+class FacebookDialogException
+/** Constructs a new FacebookException. */
+(
+    message: String?,
+    /**
+     * The error code received by the WebView. See:
+     * http://developer.android.com/reference/android/webkit/WebViewClient.html
+     */
+    val errorCode: Int,
+    /** The URL that the dialog was trying to load. */
+    val failingUrl: String?
+) : FacebookException(message) {
+  override fun toString(): String {
+    return StringBuilder()
         .append("{FacebookDialogException: ")
         .append("errorCode: ")
-        .append(getErrorCode())
+        .append(errorCode)
         .append(", message: ")
-        .append(getMessage())
+        .append(message)
         .append(", url: ")
-        .append(getFailingUrl())
+        .append(failingUrl)
         .append("}")
-        .toString();
+        .toString()
+  }
+
+  companion object {
+    const val serialVersionUID: Long = 1
   }
 }
