@@ -148,7 +148,7 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
         appCall.setPending()
       } else if (fragmentWrapper != null) {
         DialogPresenter.present(appCall, fragmentWrapper)
-      } else {
+      } else if (activity != null) {
         DialogPresenter.present(appCall, activity)
       }
     } else {
@@ -228,7 +228,7 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
   }
 
   protected abstract val orderedModeHandlers: List<ModeHandler>
-  protected abstract fun createBaseAppCall(): AppCall?
+  protected abstract fun createBaseAppCall(): AppCall
   protected abstract inner class ModeHandler {
     /** @return An object to signify a specific dialog-mode. */
     open var mode: Any = BASE_AUTOMATIC_MODE

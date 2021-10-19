@@ -455,9 +455,7 @@ object NativeProtocol {
     return null
   }
 
-  @JvmStatic
-  val latestKnownVersion: Int
-    get() = KNOWN_PROTOCOL_VERSIONS[0]
+  @JvmStatic fun getLatestKnownVersion(): Int = KNOWN_PROTOCOL_VERSIONS[0]
 
   // Note: be sure this stays sorted in descending order; add new versions at the beginning
   private val KNOWN_PROTOCOL_VERSIONS =
@@ -722,7 +720,7 @@ object NativeProtocol {
     for (appInfo in appInfoList) {
       val protocolVersion =
           computeLatestAvailableVersionFromVersionSpec(
-              appInfo.getAvailableVersions(), latestKnownVersion, versionSpec)
+              appInfo.getAvailableVersions(), getLatestKnownVersion(), versionSpec)
       if (protocolVersion != NO_PROTOCOL_AVAILABLE) {
         return ProtocolVersionQueryResult.create(appInfo, protocolVersion)
       }
