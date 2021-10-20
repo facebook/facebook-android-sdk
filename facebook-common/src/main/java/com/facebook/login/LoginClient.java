@@ -477,7 +477,7 @@ class LoginClient implements Parcelable {
     private Set<String> permissions;
     private final DefaultAudience defaultAudience;
     private final String applicationId;
-    private final String authId;
+    private String authId;
     private boolean isRerequest = false;
     private String deviceRedirectUriString;
     private String authType;
@@ -571,6 +571,10 @@ class LoginClient implements Parcelable {
 
     String getAuthId() {
       return authId;
+    }
+
+    void setAuthId(String authId) {
+      this.authId = authId;
     }
 
     boolean isRerequest() {

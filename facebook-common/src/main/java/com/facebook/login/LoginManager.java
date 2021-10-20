@@ -798,7 +798,9 @@ public class LoginManager {
    * @param loggerID Override the default logger ID for the request
    */
   public void logIn(FragmentWrapper fragment, Collection<String> permissions, String loggerID) {
-    LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
+    loginRequest.setAuthId(loggerID);
     startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
   }
 
@@ -848,7 +850,9 @@ public class LoginManager {
    * @param loggerID Override the default logger ID for the request
    */
   public void logIn(Activity activity, Collection<String> permissions, String loggerID) {
-    LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
+    loginRequest.setAuthId(loggerID);
     startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
   }
 
@@ -886,7 +890,9 @@ public class LoginManager {
       @NonNull CallbackManager callbackManager,
       @NonNull Collection<String> permissions,
       String loggerID) {
-    LoginClient.Request loginRequest = createLoginRequest(permissions, loggerID);
+    LoginConfiguration loginConfig = new LoginConfiguration(permissions);
+    LoginClient.Request loginRequest = createLoginRequestWithConfig(loginConfig);
+    loginRequest.setAuthId(loggerID);
     startLogin(
         new AndroidxActivityResultRegistryOwnerStartActivityDelegate(
             activityResultRegistryOwner, callbackManager),
@@ -989,26 +995,6 @@ public class LoginManager {
             authType,
             FacebookSdk.getApplicationId(),
             UUID.randomUUID().toString(),
-            targetApp);
-    request.setRerequest(AccessToken.isCurrentAccessTokenActive());
-    request.setMessengerPageId(messengerPageId);
-    request.setResetMessengerState(resetMessengerState);
-    request.setFamilyLogin(isFamilyLogin);
-    request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication);
-    return request;
-  }
-
-  protected LoginClient.Request createLoginRequest(
-      Collection<String> permissions, String loggerID) {
-    LoginClient.Request request =
-        new LoginClient.Request(
-            loginBehavior,
-            Collections.unmodifiableSet(
-                permissions != null ? new HashSet(permissions) : new HashSet<String>()),
-            defaultAudience,
-            authType,
-            FacebookSdk.getApplicationId(),
-            loggerID,
             targetApp);
     request.setRerequest(AccessToken.isCurrentAccessTokenActive());
     request.setMessengerPageId(messengerPageId);
