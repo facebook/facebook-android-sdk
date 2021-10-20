@@ -95,6 +95,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
       // fallback to try next handler to get id_token
       if (permissions.contains("openid") && (idTokenString == null || idTokenString.isEmpty())) {
         loginClient.tryNextHandler();
+        return;
       }
 
       if ((currentPermissions != null)
