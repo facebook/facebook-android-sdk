@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed a bug that causes multiple login intents to launch when the user has previously authorized the app and is logging in with the `openid` scope.
+
 ## [12.0.1] - 2021-10-12
 
 ### Added
