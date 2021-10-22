@@ -65,8 +65,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.common.R;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.login.LoginTargetApp;
 import com.facebook.share.internal.ShareConstants;
 import com.facebook.share.internal.ShareInternalUtility;
@@ -89,7 +87,6 @@ import org.json.JSONObject;
  * methods are provided to construct commonly-used dialogs, or a caller can specify arbitrary
  * parameters to call other dialogs.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class WebDialog extends Dialog {
 
   private static final String LOG_TAG = Logger.LOG_TAG_BASE + "WebDialog";
