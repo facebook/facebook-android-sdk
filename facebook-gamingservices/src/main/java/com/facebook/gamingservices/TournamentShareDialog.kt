@@ -30,6 +30,7 @@ import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.gamingservices.cloudgaming.CloudGameLoginHandler
+import com.facebook.gamingservices.cloudgaming.internal.SDKConstants
 import com.facebook.gamingservices.internal.TournamentShareDialogURIBuilder
 import com.facebook.internal.AppCall
 import com.facebook.internal.CallbackManagerImpl
@@ -45,6 +46,11 @@ import java.util.ArrayList
 
 @AutoHandleExceptions
 class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentShareDialog.Result?> {
+  companion object {
+    private val defaultRequestCode =
+        CallbackManagerImpl.RequestCodeOffset.TournamentShareDialog.toRequestCode()
+  }
+
   var score: Number? = null
   var tournament: Tournament? = null
 
@@ -115,8 +121,19 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
     val resultProcessor: ResultProcessor? =
         object : ResultProcessor(callback) {
           override fun onSuccess(appCall: AppCall, results: Bundle) {
-            update(results)
-            callback.onSuccess(Result())
+            if (results != null) {
+              if (results.getString("error_message") != null) {
+                callback.onError(FacebookException(results.getString("error_message")))
+                return
+              }
+
+              if (results.getString(SDKConstants.PARAM_TOURNAMENTS_ID) != null) {
+                callback.onSuccess(Result(results))
+                return
+              }
+            }
+
+            onCancel(appCall)
           }
         }
     callbackManager.registerCallback(requestCode) { resultCode, data ->
@@ -140,14 +157,15 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
    * Describes the result of a Tournament Share Dialog.
    *
    */
-  class Result
-  companion object {
-    private val defaultRequestCode =
-        CallbackManagerImpl.RequestCodeOffset.TournamentShareDialog.toRequestCode()
-    @JvmField var requestId: String? = null
+  class Result {
+    var requestID: String? = null
+    var tournamentID: String? = null
 
-    private fun update(results: Bundle) {
-      this.requestId = results.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_REQUEST_ID)
+    constructor(results: Bundle) {
+      if (results.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_REQUEST_ID) != null) {
+        this.requestID = results.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_REQUEST_ID)
+      }
+      this.tournamentID = results.getString(SDKConstants.PARAM_TOURNAMENTS_ID)
     }
   }
 
