@@ -49,6 +49,15 @@ internal object TournamentShareDialogURIBuilder {
     return builder.build()
   }
 
+  internal fun bundleForUpdating(tournamentID: String, score: Number, appID: String): Bundle {
+    val args = Bundle()
+    args.putString(SDKConstants.PARAM_TOURNAMENTS_DEEPLINK, SDKConstants.PARAM_TOURNAMENTS)
+    args.putString(SDKConstants.PARAM_TOURNAMENTS_APP_ID, appID)
+    args.putString(SDKConstants.PARAM_TOURNAMENTS_SCORE, score.toString())
+    args.putString(SDKConstants.PARAM_TOURNAMENTS_ID, tournamentID)
+    return args
+  }
+
   internal fun bundleForCreating(config: TournamentConfig, score: Number, appID: String): Bundle {
     val args = Bundle()
     args.putString(SDKConstants.PARAM_TOURNAMENTS_DEEPLINK, SDKConstants.PARAM_TOURNAMENTS)

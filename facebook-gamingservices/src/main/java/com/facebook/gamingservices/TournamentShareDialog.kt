@@ -180,7 +180,10 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
       val args =
           if (content != null)
               TournamentShareDialogURIBuilder.bundleForCreating(content, score, appID)
-          else Bundle()
+          else
+              tournament?.let {
+                TournamentShareDialogURIBuilder.bundleForUpdating(it.identifier, score, appID)
+              }
 
       setupProtocolRequestIntent(
           intent, appCall.callId.toString(), "", NativeProtocol.PROTOCOL_VERSION_20210906, args)
