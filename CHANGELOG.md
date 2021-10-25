@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.1.0] - 2021-11-01
+
 ### Fixed
 - Fixed a bug that causes multiple login intents to launch when the user has previously authorized the app and is logging in with the `openid` scope.
 
@@ -361,6 +363,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[12.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.1...sdk-version-12.1.0
 [12.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.0...sdk-version-12.0.1
 [12.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.3.0...sdk-version-12.0.0
 [11.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.2.0...sdk-version-11.3.0
@@ -406,4 +409,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+
 
