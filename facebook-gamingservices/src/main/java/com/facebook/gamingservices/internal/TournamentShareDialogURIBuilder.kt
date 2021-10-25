@@ -2,12 +2,40 @@
 
 package com.facebook.gamingservices.internal
 
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import com.facebook.gamingservices.TournamentConfig
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants
 
 internal object TournamentShareDialogURIBuilder {
+  const val scheme = "https"
+  const val authority = "fb.gg"
+  const val me = "me"
+  const val tournament = "instant_tournament"
+
+  internal fun uriForCreating(config: TournamentConfig, score: Number, appID: String): Uri {
+    val builder =
+        Uri.Builder()
+            .scheme(scheme)
+            .authority(authority)
+            .appendPath(me)
+            .appendPath(tournament)
+            .appendPath(appID)
+            .appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_SCORE, score.toString())
+    config.endTime?.let {
+      builder.appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_END_TIME, it.toString())
+    }
+    config.sortOrder?.let {
+      builder.appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_SORT_ORDER, it.toString())
+    }
+    config.scoreType?.let {
+      builder.appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_SCORE_FORMAT, it.toString())
+    }
+    config.title?.let { builder.appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_TITLE, it) }
+    config.payload?.let { builder.appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_PAYLOAD, it) }
+    return builder.build()
+  }
 
   internal fun bundleForCreating(config: TournamentConfig, score: Number, appID: String): Bundle {
     val args = Bundle()

@@ -114,6 +114,7 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
     get() {
       val handlers = ArrayList<ModeHandler>()
       handlers.add(FacebookAppHandler())
+      handlers.add(AppSwitchHandler())
       return handlers
     }
 
@@ -171,6 +172,37 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
           intent, appCall.callId.toString(), "", NativeProtocol.PROTOCOL_VERSION_20210906, args)
       appCall.requestIntent = intent
 
+      return appCall
+    }
+  }
+
+  private inner class AppSwitchHandler : ModeHandler() {
+
+    override fun canShow(content: TournamentConfig?, isBestEffort: Boolean): Boolean {
+      return true
+    }
+
+    override fun createAppCall(content: TournamentConfig?): AppCall {
+      val appCall: AppCall = this@TournamentShareDialog.createBaseAppCall()
+      val currentAccessToken = getCurrentAccessToken()
+      if (currentAccessToken == null || currentAccessToken.isExpired) {
+        throw FacebookException("Attempted to share tournament with an invalid access token")
+      }
+      if (currentAccessToken.graphDomain != null &&
+          FacebookSdk.GAMING != currentAccessToken.graphDomain) {
+        throw FacebookException("Attempted to share tournament without without gaming login")
+      }
+      val score: Number =
+          score ?: throw FacebookException("Attempted to share tournament without a score")
+
+      val uri =
+          content?.let {
+            TournamentShareDialogURIBuilder.uriForCreating(
+                it, score, currentAccessToken.applicationId)
+          }
+
+      val intent = Intent(Intent.ACTION_VIEW, uri)
+      startActivityForResult(intent, requestCode)
       return appCall
     }
   }
