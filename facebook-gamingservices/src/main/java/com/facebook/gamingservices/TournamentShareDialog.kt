@@ -87,6 +87,20 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
     showImpl(newTournamentConfig, BASE_AUTOMATIC_MODE)
   }
 
+  /**
+   * Shows the tournament share dialog, where the user has the option to share the provided
+   * tournament with the provided score if it's greater than their previous score.
+   *
+   * @param score A number representing a score
+   * @param tournament An existing tournament that the user wants to post the provided score and
+   * share.
+   */
+  fun show(score: Number, tournament: Tournament) {
+    this.score = score
+    this.tournament = tournament
+    showImpl(null, BASE_AUTOMATIC_MODE)
+  }
+
   override fun showImpl(content: TournamentConfig?, mode: Any) {
     if (CloudGameLoginHandler.isRunningInCloud()) {
       return
@@ -196,9 +210,14 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
           score ?: throw FacebookException("Attempted to share tournament without a score")
 
       val uri =
-          content?.let {
-            TournamentShareDialogURIBuilder.uriForCreating(
-                it, score, currentAccessToken.applicationId)
+          if (content != null)
+              TournamentShareDialogURIBuilder.uriForCreating(
+                  content, score, currentAccessToken.applicationId)
+          else {
+            this@TournamentShareDialog.tournament?.let {
+              TournamentShareDialogURIBuilder.uriForUpdating(
+                  it.identifier, score, currentAccessToken.applicationId)
+            }
           }
 
       val intent = Intent(Intent.ACTION_VIEW, uri)

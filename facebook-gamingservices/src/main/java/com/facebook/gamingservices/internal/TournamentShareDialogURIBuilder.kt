@@ -14,6 +14,18 @@ internal object TournamentShareDialogURIBuilder {
   const val me = "me"
   const val tournament = "instant_tournament"
 
+  internal fun uriForUpdating(tournamentID: String, score: Number, appID: String): Uri {
+    return Uri.Builder()
+        .scheme(scheme)
+        .authority(authority)
+        .appendPath(me)
+        .appendPath(tournament)
+        .appendPath(appID)
+        .appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_ID, tournamentID)
+        .appendQueryParameter(SDKConstants.PARAM_TOURNAMENTS_SCORE, score.toString())
+        .build()
+  }
+
   internal fun uriForCreating(config: TournamentConfig, score: Number, appID: String): Uri {
     val builder =
         Uri.Builder()
