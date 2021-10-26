@@ -175,6 +175,7 @@ object FeatureManager {
     ErrorReport(0x00020200),
     AnrReport(0x00020300),
     Monitoring(0x00030000),
+    ServiceUpdateCompliance(0x00030100),
 
     // Features in LoginKit
     /** Essential of LoginKit */
@@ -214,6 +215,7 @@ object FeatureManager {
           IapLogging -> "IAPLogging"
           IapLoggingLib2 -> "IAPLoggingLib2"
           Monitoring -> "Monitoring"
+          ServiceUpdateCompliance -> "ServiceUpdateCompliance"
           Login -> "LoginKit"
           ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
           IgnoreAppSwitchToLoggedOut -> "IgnoreAppSwitchToLoggedOut"

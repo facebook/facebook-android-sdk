@@ -762,7 +762,11 @@ object Utility {
     params.put("advertiser_id_collection_enabled", FacebookSdk.getAdvertiserIDCollectionEnabled())
     if (attributionIdentifiers != null) {
       if (attributionIdentifiers.attributionId != null) {
-        params.put("attribution", attributionIdentifiers.attributionId)
+        if (FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
+          appendAttributionIdUnderCompliance(params, attributionIdentifiers)
+        } else {
+          params.put("attribution", attributionIdentifiers.attributionId)
+        }
       }
       if (attributionIdentifiers.androidAdvertiserId != null) {
         params.put("advertiser_id", attributionIdentifiers.androidAdvertiserId)
@@ -1235,6 +1239,20 @@ object Utility {
 
   private fun convertBytesToGB(bytes: Double): Long {
     return Math.round(bytes / (1024.0 * 1024.0 * 1024.0))
+  }
+
+  private fun appendAttributionIdUnderCompliance(
+      params: JSONObject,
+      attributionIdentifiers: AttributionIdentifiers
+  ) {
+    // TODO: change to Build.VERSION_CODES.S after we start building with API 31
+    if (Build.VERSION.SDK_INT >= 31) {
+      if (!attributionIdentifiers.isTrackingLimited) {
+        params.put("attribution", attributionIdentifiers.attributionId)
+      }
+    } else {
+      params.put("attribution", attributionIdentifiers.attributionId)
+    }
   }
 
   @Throws(JSONException::class)
