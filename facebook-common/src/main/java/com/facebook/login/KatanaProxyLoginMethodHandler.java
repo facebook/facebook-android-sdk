@@ -68,6 +68,10 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
 
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
+    if (intents == null) {
+      return 0;
+    }
+
     for (int i = 0; i < intents.size(); i++) {
       boolean launchedIntent = tryIntent(intents.get(i), LoginClient.getLoginRequestCode());
       if (launchedIntent) {
