@@ -87,6 +87,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    kotlinOptions {
+        useOldBackend = true
+        // Keep jvm target at 1.6 to maintain compatibility with Android API level < 26
+        jvmTarget = "1.6"
+    }
+
     buildTypes {
         release {
             minifyEnabled false
