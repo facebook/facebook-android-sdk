@@ -57,7 +57,10 @@ class WebDialogTest : FacebookPowerMockTestCase() {
     meta.putInt(FacebookSdk.WEB_DIALOG_THEME, R.style.com_facebook_auth_dialog)
     mockApplicationInfo.metaData = meta
 
-    listener = WebDialog.OnCompleteListener { _: Bundle, _: FacebookException -> run {} }
+    listener =
+        object : WebDialog.OnCompleteListener {
+          override fun onComplete(values: Bundle?, error: FacebookException?) = Unit
+        }
   }
 
   @Test
