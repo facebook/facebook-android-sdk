@@ -21,7 +21,6 @@
 package com.facebook.login;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -178,7 +177,7 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
     try {
       loginClient.getFragment().startActivityForResult(intent, requestCode);
-    } catch (ActivityNotFoundException e) {
+    } catch (Exception e) {
       // We do not know if we have the activity until we try starting it.
       // FB is not installed if ActivityNotFoundException is thrown and this might fallback
       // to other handlers
