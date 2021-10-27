@@ -26,6 +26,9 @@ import com.facebook.AccessToken.Companion.setCurrentAccessToken
 import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.Utility
+import com.facebook.util.common.mockLocalBroadcastManager
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.net.HttpURLConnection
 import org.json.JSONObject
@@ -36,6 +39,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberMatcher
 import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
 @PrepareForTest(
     AccessToken::class,
@@ -57,10 +61,16 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
     MemberModifier.stub<Any?>(MemberMatcher.method(AccessTokenCache::class.java, "save"))
         .toReturn(null)
     PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
-    val mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
+    val mockLocalBroadcastManager = mockLocalBroadcastManager(FacebookSdk.getApplicationContext())
     PowerMockito.mockStatic(LocalBroadcastManager::class.java)
-    whenever(LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext()))
+    PowerMockito.`when`(LocalBroadcastManager.getInstance(any()))
         .thenReturn(mockLocalBroadcastManager)
+
+    val accessTokenManager = AccessTokenManager(mockLocalBroadcastManager, AccessTokenCache())
+    val mockAccessTokenManagerCompanion = mock<AccessTokenManager.Companion>()
+    whenever(mockAccessTokenManagerCompanion.getInstance()).thenReturn(accessTokenManager)
+    Whitebox.setInternalState(
+        AccessTokenManager::class.java, "Companion", mockAccessTokenManagerCompanion)
   }
 
   @Test

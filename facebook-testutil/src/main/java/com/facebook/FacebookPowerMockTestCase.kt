@@ -22,6 +22,7 @@ package com.facebook
 import android.annotation.SuppressLint
 import java.util.concurrent.Executor
 import java.util.concurrent.ScheduledThreadPoolExecutor
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -58,6 +59,11 @@ abstract class FacebookPowerMockTestCase {
   open fun setup() {
     ShadowLog.stream = System.out
     MockitoAnnotations.initMocks(this)
+  }
+
+  @After
+  fun clearMocks() {
+    org.mockito.Mockito.framework().clearInlineMocks()
   }
 
   class FacebookSerialExecutor : Executor {
