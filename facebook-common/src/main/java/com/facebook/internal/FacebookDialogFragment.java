@@ -26,19 +26,17 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FacebookDialogFragment extends DialogFragment {
   private Dialog dialog;
 
@@ -56,56 +54,59 @@ public class FacebookDialogFragment extends DialogFragment {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    initDialog();
+  }
 
-    if (this.dialog == null) {
-      final FragmentActivity activity = getActivity();
-      Intent intent = activity.getIntent();
-      Bundle params = NativeProtocol.getMethodArgumentsFromIntent(intent);
+  @VisibleForTesting
+  protected void initDialog() {
+    if (this.dialog != null) {
+      return;
+    }
+    final FragmentActivity activity = getActivity();
+    Intent intent = activity.getIntent();
+    Bundle params = NativeProtocol.getMethodArgumentsFromIntent(intent);
 
-      boolean isWebFallback = params.getBoolean(NativeProtocol.WEB_DIALOG_IS_FALLBACK, false);
-      WebDialog webDialog;
-      if (!isWebFallback) {
-        String actionName = params.getString(NativeProtocol.WEB_DIALOG_ACTION);
-        Bundle webParams = params.getBundle(NativeProtocol.WEB_DIALOG_PARAMS);
-        if (Utility.isNullOrEmpty(actionName)) {
-          Utility.logd(TAG, "Cannot start a WebDialog with an empty/missing 'actionName'");
-          activity.finish();
-          return;
-        }
-
-        webDialog =
-            new WebDialog.Builder(activity, actionName, webParams)
-                .setOnCompleteListener(
-                    new WebDialog.OnCompleteListener() {
-                      @Override
-                      public void onComplete(Bundle values, FacebookException error) {
-                        onCompleteWebDialog(values, error);
-                      }
-                    })
-                .build();
-      } else {
-        String url = params.getString(NativeProtocol.WEB_DIALOG_URL);
-        if (Utility.isNullOrEmpty(url)) {
-          Utility.logd(TAG, "Cannot start a fallback WebDialog with an empty/missing 'url'");
-          activity.finish();
-          return;
-        }
-
-        String redirectUrl = String.format("fb%s://bridge/", FacebookSdk.getApplicationId());
-        webDialog = FacebookWebFallbackDialog.newInstance(activity, url, redirectUrl);
-        webDialog.setOnCompleteListener(
-            new WebDialog.OnCompleteListener() {
-              @Override
-              public void onComplete(Bundle values, FacebookException error) {
-                // Error data is nested in the values since this is in the form of a
-                // Native protocol response
-                onCompleteWebFallbackDialog(values);
-              }
-            });
+    boolean isWebFallback = params.getBoolean(NativeProtocol.WEB_DIALOG_IS_FALLBACK, false);
+    WebDialog webDialog;
+    if (!isWebFallback) {
+      String actionName = params.getString(NativeProtocol.WEB_DIALOG_ACTION);
+      Bundle webParams = params.getBundle(NativeProtocol.WEB_DIALOG_PARAMS);
+      if (Utility.isNullOrEmpty(actionName)) {
+        Utility.logd(TAG, "Cannot start a WebDialog with an empty/missing 'actionName'");
+        activity.finish();
+        return;
+      }
+      webDialog =
+          new WebDialog.Builder(activity, actionName, webParams)
+              .setOnCompleteListener(
+                  new WebDialog.OnCompleteListener() {
+                    @Override
+                    public void onComplete(Bundle values, FacebookException error) {
+                      onCompleteWebDialog(values, error);
+                    }
+                  })
+              .build();
+    } else {
+      String url = params.getString(NativeProtocol.WEB_DIALOG_URL);
+      if (Utility.isNullOrEmpty(url)) {
+        Utility.logd(TAG, "Cannot start a fallback WebDialog with an empty/missing 'url'");
+        activity.finish();
+        return;
       }
 
-      this.dialog = webDialog;
+      String redirectUrl = String.format("fb%s://bridge/", FacebookSdk.getApplicationId());
+      webDialog = FacebookWebFallbackDialog.newInstance(activity, url, redirectUrl);
+      webDialog.setOnCompleteListener(
+          new WebDialog.OnCompleteListener() {
+            @Override
+            public void onComplete(Bundle values, FacebookException error) {
+              // Error data is nested in the values since this is in the form of a
+              // Native protocol response
+              onCompleteWebFallbackDialog(values);
+            }
+          });
     }
+    this.dialog = webDialog;
   }
 
   @NonNull
