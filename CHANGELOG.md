@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed a bug that causes multiple login intents to launch when the user has previously authorized the app and is logging in with the `openid` scope.
 
+### Added
+- Adds Tournaments for native games, this feature is only available for select partners.
+
 ## [12.0.1] - 2021-10-12
 
 ### Added
@@ -409,5 +412,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
-
