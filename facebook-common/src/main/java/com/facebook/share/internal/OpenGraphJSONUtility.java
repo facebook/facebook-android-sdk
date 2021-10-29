@@ -20,10 +20,8 @@
 
 package com.facebook.share.internal;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
@@ -40,8 +38,6 @@ import org.json.JSONObject;
  *
  * <p>Utility methods for JSON representation of Open Graph models.
  */
-@AutoHandleExceptions
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class OpenGraphJSONUtility {
   /**
    * Converts an action to a JSONObject.
@@ -53,9 +49,14 @@ public final class OpenGraphJSONUtility {
    * @return {@link org.json.JSONObject} representing the action.
    * @throws JSONException
    */
+  @Nullable
   public static JSONObject toJSONObject(
-      final ShareOpenGraphAction action, final PhotoJSONProcessor photoJSONProcessor)
+      @Nullable final ShareOpenGraphAction action,
+      @Nullable final PhotoJSONProcessor photoJSONProcessor)
       throws JSONException {
+    if (action == null) {
+      return null;
+    }
     final JSONObject result = new JSONObject();
     final Set<String> keys = action.keySet();
     for (String key : keys) {
@@ -84,8 +85,9 @@ public final class OpenGraphJSONUtility {
     return result;
   }
 
+  @Nullable
   public static Object toJSONValue(
-      @Nullable final Object object, final PhotoJSONProcessor photoJSONProcessor)
+      @Nullable final Object object, @Nullable final PhotoJSONProcessor photoJSONProcessor)
       throws JSONException {
     if (object == null) {
       return JSONObject.NULL;
@@ -98,25 +100,28 @@ public final class OpenGraphJSONUtility {
         || (object instanceof Long)) {
       return object;
     }
-    if (object instanceof SharePhoto) {
-      if (photoJSONProcessor != null) {
-        return photoJSONProcessor.toJSONObject((SharePhoto) object);
+    try {
+      if (object instanceof SharePhoto) {
+        if (photoJSONProcessor != null) {
+          return photoJSONProcessor.toJSONObject((SharePhoto) object);
+        }
+        return null;
       }
-      return null;
+      if (object instanceof ShareOpenGraphObject) {
+        return toJSONObject((ShareOpenGraphObject) object, photoJSONProcessor);
+      }
+      if (object instanceof List) {
+        return toJSONArray((List) object, photoJSONProcessor);
+      }
+    } catch (Exception e) {
+      // crash from PhotoJSONProcessor. Swallow it
     }
-    if (object instanceof ShareOpenGraphObject) {
-      return toJSONObject((ShareOpenGraphObject) object, photoJSONProcessor);
-    }
-    if (object instanceof List) {
-      return toJSONArray((List) object, photoJSONProcessor);
-    }
-    throw new IllegalArgumentException(
-        "Invalid object found for JSON serialization: " + object.toString());
+    return null;
   }
 
   private OpenGraphJSONUtility() {}
 
   public interface PhotoJSONProcessor {
-    public JSONObject toJSONObject(SharePhoto photo);
+    public JSONObject toJSONObject(@NonNull SharePhoto photo);
   }
 }
