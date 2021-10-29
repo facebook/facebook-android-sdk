@@ -1,6 +1,5 @@
 package com.facebook.internal
 
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import com.facebook.AccessToken
@@ -56,7 +55,7 @@ class FacebookDialogFragmentTest : FacebookPowerMockTestCase() {
     whenever(NativeProtocol.getMethodArgumentsFromIntent(any())).thenReturn(params)
 
     fragment.initDialog()
-    val dialog = WhiteboxImpl.getInternalState<Dialog>(fragment, "dialog")
+    val dialog = fragment.innerDialog
     assertThat(dialog).isEqualTo(mockDialog)
   }
 }

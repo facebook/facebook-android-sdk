@@ -96,7 +96,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
 
     FacebookDialogFragment dialogFragment = new FacebookDialogFragment();
     dialogFragment.setRetainInstance(true);
-    dialogFragment.setDialog(loginDialog);
+    dialogFragment.setInnerDialog(loginDialog);
     dialogFragment.show(fragmentActivity.getSupportFragmentManager(), FacebookDialogFragment.TAG);
 
     return 1;
