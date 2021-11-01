@@ -18,10 +18,10 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.login;
+package com.facebook.login
 
 /** Specifies the behaviors to try during login. */
-public enum LoginBehavior {
+enum class LoginBehavior {
   /**
    * Specifies that login should attempt login in using a native app in the Facebook Family of Apps,
    * and if that does not work, fall back to web dialog auth. This is the default behavior.
@@ -40,11 +40,12 @@ public enum LoginBehavior {
   /** Specifies that only the web dialog auth should be used. */
   WEB_ONLY(false, false, true, false, true, false, false),
 
-  /** Specifies that only the web view dialog auth should be used. */
-  /* @deprecated Web view login is deprecated. This value will be removed in a future release.
-   * More information at https://developers.facebook.com/docs/facebook-login/android/deprecating-webviews
+  /**
+   * Specifies that only the web view dialog auth should be used.
+   * @deprecated Web view login is deprecated. This value will be removed in a future release. More
+   * information at https://developers.facebook.com/docs/facebook-login/android/deprecating-webviews
    */
-  @Deprecated
+  @Deprecated("Webview is deprecated as of 11/5/2021")
   WEB_VIEW_ONLY(false, false, true, false, false, false, false),
 
   /** Specifies that only the web dialog auth (from anywhere) should be used */
@@ -57,56 +58,64 @@ public enum LoginBehavior {
    */
   DEVICE_AUTH(false, false, false, true, false, false, false);
 
-  private final boolean allowsGetTokenAuth;
-  private final boolean allowsKatanaAuth;
-  private final boolean allowsWebViewAuth;
-  private final boolean allowsDeviceAuth;
-  private final boolean allowsCustomTabAuth;
-  private final boolean allowsFacebookLiteAuth;
-  private final boolean allowsInstagramAppAuth;
+  private val allowsGetTokenAuth: Boolean
+  private val allowsKatanaAuth: Boolean
+  private val allowsWebViewAuth: Boolean
+  private val allowsDeviceAuth: Boolean
+  private val allowsCustomTabAuth: Boolean
+  private val allowsFacebookLiteAuth: Boolean
+  private val allowsInstagramAppAuth: Boolean
 
-  LoginBehavior(
-      boolean allowsGetTokenAuth,
-      boolean allowsKatanaAuth,
-      boolean allowsWebViewAuth,
-      boolean allowsDeviceAuth,
-      boolean allowsCustomTabAuth,
-      boolean allowsFacebookLiteAuth,
-      boolean allowsInstagramAppAuth) {
-    this.allowsGetTokenAuth = allowsGetTokenAuth;
-    this.allowsKatanaAuth = allowsKatanaAuth;
-    this.allowsWebViewAuth = allowsWebViewAuth;
-    this.allowsDeviceAuth = allowsDeviceAuth;
-    this.allowsCustomTabAuth = allowsCustomTabAuth;
-    this.allowsFacebookLiteAuth = allowsFacebookLiteAuth;
-    this.allowsInstagramAppAuth = allowsInstagramAppAuth;
+  constructor(
+      allowsGetTokenAuth: Boolean,
+      allowsKatanaAuth: Boolean,
+      allowsWebViewAuth: Boolean,
+      allowsDeviceAuth: Boolean,
+      allowsCustomTabAuth: Boolean,
+      allowsFacebookLiteAuth: Boolean,
+      allowsInstagramAppAuth: Boolean
+  ) {
+    this.allowsGetTokenAuth = allowsGetTokenAuth
+    this.allowsKatanaAuth = allowsKatanaAuth
+    this.allowsWebViewAuth = allowsWebViewAuth
+    this.allowsDeviceAuth = allowsDeviceAuth
+    this.allowsCustomTabAuth = allowsCustomTabAuth
+    this.allowsFacebookLiteAuth = allowsFacebookLiteAuth
+    this.allowsInstagramAppAuth = allowsInstagramAppAuth
   }
 
-  boolean allowsGetTokenAuth() {
-    return allowsGetTokenAuth;
+  /** Note: This getter is for internal only */
+  fun allowsGetTokenAuth(): Boolean {
+    return allowsGetTokenAuth
   }
 
-  boolean allowsKatanaAuth() {
-    return allowsKatanaAuth;
+  /** Note: This getter is for internal only */
+  fun allowsKatanaAuth(): Boolean {
+    return allowsKatanaAuth
   }
 
-  boolean allowsWebViewAuth() {
-    return allowsWebViewAuth;
+  /** Note: This getter is for internal only */
+  fun allowsWebViewAuth(): Boolean {
+    return allowsWebViewAuth
   }
 
-  boolean allowsDeviceAuth() {
-    return allowsDeviceAuth;
+  /** Note: This getter is for internal only */
+  fun allowsDeviceAuth(): Boolean {
+    return allowsDeviceAuth
   }
 
-  boolean allowsCustomTabAuth() {
-    return allowsCustomTabAuth;
+  /** Note: This getter is for internal only */
+  fun allowsCustomTabAuth(): Boolean {
+    return allowsCustomTabAuth
   }
 
-  boolean allowsFacebookLiteAuth() {
-    return allowsFacebookLiteAuth;
+  /** Note: This getter is for internal only */
+  fun allowsFacebookLiteAuth(): Boolean {
+    return allowsFacebookLiteAuth
   }
 
-  boolean allowsInstagramAppAuth() {
-    return allowsInstagramAppAuth;
+  /** Note: This getter is for internal only */
+  fun allowsInstagramAppAuth(): Boolean {
+    return allowsInstagramAppAuth
   }
 }
