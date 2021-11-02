@@ -4,7 +4,6 @@ import android.util.Base64
 import com.facebook.util.common.AuthenticationTokenTestUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -53,9 +52,9 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
   fun `test constructor with required encoded header`() {
     val authenticationHeader =
         AuthenticationTokenHeader(AuthenticationTokenTestUtil.VALID_HEADER_STRING)
-    Assert.assertEquals(authenticationHeader.alg, "RS256")
-    Assert.assertEquals(authenticationHeader.typ, "token_type")
-    Assert.assertEquals(authenticationHeader.kid, "abc")
+    assertThat(authenticationHeader.alg).isEqualTo("RS256")
+    assertThat(authenticationHeader.typ).isEqualTo("token_type")
+    assertThat(authenticationHeader.kid).isEqualTo("abc")
   }
 
   @Test
