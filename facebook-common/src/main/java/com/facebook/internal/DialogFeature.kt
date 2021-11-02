@@ -34,8 +34,9 @@ interface DialogFeature {
   /**
    * This method is for internal use only.
    *
-   * For all Enums that implement this interface, the name() method is already present. It returns
-   * the String representation of the Enum value, verbatim.
+   * For all Enums that implement this interface, the name() method (in Java) or the name property
+   * (in Kotlin) is already present. It returns the String representation of the Enum value,
+   * verbatim.
    */
-  fun name(): String
+  @Suppress("INAPPLICABLE_JVM_NAME") @get:JvmName("name") val name: String
 }

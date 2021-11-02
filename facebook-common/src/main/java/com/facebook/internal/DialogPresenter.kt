@@ -188,7 +188,7 @@ object DialogPresenter {
   ) {
     hasFacebookActivity(getApplicationContext())
     hasInternetPermissions(getApplicationContext())
-    val featureName = feature.name()
+    val featureName = feature.name
     var fallbackUrl = getDialogWebFallbackUri(feature)
     if (fallbackUrl == null) {
       throw FacebookException("Unable to fetch the Url for the DialogFeature : '$featureName'")
@@ -273,7 +273,7 @@ object DialogPresenter {
   }
 
   private fun getDialogWebFallbackUri(feature: DialogFeature): Uri? {
-    val featureName = feature.name()
+    val featureName = feature.name
     val action = feature.getAction()
     val applicationId = getApplicationId()
     val config = getDialogFeatureConfig(applicationId, action, featureName)
@@ -301,7 +301,7 @@ object DialogPresenter {
   ): IntArray {
     // Return the value from DialogFeatureConfig if available. Otherwise, just
     // default to the min-version
-    val config = getDialogFeatureConfig(applicationId, actionName, feature.name())
+    val config = getDialogFeatureConfig(applicationId, actionName, feature.name)
     return config?.versionSpec ?: intArrayOf(feature.getMinVersion())
   }
 

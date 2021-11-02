@@ -190,7 +190,7 @@ class DialogPresenterTest : FacebookPowerMockTestCase() {
     DialogPresenter.canPresentWebFallbackDialogWithFeature(testDialogFeature)
     verify(mockFetchedAppSettingsCompanion)
         .getDialogFeatureConfig(
-            APPLICATION_ID, testDialogFeature.getAction(), testDialogFeature.name())
+            APPLICATION_ID, testDialogFeature.getAction(), testDialogFeature.name)
   }
 
   @Test
@@ -272,7 +272,7 @@ class DialogPresenterTest : FacebookPowerMockTestCase() {
         object : DialogFeature {
           override fun getAction(): String = "TEST_ACTION"
           override fun getMinVersion(): Int = 0x7fffffff
-          override fun name(): String = "TEST_DIALOG"
+          override val name = "TEST_DIALOG"
         }
   }
 }

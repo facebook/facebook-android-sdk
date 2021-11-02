@@ -17,35 +17,26 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.share.internal
 
-package com.facebook.share.internal;
-
-import com.facebook.internal.DialogFeature;
-import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.DialogFeature
+import com.facebook.internal.NativeProtocol
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-public enum CameraEffectFeature implements DialogFeature {
+enum class CameraEffectFeature(private val minVersion: Int) : DialogFeature {
   SHARE_CAMERA_EFFECT(NativeProtocol.PROTOCOL_VERSION_20170417);
 
-  private int minVersion;
-
-  CameraEffectFeature(int minVersion) {
-    this.minVersion = minVersion;
+  /** This method is for internal use only. */
+  override fun getAction(): String {
+    return NativeProtocol.ACTION_CAMERA_EFFECT
   }
 
   /** This method is for internal use only. */
-  @Override
-  public String getAction() {
-    return NativeProtocol.ACTION_CAMERA_EFFECT;
-  }
-
-  /** This method is for internal use only. */
-  @Override
-  public int getMinVersion() {
-    return minVersion;
+  override fun getMinVersion(): Int {
+    return minVersion
   }
 }
