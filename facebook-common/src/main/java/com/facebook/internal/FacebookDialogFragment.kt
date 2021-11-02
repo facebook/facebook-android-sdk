@@ -77,7 +77,7 @@ class FacebookDialogFragment : DialogFragment() {
         return
       }
       val redirectUrl = String.format("fb%s://bridge/", getApplicationId())
-      webDialog = FacebookWebFallbackDialog.newInstance(activity, url, redirectUrl)
+      webDialog = FacebookWebFallbackDialog.newInstance(activity, url as String, redirectUrl)
       webDialog.onCompleteListener =
           WebDialog.OnCompleteListener { values, _
             -> // Error data is nested in the values since this is in the form of a

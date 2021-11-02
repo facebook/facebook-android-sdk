@@ -46,6 +46,7 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.annotation.VisibleForTesting
 import com.facebook.AccessToken
 import com.facebook.AccessToken.Companion.getCurrentAccessToken
 import com.facebook.AccessToken.Companion.isCurrentAccessTokenActive
@@ -334,7 +335,8 @@ open class WebDialog : Dialog {
     this.expectedRedirectUrl = expectedRedirectUrl
   }
 
-  protected open fun parseResponseUri(urlString: String?): Bundle {
+  @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+  open fun parseResponseUri(urlString: String?): Bundle {
     val u = Uri.parse(urlString)
     val b = parseUrlQueryString(u.query)
     b.putAll(parseUrlQueryString(u.fragment))
