@@ -51,7 +51,7 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
    * Set the callback manager that will handle callbacks for this dialog. It will be used if the
    * androidx activity result APIs are available.
    */
-  fun setCallbackManager(callbackManager: CallbackManager) {
+  fun setCallbackManager(callbackManager: CallbackManager?) {
     this.callbackManager = callbackManager
   }
 
