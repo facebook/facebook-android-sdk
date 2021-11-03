@@ -2,8 +2,6 @@
 
 package com.facebook.share.internal;
 
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.model.CameraEffectArguments;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +17,6 @@ import org.json.JSONObject;
  *
  * <p>Utility methods for JSON representation of Open Graph models.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class CameraEffectJSONUtility {
   private static final Map<Class<?>, CameraEffectJSONUtility.Setter> SETTERS = new HashMap<>();
 
