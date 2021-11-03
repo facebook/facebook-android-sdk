@@ -290,7 +290,7 @@ open class WebDialog : Dialog {
     super.onWindowAttributesChanged(params)
   }
 
-  override fun onCreate(savedInstanceState: Bundle) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     spinner = ProgressDialog(context)
     spinner?.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -562,7 +562,7 @@ open class WebDialog : Dialog {
       }
     }
 
-    override fun onPageStarted(view: WebView, url: String, favicon: Bitmap) {
+    override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
       logd(LOG_TAG, "Webview loading URL: $url")
       super.onPageStarted(view, url, favicon)
       if (!isDetached) {
