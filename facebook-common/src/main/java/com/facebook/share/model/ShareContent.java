@@ -23,8 +23,6 @@ package com.facebook.share.model;
 import android.net.Uri;
 import android.os.Parcel;
 import androidx.annotation.Nullable;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +31,6 @@ import java.util.List;
  * Provides the base class for content to be shared. Contains all common methods for the different
  * types of content.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class ShareContent<P extends ShareContent, E extends ShareContent.Builder>
     implements ShareModel {
   private final Uri contentUrl;
