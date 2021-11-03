@@ -65,4 +65,10 @@ class MetadataMatcherTest : FacebookPowerMockTestCase() {
                 listOf("hint", "tag", "content", "resource"), listOf("content")))
         .isTrue
   }
+
+  @Test
+  fun testMatchValueWithRegex() {
+    assertThat(MetadataMatcher.matchValue("test123", "\\w*\\d*")).isTrue
+    assertThat(MetadataMatcher.matchValue("value;", "\\w*\\d*")).isFalse
+  }
 }
