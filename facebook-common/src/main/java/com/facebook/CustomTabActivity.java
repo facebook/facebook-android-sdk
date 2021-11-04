@@ -27,14 +27,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /*
  * Login from a custom tab redirects here. Pass the url on to CustomTabMainActivity so it can return
  * the result.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class CustomTabActivity extends Activity {
   private static final int CUSTOM_TAB_REDIRECT_REQUEST_CODE = 2;
   public static final String CUSTOM_TAB_REDIRECT_ACTION =
@@ -84,7 +81,9 @@ public class CustomTabActivity extends Activity {
 
   @Override
   protected void onDestroy() {
-    LocalBroadcastManager.getInstance(this).unregisterReceiver(closeReceiver);
+    if (closeReceiver != null) {
+      LocalBroadcastManager.getInstance(this).unregisterReceiver(closeReceiver);
+    }
     super.onDestroy();
   }
 }
