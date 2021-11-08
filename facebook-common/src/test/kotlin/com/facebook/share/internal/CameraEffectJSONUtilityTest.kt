@@ -36,7 +36,7 @@ class CameraEffectJSONUtilityTest : FacebookTestCase() {
             .putArgument("name", "test")
             .putArgument("permissions", arrayOf("email", "profile"))
             .build()
-    val json = CameraEffectJSONUtility.convertToJSON(cameraEffectArguments)
+    val json = checkNotNull(CameraEffectJSONUtility.convertToJSON(cameraEffectArguments))
     assertThat(json.getString("name")).isEqualTo("test")
     assertThat(json.getJSONArray("permissions")).isEqualTo(JSONArray(arrayOf("email", "profile")))
   }
@@ -49,7 +49,8 @@ class CameraEffectJSONUtilityTest : FacebookTestCase() {
                 "name" to "test",
                 "permissions" to arrayOf("email", "profile"),
                 "empty" to JSONObject.NULL))
-    val cameraEffectArguments = CameraEffectJSONUtility.convertToCameraEffectArguments(json)
+    val cameraEffectArguments =
+        checkNotNull(CameraEffectJSONUtility.convertToCameraEffectArguments(json))
     assertThat(cameraEffectArguments.getString("name")).isEqualTo("test")
     assertThat(cameraEffectArguments.getStringArray("permissions"))
         .containsExactlyInAnyOrder("email", "profile")
