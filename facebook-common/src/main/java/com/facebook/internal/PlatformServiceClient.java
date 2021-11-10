@@ -24,17 +24,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import androidx.annotation.Nullable;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class PlatformServiceClient implements ServiceConnection {
   private final Context context;
   private final Handler handler;
@@ -80,29 +82,31 @@ public abstract class PlatformServiceClient implements ServiceConnection {
     return context;
   }
 
-  public String getNonce() {
+  public @Nullable String getNonce() {
     return nonce;
   }
 
   public boolean start() {
-    if (running) {
-      return false;
-    }
+    synchronized (this) {
+      if (running) {
+        return false;
+      }
 
-    // Make sure that the service can handle the requested protocol version
-    int availableVersion =
-        NativeProtocol.getLatestAvailableProtocolVersionForService(protocolVersion);
-    if (availableVersion == NativeProtocol.NO_PROTOCOL_AVAILABLE) {
-      return false;
-    }
+      // Make sure that the service can handle the requested protocol version
+      int availableVersion =
+          NativeProtocol.getLatestAvailableProtocolVersionForService(protocolVersion);
+      if (availableVersion == NativeProtocol.NO_PROTOCOL_AVAILABLE) {
+        return false;
+      }
 
-    Intent intent = NativeProtocol.createPlatformServiceIntent(context);
-    if (intent == null) {
-      return false;
-    } else {
-      running = true;
-      context.bindService(intent, this, Context.BIND_AUTO_CREATE);
-      return true;
+      Intent intent = NativeProtocol.createPlatformServiceIntent(context);
+      if (intent == null) {
+        return false;
+      } else {
+        running = true;
+        context.bindService(intent, this, Context.BIND_AUTO_CREATE);
+        return true;
+      }
     }
   }
 
