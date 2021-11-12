@@ -18,8 +18,18 @@ class LoginConfigurationTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test initialize LoginConfiguration with valid nonce`() {
-    val config = LoginConfiguration(listOf("user_email"), AuthenticationTokenTestUtil.NONCE)
+  fun `test initialize LoginConfiguration with correct fields`() {
+    val codeVerifier = PKCEUtil.generateCodeVerifier()
+    val config =
+        LoginConfiguration(listOf("user_email"), AuthenticationTokenTestUtil.NONCE, codeVerifier)
+    assertThat(config.permissions).isNotNull
+    assertThat(config.permissions.contains(LoginConfiguration.OPENID)).isTrue
     assertThat(config.nonce).isEqualTo(AuthenticationTokenTestUtil.NONCE)
+    assertThat(config.codeVerifier).isEqualTo(codeVerifier)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `test initialize LoginConfiguration with invalid code verifier`() {
+    LoginConfiguration(listOf("user_email"), AuthenticationTokenTestUtil.NONCE, "")
   }
 }
