@@ -43,7 +43,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockLoginClient: LoginClient
-  private lateinit var testHandler: LoginMethodHandler
+  private lateinit var testHandler: TestLoginMethodHandler
 
   private class TestLoginMethodHandler(loginClient: LoginClient) : LoginMethodHandler(loginClient) {
     var tryAuthorizeCalledTimes = 0
@@ -62,7 +62,15 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
     }
 
     // will be migrated as a property when LoginMethodHandler is migrated to Kotlin
-    override fun getNameForLogging(): String = "test_login_handler"
+    override val nameForLogging: String = "test_login_handler"
+
+    public override fun getClientState(authId: String): String {
+      return super.getClientState(authId)
+    }
+
+    public override fun addLoggingExtra(key: String?, value: Any?) {
+      super.addLoggingExtra(key, value)
+    }
   }
 
   override fun setup() {
@@ -151,7 +159,7 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
     val accessToken =
         LoginMethodHandler.createAccessTokenFromNativeLogin(
             bundle, mock(), FacebookSdk.getApplicationId())
-    assertThat(accessToken.token).isEqualTo("access_token")
+    assertThat(accessToken?.token).isEqualTo("access_token")
   }
 
   @Test
@@ -173,7 +181,7 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
     val accessToken =
         LoginMethodHandler.createAccessTokenFromWebBundle(
             listOf(), bundle, mock(), FacebookSdk.getApplicationId())
-    assertThat(accessToken.userId).isEqualTo("54321")
+    assertThat(accessToken?.userId).isEqualTo("54321")
   }
 
   @Test

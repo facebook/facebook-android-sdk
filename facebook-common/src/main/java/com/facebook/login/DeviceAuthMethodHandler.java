@@ -40,13 +40,13 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
   }
 
   @Override
-  int tryAuthorize(LoginClient.Request request) {
+  public int tryAuthorize(LoginClient.Request request) {
     showDialog(request);
     return 1;
   }
 
   private void showDialog(final LoginClient.Request request) {
-    FragmentActivity activity = loginClient.getActivity();
+    FragmentActivity activity = getLoginClient().getActivity();
     if (activity == null || activity.isFinishing()) {
       return;
     }
@@ -62,15 +62,15 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
   public void onCancel() {
     LoginClient.Result outcome =
         LoginClient.Result.createCancelResult(
-            loginClient.getPendingRequest(), "User canceled log in.");
-    loginClient.completeAndValidate(outcome);
+            getLoginClient().getPendingRequest(), "User canceled log in.");
+    getLoginClient().completeAndValidate(outcome);
   }
 
   public void onError(Exception ex) {
     LoginClient.Result outcome =
         LoginClient.Result.createErrorResult(
-            loginClient.getPendingRequest(), null, ex.getMessage());
-    loginClient.completeAndValidate(outcome);
+            getLoginClient().getPendingRequest(), null, ex.getMessage());
+    getLoginClient().completeAndValidate(outcome);
   }
 
   public void onSuccess(
@@ -98,8 +98,8 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
             dataAccessExpirationTime);
 
     LoginClient.Result outcome =
-        LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token);
-    loginClient.completeAndValidate(outcome);
+        LoginClient.Result.createTokenResult(getLoginClient().getPendingRequest(), token);
+    getLoginClient().completeAndValidate(outcome);
   }
 
   public static synchronized ScheduledThreadPoolExecutor getBackgroundExecutor() {
@@ -115,7 +115,7 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "device_auth";
   }
 

@@ -36,12 +36,12 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "katana_proxy_auth";
   }
 
   @Override
-  int tryAuthorize(LoginClient.Request request) {
+  public int tryAuthorize(LoginClient.Request request) {
     LoginBehavior behavior = request.getLoginBehavior();
     boolean ignoreAppSwitchToLoggedOut =
         FacebookSdk.ignoreAppSwitchToLoggedOut
@@ -50,7 +50,7 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
     String e2e = LoginClient.getE2E();
     List<Intent> intents =
         NativeProtocol.createProxyAuthIntents(
-            loginClient.getActivity(),
+            getLoginClient().getActivity(),
             request.getApplicationId(),
             request.getPermissions(),
             e2e,

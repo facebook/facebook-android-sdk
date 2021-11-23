@@ -42,7 +42,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "web_view";
   }
 
@@ -52,12 +52,12 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  boolean needsInternetPermission() {
+  public boolean needsInternetPermission() {
     return true;
   }
 
   @Override
-  void cancel() {
+  public void cancel() {
     if (loginDialog != null) {
       loginDialog.cancel();
       loginDialog = null;
@@ -65,7 +65,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  int tryAuthorize(final LoginClient.Request request) {
+  public int tryAuthorize(final LoginClient.Request request) {
     Bundle parameters = getParameters(request);
 
     WebDialog.OnCompleteListener listener =
@@ -79,7 +79,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
     e2e = LoginClient.getE2E();
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
-    FragmentActivity fragmentActivity = loginClient.getActivity();
+    FragmentActivity fragmentActivity = getLoginClient().getActivity();
     final boolean isChromeOS = Utility.isChromeOS(fragmentActivity);
 
     WebDialog.Builder builder =

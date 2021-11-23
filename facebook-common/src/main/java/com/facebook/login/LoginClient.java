@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
@@ -48,7 +49,8 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class LoginClient implements Parcelable {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public class LoginClient implements Parcelable {
   LoginMethodHandler[] handlersToTry;
   int currentHandler = -1;
   Fragment fragment;
@@ -233,7 +235,7 @@ class LoginClient implements Parcelable {
           LoginLogger.EVENT_PARAM_METHOD_RESULT_SKIPPED,
           null,
           null,
-          getCurrentHandler().methodLoggingExtras);
+          getCurrentHandler().getMethodLoggingExtras());
     }
 
     while (handlersToTry != null && currentHandler < (handlersToTry.length - 1)) {
@@ -330,7 +332,7 @@ class LoginClient implements Parcelable {
     // (in which case we already logged that).
     if (handler != null) {
       logAuthorizationMethodComplete(
-          handler.getNameForLogging(), outcome, handler.methodLoggingExtras);
+          handler.getNameForLogging(), outcome, handler.getMethodLoggingExtras());
     }
 
     if (loggingExtras != null) {

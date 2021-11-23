@@ -46,15 +46,15 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     super(source);
   }
 
-  abstract int tryAuthorize(LoginClient.Request request);
+  public abstract int tryAuthorize(LoginClient.Request request);
 
   public AccessTokenSource getTokenSource() {
     return AccessTokenSource.FACEBOOK_APPLICATION_WEB;
   }
 
   @Override
-  boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-    LoginClient.Request request = loginClient.getPendingRequest();
+  public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    LoginClient.Request request = getLoginClient().getPendingRequest();
 
     if (data == null) {
       // This happens if the user presses 'Back'.
@@ -94,9 +94,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
   private void completeLogin(@Nullable LoginClient.Result outcome) {
     if (outcome != null) {
-      loginClient.completeAndValidate(outcome);
+      getLoginClient().completeAndValidate(outcome);
     } else {
-      loginClient.tryNextHandler();
+      getLoginClient().tryNextHandler();
     }
   }
 
@@ -176,7 +176,7 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     }
 
     try {
-      loginClient.getFragment().startActivityForResult(intent, requestCode);
+      getLoginClient().getFragment().startActivityForResult(intent, requestCode);
     } catch (Exception e) {
       // We do not know if we have the activity until we try starting it.
       // FB is not installed if ActivityNotFoundException is thrown and this might fallback

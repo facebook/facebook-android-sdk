@@ -35,7 +35,7 @@ class InstagramAppLoginMethodHandler extends NativeAppLoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "instagram_login";
   }
 
@@ -45,11 +45,11 @@ class InstagramAppLoginMethodHandler extends NativeAppLoginMethodHandler {
   }
 
   @Override
-  int tryAuthorize(LoginClient.Request request) {
+  public int tryAuthorize(LoginClient.Request request) {
     String e2e = LoginClient.getE2E();
     Intent intent =
         NativeProtocol.createInstagramIntent(
-            loginClient.getActivity(),
+            getLoginClient().getActivity(),
             request.getApplicationId(),
             request.getPermissions(),
             e2e,

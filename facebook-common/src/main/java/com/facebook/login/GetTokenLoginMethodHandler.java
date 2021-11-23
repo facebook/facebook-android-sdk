@@ -44,12 +44,12 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "get_token";
   }
 
   @Override
-  void cancel() {
+  public void cancel() {
     if (getTokenClient != null) {
       getTokenClient.cancel();
       getTokenClient.setCompletedListener(null);
@@ -57,13 +57,14 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
     }
   }
 
-  int tryAuthorize(final LoginClient.Request request) {
-    getTokenClient = new GetTokenClient(loginClient.getActivity(), request);
+  @Override
+  public int tryAuthorize(final LoginClient.Request request) {
+    getTokenClient = new GetTokenClient(getLoginClient().getActivity(), request);
     if (!getTokenClient.start()) {
       return 0;
     }
 
-    loginClient.notifyBackgroundProcessingStart();
+    getLoginClient().notifyBackgroundProcessingStart();
 
     GetTokenClient.CompletedListener callback =
         new GetTokenClient.CompletedListener() {
@@ -82,6 +83,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
       getTokenClient.setCompletedListener(null);
     }
     getTokenClient = null;
+    LoginClient loginClient = getLoginClient();
 
     loginClient.notifyBackgroundProcessingStop();
 
@@ -126,7 +128,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
 
   void onComplete(final LoginClient.Request request, final Bundle result) {
     LoginClient.Result outcome;
-
+    LoginClient loginClient = getLoginClient();
     try {
       AccessToken token =
           createAccessTokenFromNativeLogin(
@@ -145,6 +147,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
   // Workaround for old facebook apps that don't return the userid.
   void complete(final LoginClient.Request request, final Bundle result) {
     String userId = result.getString(NativeProtocol.EXTRA_USER_ID);
+    final LoginClient loginClient = getLoginClient();
     // If the result is missing the UserId request it
     if (userId == null || userId.isEmpty()) {
       loginClient.notifyBackgroundProcessingStart();

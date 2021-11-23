@@ -92,7 +92,7 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
     } else {
       // The call to clear cookies will create the first instance of CookieSyncManager if
       // necessary
-      Utility.clearFacebookCookies(loginClient.getActivity());
+      Utility.clearFacebookCookies(getLoginClient().getActivity());
       addLoggingExtra(
           ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, AppEventsConstants.EVENT_PARAM_VALUE_NO);
     }
@@ -115,7 +115,7 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, request.getApplicationId());
     }
 
-    parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, loginClient.getE2E());
+    parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, getLoginClient().getE2E());
 
     if (request.isInstagramLogin()) {
       parameters.putString(
@@ -171,6 +171,7 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
 
   protected void onComplete(LoginClient.Request request, Bundle values, FacebookException error) {
     LoginClient.Result outcome;
+    LoginClient loginClient = getLoginClient();
     e2e = null;
     if (values != null) {
       // Actual e2e we got from the dialog should be used for logging.
@@ -193,7 +194,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         // CookieSyncManager has never been created.
         CookieSyncManager syncManager = CookieSyncManager.createInstance(loginClient.getActivity());
         syncManager.sync();
-        saveCookieToken(token.getToken());
+        if (token != null) {
+          saveCookieToken(token.getToken());
+        }
       } catch (FacebookException ex) {
         outcome =
             LoginClient.Result.createErrorResult(
@@ -230,14 +233,14 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
   }
 
   private String loadCookieToken() {
-    Context context = loginClient.getActivity();
+    Context context = getLoginClient().getActivity();
     SharedPreferences sharedPreferences =
         context.getSharedPreferences(WEB_VIEW_AUTH_HANDLER_STORE, Context.MODE_PRIVATE);
     return sharedPreferences.getString(WEB_VIEW_AUTH_HANDLER_TOKEN_KEY, "");
   }
 
   private void saveCookieToken(String token) {
-    Context context = loginClient.getActivity();
+    Context context = getLoginClient().getActivity();
     context
         .getSharedPreferences(WEB_VIEW_AUTH_HANDLER_STORE, Context.MODE_PRIVATE)
         .edit()

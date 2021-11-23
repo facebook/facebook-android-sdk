@@ -33,16 +33,16 @@ class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "fb_lite_login";
   }
 
   @Override
-  int tryAuthorize(LoginClient.Request request) {
+  public int tryAuthorize(LoginClient.Request request) {
     String e2e = LoginClient.getE2E();
     Intent intent =
         NativeProtocol.createFacebookLiteIntent(
-            loginClient.getActivity(),
+            getLoginClient().getActivity(),
             request.getApplicationId(),
             request.getPermissions(),
             e2e,

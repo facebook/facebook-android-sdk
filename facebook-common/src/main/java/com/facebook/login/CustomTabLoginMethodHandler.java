@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.Nullable;
 import com.facebook.AccessTokenSource;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookException;
@@ -62,7 +63,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  String getNameForLogging() {
+  public String getNameForLogging() {
     return "custom_tab";
   }
 
@@ -86,7 +87,8 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  int tryAuthorize(final LoginClient.Request request) {
+  public int tryAuthorize(final LoginClient.Request request) {
+    LoginClient loginClient = getLoginClient();
     if (this.getRedirectUrl().isEmpty()) {
       return 0;
     }
@@ -126,7 +128,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+  public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     if (data != null) {
       boolean hasNoBrowserException =
           data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION, false);
@@ -139,9 +141,13 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     if (requestCode != CUSTOM_TAB_REQUEST_CODE) {
       return super.onActivityResult(requestCode, resultCode, data);
     }
-    LoginClient.Request request = loginClient.getPendingRequest();
+    LoginClient.Request request = getLoginClient().getPendingRequest();
     if (resultCode == Activity.RESULT_OK) {
-      onCustomTabComplete(data.getStringExtra(CustomTabMainActivity.EXTRA_URL), request);
+      String extraUrl = null;
+      if (data != null) {
+        extraUrl = data.getStringExtra(CustomTabMainActivity.EXTRA_URL);
+      }
+      onCustomTabComplete(extraUrl, request);
       return true;
     }
     super.onComplete(request, null, new FacebookOperationCanceledException());
@@ -201,7 +207,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  protected void putChallengeParam(JSONObject param) throws JSONException {
+  public void putChallengeParam(JSONObject param) throws JSONException {
     param.put(LoginLogger.EVENT_PARAM_CHALLENGE, expectedChallenge);
   }
 
