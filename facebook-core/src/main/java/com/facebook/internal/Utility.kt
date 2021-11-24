@@ -755,7 +755,8 @@ object Utility {
       params: JSONObject,
       attributionIdentifiers: AttributionIdentifiers?,
       anonymousAppDeviceGUID: String?,
-      limitEventUsage: Boolean
+      limitEventUsage: Boolean,
+      context: Context
   ) {
     if (!FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
       params.put("anon_id", anonymousAppDeviceGUID)
@@ -764,11 +765,11 @@ object Utility {
     params.put("advertiser_id_collection_enabled", FacebookSdk.getAdvertiserIDCollectionEnabled())
     if (attributionIdentifiers != null) {
       if (FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
-        appendAnonIdUnderCompliance(params, attributionIdentifiers, anonymousAppDeviceGUID)
+        appendAnonIdUnderCompliance(params, attributionIdentifiers, anonymousAppDeviceGUID, context)
       }
       if (attributionIdentifiers.attributionId != null) {
         if (FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
-          appendAttributionIdUnderCompliance(params, attributionIdentifiers)
+          appendAttributionIdUnderCompliance(params, attributionIdentifiers, context)
         } else {
           params.put("attribution", attributionIdentifiers.attributionId)
         }
@@ -1246,15 +1247,14 @@ object Utility {
     return Math.round(bytes / (1024.0 * 1024.0 * 1024.0))
   }
 
-  // TODO: T104500710 Following logic is just in case until we figure out whether we anon_id for ad
-  // purpose
   private fun appendAnonIdUnderCompliance(
       params: JSONObject,
       attributionIdentifiers: AttributionIdentifiers,
       anonymousAppDeviceGUID: String?,
+      context: Context
   ) {
     // TODO: change to Build.VERSION_CODES.S after we start building with API 31
-    if (Build.VERSION.SDK_INT >= 31) {
+    if (Build.VERSION.SDK_INT >= 31 && isGooglePlayServicesAvailable(context)) {
       if (!attributionIdentifiers.isTrackingLimited) {
         params.put("anon_id", anonymousAppDeviceGUID)
       }
@@ -1265,16 +1265,28 @@ object Utility {
 
   private fun appendAttributionIdUnderCompliance(
       params: JSONObject,
-      attributionIdentifiers: AttributionIdentifiers
+      attributionIdentifiers: AttributionIdentifiers,
+      context: Context
   ) {
     // TODO: change to Build.VERSION_CODES.S after we start building with API 31
-    if (Build.VERSION.SDK_INT >= 31) {
+    if (Build.VERSION.SDK_INT >= 31 && isGooglePlayServicesAvailable(context)) {
       if (!attributionIdentifiers.isTrackingLimited) {
         params.put("attribution", attributionIdentifiers.attributionId)
       }
     } else {
       params.put("attribution", attributionIdentifiers.attributionId)
     }
+  }
+
+  private fun isGooglePlayServicesAvailable(context: Context): Boolean {
+    val method =
+        getMethodQuietly(
+            "com.google.android.gms.common.GooglePlayServicesUtil",
+            "isGooglePlayServicesAvailable",
+            Context::class.java)
+            ?: return false
+    val connectionResult = invokeMethodQuietly(null, method, context)
+    return !(connectionResult !is Int || connectionResult != 0)
   }
 
   @Throws(JSONException::class)
