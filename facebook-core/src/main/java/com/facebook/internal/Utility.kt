@@ -757,10 +757,15 @@ object Utility {
       anonymousAppDeviceGUID: String?,
       limitEventUsage: Boolean
   ) {
-    params.put("anon_id", anonymousAppDeviceGUID)
+    if (!FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
+      params.put("anon_id", anonymousAppDeviceGUID)
+    }
     params.put("application_tracking_enabled", !limitEventUsage)
     params.put("advertiser_id_collection_enabled", FacebookSdk.getAdvertiserIDCollectionEnabled())
     if (attributionIdentifiers != null) {
+      if (FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
+        appendAnonIdUnderCompliance(params, attributionIdentifiers, anonymousAppDeviceGUID)
+      }
       if (attributionIdentifiers.attributionId != null) {
         if (FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
           appendAttributionIdUnderCompliance(params, attributionIdentifiers)
@@ -1239,6 +1244,23 @@ object Utility {
 
   private fun convertBytesToGB(bytes: Double): Long {
     return Math.round(bytes / (1024.0 * 1024.0 * 1024.0))
+  }
+
+  // TODO: T104500710 Following logic is just in case until we figure out whether we anon_id for ad
+  // purpose
+  private fun appendAnonIdUnderCompliance(
+      params: JSONObject,
+      attributionIdentifiers: AttributionIdentifiers,
+      anonymousAppDeviceGUID: String?,
+  ) {
+    // TODO: change to Build.VERSION_CODES.S after we start building with API 31
+    if (Build.VERSION.SDK_INT >= 31) {
+      if (!attributionIdentifiers.isTrackingLimited) {
+        params.put("anon_id", anonymousAppDeviceGUID)
+      }
+    } else {
+      params.put("anon_id", anonymousAppDeviceGUID)
+    }
   }
 
   private fun appendAttributionIdUnderCompliance(
