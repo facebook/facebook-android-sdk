@@ -36,6 +36,7 @@ public class GamingPayload {
   private static final String KEY_PAYLOAD = "payload";
   private static final String KEY_APPLINK_DATA = "al_applink_data";
   private static final String KEY_EXTRAS = "extras";
+  private static final String KEY_TOURNAMENT_ID = "tournament_id";
 
   private static Map<String, String> payloadData;
 
@@ -53,7 +54,12 @@ public class GamingPayload {
     if (GamingPayload.payloadData == null) {
       return null;
     }
-    return GamingPayload.payloadData.getOrDefault(KEY_GAME_REQUEST_ID, null);
+
+    if (GamingPayload.payloadData.containsKey(KEY_GAME_REQUEST_ID)) {
+      return GamingPayload.payloadData.get(KEY_GAME_REQUEST_ID);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -67,7 +73,32 @@ public class GamingPayload {
     if (GamingPayload.payloadData == null) {
       return null;
     }
-    return GamingPayload.payloadData.getOrDefault(KEY_PAYLOAD, null);
+
+    if (GamingPayload.payloadData.containsKey(KEY_PAYLOAD)) {
+      return GamingPayload.payloadData.get(KEY_PAYLOAD);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Retrieves the tournament id sent from Facebook to this game.
+   *
+   * <p>When a user clicks play from the tournament share post on their news feed, the tournament id
+   * will be sent to the game via deeplink.
+   *
+   * @return tournament id (if any).
+   */
+  public static @Nullable String getTournamentId() {
+    if (GamingPayload.payloadData == null) {
+      return null;
+    }
+
+    if (GamingPayload.payloadData.containsKey(KEY_TOURNAMENT_ID)) {
+      return GamingPayload.payloadData.get(KEY_TOURNAMENT_ID);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -81,7 +112,8 @@ public class GamingPayload {
     try {
       JSONObject payloadJSON = new JSONObject(payloadString);
       loadedPayload.put(KEY_GAME_REQUEST_ID, payloadJSON.optString(KEY_GAME_REQUEST_ID));
-      loadedPayload.put(KEY_PAYLOAD, payloadJSON.getString(KEY_PAYLOAD));
+      loadedPayload.put(KEY_PAYLOAD, payloadJSON.optString(KEY_PAYLOAD));
+      loadedPayload.put(KEY_TOURNAMENT_ID, payloadJSON.optString(KEY_TOURNAMENT_ID));
 
       GamingPayload.payloadData = loadedPayload;
     } catch (JSONException e) {
@@ -109,6 +141,7 @@ public class GamingPayload {
         String gameRequestId = appLinkExtras.getString(KEY_GAME_REQUEST_ID);
         String payload = appLinkExtras.getString(KEY_PAYLOAD);
         String contextTokenId = appLinkExtras.getString(KEY_CONTEXT_TOKEN_ID);
+        String tournamentId = appLinkExtras.getString(KEY_TOURNAMENT_ID);
 
         if (contextTokenId != null) {
           GamingContext.setCurrentGamingContext(new GamingContext(contextTokenId));
@@ -116,6 +149,7 @@ public class GamingPayload {
 
         loadedPayload.put(KEY_GAME_REQUEST_ID, gameRequestId);
         loadedPayload.put(KEY_PAYLOAD, payload);
+        loadedPayload.put(KEY_TOURNAMENT_ID, tournamentId);
         GamingPayload.payloadData = loadedPayload;
       }
     }
