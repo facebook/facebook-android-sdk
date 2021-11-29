@@ -19,6 +19,8 @@
  */
 package com.facebook.internal
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
@@ -27,6 +29,8 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.HttpMethod
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
@@ -42,6 +46,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.powermock.api.mockito.PowerMockito
+import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -50,6 +55,8 @@ import org.powermock.reflect.Whitebox
     FacebookSdk::class,
     GraphRequest::class,
     Utility::class,
+    FeatureManager::class,
+    GoogleApiAvailability::class,
 )
 class UtilityTest : FacebookPowerMockTestCase() {
 
@@ -69,6 +76,7 @@ class UtilityTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getGraphDomain()).thenCallRealMethod()
     whenever(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
     whenever(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
+    PowerMockito.mockStatic(FeatureManager::class.java)
   }
 
   @Test
@@ -212,5 +220,50 @@ class UtilityTest : FacebookPowerMockTestCase() {
     val validJson = "{\"k1\": true, \"k2\": \"value\"}"
     val result = Utility.convertJSONObjectToStringMap(JSONObject(validJson))
     assertEquals(mapOf("k1" to "true", "k2" to "value"), result)
+  }
+
+  @Test
+  fun testSetAppEventAttributionParametersWithoutServiceUpdateCompliance() {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance))
+        .thenReturn(false)
+
+    val params: JSONObject = JSONObject()
+    val mockAnonId = "fb_mock_anonID"
+    val mockAttributionID = "fb_mock_attributionID"
+    val mockContext = mock<Context>()
+    val mockIdentifiers = PowerMockito.mock(AttributionIdentifiers::class.java)
+    whenever(mockIdentifiers.attributionId).thenReturn(mockAttributionID)
+    Utility.setAppEventAttributionParameters(
+        params, mockIdentifiers, mockAnonId, false, mockContext)
+    assertEquals(params["anon_id"], mockAnonId)
+    assertEquals(params["attribution"], mockAttributionID)
+  }
+
+  @Test
+  fun testSetAppEventAttributionParametersWithServiceUpdateCompliance() {
+    if (Build.VERSION.SDK_INT < 31) {
+      // Skipping test, SDK version is lower than 31
+      return
+    }
+
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance))
+        .thenReturn(true)
+
+    val googleApiAvailability = PowerMockito.mock(GoogleApiAvailability::class.java)
+    mockStatic(GoogleApiAvailability::class.java)
+    whenever(GoogleApiAvailability.getInstance()).thenReturn(googleApiAvailability)
+    whenever(googleApiAvailability.isGooglePlayServicesAvailable(any()))
+        .thenReturn(ConnectionResult.SUCCESS)
+
+    val params: JSONObject = JSONObject()
+    val mockAnonId = "fb_mock_anonID"
+    val mockAttributionID = "fb_mock_attributionID"
+    val mockContext = mock<Context>()
+    val mockIdentifiers = PowerMockito.mock(AttributionIdentifiers::class.java)
+    whenever(mockIdentifiers.attributionId).thenReturn(mockAttributionID)
+    Utility.setAppEventAttributionParameters(
+        params, mockIdentifiers, mockAnonId, false, mockContext)
+    assertNull(params["anon_id"])
+    assertNull(params["attribution"])
   }
 }
