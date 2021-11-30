@@ -60,6 +60,7 @@ dependencies {
     testImplementation "com.android.installreferrer:installreferrer:1.0"
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
+    testImplementation 'com.google.android.gms:play-services-gcm:17.0.0'
 
 }
 
