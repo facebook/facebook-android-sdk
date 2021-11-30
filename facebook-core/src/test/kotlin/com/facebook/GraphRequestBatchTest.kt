@@ -21,9 +21,9 @@
 package com.facebook
 
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.verify
 import java.lang.IllegalArgumentException
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.reflect.Whitebox
@@ -47,7 +47,7 @@ class GraphRequestBatchTest : FacebookPowerMockTestCase() {
   @Test
   fun `test set timeout with valid value`() {
     batch.timeout = 10
-    Assert.assertEquals(10, batch.timeout)
+    assertThat(batch.timeout).isEqualTo(10)
   }
 
   @Test
@@ -55,8 +55,16 @@ class GraphRequestBatchTest : FacebookPowerMockTestCase() {
     val callback = mock<GraphRequestBatch.Callback>()
     batch.addCallback(callback)
     batch.addCallback(callback)
+    assertThat(batch.callbacks.size).isEqualTo(1)
+  }
 
-    Assert.assertEquals(1, batch.callbacks.size)
+  @Test
+  fun `test remove callbacks`() {
+    val callback = mock<GraphRequestBatch.Callback>()
+    batch.addCallback(callback)
+    batch.removeCallback(callback)
+
+    assertThat(batch.callbacks.size).isEqualTo(0)
   }
 
   @Test
@@ -64,35 +72,69 @@ class GraphRequestBatchTest : FacebookPowerMockTestCase() {
     val request1 = mock<GraphRequest>()
     val request2 = mock<GraphRequest>()
     batch = GraphRequestBatch(request1, request2)
-    Assert.assertEquals(request1, batch.requests[0])
-    Assert.assertEquals(request2, batch.requests[1])
+    assertThat(batch.requests[0]).isEqualTo(request1)
+    assertThat(batch.requests[1]).isEqualTo(request2)
+  }
+
+  @Test
+  fun `test copy constructor`() {
+    val request1 = mock<GraphRequest>()
+    val request2 = mock<GraphRequest>()
+    val batch1 = GraphRequestBatch(request1, request2)
+    val callback1 = mock<GraphRequestBatch.Callback>()
+    batch1.addCallback(callback1)
+    val batch2 = GraphRequestBatch(batch1)
+
+    assertThat(batch2[0]).isEqualTo(request1)
+    assertThat(batch2[1]).isEqualTo(request2)
+    assertThat(batch2.callbacks[0]).isEqualTo(callback1)
+
+    // batch 1 won't be changed after batch2 is changed
+    batch2.addCallback(mock())
+    batch2.add(mock())
+    assertThat(batch1.size).isEqualTo(2)
+    assertThat(batch1.callbacks.size).isEqualTo(1)
   }
 
   @Test
   fun `test execute and wait calls GraphRequest`() {
-    val mockGraphResponses = mock<List<GraphResponse>>()
-    whenever(mockGraphRequestCompanion.executeBatchAndWait(batch)).thenReturn(mockGraphResponses)
-    val responses = batch.executeAndWait()
-    Assert.assertEquals(mockGraphResponses, responses)
+    batch.executeAndWait()
+    verify(mockGraphRequestCompanion).executeBatchAndWait(batch)
   }
 
   @Test
   fun `test execute async calls GraphRequest`() {
-    val mockGraphRequestAsyncTask = mock<GraphRequestAsyncTask>()
-    whenever(mockGraphRequestCompanion.executeBatchAsync(batch))
-        .thenReturn(mockGraphRequestAsyncTask)
-    val asyncTask = batch.executeAsync()
-    Assert.assertEquals(mockGraphRequestAsyncTask, asyncTask)
+    batch.executeAsync()
+    verify(mockGraphRequestCompanion).executeBatchAsync(batch)
   }
 
   @Test
-  fun `test remove GraphRequest from the batch`() {
+  fun `test GraphRequest from the batch`() {
     val request1 = mock<GraphRequest>()
     val request2 = mock<GraphRequest>()
     batch = GraphRequestBatch(request1, request2)
     val popRequest = batch.removeAt(0)
-    Assert.assertEquals(request1, popRequest)
-    Assert.assertTrue(batch.remove(request2))
-    Assert.assertFalse(batch.remove(request1))
+    assertThat(popRequest).isEqualTo(request1)
+    assertThat(batch.remove(request2)).isTrue
+    assertThat(batch.remove(request1)).isFalse
+  }
+
+  @Test
+  fun `test clear`() {
+    val request1 = mock<GraphRequest>()
+    val request2 = mock<GraphRequest>()
+    batch = GraphRequestBatch(request1, request2)
+    batch.clear()
+    assertThat(batch.size).isEqualTo(0)
+  }
+
+  @Test
+  fun `test add to specific position`() {
+    val request1 = mock<GraphRequest>()
+    val request2 = mock<GraphRequest>()
+    batch = GraphRequestBatch(request1)
+    batch.add(0, request2)
+    assertThat(batch[0]).isEqualTo(request2)
+    assertThat(batch[1]).isEqualTo(request1)
   }
 }
