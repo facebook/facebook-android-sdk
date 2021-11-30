@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.2.0] - 2021-11-29
+
+### Added
+- Added parsing entry intent to look for gaming payload and tournament data for user coming from FB surface. Gaming tournament feature is available for selected partners now.
+- Added data processing options to crash/error report.
+
+### Fixed
+- On Android 12 and above, AppEvents will send attribution ID and anonymous ID if GMS is supported and isTrackingLimited is OFF. On Android 11 and below, nothing is changed. This feature will be turned on after Google Play Store starts the enforcement of the new policy.
+
 ## [12.1.0] - 2021-11-01
 
 ### Fixed
@@ -366,6 +375,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[12.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.1.0...sdk-version-12.2.0
 [12.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.1...sdk-version-12.1.0
 [12.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.0...sdk-version-12.0.1
 [12.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.3.0...sdk-version-12.0.0
