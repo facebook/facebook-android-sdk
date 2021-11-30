@@ -32,11 +32,8 @@ import com.facebook.internal.CustomTab;
 import com.facebook.internal.InstagramCustomTab;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.login.LoginTargetApp;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class CustomTabMainActivity extends Activity {
   public static final String EXTRA_ACTION =
       CustomTabMainActivity.class.getSimpleName() + ".extra_action";
