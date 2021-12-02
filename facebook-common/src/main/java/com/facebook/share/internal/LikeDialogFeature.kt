@@ -18,10 +18,10 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share.internal;
+package com.facebook.share.internal
 
-import com.facebook.internal.DialogFeature;
-import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.DialogFeature
+import com.facebook.internal.NativeProtocol
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -32,23 +32,16 @@ import com.facebook.internal.NativeProtocol;
  * @deprecated
  * LikeView is deprecated
  */
-@Deprecated
-public enum LikeDialogFeature implements DialogFeature {
-
+@Deprecated("LikeDialogFeature is deprecated")
+enum class LikeDialogFeature(private val minVersion: Int) : DialogFeature {
   // This matches a value in a sitevar. DO NOT CHANGE
   LIKE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140701);
 
-  private int minVersion;
-
-  LikeDialogFeature(int minVersion) {
-    this.minVersion = minVersion;
+  override fun getAction(): String {
+    return NativeProtocol.ACTION_LIKE_DIALOG
   }
 
-  public String getAction() {
-    return NativeProtocol.ACTION_LIKE_DIALOG;
-  }
-
-  public int getMinVersion() {
-    return minVersion;
+  override fun getMinVersion(): Int {
+    return minVersion
   }
 }
