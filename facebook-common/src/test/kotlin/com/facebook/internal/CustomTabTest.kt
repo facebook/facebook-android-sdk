@@ -10,7 +10,6 @@ import com.facebook.login.CustomTabPrefetchHelper
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -18,7 +17,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(CustomTabPrefetchHelper::class, CustomTabsIntent::class)
+@PrepareForTest(CustomTabsIntent::class)
 class CustomTabTest : FacebookPowerMockTestCase() {
   private lateinit var mockCustomTabsIntent: CustomTabsIntent
   private lateinit var parameters: Bundle
@@ -35,8 +34,9 @@ class CustomTabTest : FacebookPowerMockTestCase() {
         .withAnyArguments()
         .thenReturn(mockCustomTabsIntent)
 
-    PowerMockito.mockStatic(CustomTabPrefetchHelper::class.java)
-    whenever(CustomTabPrefetchHelper.getPreparedSessionOnce()).thenReturn(null)
+    val mockCustomTabPrefetchHelperCompanion = mock<CustomTabPrefetchHelper.Companion>()
+    Whitebox.setInternalState(
+        CustomTabPrefetchHelper::class.java, "Companion", mockCustomTabPrefetchHelperCompanion)
   }
 
   @Test
