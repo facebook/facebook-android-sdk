@@ -22,38 +22,59 @@ package com.facebook.login;
 
 import android.content.ComponentName;
 import android.net.Uri;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
+import java.util.concurrent.locks.ReentrantLock;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
+/**
+ * This class is for internal use. SDK users should not access it directly.
+ *
+ * <p>The helper for scheduling prefetching for login custom tab.
+ */
 public class CustomTabPrefetchHelper extends CustomTabsServiceConnection {
 
   private static CustomTabsClient client = null;
   private static CustomTabsSession session = null;
+  private static final ReentrantLock lock = new ReentrantLock();
 
   private static void prepareSession() {
+    lock.lock();
     if (session == null) {
       if (client != null) {
         session = client.newSession(null);
       }
     }
+    lock.unlock();
   }
 
-  public static void mayLaunchUrl(Uri url) {
-    if (session == null) {
-      prepareSession();
-    }
+  /**
+   * Prepare the session with prefetching the provided url
+   *
+   * @param url The url to be prefetched
+   */
+  public static void mayLaunchUrl(@NonNull Uri url) {
+    prepareSession();
+    lock.lock();
     if (session != null) {
       session.mayLaunchUrl(url, null, null);
     }
+    lock.unlock();
   }
 
+  /**
+   * Obtain the prepared session and clear it.
+   *
+   * @return the session which is prepared before, null if the prepared one is already obtained.
+   */
+  @Nullable
   public static CustomTabsSession getPreparedSessionOnce() {
+    lock.lock();
     CustomTabsSession result = session;
     session = null;
+    lock.unlock();
     return result;
   }
 
