@@ -1672,8 +1672,11 @@ class GraphRequest {
     if (this.graphPath == null) {
       return false
     }
-    val applicationEndpointRegex = "^/?" + FacebookSdk.getApplicationId() + "/?.*"
-    return this.forceApplicationRequest || Pattern.matches(applicationEndpointRegex, this.graphPath)
+    val applicationIdEndpointRegex = "^/?" + FacebookSdk.getApplicationId() + "/?.*"
+    val appNodeEndpointRegex = "^/?app/?.*"
+    return this.forceApplicationRequest ||
+        Pattern.matches(applicationIdEndpointRegex, this.graphPath) ||
+        Pattern.matches(appNodeEndpointRegex, this.graphPath)
   }
 
   private class Attachment(val request: GraphRequest, val value: Any?)

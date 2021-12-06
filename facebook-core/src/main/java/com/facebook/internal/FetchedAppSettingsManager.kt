@@ -35,6 +35,7 @@ import com.facebook.core.BuildConfig
 import com.facebook.internal.FetchedAppGateKeepersManager.queryAppGateKeepers
 import com.facebook.internal.InternalSettings.isUnityApp
 import com.facebook.internal.SmartLoginOption.Companion.parseOptions
+import com.facebook.internal.Utility.isNullOrEmpty
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicReference
@@ -292,10 +293,20 @@ object FetchedAppSettingsManager {
       appSettingFields.add(SDK_UPDATE_MESSAGE)
     }
     appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", appSettingFields))
-    val request = GraphRequest.newGraphPathRequest(null, applicationId, null)
-    request.setForceApplicationRequest(true)
-    request.setSkipClientToken(true)
-    request.parameters = appSettingsParams
+    val request =
+        if (isNullOrEmpty(FacebookSdk.getClientToken())) {
+          val request = GraphRequest.newGraphPathRequest(null, applicationId, null)
+          request.setForceApplicationRequest(true)
+          request.setSkipClientToken(true)
+          request.parameters = appSettingsParams
+          request
+        } else {
+          val request = GraphRequest.newGraphPathRequest(null, "app", null)
+          request.setForceApplicationRequest(true)
+          request.parameters = appSettingsParams
+          request
+        }
+
     return request.executeAndWait().jsonObject ?: JSONObject()
   }
 
