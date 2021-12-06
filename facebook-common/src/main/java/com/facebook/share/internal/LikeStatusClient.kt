@@ -17,45 +17,40 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.share.internal
 
-package com.facebook.share.internal;
-
-import android.content.Context;
-import android.os.Bundle;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.PlatformServiceClient;
+import android.content.Context
+import android.os.Bundle
+import com.facebook.internal.NativeProtocol
+import com.facebook.internal.PlatformServiceClient
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  *
- * <p>This class executes service calls to fetch like-state of objects from the Facebook
- * Application, if available.
+ * This class executes service calls to fetch like-state of objects from the Facebook Application,
+ * if available.
  */
 /*
  * @deprecated
  * LikeView is deprecated
  */
-@Deprecated
-final class LikeStatusClient extends PlatformServiceClient {
-  private String objectId;
-
-  LikeStatusClient(Context context, String applicationId, String objectId) {
-    super(
+@Deprecated("")
+internal class LikeStatusClient(
+    context: Context,
+    applicationId: String,
+    private val objectId: String
+) :
+    PlatformServiceClient(
         context,
         NativeProtocol.MESSAGE_GET_LIKE_STATUS_REQUEST,
         NativeProtocol.MESSAGE_GET_LIKE_STATUS_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20141001,
         applicationId,
-        null);
-
-    this.objectId = objectId;
-  }
-
-  @Override
-  protected void populateRequestBundle(Bundle data) {
+        null) {
+  override fun populateRequestBundle(data: Bundle?) {
     // Only thing we need to pass in is the object id.
-    data.putString(ShareConstants.EXTRA_OBJECT_ID, objectId);
+    data?.putString(ShareConstants.EXTRA_OBJECT_ID, objectId)
   }
 }
