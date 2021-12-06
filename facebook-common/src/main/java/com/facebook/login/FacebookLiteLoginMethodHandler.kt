@@ -25,6 +25,7 @@ import android.os.Parcelable
 import com.facebook.internal.NativeProtocol
 import com.facebook.internal.ServerProtocol
 
+@Deprecated("fblite login is deprecated and we will remove this class in v13.0 release")
 internal class FacebookLiteLoginMethodHandler : NativeAppLoginMethodHandler {
 
   constructor(loginClient: LoginClient) : super(loginClient)
