@@ -326,8 +326,11 @@ internal constructor(
         callback: GraphRequest.Callback
     ): GraphRequest {
       val parameters = Bundle()
-      return GraphRequest(
-          accessToken, ME_PERMISSIONS_GRAPH_PATH, parameters, HttpMethod.GET, callback)
+      val request =
+          GraphRequest.newGraphPathRequest(accessToken, ME_PERMISSIONS_GRAPH_PATH, callback)
+      request.parameters = parameters
+      request.httpMethod = HttpMethod.GET
+      return request
     }
 
     private fun getRefreshTokenInfoForToken(accessToken: AccessToken): RefreshTokenInfo {
@@ -346,7 +349,10 @@ internal constructor(
       val parameters = Bundle()
       parameters.putString("grant_type", refreshInfo.grantType)
       parameters.putString("client_id", accessToken.applicationId)
-      return GraphRequest(accessToken, refreshInfo.graphPath, parameters, HttpMethod.GET, callback)
+      val request = GraphRequest.newGraphPathRequest(accessToken, refreshInfo.graphPath, callback)
+      request.parameters = parameters
+      request.httpMethod = HttpMethod.GET
+      return request
     }
   }
 }
