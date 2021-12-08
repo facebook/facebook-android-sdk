@@ -49,8 +49,8 @@ internal class LikeStatusClient(
         NativeProtocol.PROTOCOL_VERSION_20141001,
         applicationId,
         null) {
-  override fun populateRequestBundle(data: Bundle?) {
+  override fun populateRequestBundle(data: Bundle) {
     // Only thing we need to pass in is the object id.
-    data?.putString(ShareConstants.EXTRA_OBJECT_ID, objectId)
+    data.putString(ShareConstants.EXTRA_OBJECT_ID, objectId)
   }
 }

@@ -73,8 +73,8 @@ class PlatformServiceClientTest : FacebookPowerMockTestCase() {
                 PROTOCOL_VERSION,
                 APPLICATION_ID,
                 NONCE) {
-          override fun populateRequestBundle(data: Bundle?) {
-            data?.putString("TEST", "TEST_DATA")
+          override fun populateRequestBundle(data: Bundle) {
+            data.putString("TEST", "TEST_DATA")
           }
         }
   }

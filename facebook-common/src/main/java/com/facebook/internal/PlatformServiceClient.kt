@@ -119,7 +119,7 @@ abstract class PlatformServiceClient(
     }
   }
 
-  protected abstract fun populateRequestBundle(data: Bundle?)
+  protected abstract fun populateRequestBundle(data: Bundle)
   protected fun handleMessage(message: Message) {
     if (message.what == replyMessage) {
       val extras = message.data

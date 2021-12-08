@@ -18,43 +18,35 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.login;
+package com.facebook.login
 
-import android.content.Context;
-import android.os.Bundle;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.PlatformServiceClient;
+import android.content.Context
+import android.os.Bundle
+import com.facebook.internal.NativeProtocol
+import com.facebook.internal.PlatformServiceClient
 
-final class LoginStatusClient extends PlatformServiceClient {
-
-  static final long DEFAULT_TOAST_DURATION_MS = 5000L;
-  private final String loggerRef;
-  private final String graphApiVersion;
-  private final long toastDurationMs;
-
-  LoginStatusClient(
-      final Context context,
-      final String applicationId,
-      final String loggerRef,
-      final String graphApiVersion,
-      final long toastDurationMs,
-      final String nonce) {
-    super(
+internal class LoginStatusClient(
+    context: Context,
+    applicationId: String,
+    private val loggerRef: String,
+    private val graphApiVersion: String,
+    private val toastDurationMs: Long,
+    nonce: String?
+) :
+    PlatformServiceClient(
         context,
         NativeProtocol.MESSAGE_GET_LOGIN_STATUS_REQUEST,
         NativeProtocol.MESSAGE_GET_LOGIN_STATUS_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20170411,
         applicationId,
-        nonce);
-    this.loggerRef = loggerRef;
-    this.graphApiVersion = graphApiVersion;
-    this.toastDurationMs = toastDurationMs;
+        nonce) {
+  override fun populateRequestBundle(data: Bundle) {
+    data.putString(NativeProtocol.EXTRA_LOGGER_REF, loggerRef)
+    data.putString(NativeProtocol.EXTRA_GRAPH_API_VERSION, graphApiVersion)
+    data.putLong(NativeProtocol.EXTRA_TOAST_DURATION_MS, toastDurationMs)
   }
 
-  @Override
-  protected void populateRequestBundle(Bundle data) {
-    data.putString(NativeProtocol.EXTRA_LOGGER_REF, loggerRef);
-    data.putString(NativeProtocol.EXTRA_GRAPH_API_VERSION, graphApiVersion);
-    data.putLong(NativeProtocol.EXTRA_TOAST_DURATION_MS, toastDurationMs);
+  companion object {
+    const val DEFAULT_TOAST_DURATION_MS = 5000L
   }
 }
