@@ -18,25 +18,20 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.login;
+package com.facebook.login
 
-import android.content.Context;
-import android.os.Bundle;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.PlatformServiceClient;
+import android.content.Context
+import android.os.Bundle
+import com.facebook.internal.NativeProtocol
+import com.facebook.internal.PlatformServiceClient
 
-final class GetTokenClient extends PlatformServiceClient {
-
-  GetTokenClient(Context context, LoginClient.Request request) {
-    super(
+internal class GetTokenClient(context: Context, request: LoginClient.Request) :
+    PlatformServiceClient(
         context,
         NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REQUEST,
         NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20121101,
-        request.getApplicationId(),
-        request.getNonce());
-  }
-
-  @Override
-  protected void populateRequestBundle(Bundle data) {}
+        request.applicationId,
+        request.nonce) {
+  override fun populateRequestBundle(data: Bundle) = Unit
 }
