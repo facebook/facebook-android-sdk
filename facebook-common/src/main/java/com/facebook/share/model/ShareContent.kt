@@ -193,7 +193,7 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
       return this as E
     }
 
-    override fun readFrom(content: P): E {
+    override fun readFrom(content: P?): E {
       return if (content == null) {
         this as E
       } else
