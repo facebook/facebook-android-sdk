@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.AuthenticationToken;
@@ -36,7 +37,8 @@ import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
-abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
   NativeAppLoginMethodHandler(LoginClient loginClient) {
     super(loginClient);
