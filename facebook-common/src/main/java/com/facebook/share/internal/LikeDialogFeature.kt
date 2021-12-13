@@ -41,7 +41,5 @@ enum class LikeDialogFeature(private val minVersion: Int) : DialogFeature {
     return NativeProtocol.ACTION_LIKE_DIALOG
   }
 
-  override fun getMinVersion(): Int {
-    return minVersion
-  }
+  override fun getMinVersion(): Int = minVersion
 }

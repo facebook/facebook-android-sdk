@@ -98,9 +98,7 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
     shareHashtag = ShareHashtag.Builder().readFrom(parcel).build()
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(out: Parcel, flags: Int) {
     out.writeParcelable(contentUrl, 0)

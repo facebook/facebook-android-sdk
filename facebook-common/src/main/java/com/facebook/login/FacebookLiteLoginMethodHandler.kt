@@ -57,9 +57,7 @@ internal class FacebookLiteLoginMethodHandler : NativeAppLoginMethodHandler {
 
   constructor(source: Parcel) : super(source)
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
     super.writeToParcel(dest, flags)

@@ -35,9 +35,7 @@ class ProgressNoopOutputStream(private val callbackHandler: Handler?) :
     currentRequestProgress = if (currentRequest != null) progressMap[currentRequest] else null
   }
 
-  fun getProgressMap(): Map<GraphRequest, RequestProgress> {
-    return progressMap
-  }
+  fun getProgressMap(): Map<GraphRequest, RequestProgress> = progressMap
 
   /** Add size to currentRequestProgress's process size */
   fun addProgress(size: Long) {

@@ -41,7 +41,5 @@ enum class OpenGraphActionDialogFeature(private val minVersion: Int) : DialogFea
   }
 
   /** This method is for internal use only. */
-  override fun getMinVersion(): Int {
-    return minVersion
-  }
+  override fun getMinVersion(): Int = minVersion
 }

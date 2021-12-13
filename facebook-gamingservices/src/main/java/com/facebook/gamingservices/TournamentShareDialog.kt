@@ -213,9 +213,7 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
 
   private inner class AppSwitchHandler : ModeHandler() {
 
-    override fun canShow(content: TournamentConfig?, isBestEffort: Boolean): Boolean {
-      return true
-    }
+    override fun canShow(content: TournamentConfig?, isBestEffort: Boolean): Boolean = true
 
     override fun createAppCall(content: TournamentConfig?): AppCall {
       val appCall: AppCall = this@TournamentShareDialog.createBaseAppCall()

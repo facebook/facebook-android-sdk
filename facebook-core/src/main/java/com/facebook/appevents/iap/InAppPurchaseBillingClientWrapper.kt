@@ -139,9 +139,7 @@ private constructor(
   @AutoHandleExceptions
   internal class PurchasesUpdatedListenerWrapper : InvocationHandler {
     // dummy function, no need to implement onPurchasesUpdated
-    override fun invoke(proxy: Any, m: Method, args: Array<Any>?): Any? {
-      return null
-    }
+    override fun invoke(proxy: Any, m: Method, args: Array<Any>?): Any? = null
   }
 
   @AutoHandleExceptions

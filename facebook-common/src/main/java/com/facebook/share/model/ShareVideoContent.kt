@@ -60,9 +60,7 @@ class ShareVideoContent : ShareContent<ShareVideoContent, ShareVideoContent.Buil
     video = ShareVideo.Builder().readFrom(parcel).build()
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(out: Parcel, flags: Int) {
     super.writeToParcel(out, flags)

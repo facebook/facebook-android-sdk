@@ -79,9 +79,7 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
     callbackManagerImpl.registerCallback(
         456,
         object : CallbackManagerImpl.Callback {
-          override fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
-            return false
-          }
+          override fun onActivityResult(resultCode: Int, data: Intent?): Boolean = false
         })
     callbackManagerImpl.onActivityResult(123, 1, Intent())
     Assert.assertTrue(capturedResult)

@@ -214,9 +214,7 @@ class Profile : Parcelable {
     pictureUri = if (pictureUriString == null) null else Uri.parse(pictureUriString)
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
     dest.writeString(id)

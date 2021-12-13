@@ -312,13 +312,9 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
       }
     }
 
-    fun excludeBufferFiles(): FilenameFilter {
-      return filterExcludeBufferFiles
-    }
+    fun excludeBufferFiles(): FilenameFilter = filterExcludeBufferFiles
 
-    fun excludeNonBufferFiles(): FilenameFilter {
-      return filterExcludeNonBufferFiles
-    }
+    fun excludeNonBufferFiles(): FilenameFilter = filterExcludeNonBufferFiles
 
     fun newFile(root: File?): File {
       val name = FILE_NAME_PREFIX + java.lang.Long.valueOf(bufferIndex.incrementAndGet()).toString()
@@ -466,9 +462,7 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
       throw UnsupportedOperationException()
     }
 
-    override fun markSupported(): Boolean {
-      return false
-    }
+    override fun markSupported(): Boolean = false
 
     @Throws(IOException::class)
     override fun read(buffer: ByteArray): Int {

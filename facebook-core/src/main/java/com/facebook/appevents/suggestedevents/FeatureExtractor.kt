@@ -75,10 +75,7 @@ internal object FeatureExtractor {
   private lateinit var rules: JSONObject
   private var initialized = false
 
-  @JvmStatic
-  fun isInitialized(): Boolean {
-    return initialized
-  }
+  @JvmStatic fun isInitialized(): Boolean = initialized
 
   @JvmStatic
   fun initialize(file: File?) {

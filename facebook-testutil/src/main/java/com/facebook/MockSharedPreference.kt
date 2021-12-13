@@ -27,9 +27,7 @@ import android.os.Build
 class MockSharedPreference : SharedPreferences {
   private val preferenceMap: HashMap<String, Any?> = HashMap()
   private val editor: MockEditor = MockEditor(preferenceMap)
-  override fun getAll(): Map<String, *> {
-    return preferenceMap
-  }
+  override fun getAll(): Map<String, *> = preferenceMap
 
   override fun getString(key: String, defValue: String?): String? {
     return preferenceMap.getOrDefault(key, defValue) as String?
@@ -59,9 +57,7 @@ class MockSharedPreference : SharedPreferences {
     return preferenceMap.containsKey(key)
   }
 
-  override fun edit(): SharedPreferences.Editor {
-    return editor
-  }
+  override fun edit(): SharedPreferences.Editor = editor
 
   override fun registerOnSharedPreferenceChangeListener(
       listener: SharedPreferences.OnSharedPreferenceChangeListener
@@ -112,9 +108,7 @@ class MockSharedPreference : SharedPreferences {
       return this
     }
 
-    override fun commit(): Boolean {
-      return true
-    }
+    override fun commit(): Boolean = true
 
     override fun apply() = Unit
   }

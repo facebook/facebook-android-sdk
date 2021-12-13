@@ -239,9 +239,7 @@ private constructor(
       false // errorIsTransient
       )
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   /** An enum that represents the Facebook SDK classification for the error that occurred. */
   enum class Category {

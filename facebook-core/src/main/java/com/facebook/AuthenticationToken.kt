@@ -159,9 +159,7 @@ class AuthenticationToken : Parcelable {
     dest.writeString(signature)
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   private fun isValidSignature(
       headerString: String,

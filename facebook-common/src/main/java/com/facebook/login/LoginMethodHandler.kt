@@ -66,13 +66,9 @@ abstract class LoginMethodHandler : Parcelable {
   }
 
   abstract fun tryAuthorize(request: LoginClient.Request): Int
-  open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-    return false
-  }
+  open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean = false
 
-  open fun needsInternetPermission(): Boolean {
-    return false
-  }
+  open fun needsInternetPermission(): Boolean = false
 
   open fun cancel() = Unit
 
@@ -112,9 +108,7 @@ abstract class LoginMethodHandler : Parcelable {
     writeStringMapToParcel(dest, methodLoggingExtras)
   }
 
-  open fun shouldKeepTrackOfMultipleIntents(): Boolean {
-    return false
-  }
+  open fun shouldKeepTrackOfMultipleIntents(): Boolean = false
 
   companion object {
     @JvmStatic

@@ -94,9 +94,7 @@ class AuthenticationTokenHeader : Parcelable {
     dest.writeString(kid)
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun toString(): String {
     val headerJsonObject = toJSONObject()

@@ -394,9 +394,7 @@ class AuthenticationTokenClaims : Parcelable {
     return claimsJsonObject.toString()
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   private fun isValidClaims(claimsJson: JSONObject, expectedNonce: String): Boolean {
     if (claimsJson == null) {

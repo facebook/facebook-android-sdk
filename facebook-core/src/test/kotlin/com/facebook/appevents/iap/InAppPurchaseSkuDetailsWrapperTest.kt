@@ -109,9 +109,7 @@ class InAppPurchaseSkuDetailsWrapperTest : FacebookPowerMockTestCase() {
         return this
       }
 
-      fun build(): FakeSkuDetailsParams {
-        return params
-      }
+      fun build(): FakeSkuDetailsParams = params
     }
   }
 }

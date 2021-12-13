@@ -91,9 +91,7 @@ internal constructor(
    * @return the returned JSON object, or null if none was returned (or if the result was a JSON
    * array)
    */
-  fun getJSONObject(): JSONObject? {
-    return graphObject
-  }
+  fun getJSONObject(): JSONObject? = graphObject
 
   /** The response returned for this request, if it's in object form. Otherwise it's null */
   val jsonObject: JSONObject? = graphObject
@@ -104,9 +102,7 @@ internal constructor(
    * @return the returned JSON array, or null if none was returned (or if the result was a JSON
    * object)
    */
-  fun getJSONArray(): JSONArray? {
-    return graphObjectArray
-  }
+  fun getJSONArray(): JSONArray? = graphObjectArray
 
   /** The response returned for this request, if it's in array form. Otherwise it's null */
   val jsonArray: JSONArray? = graphObjectArray

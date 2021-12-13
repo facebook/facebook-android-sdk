@@ -68,9 +68,7 @@ class TournamentConfig : ShareModel {
     image = null
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(out: Parcel, flags: Int) {
     out.writeString(sortOrder.toString())

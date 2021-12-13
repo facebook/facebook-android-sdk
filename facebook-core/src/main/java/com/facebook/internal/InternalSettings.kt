@@ -28,10 +28,7 @@ object InternalSettings {
 
   @Volatile private var customUserAgent: String? = null
 
-  @JvmStatic
-  fun getCustomUserAgent(): String? {
-    return customUserAgent
-  }
+  @JvmStatic fun getCustomUserAgent(): String? = customUserAgent
   @JvmStatic
   fun setCustomUserAgent(value: String) {
     customUserAgent = value

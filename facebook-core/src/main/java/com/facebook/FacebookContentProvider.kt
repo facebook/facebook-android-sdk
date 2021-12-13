@@ -48,9 +48,7 @@ import java.util.UUID
  * the [getContentProviderName][FacebookContentProvider.getAttachmentUrl] method.
  */
 class FacebookContentProvider : ContentProvider() {
-  override fun onCreate(): Boolean {
-    return true
-  }
+  override fun onCreate(): Boolean = true
 
   override fun query(
       uri: Uri,
@@ -62,17 +60,11 @@ class FacebookContentProvider : ContentProvider() {
     return null
   }
 
-  override fun getType(uri: Uri): String? {
-    return null
-  }
+  override fun getType(uri: Uri): String? = null
 
-  override fun insert(uri: Uri, contentValues: ContentValues?): Uri? {
-    return null
-  }
+  override fun insert(uri: Uri, contentValues: ContentValues?): Uri? = null
 
-  override fun delete(uri: Uri, s: String?, strings: Array<String>?): Int {
-    return 0
-  }
+  override fun delete(uri: Uri, s: String?, strings: Array<String>?): Int = 0
 
   override fun update(
       uri: Uri,

@@ -85,37 +85,23 @@ enum class LoginBehavior {
   }
 
   /** Note: This getter is for internal only */
-  fun allowsGetTokenAuth(): Boolean {
-    return allowsGetTokenAuth
-  }
+  fun allowsGetTokenAuth(): Boolean = allowsGetTokenAuth
 
   /** Note: This getter is for internal only */
-  fun allowsKatanaAuth(): Boolean {
-    return allowsKatanaAuth
-  }
+  fun allowsKatanaAuth(): Boolean = allowsKatanaAuth
 
   /** Note: This getter is for internal only */
-  fun allowsWebViewAuth(): Boolean {
-    return allowsWebViewAuth
-  }
+  fun allowsWebViewAuth(): Boolean = allowsWebViewAuth
 
   /** Note: This getter is for internal only */
-  fun allowsDeviceAuth(): Boolean {
-    return allowsDeviceAuth
-  }
+  fun allowsDeviceAuth(): Boolean = allowsDeviceAuth
 
   /** Note: This getter is for internal only */
-  fun allowsCustomTabAuth(): Boolean {
-    return allowsCustomTabAuth
-  }
+  fun allowsCustomTabAuth(): Boolean = allowsCustomTabAuth
 
   /** Note: This getter is for internal only */
-  fun allowsFacebookLiteAuth(): Boolean {
-    return allowsFacebookLiteAuth
-  }
+  fun allowsFacebookLiteAuth(): Boolean = allowsFacebookLiteAuth
 
   /** Note: This getter is for internal only */
-  fun allowsInstagramAppAuth(): Boolean {
-    return allowsInstagramAppAuth
-  }
+  fun allowsInstagramAppAuth(): Boolean = allowsInstagramAppAuth
 }

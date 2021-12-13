@@ -52,9 +52,7 @@ class FetchedAppSettings(
     val restrictiveDataSetting: String?
 ) {
 
-  fun supportsImplicitLogging(): Boolean {
-    return supportsImplicitLogging
-  }
+  fun supportsImplicitLogging(): Boolean = supportsImplicitLogging
 
   class DialogFeatureConfig
   private constructor(

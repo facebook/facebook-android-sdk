@@ -93,8 +93,5 @@ object Constants {
    */
   const val EVENT_PARAM_PRODUCT_PRICE_CURRENCY = "fb_product_price_currency"
 
-  @JvmStatic
-  fun getDefaultAppEventsSessionTimeoutInSeconds(): Int {
-    return 60
-  }
+  @JvmStatic fun getDefaultAppEventsSessionTimeoutInSeconds(): Int = 60
 }

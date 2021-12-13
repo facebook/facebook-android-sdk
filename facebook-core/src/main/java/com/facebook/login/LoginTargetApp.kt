@@ -23,9 +23,7 @@ enum class LoginTargetApp(private val targetApp: String) {
   FACEBOOK("facebook"),
   INSTAGRAM("instagram");
 
-  override fun toString(): String {
-    return targetApp
-  }
+  override fun toString(): String = targetApp
 
   companion object {
     /**

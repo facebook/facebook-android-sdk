@@ -131,9 +131,7 @@ object ImageDownloader {
   }
 
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-  fun getPendingRequests(): Map<RequestKey, DownloaderContext> {
-    return pendingRequests
-  }
+  fun getPendingRequests(): Map<RequestKey, DownloaderContext> = pendingRequests
 
   private fun enqueueCacheRead(
       request: ImageRequest,

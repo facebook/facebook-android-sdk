@@ -153,9 +153,7 @@ object RemoteServiceWrapper {
     MOBILE_APP_INSTALL("MOBILE_APP_INSTALL"),
     CUSTOM_APP_EVENTS("CUSTOM_APP_EVENTS");
 
-    override fun toString(): String {
-      return eventType
-    }
+    override fun toString(): String = eventType
   }
 
   internal class RemoteServiceConnection : ServiceConnection {

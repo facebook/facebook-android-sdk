@@ -81,13 +81,9 @@ class AppEvent : Serializable {
     this.inBackground = inBackground
   }
 
-  fun getIsImplicit(): Boolean {
-    return isImplicit
-  }
+  fun getIsImplicit(): Boolean = isImplicit
 
-  fun getJSONObject(): JSONObject {
-    return jsonObject
-  }
+  fun getJSONObject(): JSONObject = jsonObject
 
   // for old events we don't have a checksum
   val isChecksumValid: Boolean

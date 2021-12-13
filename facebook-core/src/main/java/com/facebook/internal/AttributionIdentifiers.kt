@@ -272,9 +272,7 @@ class AttributionIdentifiers {
   }
 
   private class GoogleAdInfo constructor(private val binder: IBinder) : IInterface {
-    override fun asBinder(): IBinder {
-      return binder
-    }
+    override fun asBinder(): IBinder = binder
 
     @get:Throws(RemoteException::class)
     val advertiserId: String?

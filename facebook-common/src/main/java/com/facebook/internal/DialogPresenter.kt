@@ -108,9 +108,7 @@ object DialogPresenter {
         registry.register<Intent, Pair<Int, Intent?>>(
             "facebook-dialog-request-$requestCode",
             object : ActivityResultContract<Intent, Pair<Int, Intent?>>() {
-              override fun createIntent(context: Context, input: Intent): Intent {
-                return input
-              }
+              override fun createIntent(context: Context, input: Intent): Intent = input
 
               override fun parseResult(resultCode: Int, intent: Intent?): Pair<Int, Intent?> {
                 return Pair.create(resultCode, intent)
