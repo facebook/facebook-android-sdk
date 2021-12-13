@@ -16,7 +16,7 @@ package com.facebook.appevents.codeless.internal
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.util.common.assertThrows
-import java.util.*
+import java.util.Arrays
 import kotlin.collections.ArrayList
 import org.json.JSONArray
 import org.json.JSONException

@@ -26,7 +26,7 @@ import com.facebook.gamingservices.model.CustomUpdateContent
 import com.facebook.gamingservices.model.CustomUpdateLocalizedText
 import com.facebook.gamingservices.model.CustomUpdateMedia
 import com.facebook.gamingservices.model.CustomUpdateMediaInfo
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class CustomUpdateContentTest : FacebookPowerMockTestCase() {
