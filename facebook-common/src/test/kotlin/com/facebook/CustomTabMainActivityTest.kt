@@ -45,7 +45,7 @@ class CustomTabMainActivityTest : FacebookPowerMockTestCase() {
   private lateinit var launchIntent: Intent
   private lateinit var mockLocalBroadcastManager: LocalBroadcastManager
   private lateinit var mockCustomTabsIntent: CustomTabsIntent
-  val mockChromePackageString = "mock chrome package string"
+  private val mockChromePackageString = "mock chrome package string"
 
   override fun setup() {
     super.setup()
