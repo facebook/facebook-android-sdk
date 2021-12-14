@@ -28,13 +28,14 @@ import com.facebook.AccessToken
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
-import com.facebook.HttpMethod
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlin.collections.HashMap
 import org.assertj.core.api.Assertions.assertThat
@@ -44,7 +45,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -54,7 +54,6 @@ import org.powermock.reflect.Whitebox
     AccessToken::class,
     FacebookSdk::class,
     GraphRequest::class,
-    Utility::class,
     FeatureManager::class,
     GoogleApiAvailability::class,
 )
@@ -114,9 +113,11 @@ class UtilityTest : FacebookPowerMockTestCase() {
   }
 
   fun createTestForGetGraphMeRequestWithCacheAsync(graphDomain: String?, expectedFields: String) {
-    PowerMockito.whenNew(GraphRequest::class.java)
-        .withAnyArguments()
-        .thenReturn(mock<GraphRequest>())
+    val mockGraphRequestCompanion = mock<GraphRequest.Companion>()
+    val mockGraphRequest = mock<GraphRequest>()
+    whenever(mockGraphRequestCompanion.newMeRequest(anyOrNull(), anyOrNull()))
+        .thenReturn(mockGraphRequest)
+    Whitebox.setInternalState(GraphRequest::class.java, "Companion", mockGraphRequestCompanion)
 
     val accessToken = mock<AccessToken>()
     whenever(accessToken.graphDomain).thenReturn(graphDomain)
@@ -124,21 +125,12 @@ class UtilityTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(AccessToken::class.java, "Companion", mockTokenCompanionObject)
     whenever(mockTokenCompanionObject.getCurrentAccessToken()).thenReturn(accessToken)
 
-    val bundleArgumentCaptor = ArgumentCaptor.forClass(Bundle::class.java)
-    Utility.getGraphMeRequestWithCacheAsync(
-        mockTokenString, mock<Utility.GraphMeRequestWithCacheCallback>())
+    val bundleArgumentCaptor = argumentCaptor<Bundle>()
+    Utility.getGraphMeRequestWithCacheAsync(mockTokenString, mock())
 
-    PowerMockito.verifyNew(GraphRequest::class.java)
-        .withArguments(
-            isNull(),
-            eq<String>("me"),
-            bundleArgumentCaptor.capture(),
-            eq(HttpMethod.GET),
-            isNull(),
-            isNull(),
-            any<Int>(),
-            isNull()) // @JvmOverloads adds extra arguments
-    val parameters = bundleArgumentCaptor.getValue()
+    verify(mockGraphRequestCompanion).newMeRequest(isNull(), isNull())
+    verify(mockGraphRequest).parameters = bundleArgumentCaptor.capture()
+    val parameters = bundleArgumentCaptor.firstValue
     assertThat(parameters.getString("fields")).isEqualTo(expectedFields)
     assertThat(parameters.getString("access_token")).isEqualTo(mockTokenString)
   }

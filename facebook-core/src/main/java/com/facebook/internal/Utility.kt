@@ -1129,7 +1129,10 @@ object Utility {
     parameters.putString(
         "fields", getProfileFieldsForGraphDomain(getCurrentTokenDomainWithDefault()))
     parameters.putString("access_token", accessToken)
-    return GraphRequest(null, "me", parameters, HttpMethod.GET, null)
+    val request = GraphRequest.newMeRequest(null, null)
+    request.parameters = parameters
+    request.httpMethod = HttpMethod.GET
+    return request
   }
 
   private fun getProfileFieldsForGraphDomain(graphDomain: String?): String {
