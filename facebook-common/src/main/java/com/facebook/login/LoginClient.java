@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -543,7 +544,11 @@ public class LoginClient implements Parcelable {
       this.applicationId = applicationId;
       this.authId = authId;
       this.targetApp = targetApp;
-      this.nonce = nonce;
+      if (Utility.isNullOrEmpty(nonce)) {
+        this.nonce = UUID.randomUUID().toString();
+      } else {
+        this.nonce = nonce;
+      }
     }
 
     Set<String> getPermissions() {
