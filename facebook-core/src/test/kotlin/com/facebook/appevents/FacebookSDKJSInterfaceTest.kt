@@ -5,6 +5,7 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -12,8 +13,9 @@ import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, FacebookSDKJSInterface::class)
+@PrepareForTest(FacebookSdk::class)
 class FacebookSDKJSInterfaceTest : FacebookPowerMockTestCase() {
   private val validJson =
       "{\n" +
@@ -31,9 +33,11 @@ class FacebookSDKJSInterfaceTest : FacebookPowerMockTestCase() {
     mockContext = mock()
     mockLogger = mock()
 
-    PowerMockito.whenNew(InternalAppEventsLogger::class.java)
-        .withAnyArguments()
+    val mockInternalAppEventsLoggerCompanion = mock<InternalAppEventsLogger.Companion>()
+    whenever(mockInternalAppEventsLoggerCompanion.createInstance(anyOrNull(), anyOrNull()))
         .thenReturn(mockLogger)
+    Whitebox.setInternalState(
+        InternalAppEventsLogger::class.java, "Companion", mockInternalAppEventsLoggerCompanion)
     sdkInterface = FacebookSDKJSInterface(mockContext)
   }
 

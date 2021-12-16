@@ -41,7 +41,7 @@ internal class FacebookSDKJSInterface(private val context: Context?) {
               "Check your webview Pixel configuration")
       return
     }
-    val logger = InternalAppEventsLogger(context)
+    val logger = InternalAppEventsLogger.createInstance(context)
     val parameters = jsonStringToBundle(jsonString)
     parameters.putString(PARAMETER_FBSDK_PIXEL_REFERRAL, pixelId)
     logger.logEvent(eventName, parameters)

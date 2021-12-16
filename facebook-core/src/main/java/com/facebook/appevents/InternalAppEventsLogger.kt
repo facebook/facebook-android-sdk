@@ -136,5 +136,19 @@ class InternalAppEventsLogger internal constructor(private val loggerImpl: AppEv
     fun setInternalUserData(ud: Map<String, String>) {
       UserDataStore.setInternalUd(ud)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @JvmStatic
+    @JvmOverloads
+    fun createInstance(context: Context?, applicationId: String? = null): InternalAppEventsLogger =
+        InternalAppEventsLogger(context, applicationId)
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @JvmStatic
+    fun createInstance(
+        activityName: String,
+        applicationId: String?,
+        accessToken: AccessToken?
+    ): InternalAppEventsLogger = InternalAppEventsLogger(activityName, applicationId, accessToken)
   }
 }
