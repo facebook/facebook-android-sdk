@@ -130,6 +130,7 @@ object Utility {
    * @param range2 The second range
    * @return The intersection of the two ranges.
    */
+  @Deprecated("It will be removed in v13.0.")
   @JvmStatic
   fun intersectRanges(range1: IntArray?, range2: IntArray?): IntArray? {
     if (range1 == null) {
@@ -201,6 +202,8 @@ object Utility {
   // Returns true iff all items in subset are in superset, treating null and
   // empty collections as
   // the same.
+  @Deprecated(
+      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.containsAll"))
   @JvmStatic
   fun <T> isSubset(subset: Collection<T>?, superset: Collection<T>?): Boolean {
     if (superset == null || superset.isEmpty()) {
@@ -240,11 +243,14 @@ object Utility {
     } else s
   }
 
+  @Deprecated("This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.listOf"))
   @JvmStatic
   fun <T> unmodifiableCollection(vararg ts: T): Collection<T> {
     return Collections.unmodifiableCollection(Arrays.asList(*ts))
   }
 
+  @Deprecated(
+      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.arrayListOf"))
   @JvmStatic
   fun <T> arrayList(vararg ts: T): ArrayList<T> {
     val arrayList = ArrayList<T>(ts.size)
@@ -254,6 +260,8 @@ object Utility {
     return arrayList
   }
 
+  @Deprecated(
+      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.hashSetOf"))
   @JvmStatic
   fun <T> hashSet(vararg ts: T): HashSet<T> {
     val hashSet = HashSet<T>(ts.size)
@@ -631,6 +639,7 @@ object Utility {
     } else a == b
   }
 
+  @Deprecated("It will be removed in v13.0.")
   @JvmStatic
   fun hasSameId(a: JSONObject?, b: JSONObject?): Boolean {
     if (a == null || b == null || !a.has("id") || !b.has("id")) {
@@ -661,6 +670,7 @@ object Utility {
     return response?.optJSONArray(propertyKey)
   }
 
+  @Deprecated("It will be removed in v13.0.")
   @JvmStatic
   fun clearCaches() {
     ImageDownloader.clearCache()
@@ -682,6 +692,8 @@ object Utility {
     directoryOrFile.delete()
   }
 
+  @Deprecated(
+      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.filterNotNull"))
   @JvmStatic
   fun <T> asListNoNulls(vararg array: T): List<T> {
     val result = ArrayList<T>()
@@ -946,6 +958,7 @@ object Utility {
     }
   }
 
+  @Deprecated("This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.filter"))
   @JvmStatic
   fun <T> filter(target: List<T>?, predicate: Predicate<T>): List<T>? {
     if (target == null) {
@@ -960,6 +973,7 @@ object Utility {
     return if (list.size == 0) null else list
   }
 
+  @Deprecated("This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.map"))
   @JvmStatic
   fun <T, K> map(target: List<T>?, mapper: Mapper<T, K>): List<K>? {
     if (target == null) {
