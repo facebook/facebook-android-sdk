@@ -36,6 +36,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.math.BigDecimal
 import java.util.Currency
 import org.junit.Assert.assertEquals
@@ -44,7 +45,6 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.verifyNew
-import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -85,9 +85,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     mockStatic(FetchedAppGateKeepersManager::class.java)
 
     context = Robolectric.buildActivity(Activity::class.java).get()
-    whenCalled(FacebookSdk.getApplicationContext()).thenReturn(context)
-    whenCalled(FacebookSdk.isInitialized()).thenReturn(true)
-    whenCalled(FacebookSdk.getApplicationId()).thenReturn(appID)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(appID)
 
     mockInternalAppEventsLogger = mock(InternalAppEventsLogger::class.java)
     whenNew(InternalAppEventsLogger::class.java)
@@ -103,24 +103,24 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     whenNew(Bundle::class.java).withAnyArguments().thenReturn(mockBundle)
 
     mockFetchedAppSettings = mock(FetchedAppSettings::class.java)
-    whenCalled(FetchedAppSettingsManager.queryAppSettings(appID, false))
+    whenever(FetchedAppSettingsManager.queryAppSettings(appID, false))
         .thenReturn(mockFetchedAppSettings)
-    whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
+    whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
         .thenReturn(mockFetchedAppSettings)
 
-    whenCalled(Log.w(any(), any<String>())).then { logWarningCallCount++ }
-    whenCalled(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
+    whenever(Log.w(any(), any<String>())).then { logWarningCallCount++ }
+    whenever(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
 
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
 
-    whenCalled(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
+    whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
         .thenReturn(true)
   }
 
   @Test
   fun `test log activate app event when autoLogAppEvent disable`() {
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
     AutomaticAnalyticsLogger.logActivateAppEvent()
 
@@ -130,7 +130,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test log activate app event when autoLogAppEvent enable`() {
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
 
     AutomaticAnalyticsLogger.logActivateAppEvent()
 
@@ -140,11 +140,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test log activate app event when autoLogAppEvent enable & context is application`() {
     val appContext = RuntimeEnvironment.application
-    whenCalled(FacebookSdk.getApplicationContext()).thenReturn(appContext)
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(appContext)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
     val mockCompanion = mock(AppEventsLogger.Companion::class.java)
     WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
-    whenCalled(mockCompanion.activateApp(appContext, appID)).then { appEventLoggerCallCount++ }
+    whenever(mockCompanion.activateApp(appContext, appID)).then { appEventLoggerCallCount++ }
 
     AutomaticAnalyticsLogger.logActivateAppEvent()
 
@@ -153,7 +153,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test log activity time spent event when automatic logging disable`() {
-    whenCalled(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(false)
+    whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(false)
 
     AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
 
@@ -164,7 +164,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test log activity time spent event when automatic logging enable`() {
-    whenCalled(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
+    whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
 
     AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
 
@@ -179,10 +179,10 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     var appGateKeepersManagerCallCount = 0
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
-    whenCalled(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>())).then {
+    whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>())).then {
       appGateKeepersManagerCallCount++
     }
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
     AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
 
@@ -191,7 +191,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test log purchase when implicit purchase logging enable & subscribed`() {
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
     AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
     verify(mockInternalAppEventsLogger)
         .logEventImplicitly(
@@ -203,7 +203,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test log purchase when implicit purchase logging enable & not subscribed`() {
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
     AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, false)
     verify(mockInternalAppEventsLogger)
         .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
@@ -211,14 +211,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test is implicit purchase logging enabled when autoLogAppEvent Disable`() {
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
     val result = AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()
     assertEquals(false, result)
   }
 
   @Test
   fun `test is implicit purchase logging enabled when autoLogAppEvent enable`() {
-    whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
     val result2 = AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()
     assertEquals(true, result2)
   }

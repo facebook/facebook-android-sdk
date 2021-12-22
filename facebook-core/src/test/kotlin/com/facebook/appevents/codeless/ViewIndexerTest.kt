@@ -26,6 +26,7 @@ import com.facebook.GraphRequest
 import com.facebook.GraphResponse
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -33,7 +34,6 @@ import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.spy
-import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.robolectric.util.ReflectionHelpers
@@ -53,16 +53,14 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     mockViewIndexer = ViewIndexer(activity)
     mockGraphRequest = mock()
     mockGraphResponse = mock()
-    whenCalled(mockGraphRequest.executeAndWait()).thenReturn(mockGraphResponse)
+    whenever(mockGraphRequest.executeAndWait()).thenReturn(mockGraphResponse)
 
     spy(ViewIndexer::class.java)
     ReflectionHelpers.setStaticField(ViewIndexer::class.java, "instance", mockViewIndexer)
 
     mockStatic(CodelessManager::class.java)
     updateAppIndexingHasBeenCalledTime = 0
-    whenCalled(CodelessManager.updateAppIndexing(any())).then {
-      updateAppIndexingHasBeenCalledTime++
-    }
+    whenever(CodelessManager.updateAppIndexing(any())).then { updateAppIndexingHasBeenCalledTime++ }
   }
 
   @Test
@@ -75,7 +73,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `processRequest when json object is null`() {
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(null)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(null)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     assertEquals(0, updateAppIndexingHasBeenCalledTime)
     val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
@@ -85,7 +83,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun `processRequest when success is true`() {
     val jsonObject = JSONObject("{'success': 'true'}")
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
     assertThat(previousDigest).isEqualTo(currentDigest)
@@ -94,7 +92,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun `processRequest when success is not true`() {
     val jsonObject = JSONObject("{'success': 'false'}")
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
     assertThat(previousDigest).isNull()
@@ -103,7 +101,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun `processRequest when there is no success in json object`() {
     val jsonObject = JSONObject("{'error': 'user error'}")
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     val previousDigest = Whitebox.getInternalState<String>(mockViewIndexer, "previousDigest")
     assertThat(previousDigest).isNull()
@@ -112,7 +110,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun `processRequest when is_app_indexing_enabled is true`() {
     val jsonObject = JSONObject("{'is_app_indexing_enabled': true}")
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     assertEquals(1, updateAppIndexingHasBeenCalledTime)
   }
@@ -120,7 +118,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun `processRequest when is_app_indexing_enabled is false`() {
     val jsonObject = JSONObject("{'is_app_indexing_enabled': false}")
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     assertEquals(1, updateAppIndexingHasBeenCalledTime)
   }
@@ -128,7 +126,7 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
   @Test
   fun `processRequest when is_app_indexing_enabled is not a boolean`() {
     val jsonObject = JSONObject("{'is_app_indexing_enabled': 'abc'}")
-    whenCalled(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
+    whenever(mockGraphResponse.getJSONObject()).thenReturn(jsonObject)
     mockViewIndexer.processRequest(mockGraphRequest, currentDigest)
     assertEquals(0, updateAppIndexingHasBeenCalledTime)
   }
