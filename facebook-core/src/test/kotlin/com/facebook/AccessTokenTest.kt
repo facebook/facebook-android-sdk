@@ -26,8 +26,6 @@ import android.os.Bundle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.Utility
-import com.facebook.internal.Utility.arrayList
-import com.facebook.internal.Utility.hashSet
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Date
@@ -72,9 +70,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
               "",
               "1234",
               "1000",
-              arrayList<String?>("something"),
-              arrayList<String?>("something_else"),
-              arrayList<String?>("something_else_e"),
+              arrayListOf("something"),
+              arrayListOf("something_else"),
+              arrayListOf("something_else_e"),
               AccessTokenSource.CLIENT_TOKEN,
               Date(),
               Date(),
@@ -91,9 +89,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
               "a token",
               "1234",
               "",
-              arrayList<String?>("something"),
-              arrayList<String?>("something_else"),
-              arrayList<String?>("something_else_e"),
+              arrayListOf("something"),
+              arrayListOf("something_else"),
+              arrayListOf("something_else_e"),
               AccessTokenSource.CLIENT_TOKEN,
               Date(),
               Date(),
@@ -110,9 +108,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
               "a token",
               "",
               "0000",
-              arrayList<String?>("something"),
-              arrayList<String?>("something_else"),
-              arrayList<String?>("something_else_e"),
+              arrayListOf("something"),
+              arrayListOf("something_else"),
+              arrayListOf("something_else_e"),
               AccessTokenSource.CLIENT_TOKEN,
               Date(),
               Date(),
@@ -128,7 +126,7 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
             "a token",
             "1234",
             "1000",
-            arrayList<String?>("stream_publish"),
+            arrayListOf("stream_publish"),
             null,
             null,
             AccessTokenSource.WEB_VIEW,
@@ -149,9 +147,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test cache roundtrip`() {
-    val permissions: Set<String> = hashSet("stream_publish", "go_outside_and_play")
-    val declinedPermissions: Set<String> = hashSet("no you may not", "no soup for you")
-    val expiredPermissions: Set<String> = hashSet("expired", "oh no")
+    val permissions: Set<String> = hashSetOf("stream_publish", "go_outside_and_play")
+    val declinedPermissions: Set<String> = hashSetOf("no you may not", "no soup for you")
+    val expiredPermissions: Set<String> = hashSetOf("expired", "oh no")
     val token = "AnImaginaryTokenValue"
     val later = FacebookTestUtility.nowPlusSeconds(60)
     val earlier = FacebookTestUtility.nowPlusSeconds(-60)
@@ -413,9 +411,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
   @Test
   fun `test AccessToken constructor`() {
     val token = "A token of my esteem"
-    val permissions: Set<String?> = hashSet<String?>("walk", "chew gum")
-    val declinedPermissions: Set<String?> = hashSet<String?>("jump")
-    val expiredPermissions: Set<String?> = hashSet<String?>("smile")
+    val permissions: Set<String?> = hashSetOf("walk", "chew gum")
+    val declinedPermissions: Set<String?> = hashSetOf("jump")
+    val expiredPermissions: Set<String?> = hashSetOf("smile")
     val expires = Date(2_025, 5, 3)
     val lastRefresh = Date(2_023, 8, 15)
     val dataAccessExpirationTime = Date(2_025, 5, 3)

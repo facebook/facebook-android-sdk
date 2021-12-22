@@ -90,10 +90,9 @@ object ServerProtocol {
 
   @JvmStatic
   val errorsProxyAuthDisabled: Collection<String> =
-      Utility.unmodifiableCollection("service_disabled", "AndroidAuthKillSwitchException")
+      listOf("service_disabled", "AndroidAuthKillSwitchException")
   @JvmStatic
-  val errorsUserCanceled: Collection<String> =
-      Utility.unmodifiableCollection("access_denied", "OAuthAccessDeniedException")
+  val errorsUserCanceled: Collection<String> = listOf("access_denied", "OAuthAccessDeniedException")
   @JvmStatic val errorConnectionFailure = "CONNECTION_FAILURE"
   @JvmStatic
   fun getDialogAuthority(): String =

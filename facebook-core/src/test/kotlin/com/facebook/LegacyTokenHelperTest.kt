@@ -26,9 +26,9 @@ class LegacyTokenHelperTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test legacy token helper`() {
-    val permissions: Set<String> = Utility.hashSet("stream_publish", "go_outside_and_play")
-    val declinedPermissions: Set<String> = Utility.hashSet("no you may not", "no soup for you")
-    val expiredPermissions: Set<String> = Utility.hashSet("expired", "oh no")
+    val permissions: Set<String> = hashSetOf("stream_publish", "go_outside_and_play")
+    val declinedPermissions: Set<String> = hashSetOf("no you may not", "no soup for you")
+    val expiredPermissions: Set<String> = hashSetOf("expired", "oh no")
     val token = "AnImaginaryTokenValue"
     val later = FacebookTestUtility.nowPlusSeconds(60)
     val earlier = FacebookTestUtility.nowPlusSeconds(-60)

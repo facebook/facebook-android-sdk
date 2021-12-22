@@ -203,12 +203,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun testUnmodifiableCollection() {
-    val result = Utility.unmodifiableCollection("t1", "t2")
-    assertArrayEquals(arrayOf("t1", "t2"), result.toTypedArray())
-  }
-
-  @Test
   fun testConvertJSONObjectToStringMap() {
     val validJson = "{\"k1\": true, \"k2\": \"value\"}"
     val result = Utility.convertJSONObjectToStringMap(JSONObject(validJson))
