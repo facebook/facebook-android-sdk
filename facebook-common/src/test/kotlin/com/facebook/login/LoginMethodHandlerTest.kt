@@ -172,16 +172,11 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test createAccessTokenFromWebBundle with valid bundle`() {
-    val bundle = Bundle()
-    bundle.putLong(AccessToken.EXPIRES_IN_KEY, 36000L)
-    bundle.putLong(AccessToken.DATA_ACCESS_EXPIRATION_TIME, 36000L)
-    bundle.putString(AccessToken.ACCESS_TOKEN_KEY, "access_token")
-    bundle.putString(AccessToken.GRAPH_DOMAIN, "test.facebook.com")
-    bundle.putString("signed_request", SIGNATURE_AND_PAYLOAD)
+    val bundle = createValidWebLoginResultBundle()
     val accessToken =
         LoginMethodHandler.createAccessTokenFromWebBundle(
             listOf(), bundle, mock(), FacebookSdk.getApplicationId())
-    assertThat(accessToken?.userId).isEqualTo("54321")
+    assertThat(accessToken?.userId).isEqualTo(WEB_LOGIN_TEST_USER_ID)
   }
 
   @Test
@@ -200,6 +195,17 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
   companion object {
     // user_id = 54321 for this base64 code
-    const val SIGNATURE_AND_PAYLOAD = "signature.eyJ1c2VyX2lkIjo1NDMyMX0="
+    private const val SIGNATURE_AND_PAYLOAD = "signature.eyJ1c2VyX2lkIjo1NDMyMX0="
+    const val WEB_LOGIN_TEST_USER_ID = "54321"
+
+    internal fun createValidWebLoginResultBundle(): Bundle {
+      val bundle = Bundle()
+      bundle.putLong(AccessToken.EXPIRES_IN_KEY, 36000L)
+      bundle.putLong(AccessToken.DATA_ACCESS_EXPIRATION_TIME, 36000L)
+      bundle.putString(AccessToken.ACCESS_TOKEN_KEY, "access_token")
+      bundle.putString(AccessToken.GRAPH_DOMAIN, "test.facebook.com")
+      bundle.putString("signed_request", SIGNATURE_AND_PAYLOAD)
+      return bundle
+    }
   }
 }

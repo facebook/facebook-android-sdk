@@ -37,11 +37,8 @@ import com.facebook.FacebookServiceException;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Locale;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 abstract class WebLoginMethodHandler extends LoginMethodHandler {
   private static final String WEB_VIEW_AUTH_HANDLER_STORE =
       "com.facebook.login.AuthorizationClient.WebViewAuthHandler.TOKEN_STORE_KEY";
