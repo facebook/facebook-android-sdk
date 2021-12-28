@@ -1479,10 +1479,12 @@ object Utility {
       return false
     }
 
+  @Deprecated("This type should not be used in Kotlin.")
   fun interface Predicate<T> {
     fun apply(item: T): Boolean
   }
 
+  @Deprecated("This type should not be used in Kotlin.")
   fun interface Mapper<T, K> {
     fun apply(item: T): K
   }
