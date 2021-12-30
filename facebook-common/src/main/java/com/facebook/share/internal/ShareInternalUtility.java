@@ -80,10 +80,10 @@ import org.json.JSONObject;
 @AutoHandleExceptions
 public final class ShareInternalUtility {
   public static final String MY_PHOTOS = "me/photos";
-  private static final String MY_STAGING_RESOURCES = "me/staging_resources";
+  static final String MY_STAGING_RESOURCES = "me/staging_resources";
 
   // Parameter names/values
-  private static final String STAGING_PARAM = "file";
+  static final String STAGING_PARAM = "file";
 
   public static void invokeCallbackWithException(
       FacebookCallback<Sharer.Result> callback, final Exception exception) {
@@ -186,7 +186,12 @@ public final class ShareInternalUtility {
           final String gesture = getNativeDialogCompletionGesture(results);
           if (gesture == null || "post".equalsIgnoreCase(gesture)) {
             String postId = getShareDialogPostId(results);
-            invokeOnSuccessCallback(callback, postId);
+            if (postId != null) {
+              invokeOnSuccessCallback(callback, postId);
+            } else {
+              invokeOnErrorCallback(
+                  callback, new FacebookException(NativeProtocol.ERROR_UNKNOWN_ERROR));
+            }
           } else if ("cancel".equalsIgnoreCase(gesture)) {
             invokeOnCancelCallback(callback);
           } else {
