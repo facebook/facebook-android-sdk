@@ -327,6 +327,7 @@ internal constructor(
         callback: GraphRequest.Callback
     ): GraphRequest {
       val parameters = Bundle()
+      parameters.putString(GraphRequest.FIELDS_PARAM, "permission,status")
       val request =
           GraphRequest.newGraphPathRequest(accessToken, ME_PERMISSIONS_GRAPH_PATH, callback)
       request.parameters = parameters
@@ -350,6 +351,9 @@ internal constructor(
       val parameters = Bundle()
       parameters.putString("grant_type", refreshInfo.grantType)
       parameters.putString("client_id", accessToken.applicationId)
+      parameters.putString(
+          GraphRequest.FIELDS_PARAM,
+          "access_token,expires_at,expires_in,data_access_expiration_time,graph_domain")
       val request = GraphRequest.newGraphPathRequest(accessToken, refreshInfo.graphPath, callback)
       request.parameters = parameters
       request.httpMethod = HttpMethod.GET
