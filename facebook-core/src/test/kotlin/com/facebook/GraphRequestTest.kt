@@ -28,9 +28,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.AttributionIdentifiers
+import com.facebook.internal.Logger
 import com.facebook.internal.ServerProtocol
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -739,6 +742,31 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val decodeData = URLDecoder.decode(data, "UTF-8")
     // check requests are in the decoded data
     assertThat(decodeData).contains("test attachment data")
+  }
+
+  @Test
+  fun `test validating get requests with null or empty fields params will generate an error log`() {
+    val mockLoggerCompanion = mock<Logger.Companion>()
+    Whitebox.setInternalState(Logger::class.java, "Companion", mockLoggerCompanion)
+    val graphRequestWithNullFieldsParams = GraphRequest.newGraphPathRequest(null, "/test/", null)
+    graphRequestWithNullFieldsParams.parameters.remove(GraphRequest.FIELDS_PARAM)
+    val graphRequestWithEmptyFieldsParams = GraphRequest.newGraphPathRequest(null, "/test/", null)
+    graphRequestWithEmptyFieldsParams.parameters.putString(GraphRequest.FIELDS_PARAM, "")
+    GraphRequest.validateFieldsParamForGetRequests(
+        GraphRequestBatch(graphRequestWithNullFieldsParams, graphRequestWithEmptyFieldsParams))
+    verify(mockLoggerCompanion, times(2))
+        .log(eq(LoggingBehavior.DEVELOPER_ERRORS), eq(Log.WARN), any(), any())
+  }
+
+  @Test
+  fun `test validating get requests with correct fields params`() {
+    val mockLoggerCompanion = mock<Logger.Companion>()
+    Whitebox.setInternalState(Logger::class.java, "Companion", mockLoggerCompanion)
+    val graphRequest = GraphRequest.newGraphPathRequest(null, "/test/", null)
+    graphRequest.parameters.putString(GraphRequest.FIELDS_PARAM, "id,name")
+    GraphRequest.validateFieldsParamForGetRequests(GraphRequestBatch(graphRequest))
+    verify(mockLoggerCompanion, never())
+        .log(eq(LoggingBehavior.DEVELOPER_ERRORS), eq(Log.WARN), any(), any())
   }
 
   fun createAccessTokenForDomain(domain: String): AccessToken {

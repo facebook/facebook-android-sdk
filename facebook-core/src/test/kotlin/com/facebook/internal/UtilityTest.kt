@@ -132,7 +132,7 @@ class UtilityTest : FacebookPowerMockTestCase() {
     verify(mockGraphRequestCompanion).newMeRequest(isNull(), isNull())
     verify(mockGraphRequest).parameters = bundleArgumentCaptor.capture()
     val parameters = bundleArgumentCaptor.firstValue
-    assertThat(parameters.getString("fields")).isEqualTo(expectedFields)
+    assertThat(parameters.getString(GraphRequest.FIELDS_PARAM)).isEqualTo(expectedFields)
     assertThat(parameters.getString("access_token")).isEqualTo(mockTokenString)
   }
 

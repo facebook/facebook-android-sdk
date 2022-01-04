@@ -54,7 +54,7 @@ object FetchedAppGateKeepersManager {
   private const val APPLICATION_GATEKEEPER_EDGE = "mobile_sdk_gk"
   private const val APPLICATION_GATEKEEPER_FIELD = "gatekeepers"
   private const val APPLICATION_GRAPH_DATA = "data"
-  private const val APPLICATION_FIELDS = "fields"
+  private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private const val APPLICATION_PLATFORM = "platform"
   private const val APPLICATION_SDK_VERSION = "sdk_version"
   private val isLoading = AtomicBoolean(false)

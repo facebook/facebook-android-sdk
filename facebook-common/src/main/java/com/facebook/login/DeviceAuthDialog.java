@@ -409,7 +409,7 @@ public class DeviceAuthDialog extends DialogFragment {
   private void onSuccess(
       final String accessToken, final Long expiresIn, final Long dataAccessExpirationTime) {
     Bundle parameters = new Bundle();
-    parameters.putString("fields", "id,permissions,name");
+    parameters.putString(GraphRequest.FIELDS_PARAM, "id,permissions,name");
     final Date expirationTime =
         expiresIn != 0 ? new Date(new Date().getTime() + expiresIn * 1000l) : null;
     final Date dataAccessExpirationTimeDate =

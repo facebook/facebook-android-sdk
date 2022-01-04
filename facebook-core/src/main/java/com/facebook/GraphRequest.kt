@@ -78,7 +78,6 @@ import kotlin.collections.Map
 import kotlin.collections.MutableMap
 import kotlin.collections.set
 import kotlin.collections.toList
-import kotlin.collections.toTypedArray
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -1090,35 +1089,16 @@ class GraphRequest {
     }
 
     @JvmStatic
-    internal fun shouldWarnOnMissingFieldsParam(request: GraphRequest): Boolean {
-      // null implies latest version
-      var version = request.version ?: return true
-      if (version.isEmpty()) {
-        return true
-      }
-      if (version.startsWith("v")) {
-        version = version.substring(1)
-      }
-      val versionParts = version.split("\\.".toRegex()).toTypedArray()
-      // We should warn on missing "fields" params for API 2.4 and above
-      return versionParts.size >= 2 && versionParts[0].toInt() > 2 ||
-          versionParts[0].toInt() >= 2 && versionParts[1].toInt() >= 4
-    }
-
-    @JvmStatic
     internal fun validateFieldsParamForGetRequests(requests: GraphRequestBatch) {
       // validate that the GET requests all have a "fields" param
       for (request in requests) {
-        if (HttpMethod.GET == request.httpMethod && shouldWarnOnMissingFieldsParam(request)) {
-          if (!request.parameters.containsKey(FIELDS_PARAM) ||
-              isNullOrEmpty(request.parameters.getString(FIELDS_PARAM))) {
+        if (HttpMethod.GET == request.httpMethod) {
+          if (isNullOrEmpty(request.parameters.getString(FIELDS_PARAM))) {
             log(
                 LoggingBehavior.DEVELOPER_ERRORS,
                 Log.WARN,
                 "Request",
-                "starting with Graph API v2.4, GET requests for /%s should contain an" +
-                    " explicit \"fields\" parameter.",
-                request.graphPath ?: "")
+                "GET requests for /${request.graphPath?:""} should contain an explicit \"fields\" parameter.")
           }
         }
       }

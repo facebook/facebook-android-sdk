@@ -1142,7 +1142,8 @@ object Utility {
   private fun getGraphMeRequestWithCache(accessToken: String): GraphRequest {
     val parameters = Bundle()
     parameters.putString(
-        "fields", getProfileFieldsForGraphDomain(getCurrentTokenDomainWithDefault()))
+        GraphRequest.FIELDS_PARAM,
+        getProfileFieldsForGraphDomain(getCurrentTokenDomainWithDefault()))
     parameters.putString("access_token", accessToken)
     val request = GraphRequest.newMeRequest(null, null)
     request.parameters = parameters

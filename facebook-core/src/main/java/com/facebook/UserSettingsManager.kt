@@ -47,7 +47,7 @@ internal object UserSettingsManager {
       (7 * 24 * 60 * 60 * 1000 // Millisecond
           ).toLong()
   private const val ADVERTISER_ID_KEY = "advertiser_id"
-  private const val APPLICATION_FIELDS = "fields"
+  private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private val autoInitEnabled = UserSetting(true, FacebookSdk.AUTO_INIT_ENABLED_PROPERTY)
   private val autoLogAppEventsEnabled =
       UserSetting(true, FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY)

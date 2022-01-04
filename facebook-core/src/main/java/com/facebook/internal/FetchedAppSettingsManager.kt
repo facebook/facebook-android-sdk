@@ -91,7 +91,7 @@ object FetchedAppSettingsManager {
           APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD,
           APP_SETTING_APP_EVENTS_AAM_RULE,
           SUGGESTED_EVENTS_SETTING)
-  private const val APPLICATION_FIELDS = "fields"
+  private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private val fetchedAppSettings: MutableMap<String, FetchedAppSettings> = ConcurrentHashMap()
   private val loadingState = AtomicReference(FetchAppSettingState.NOT_LOADED)
   private val fetchedAppSettingsCallbacks = ConcurrentLinkedQueue<FetchedAppSettingsCallback>()
