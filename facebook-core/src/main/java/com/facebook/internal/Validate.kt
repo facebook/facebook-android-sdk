@@ -105,8 +105,9 @@ object Validate {
   }
 
   @JvmStatic
-  fun notNullOrEmpty(arg: String?, name: String) {
-    require(!Utility.isNullOrEmpty(arg)) { "Argument '$name' cannot be null or empty" }
+  fun notNullOrEmpty(arg: String?, name: String): String {
+    require(arg != null && arg.isNotEmpty()) { "Argument '$name' cannot be null or empty" }
+    return arg
   }
 
   @JvmStatic

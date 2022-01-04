@@ -639,8 +639,7 @@ open class WebDialog : Dialog {
       if (applicationId == null) {
         applicationId = getMetadataApplicationId(context)
       }
-      notNullOrEmpty(applicationId, "applicationId")
-      this.applicationId = applicationId
+      this.applicationId = notNullOrEmpty(applicationId, "applicationId")
       finishInit(context, action, parameters)
     }
 

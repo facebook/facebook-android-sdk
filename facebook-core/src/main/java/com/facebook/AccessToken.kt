@@ -367,19 +367,16 @@ class AccessToken : Parcelable {
     parcel.readStringList(permissionsList)
     expiredPermissions = Collections.unmodifiableSet(HashSet(permissionsList))
     val token = parcel.readString()
-    Validate.notNullOrEmpty(token, "token")
-    this.token = checkNotNull(token)
+    this.token = Validate.notNullOrEmpty(token, "token")
     val sourceString = parcel.readString()
     source =
         if (sourceString != null) AccessTokenSource.valueOf(sourceString)
         else DEFAULT_ACCESS_TOKEN_SOURCE
     lastRefresh = Date(parcel.readLong())
     val applicationId = parcel.readString()
-    Validate.notNullOrEmpty(applicationId, "applicationId")
-    this.applicationId = checkNotNull(applicationId)
+    this.applicationId = Validate.notNullOrEmpty(applicationId, "applicationId")
     val userId = parcel.readString()
-    Validate.notNullOrEmpty(userId, "userId")
-    this.userId = checkNotNull(userId)
+    this.userId = Validate.notNullOrEmpty(userId, "userId")
     dataAccessExpirationTime = Date(parcel.readLong())
     graphDomain = parcel.readString()
   }

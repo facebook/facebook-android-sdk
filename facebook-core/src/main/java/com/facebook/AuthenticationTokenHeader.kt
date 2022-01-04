@@ -58,16 +58,13 @@ class AuthenticationTokenHeader : Parcelable {
 
   internal constructor(parcel: Parcel) {
     val alg = parcel.readString()
-    Validate.notNullOrEmpty(alg, "alg")
-    this.alg = checkNotNull(alg)
+    this.alg = Validate.notNullOrEmpty(alg, "alg")
 
     val typ = parcel.readString()
-    Validate.notNullOrEmpty(typ, "typ")
-    this.typ = checkNotNull(typ)
+    this.typ = Validate.notNullOrEmpty(typ, "typ")
 
     val kid = parcel.readString()
-    Validate.notNullOrEmpty(kid, "kid")
-    this.kid = checkNotNull(kid)
+    this.kid = Validate.notNullOrEmpty(kid, "kid")
   }
 
   /**

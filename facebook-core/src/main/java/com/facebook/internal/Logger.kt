@@ -159,9 +159,8 @@ class Logger(behavior: LoggingBehavior, tag: String) {
   }
 
   init {
-    Validate.notNullOrEmpty(tag, "tag")
     this.behavior = behavior
-    this.tag = LOG_TAG_BASE + tag
+    this.tag = LOG_TAG_BASE + Validate.notNullOrEmpty(tag, "tag")
     contents = StringBuilder()
   }
 }

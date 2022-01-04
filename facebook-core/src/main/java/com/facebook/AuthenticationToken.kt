@@ -83,12 +83,10 @@ class AuthenticationToken : Parcelable {
 
   internal constructor(parcel: Parcel) {
     val token = parcel.readString()
-    Validate.notNullOrEmpty(token, "token")
-    this.token = checkNotNull(token)
+    this.token = Validate.notNullOrEmpty(token, "token")
 
     val expectedNonce = parcel.readString()
-    Validate.notNull(expectedNonce, "expectedNonce")
-    this.expectedNonce = checkNotNull(expectedNonce)
+    this.expectedNonce = Validate.notNullOrEmpty(expectedNonce, "expectedNonce")
 
     this.header =
         checkNotNull(parcel.readParcelable(AuthenticationTokenHeader::class.java.classLoader))
@@ -96,8 +94,7 @@ class AuthenticationToken : Parcelable {
         checkNotNull(parcel.readParcelable(AuthenticationTokenClaims::class.java.classLoader))
 
     val signature = parcel.readString()
-    Validate.notNullOrEmpty(signature, "signature")
-    this.signature = checkNotNull(signature)
+    this.signature = Validate.notNullOrEmpty(signature, "signature")
   }
 
   /**

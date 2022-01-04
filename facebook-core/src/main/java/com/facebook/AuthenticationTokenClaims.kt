@@ -257,26 +257,21 @@ class AuthenticationTokenClaims : Parcelable {
 
   internal constructor(parcel: Parcel) {
     val jti = parcel.readString()
-    Validate.notNullOrEmpty(jti, JSON_KEY_JIT)
-    this.jti = checkNotNull(jti)
+    this.jti = Validate.notNullOrEmpty(jti, JSON_KEY_JIT)
 
     val iss = parcel.readString()
-    Validate.notNullOrEmpty(iss, JSON_KEY_ISS)
-    this.iss = checkNotNull(iss)
+    this.iss = Validate.notNullOrEmpty(iss, JSON_KEY_ISS)
 
     val aud = parcel.readString()
-    Validate.notNullOrEmpty(aud, JSON_KEY_AUD)
-    this.aud = checkNotNull(aud)
+    this.aud = Validate.notNullOrEmpty(aud, JSON_KEY_AUD)
 
     val nonce = parcel.readString()
-    Validate.notNullOrEmpty(nonce, JSON_KEY_NONCE)
-    this.nonce = checkNotNull(nonce)
+    this.nonce = Validate.notNullOrEmpty(nonce, JSON_KEY_NONCE)
 
     this.exp = parcel.readLong()
     this.iat = parcel.readLong()
     val sub = parcel.readString()
-    Validate.notNullOrEmpty(sub, JSON_KEY_SUB)
-    this.sub = checkNotNull(sub)
+    this.sub = Validate.notNullOrEmpty(sub, JSON_KEY_SUB)
     this.name = parcel.readString()
     this.givenName = parcel.readString()
     this.middleName = parcel.readString()
