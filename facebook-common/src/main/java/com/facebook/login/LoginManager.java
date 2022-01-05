@@ -271,6 +271,7 @@ public class LoginManager {
 
     boolean isCanceled = false;
     if (data != null) {
+      data.setExtrasClassLoader(LoginClient.Result.class.getClassLoader());
       LoginClient.Result result = data.getParcelableExtra(LoginFragment.RESULT_KEY);
       if (result != null) {
         originalRequest = result.request;
@@ -310,6 +311,7 @@ public class LoginManager {
     if (intent == null) {
       return null;
     }
+    intent.setExtrasClassLoader(LoginClient.Result.class.getClassLoader());
     LoginClient.Result result = intent.getParcelableExtra(LoginFragment.RESULT_KEY);
     if (result == null) {
       return null;
