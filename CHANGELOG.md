@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.3.0] - 2022-01-04
+
+### Added
+- Avoid tokenless requests if the client token is presented. Tokenless request support will be removed in v13.0.
+
+### Deprecated
+- Fblite Login is deprecated.
+- Internal utility methods on collections are deprecated and will be replaced by `kotlin.collections`.
+
+### Fixed
+- Fixed reauthorization of data access.
+- Add fields parameters for login GET requests to remove warning messages.
+
 ## [12.2.0] - 2021-11-29
 
 ### Added
@@ -375,6 +388,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[12.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.2.0...sdk-version-12.3.0
 [12.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.1.0...sdk-version-12.2.0
 [12.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.1...sdk-version-12.1.0
 [12.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.0...sdk-version-12.0.1
