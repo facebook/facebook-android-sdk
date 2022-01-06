@@ -35,7 +35,7 @@ import com.facebook.internal.NativeProtocol.getExceptionFromErrorData
 import com.facebook.internal.NativeProtocol.getMethodArgumentsFromIntent
 import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
-import com.facebook.internal.logging.dumpsys.EndToEndDumpsysHelper.Companion.maybeDump
+import com.facebook.internal.logging.dumpsys.EndToEndDumper
 import com.facebook.login.LoginFragment
 import com.facebook.referrals.ReferralFragment
 import com.facebook.share.internal.DeviceShareDialogFragment
@@ -144,7 +144,7 @@ open class FacebookActivity : FragmentActivity() {
       writer: PrintWriter,
       args: Array<String>?
   ) {
-    if (maybeDump(prefix, writer, args)) {
+    if (EndToEndDumper.instance?.maybeDump(prefix, writer, args) == true) {
       return
     }
     super.dump(prefix, fd, writer, args)
