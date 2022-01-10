@@ -20,7 +20,10 @@ class GetTokenClientTest : FacebookPowerMockTestCase() {
             "1234",
             "5678",
             null,
-            AuthenticationTokenTestUtil.NONCE)
+            AuthenticationTokenTestUtil.NONCE,
+            null,
+            null,
+            null)
     val getTokenClient = GetTokenClient(contextMock, request)
     assertThat(getTokenClient).isNotNull
     assertThat(getTokenClient.nonce).isEqualTo(AuthenticationTokenTestUtil.NONCE)

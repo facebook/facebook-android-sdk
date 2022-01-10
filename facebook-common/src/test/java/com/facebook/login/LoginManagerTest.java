@@ -98,6 +98,9 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   private final Date EXPIRES = new Date(2025, 5, 3);
   private final Date LAST_REFRESH = new Date(2023, 8, 15);
   private final Date DATA_ACCESS_EXPIRATION_TIME = new Date(2025, 5, 3);
+  private final String codeVerifier = "codeVerifier";
+  private final String codeChallenge = "codeChallenge";
+  private final CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
 
   @Mock public Activity mockActivity;
   @Mock public Fragment mockFragment;
@@ -774,7 +777,10 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
             null,
             null,
             LoginTargetApp.FACEBOOK,
-            AuthenticationTokenTestUtil.NONCE);
+            AuthenticationTokenTestUtil.NONCE,
+            codeVerifier,
+            codeChallenge,
+            codeChallengeMethod);
 
     AccessToken accessToken = createAccessToken();
     AuthenticationToken authenticationToken = createAuthenticationToken();
