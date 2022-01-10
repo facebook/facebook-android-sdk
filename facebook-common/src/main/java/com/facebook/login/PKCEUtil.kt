@@ -20,6 +20,10 @@
 
 package com.facebook.login
 
+import android.util.Base64
+import com.facebook.FacebookException
+import java.security.MessageDigest
+
 internal object PKCEUtil {
 
   /**
@@ -47,5 +51,37 @@ internal object PKCEUtil {
     val random43to128 = (43..128).random()
     val allowedCharSet = ('a'..'z') + ('A'..'Z') + ('0'..'9') + ('-') + ('.') + ('_') + ('~')
     return List(random43to128) { allowedCharSet.random() }.joinToString("")
+  }
+
+  /**
+   * Returns the code challenge of the code verifier
+   * @param codeVerifier the original code verifier
+   * @param codeChallengeMethod the supplied codeChallengeMethod
+   */
+  @JvmStatic
+  @Throws(FacebookException::class)
+  fun generateCodeChallenge(
+      codeVerifier: String,
+      codeChallengeMethod: CodeChallengeMethod
+  ): String {
+    if (!isValidCodeVerifier(codeVerifier)) {
+      throw FacebookException("Invalid Code Verifier.")
+    }
+
+    if (codeChallengeMethod == CodeChallengeMethod.PLAIN) {
+      return codeVerifier
+    }
+
+    return try {
+      // try to generate challenge with S256
+      val bytes: ByteArray = codeVerifier.toByteArray(Charsets.US_ASCII)
+      val messageDigest = MessageDigest.getInstance("SHA-256")
+      messageDigest.update(bytes, 0, bytes.size)
+      val digest = messageDigest.digest()
+
+      Base64.encodeToString(digest, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+    } catch (ex: Exception) {
+      throw FacebookException(ex)
+    }
   }
 }

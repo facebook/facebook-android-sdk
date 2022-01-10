@@ -1,5 +1,6 @@
 package com.facebook.login
 
+import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -39,5 +40,25 @@ class PKCEUtilTest : FacebookPowerMockTestCase() {
   fun `test generateCodeVerifier and make sure generated code verifier is valid`() {
     val codeVerifier = PKCEUtil.generateCodeVerifier()
     assertThat(PKCEUtil.isValidCodeVerifier(codeVerifier)).isTrue
+  }
+
+  @Test
+  fun `test generateCodeChallenge with plain method`() {
+    val codeChallenge =
+        PKCEUtil.generateCodeChallenge(VALID_CODE_VERIFIER, CodeChallengeMethod.PLAIN)
+    assertThat(codeChallenge).isEqualTo(VALID_CODE_VERIFIER)
+  }
+
+  @Test(expected = FacebookException::class)
+  fun `test generateCodeChallenge with invalid code verifier`() {
+    PKCEUtil.generateCodeChallenge("abc", CodeChallengeMethod.PLAIN)
+  }
+
+  @Test
+  fun `test generateCodeChallenge with correct code verifier and S256`() {
+    val expectedCodeChallenge = "Kwymmz9hbJb0Df_F6y-LaDxntHMdlm8vgM5T0320czQ"
+    val codeChallenge =
+        PKCEUtil.generateCodeChallenge(VALID_CODE_VERIFIER, CodeChallengeMethod.S256)
+    assertThat(codeChallenge).isEqualTo(expectedCodeChallenge)
   }
 }
