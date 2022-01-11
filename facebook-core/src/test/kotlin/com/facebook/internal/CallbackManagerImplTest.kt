@@ -33,7 +33,7 @@ import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, CallbackManagerImpl::class)
+@PrepareForTest(FacebookSdk::class)
 class CallbackManagerImplTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {

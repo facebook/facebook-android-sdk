@@ -1,25 +1,25 @@
 package com.facebook.internal
 
+import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.gatekeeper.GateKeeper
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicBoolean
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FetchedAppGateKeepersManager::class, FacebookSdk::class)
+@PrepareForTest(FacebookSdk::class)
 class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
   companion object {
@@ -78,32 +78,23 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     const val EMPTY_RESPONSE = "{}"
     const val EMPTY_DATA_RESPONSE = "{\n" + "  \"data\": [\n" + "  ]\n" + "}"
   }
-  private var loadAsyncTimes = 0
+  private var asyncTaskExecutedTimes = 0
 
   @Before
   fun init() {
     mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
     whenever(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_NAME)
-    loadAsyncTimes = 0
-    mockStatic(FetchedAppGateKeepersManager::class.java)
-
-    whenever(
-            FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(
-                eq(APPLICATION_NAME), anyOrNull()))
-        .thenCallRealMethod()
-
-    whenever(FetchedAppGateKeepersManager.getGateKeeperForKey(any(), anyOrNull(), any()))
-        .thenCallRealMethod()
-
-    whenever(FetchedAppGateKeepersManager.getGateKeepersForApplication(anyOrNull()))
-        .thenCallRealMethod()
-
-    whenever(FetchedAppGateKeepersManager.setRuntimeGateKeeper(any(), any())).thenCallRealMethod()
-
-    whenever(FetchedAppGateKeepersManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
-
-    whenever(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
+    whenever(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext())
+    val mockExecutor = mock<Executor>()
+    whenever(mockExecutor.execute(any())).thenAnswer {
+      asyncTaskExecutedTimes++
+      // reset isLoading
+      Whitebox.setInternalState(
+          FetchedAppGateKeepersManager::class.java, "isLoading", AtomicBoolean(false))
+    }
+    whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
 
     // because it is a static variable which holds a lot of state about the GKs, we need to reset it
     // every time
@@ -122,81 +113,81 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
   fun `parse valid json_ok`() {
     val test = JSONObject(VALID_JSON)
     val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
-    assertFalse(result.getBoolean(GK2))
-    assertTrue(result.getBoolean(GK1))
+    assertThat(result.getBoolean(GK2)).isFalse
+    assertThat(result.getBoolean(GK1)).isTrue
 
     val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
-    assertTrue(map[GK1]!!)
-    assertFalse(map[GK2]!!)
+    assertThat(map[GK1]).isTrue
+    assertThat(map[GK2]).isFalse
 
     val gk1 = FetchedAppGateKeepersManager.getGateKeeperForKey(GK1, APPLICATION_NAME, false)
     val gk2 = FetchedAppGateKeepersManager.getGateKeeperForKey(GK2, APPLICATION_NAME, true)
-    assertTrue(gk1)
-    assertFalse(gk2)
+    assertThat(gk1).isTrue
+    assertThat(gk2).isFalse
     // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
-    assertEquals(3, loadAsyncTimes)
+    assertThat(asyncTaskExecutedTimes).isEqualTo(3)
   }
 
   @Test
   fun `parse value isnt boolean_fail`() {
     val test = JSONObject(NON_BOOLEAN_VALUE_RESPONSE)
     val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
-    assertEquals(0, result.length())
+    assertThat(result.length()).isEqualTo(0)
 
     val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
     // current parser filters out non boolean values, otherwise map will actually return the exact
     // value
-    assertEquals(null, map[GK1])
+    assertThat(map[GK1]).isNull()
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey(GK1, APPLICATION_NAME, false)
-    assertFalse(gk)
+    assertThat(gk).isFalse
     // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
-    assertEquals(2, loadAsyncTimes)
+    assertThat(asyncTaskExecutedTimes).isEqualTo(2)
   }
 
   @Test
   fun `parse empty list of gks_fail`() {
     val test = JSONObject(EMPTY_GK_LIST_RESPONSE)
     val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
-    assertEquals(0, result.length())
+    assertThat(result.length()).isEqualTo(0)
 
     val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
-    assertEquals(0, map.size)
+    assertThat(map.size).isEqualTo(0)
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
-    assertFalse(gk)
+    assertThat(gk).isFalse()
     // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
-    assertEquals(2, loadAsyncTimes)
+    assertThat(asyncTaskExecutedTimes).isEqualTo(2)
   }
 
   @Test
   fun `parse empty response_fail`() {
     val test = JSONObject(EMPTY_RESPONSE)
     val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
-    assertEquals(0, result.length())
+    assertThat(result.length()).isEqualTo(0)
 
     val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
-    assertEquals(0, map.size)
+    assertThat(map.size).isEqualTo(0)
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
-    assertFalse(gk)
+    assertThat(gk).isFalse
     // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
-    assertEquals(2, loadAsyncTimes)
+    assertThat(asyncTaskExecutedTimes).isEqualTo(2)
   }
 
   @Test
   fun `parse empty data response of gks_fail`() {
     val test = JSONObject(EMPTY_DATA_RESPONSE)
     val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
-    assertEquals(0, result.length())
+    assertThat(result.length()).isEqualTo(0)
 
     val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
-    assertEquals(0, map.size)
+    assertThat(map.size).isEqualTo(0)
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
-    assertFalse(gk)
+    assertThat(gk).isFalse
     // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
-    assertEquals(2, loadAsyncTimes)
+    assertThat(asyncTaskExecutedTimes).isEqualTo(2)
   }
 
   @Test
@@ -206,9 +197,9 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
         FetchedAppGateKeepersManager::class.java, "fetchedAppGateKeepers", map)
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     val gk1 = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, true)
-    assertFalse(gk)
-    assertTrue(gk1)
-    assertEquals(2, loadAsyncTimes)
+    assertThat(gk).isFalse
+    assertThat(gk1).isTrue
+    assertThat(asyncTaskExecutedTimes).isEqualTo(2)
   }
 
   @Test
@@ -219,9 +210,9 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     FetchedAppGateKeepersManager.setRuntimeGateKeeper(gateKeeper = GateKeeper(GK1, true))
     val map1 = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
-    assertTrue(map1.getValue(GK1))
+    assertThat(map1.getValue(GK1)).isTrue
     FetchedAppGateKeepersManager.setRuntimeGateKeeper(gateKeeper = GateKeeper(GK1, false))
     val map2 = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
-    assertFalse(map2.getValue(GK1))
+    assertThat(map2.getValue(GK1)).isFalse
   }
 }
