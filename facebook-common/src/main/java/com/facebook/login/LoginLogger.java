@@ -27,8 +27,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,7 +35,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @AutoHandleExceptions
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class LoginLogger {
   // Constants for logging login-related data.
   static final String EVENT_NAME_LOGIN_METHOD_START = "fb_mobile_login_method_start";
@@ -153,7 +150,7 @@ class LoginLogger {
     } catch (JSONException e) {
     }
 
-    logger.logEventImplicitly(eventName, null, bundle);
+    logger.logEventImplicitly(eventName, bundle);
   }
 
   public void logCompleteLogin(
