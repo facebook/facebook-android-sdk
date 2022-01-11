@@ -192,7 +192,12 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
       if (Utility.isNullOrEmpty(error)
           && Utility.isNullOrEmpty(errorMessage)
           && errorCode == FacebookRequestError.INVALID_ERROR_CODE) {
-        super.onComplete(request, values, null);
+        try {
+          values = processCodeExchange(request, values);
+          super.onComplete(request, values, null);
+        } catch (FacebookException ex) {
+          super.onComplete(request, null, ex);
+        }
       } else if (error != null
           && (error.equals("access_denied") || error.equals("OAuthAccessDeniedException"))) {
         super.onComplete(request, null, new FacebookOperationCanceledException());

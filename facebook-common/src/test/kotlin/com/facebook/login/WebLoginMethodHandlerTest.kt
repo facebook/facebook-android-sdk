@@ -64,6 +64,10 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
       return super.getParameters(request)
     }
 
+    public override fun getRedirectUrl(): String {
+      return super.getRedirectUrl()
+    }
+
     public override fun onComplete(
         request: LoginClient.Request,
         values: Bundle?,
@@ -117,7 +121,7 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test redirect url is a valid uri`() {
-    val uri = Uri.parse(testHandler.redirectUrl)
+    val uri = Uri.parse(testHandler.getRedirectUrl())
     assertThat(uri.scheme).isEqualTo("fb123456789")
     assertThat(uri.authority).isEqualTo("authorize")
   }
