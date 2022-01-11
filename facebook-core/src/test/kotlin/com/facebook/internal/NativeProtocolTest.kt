@@ -186,7 +186,9 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
             false, // resetMessengerState
             false, // isFamilyLogin
             false, // shouldSkipAccountDedupe
-            AuthenticationTokenTestUtil.NONCE)
+            AuthenticationTokenTestUtil.NONCE,
+            "codeChallenge",
+            "S256")
 
     assertThat(intents.size).isEqualTo(2)
     val katanaIntent = intents.get(0)
@@ -195,7 +197,7 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     assertThat(katanaIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
         .isEqualTo(mockAppID)
     assertThat(katanaIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
-        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST)
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
     assertThat(katanaIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
         .isFalse()
 
@@ -205,7 +207,7 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     assertThat(wakizashiIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
         .isEqualTo(mockAppID)
     assertThat(wakizashiIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
-        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST)
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
     assertThat(katanaIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
         .isFalse()
   }

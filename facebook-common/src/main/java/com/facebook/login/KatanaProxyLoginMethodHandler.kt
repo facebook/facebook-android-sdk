@@ -57,7 +57,9 @@ class KatanaProxyLoginMethodHandler : NativeAppLoginMethodHandler {
             request.resetMessengerState,
             request.isFamilyLogin,
             request.shouldSkipAccountDeduplication(),
-            request.nonce)
+            request.nonce,
+            request.codeChallenge,
+            request.codeChallengeMethod.name)
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e)
     for ((i, intent) in intents.withIndex()) {
       val launchedIntent = tryIntent(intent, LoginClient.getLoginRequestCode())
