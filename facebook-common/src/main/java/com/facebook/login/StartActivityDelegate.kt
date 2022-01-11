@@ -18,14 +18,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.login;
+package com.facebook.login
 
-import android.app.Activity;
-import android.content.Intent;
-import androidx.annotation.Nullable;
+import android.app.Activity
+import android.content.Intent
 
-interface StartActivityDelegate {
-  public void startActivityForResult(Intent intent, int requestCode);
-
-  public @Nullable Activity getActivityContext();
+internal interface StartActivityDelegate {
+  fun startActivityForResult(intent: Intent, requestCode: Int)
+  val activityContext: Activity?
 }
