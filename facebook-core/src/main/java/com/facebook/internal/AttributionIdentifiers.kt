@@ -70,7 +70,8 @@ class AttributionIdentifiers {
 
   companion object {
     private val TAG = AttributionIdentifiers::class.java.canonicalName
-    private const val ATTRIBUTION_ID_CONTENT_PROVIDER =
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal const val ATTRIBUTION_ID_CONTENT_PROVIDER =
         "com.facebook.katana.provider.AttributionIdProvider"
     private const val ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI =
         "com.facebook.wakizashi.provider.AttributionIdProvider"
@@ -198,10 +199,10 @@ class AttributionIdentifiers {
                 ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0)
         if (contentProviderInfo != null &&
             validateSignature(context, contentProviderInfo.packageName)) {
-          providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER)
+          providerUri = Uri.parse("content://$ATTRIBUTION_ID_CONTENT_PROVIDER")
         } else if (wakizashiProviderInfo != null &&
             validateSignature(context, wakizashiProviderInfo.packageName)) {
-          providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI)
+          providerUri = Uri.parse("content://$ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI")
         }
         val installerPackageName = getInstallerPackageName(context)
         if (installerPackageName != null) {
