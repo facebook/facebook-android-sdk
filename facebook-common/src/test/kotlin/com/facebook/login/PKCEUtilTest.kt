@@ -1,30 +1,14 @@
 package com.facebook.login
 
-import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
-import com.facebook.FacebookSdk
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSdk::class, PKCEUtil::class)
 class PKCEUtilTest : FacebookPowerMockTestCase() {
   // 128 characters valid code verifier
   val VALID_CODE_VERIFIER =
       "MAmh_Ym~fzC9X0QAtsdI~vHaToXbio7J.aHQIV0.VX-_o5MqtReS2t~3Hw-8RD-vL7mV.KyJGR0xXnBjN9BuMldSH5RM4xBa8rRhu2Yju828y6FzJXB2BCEW7~XrcMkp"
-
-  @Before
-  fun before() {
-    PowerMockito.mockStatic(FacebookSdk::class.java)
-    whenever(FacebookSdk.isInitialized()).thenReturn(true)
-    whenever(FacebookSdk.getApplicationContext())
-        .thenReturn(ApplicationProvider.getApplicationContext())
-    whenever(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID)
-  }
 
   @Test
   fun `test isValidCodeVerifier with valid code verifier`() {
@@ -76,23 +60,5 @@ class PKCEUtilTest : FacebookPowerMockTestCase() {
     val codeChallenge =
         PKCEUtil.generateCodeChallenge(VALID_CODE_VERIFIER, CodeChallengeMethod.S256)
     assertThat(codeChallenge).isEqualTo(expectedCodeChallenge)
-  }
-
-  @Test
-  fun `test createCodeExchangeRequest to make sure create correctly`() {
-    val paramCode = "code"
-    val paramRedirectUri = "redirect_uri"
-    val paramCodeVerifier = "code_verifier"
-    val paramAppId = AuthenticationTokenTestUtil.APP_ID
-
-    val graphRequest =
-        PKCEUtil.createCodeExchangeRequest(paramCode, paramRedirectUri, paramCodeVerifier)
-    val parameters = graphRequest.parameters
-
-    // Make sure correct HttpMethod and parameters are called
-    assertThat(parameters["code"]).isEqualTo(paramCode)
-    assertThat(parameters["redirect_uri"]).isEqualTo(paramRedirectUri)
-    assertThat(parameters["code_verifier"]).isEqualTo(paramCodeVerifier)
-    assertThat(parameters["client_id"]).isEqualTo(paramAppId)
   }
 }

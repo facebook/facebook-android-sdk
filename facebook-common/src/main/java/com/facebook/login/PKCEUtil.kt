@@ -20,12 +20,8 @@
 
 package com.facebook.login
 
-import android.os.Bundle
 import android.util.Base64
 import com.facebook.FacebookException
-import com.facebook.FacebookSdk
-import com.facebook.GraphRequest
-import com.facebook.HttpMethod
 import java.security.MessageDigest
 
 internal object PKCEUtil {
@@ -87,28 +83,5 @@ internal object PKCEUtil {
     } catch (ex: Exception) {
       throw FacebookException(ex)
     }
-  }
-
-  /**
-   * Create the GraphRequest of
-   * @param authorizationCode the server generated code needed for code exchange, one time use
-   * @param redirectUri the uri specified during the code request
-   * @param codeVerifier the original code verifier
-   */
-  @JvmStatic
-  fun createCodeExchangeRequest(
-      authorizationCode: String,
-      redirectUri: String,
-      codeVerifier: String
-  ): GraphRequest {
-    val parameters = Bundle()
-    parameters.putString("code", authorizationCode)
-    parameters.putString("client_id", FacebookSdk.getApplicationId())
-    parameters.putString("redirect_uri", redirectUri)
-    parameters.putString("code_verifier", codeVerifier)
-    val graphRequest = GraphRequest.newGraphPathRequest(null, "oauth/access_token", null)
-    graphRequest.httpMethod = HttpMethod.GET
-    graphRequest.parameters = parameters
-    return graphRequest
   }
 }
