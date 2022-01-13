@@ -24,40 +24,26 @@ import android.os.Bundle
 import android.os.Parcel
 import com.facebook.AccessToken
 import com.facebook.AuthenticationToken
-import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
-import com.facebook.FacebookRequestError
 import com.facebook.FacebookSdk
-import com.facebook.FacebookServiceException
-import com.facebook.GraphRequest
-import com.facebook.GraphResponse
 import com.facebook.internal.NativeProtocol
-import com.facebook.internal.ServerProtocol
 import com.facebook.internal.security.OidcSecurityUtil
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.security.PublicKey
-import java.util.HashSet
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
-import org.junit.Assert
 import org.junit.Test
-import org.mockito.Mockito.times
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSdk::class, OidcSecurityUtil::class, PKCEUtil::class, GraphRequest::class)
+@PrepareForTest(FacebookSdk::class, OidcSecurityUtil::class)
 class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockLoginClient: LoginClient
   private lateinit var testHandler: TestLoginMethodHandler
-  private lateinit var request: LoginClient.Request
-  private lateinit var bundle: Bundle
-  private lateinit var graphRequestMock: GraphRequest
-  private lateinit var graphResponseMock: GraphResponse
 
   private class TestLoginMethodHandler(loginClient: LoginClient) : LoginMethodHandler(loginClient) {
     var tryAuthorizeCalledTimes = 0
@@ -82,10 +68,6 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
       return super.getClientState(authId)
     }
 
-    public override fun processCodeExchange(request: LoginClient.Request, values: Bundle): Bundle {
-      return super.processCodeExchange(request, values)
-    }
-
     public override fun addLoggingExtra(key: String?, value: Any?) {
       super.addLoggingExtra(key, value)
     }
@@ -93,8 +75,6 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
   override fun setup() {
     super.setup()
-    PowerMockito.mockStatic(GraphRequest::class.java)
-    PowerMockito.mockStatic(PKCEUtil::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
     PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
@@ -108,23 +88,6 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(OidcSecurityUtil.verify(eq(pubKey), any(), any())).thenReturn(true)
     mockLoginClient = mock()
     testHandler = TestLoginMethodHandler(mockLoginClient)
-    val codeVerifier = "code_verifier"
-    request =
-        LoginClient.Request(
-            LoginBehavior.NATIVE_WITH_FALLBACK,
-            HashSet(LoginHandlerTestCase.PERMISSIONS),
-            DefaultAudience.FRIENDS,
-            "rerequest",
-            "1234",
-            "5678",
-            null,
-            AuthenticationTokenTestUtil.NONCE,
-            codeVerifier,
-            PKCEUtil.generateCodeChallenge(codeVerifier, CodeChallengeMethod.S256),
-            CodeChallengeMethod.S256)
-    bundle = Bundle()
-    graphRequestMock = mock()
-    graphResponseMock = mock()
   }
 
   @Test
@@ -228,88 +191,6 @@ class LoginMethodHandlerTest : FacebookPowerMockTestCase() {
     testHandler.writeToParcel(parcel, 0)
     verify(parcel).writeString("extra_logging_key")
     verify(parcel).writeString("extra_logging_value")
-  }
-
-  @Test
-  fun `test processCodeExchange without code param`() {
-    whenever(PKCEUtil.createCodeExchangeRequest(any(), any(), any())).thenReturn(graphRequestMock)
-    try {
-      testHandler.processCodeExchange(request, bundle)
-      Assert.fail()
-    } catch (ex: FacebookException) {
-      assertThat(ex.message).isEqualTo("No code param found from the request")
-    }
-    verify(graphRequestMock, times(0)).executeAndWait()
-  }
-
-  @Test
-  fun `test processCodeExchange with bad request`() {
-    bundle.putString("code", "code")
-
-    val requestErrorMock = mock<FacebookRequestError>()
-    whenever(requestErrorMock.errorMessage).thenReturn("test")
-    whenever(graphRequestMock.executeAndWait()).thenReturn(graphResponseMock)
-    whenever(graphResponseMock.error).thenReturn(requestErrorMock)
-    whenever(PKCEUtil.createCodeExchangeRequest(any(), any(), any())).thenReturn(graphRequestMock)
-    try {
-      testHandler.processCodeExchange(request, bundle)
-      Assert.fail()
-    } catch (ex: FacebookServiceException) {
-      assertThat(ex.requestError.errorMessage).isEqualTo("test")
-    }
-  }
-
-  @Test
-  fun `test processCodeExchange with no access_token found from response`() {
-    bundle.putString("code", "code")
-    val jsonMock = mock<JSONObject>()
-
-    whenever(graphRequestMock.executeAndWait()).thenReturn(graphResponseMock)
-    whenever(graphResponseMock.error).thenReturn(null) // make sure no request error
-    whenever(graphResponseMock.getJSONObject()).thenReturn(jsonMock)
-    whenever(PKCEUtil.createCodeExchangeRequest(any(), any(), any())).thenReturn(graphRequestMock)
-    try {
-      testHandler.processCodeExchange(request, bundle)
-      Assert.fail()
-    } catch (ex: FacebookException) {
-      assertThat(ex.message).isEqualTo("No access token found from result")
-    }
-  }
-
-  @Test
-  fun `test processCodeExchange successfully with access_token and id_token included`() {
-    bundle.putString("code", "code")
-    val responseJSONObject = JSONObject()
-    responseJSONObject.put(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, "123")
-    responseJSONObject.put(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN, "456")
-
-    whenever(graphRequestMock.executeAndWait()).thenReturn(graphResponseMock)
-    whenever(graphResponseMock.error).thenReturn(null) // make sure no request error
-    whenever(graphResponseMock.getJSONObject()).thenReturn(responseJSONObject)
-    whenever(PKCEUtil.createCodeExchangeRequest(any(), any(), any())).thenReturn(graphRequestMock)
-    try {
-      val values = testHandler.processCodeExchange(request, bundle)
-      assertThat(values[ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN]).isEqualTo("123")
-      assertThat(values[ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN]).isEqualTo("456")
-    } catch (ex: FacebookException) {
-      Assert.fail()
-    }
-  }
-
-  @Test
-  fun `test processCodeExchange with invalid JSON from response`() {
-    bundle.putString("code", "code")
-
-    whenever(graphRequestMock.executeAndWait()).thenReturn(graphResponseMock)
-    whenever(graphResponseMock.error).thenReturn(null) // make sure no request error
-    whenever(graphResponseMock.getJSONObject()).thenReturn(null) // null JSON or invalid json
-    whenever(PKCEUtil.createCodeExchangeRequest(any(), any(), any())).thenReturn(graphRequestMock)
-    try {
-      testHandler.processCodeExchange(request, bundle)
-      Assert.fail()
-    } catch (ex: FacebookException) {
-      assertThat(ex.message).isEqualTo("No access token found from result")
-    }
   }
 
   companion object {

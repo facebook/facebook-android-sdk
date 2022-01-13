@@ -31,20 +31,16 @@ import com.facebook.AccessToken
 import com.facebook.AccessTokenSource
 import com.facebook.AuthenticationToken
 import com.facebook.FacebookException
-import com.facebook.FacebookSdk
-import com.facebook.FacebookServiceException
 import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.internal.AnalyticsEvents
 import com.facebook.internal.NativeProtocol
-import com.facebook.internal.ServerProtocol
 import com.facebook.internal.Utility.getBundleLongAsDate
 import com.facebook.internal.Utility.isNullOrEmpty
 import com.facebook.internal.Utility.readStringMapFromParcel
 import com.facebook.internal.Utility.writeStringMapToParcel
-import com.facebook.login.PKCEUtil.createCodeExchangeRequest
 import java.io.UnsupportedEncodingException
+import java.lang.Exception
 import java.util.Date
-import kotlin.collections.HashMap
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -79,10 +75,6 @@ abstract class LoginMethodHandler : Parcelable {
 
   @Throws(JSONException::class) open fun putChallengeParam(param: JSONObject) = Unit
 
-  protected open fun getRedirectUrl(): String {
-    return "fb" + FacebookSdk.getApplicationId() + "://authorize/"
-  }
-
   protected open fun getClientState(authId: String): String {
     val param = JSONObject()
     try {
@@ -111,57 +103,6 @@ abstract class LoginMethodHandler : Parcelable {
         AnalyticsEvents.PARAMETER_WEB_LOGIN_SWITCHBACK_TIME, System.currentTimeMillis())
     parameters.putString(AnalyticsEvents.PARAMETER_APP_ID, applicationId)
     logger.logEventImplicitly(AnalyticsEvents.EVENT_WEB_LOGIN_COMPLETE, null, parameters)
-  }
-
-  /**
-   * Process the code exchange for access_token and id_token and add them to Bundle
-   * @param request The original request
-   * @param values The bundle values or params that received from initial (response_type = code)
-   * request
-   * @return true if no error occurs during the code exchange request
-   */
-  @Throws(FacebookException::class)
-  protected open fun processCodeExchange(request: LoginClient.Request, values: Bundle): Bundle {
-    // Check and make sure input Bundle is correct
-    // "code" is required to execute GraphRequest to exchange for
-    // access_token and authentication_token
-    val code = values.getString("code")
-    if (isNullOrEmpty(code)) {
-      throw FacebookException("No code param found from the request")
-    }
-
-    // PKCE code exchange step for access_token and authentication_token
-    val codeExchangeRequest =
-        code?.let { createCodeExchangeRequest(it, this.getRedirectUrl(), request.codeVerifier) }
-            ?: throw FacebookException("Failed to create code exchange request")
-
-    val PKCEResponse = codeExchangeRequest.executeAndWait()
-    if (PKCEResponse.error != null) {
-      val requestError = PKCEResponse.error
-      throw requestError?.let { FacebookServiceException(it, requestError.errorMessage) }!!
-    }
-
-    // add result of the code exchange to result bundle
-    try {
-      // add AccessToken to values
-      val PKCEResultJson = PKCEResponse.getJSONObject()
-      val accessTokenString = PKCEResultJson?.getString(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN)
-      if (PKCEResultJson == null || isNullOrEmpty(accessTokenString)) {
-        throw FacebookException("No access token found from result")
-      }
-      values.putString(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, accessTokenString)
-
-      // add AuthenticationToken to values
-      if (PKCEResultJson?.has(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN)) {
-        values.putString(
-            ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN,
-            PKCEResultJson?.getString(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN))
-      }
-    } catch (ex: JSONException) {
-      throw FacebookException("Fail to process code exchange response: " + ex.message)
-    }
-
-    return values
   }
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
