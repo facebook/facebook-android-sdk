@@ -491,9 +491,6 @@ public class LoginClient implements Parcelable {
     private boolean isFamilyLogin = false;
     private boolean shouldSkipAccountDeduplication = false;
     private String nonce;
-    private String codeVerifier;
-    private String codeChallenge;
-    private CodeChallengeMethod codeChallengeMethod;
 
     Request(
         LoginBehavior loginBehavior,
@@ -528,9 +525,6 @@ public class LoginClient implements Parcelable {
           applicationId,
           authId,
           targetApp,
-          null,
-          null,
-          null,
           null);
     }
 
@@ -542,10 +536,7 @@ public class LoginClient implements Parcelable {
         String applicationId,
         String authId,
         LoginTargetApp targetApp,
-        String nonce,
-        String codeVerifier,
-        String codeChallenge,
-        CodeChallengeMethod codeChallengeMethod) {
+        String nonce) {
       this.loginBehavior = loginBehavior;
       this.permissions = permissions != null ? permissions : new HashSet<String>();
       this.defaultAudience = defaultAudience;
@@ -558,9 +549,6 @@ public class LoginClient implements Parcelable {
       } else {
         this.nonce = nonce;
       }
-      this.codeVerifier = codeVerifier;
-      this.codeChallenge = codeChallenge;
-      this.codeChallengeMethod = codeChallengeMethod;
     }
 
     Set<String> getPermissions() {
@@ -677,18 +665,6 @@ public class LoginClient implements Parcelable {
       return nonce;
     }
 
-    public String getCodeVerifier() {
-      return codeVerifier;
-    }
-
-    public String getCodeChallenge() {
-      return codeChallenge;
-    }
-
-    public CodeChallengeMethod getCodeChallengeMethod() {
-      return codeChallengeMethod;
-    }
-
     private Request(Parcel parcel) {
       String enumValue = parcel.readString();
       this.loginBehavior = enumValue != null ? LoginBehavior.valueOf(enumValue) : null;
@@ -710,13 +686,6 @@ public class LoginClient implements Parcelable {
       this.isFamilyLogin = parcel.readByte() != 0;
       this.shouldSkipAccountDeduplication = parcel.readByte() != 0;
       this.nonce = parcel.readString();
-      this.codeVerifier = parcel.readString();
-      this.codeChallenge = parcel.readString();
-      String codeChallengeMethodEnumVal = parcel.readString();
-      this.codeChallengeMethod =
-          codeChallengeMethodEnumVal != null
-              ? CodeChallengeMethod.valueOf(codeChallengeMethodEnumVal)
-              : null;
     }
 
     @Override
@@ -741,9 +710,6 @@ public class LoginClient implements Parcelable {
       dest.writeByte((byte) (isFamilyLogin ? 1 : 0));
       dest.writeByte((byte) (shouldSkipAccountDeduplication ? 1 : 0));
       dest.writeString(nonce);
-      dest.writeString(codeVerifier);
-      dest.writeString(codeChallenge);
-      dest.writeString(codeChallengeMethod != null ? codeChallengeMethod.name() : null);
     }
 
     public static final Parcelable.Creator<Request> CREATOR =

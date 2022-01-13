@@ -966,19 +966,6 @@ public class LoginManager {
   }
 
   protected LoginClient.Request createLoginRequestWithConfig(LoginConfiguration loginConfig) {
-    // init the PKCE vars (code challenge and challenge method)
-    String codeChallenge = null;
-    CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
-    try {
-      codeChallenge =
-          PKCEUtil.generateCodeChallenge(loginConfig.getCodeVerifier(), codeChallengeMethod);
-    } catch (FacebookException _ex) {
-      // fallback to 'plain' if device cannot support S256 for some reason
-      codeChallengeMethod = CodeChallengeMethod.PLAIN;
-      codeChallenge =
-          PKCEUtil.generateCodeChallenge(loginConfig.getCodeVerifier(), codeChallengeMethod);
-    }
-
     LoginClient.Request request =
         new LoginClient.Request(
             loginBehavior,
@@ -991,10 +978,7 @@ public class LoginManager {
             FacebookSdk.getApplicationId(),
             UUID.randomUUID().toString(),
             targetApp,
-            loginConfig.getNonce(),
-            loginConfig.getCodeVerifier(),
-            codeChallenge,
-            codeChallengeMethod);
+            loginConfig.getNonce());
     request.setRerequest(AccessToken.isCurrentAccessTokenActive());
     request.setMessengerPageId(messengerPageId);
     request.setResetMessengerState(resetMessengerState);

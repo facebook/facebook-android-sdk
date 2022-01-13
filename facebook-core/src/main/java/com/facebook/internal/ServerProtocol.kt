@@ -41,8 +41,6 @@ object ServerProtocol {
   const val DIALOG_PARAM_AUTH_TYPE = "auth_type"
   const val DIALOG_PARAM_CBT = "cbt"
   const val DIALOG_PARAM_CLIENT_ID = "client_id"
-  const val DIALOG_PARAM_CODE_CHALLENGE = "code_challenge"
-  const val DIALOG_PARAM_CODE_CHALLENGE_METHOD = "code_challenge_method"
   const val DIALOG_PARAM_CUSTOM_TABS_PREFETCHING = "cct_prefetching"
   const val DIALOG_PARAM_DISPLAY = "display"
   const val DIALOG_PARAM_DISPLAY_TOUCH = "touch"
@@ -66,7 +64,6 @@ object ServerProtocol {
   const val DIALOG_REREQUEST_AUTH_TYPE = "rerequest"
   const val DIALOG_PARAM_FX_APP = "fx_app"
   const val DIALOG_PARAM_SKIP_DEDUPE = "skip_dedupe"
-  const val DIALOG_RESPONSE_TYPE_CODE = "code,signed_request,graph_domain"
   const val DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES =
       "token,signed_request,graph_domain,granted_scopes"
   const val DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST = "token,signed_request,graph_domain"

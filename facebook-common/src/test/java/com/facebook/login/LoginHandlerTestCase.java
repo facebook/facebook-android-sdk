@@ -39,8 +39,6 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
   protected static final HashSet<String> PERMISSIONS =
       new HashSet<String>(Arrays.asList("go outside", "come back in"));
   protected static final String ERROR_MESSAGE = "This is bad!";
-  protected static final String CODE_VERIFIER = "codeVerifier";
-  protected static final String CODE_CHALLENGE = "codeChallenge";
 
   protected FragmentActivity activity;
   protected LoginClient mockLoginClient;
@@ -64,12 +62,7 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
         DefaultAudience.FRIENDS,
         "rerequest",
         "1234",
-        "5678",
-        LoginTargetApp.FACEBOOK,
-        AuthenticationTokenTestUtil.NONCE,
-        CODE_VERIFIER,
-        CODE_CHALLENGE,
-        CodeChallengeMethod.S256);
+        "5678");
   }
 
   protected LoginClient.Request createIGAppRequest() {
@@ -95,7 +88,6 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
   }
 
   protected LoginClient.Request createRequestWithNonce() {
-    String codeVerifier = PKCEUtil.generateCodeVerifier();
     return new LoginClient.Request(
         LoginBehavior.NATIVE_WITH_FALLBACK,
         new HashSet<String>(PERMISSIONS),
@@ -104,10 +96,7 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
         "1234",
         "5678",
         null,
-        AuthenticationTokenTestUtil.NONCE,
-        codeVerifier,
-        PKCEUtil.generateCodeChallenge(codeVerifier, CodeChallengeMethod.S256),
-        CodeChallengeMethod.S256);
+        AuthenticationTokenTestUtil.NONCE);
   }
 
   protected void assertDateDiffersWithinDelta(
