@@ -24,9 +24,9 @@ buildscript {
     project.apply from: "${rootDir}/constants.gradle"
 
     repositories {
+        maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
         mavenCentral()
         google()
-        jcenter()
     }
 
     dependencies {
@@ -40,7 +40,7 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-        jcenter()
+        maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
         maven { url 'https://jitpack.io' }
     }
 
