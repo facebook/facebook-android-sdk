@@ -30,8 +30,6 @@ import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.AuthenticationToken;
 import com.facebook.FacebookException;
-import com.facebook.FacebookRequestError;
-import com.facebook.FacebookServiceException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -48,34 +46,6 @@ public abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
   NativeAppLoginMethodHandler(Parcel source) {
     super(source);
-  }
-
-  /**
-   * handle the success response from the initial request when user confirms on GDP
-   *
-   * @param request initial request
-   * @param extras data returned from initial request
-   */
-  private void processSuccessResponse(LoginClient.Request request, Bundle extras) {
-    if (extras.containsKey("code") && !Utility.isNullOrEmpty(extras.getString("code"))) {
-      // if contains "code" which mean this is code flow and need to exchange for token
-      try {
-        extras = processCodeExchange(request, extras);
-        handleResultOk(request, extras);
-      } catch (FacebookServiceException ex) {
-        FacebookRequestError requestError = ex.getRequestError();
-        handleResultError(
-            request,
-            requestError.getErrorType(),
-            requestError.getErrorMessage(),
-            String.valueOf(requestError.getErrorCode()));
-      } catch (FacebookException ex) {
-        handleResultError(request, null, ex.getMessage(), null);
-      }
-    } else {
-      // Lightweight Login will go through this flow
-      handleResultOk(request, extras);
-    }
   }
 
   public abstract int tryAuthorize(LoginClient.Request request);
@@ -113,11 +83,10 @@ public abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
       String e2e = extras.getString(NativeProtocol.FACEBOOK_PROXY_AUTH_E2E_KEY);
       if (!Utility.isNullOrEmpty(e2e)) {
-
         logWebLoginCompleted(e2e);
       }
       if (error == null && errorCode == null && errorMessage == null) {
-        processSuccessResponse(request, extras);
+        handleResultOk(request, extras);
       } else {
         handleResultError(request, error, errorMessage, errorCode);
       }
