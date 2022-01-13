@@ -43,7 +43,7 @@ dependencies {
     // Third-party Dependencies
     implementation 'com.google.zxing:core:3.3.3'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
 
     // Unit Tests
     testImplementation project(":facebook-testutil")
@@ -64,7 +64,6 @@ dependencies {
 
 
     testImplementation "com.android.installreferrer:installreferrer:1.0"
-    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
 }
 
@@ -88,8 +87,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     sourceSets {
@@ -101,12 +100,6 @@ android {
             jvmArgs '-XX:MaxPermSize=1024m'
             maxHeapSize = "4096m"
         }
-    }
-
-    kotlinOptions {
-        useOldBackend = true
-        // Keep jvm target at 1.6 to maintain compatibility with Android API level < 26
-        jvmTarget = "1.6"
     }
 
     buildTypes {

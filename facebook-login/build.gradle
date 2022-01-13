@@ -36,7 +36,7 @@ dependencies {
     // Support Dependencies
     implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
 }
 
 android {
@@ -65,8 +65,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {

@@ -42,7 +42,7 @@ dependencies {
     api project(":facebook-gamingservices")
     testImplementation project(":facebook-testutil")
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     // Unit Tests
     testImplementation "junit:junit:$junitVersion"
     testImplementation 'org.robolectric:robolectric:4.4'
@@ -65,7 +65,6 @@ dependencies {
     androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.2'
 
     testImplementation "com.android.installreferrer:installreferrer:1.0"
-    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
 
     testImplementation project(":facebook-places")
@@ -92,8 +91,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     sourceSets {
