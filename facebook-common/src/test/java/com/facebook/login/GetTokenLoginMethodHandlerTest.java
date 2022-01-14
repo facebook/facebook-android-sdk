@@ -37,7 +37,6 @@ import com.facebook.AuthenticationToken;
 import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
 import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.Utility;
 import com.facebook.internal.security.OidcSecurityUtil;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -144,7 +143,9 @@ public class GetTokenLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   @Test
   public void testFromNativeLogin() {
-    ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
+    ArrayList<String> permissions = new ArrayList<>();
+    permissions.add("stream_publish");
+    permissions.add("go_outside_and_play");
     String token = "AnImaginaryTokenValue";
     String userId = "1000";
 

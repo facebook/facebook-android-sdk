@@ -250,17 +250,6 @@ object Utility {
   }
 
   @Deprecated(
-      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.arrayListOf"))
-  @JvmStatic
-  fun <T> arrayList(vararg ts: T): ArrayList<T> {
-    val arrayList = ArrayList<T>(ts.size)
-    for (t in ts) {
-      arrayList.add(t)
-    }
-    return arrayList
-  }
-
-  @Deprecated(
       "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.hashSetOf"))
   @JvmStatic
   fun <T> hashSet(vararg ts: T): HashSet<T> {

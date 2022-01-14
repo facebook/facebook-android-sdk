@@ -28,7 +28,6 @@ import com.facebook.FacebookOperationCanceledException
 import com.facebook.FacebookSdk
 import com.facebook.TestUtils
 import com.facebook.internal.FacebookDialogFragment
-import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -146,7 +145,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
   @Test
   fun testFromDialog() {
-    val permissions = Utility.arrayList("stream_publish", "go_outside_and_play")
+    val permissions = arrayListOf("stream_publish", "go_outside_and_play")
     val token = "AnImaginaryTokenValue"
 
     val bundle = Bundle()
@@ -168,7 +167,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
   @Test
   fun testFromSSOWithExpiresString() {
-    val permissions = Utility.arrayList("stream_publish", "go_outside_and_play")
+    val permissions = arrayListOf("stream_publish", "go_outside_and_play")
     val token = "AnImaginaryTokenValue"
 
     val bundle = Bundle()
@@ -191,7 +190,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
   @Test
   fun testFromSSOWithExpiresLong() {
-    val permissions = Utility.arrayList("stream_publish", "go_outside_and_play")
+    val permissions = arrayListOf("stream_publish", "go_outside_and_play")
     val token = "AnImaginaryTokenValue"
 
     val bundle = Bundle()
