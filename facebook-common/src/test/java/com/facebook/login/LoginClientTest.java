@@ -201,12 +201,11 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     LoginClient client = new LoginClient(mockFragment);
     LoginMethodHandler[] handlers = client.getHandlersToTry(request);
 
-    assertThat(handlers.length).isEqualTo(5);
+    assertThat(handlers.length).isEqualTo(4);
     assertThat(handlers[0]).isInstanceOf(GetTokenLoginMethodHandler.class);
     assertThat(handlers[1]).isInstanceOf(KatanaProxyLoginMethodHandler.class);
-    assertThat(handlers[2]).isInstanceOf(FacebookLiteLoginMethodHandler.class);
-    assertThat(handlers[3]).isInstanceOf(CustomTabLoginMethodHandler.class);
-    assertThat(handlers[4]).isInstanceOf(WebViewLoginMethodHandler.class);
+    assertThat(handlers[2]).isInstanceOf(CustomTabLoginMethodHandler.class);
+    assertThat(handlers[3]).isInstanceOf(WebViewLoginMethodHandler.class);
   }
 
   @Test

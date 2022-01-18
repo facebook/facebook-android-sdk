@@ -186,10 +186,6 @@ public class LoginClient implements Parcelable {
       if (!FacebookSdk.bypassAppSwitch && behavior.allowsKatanaAuth()) {
         handlers.add(new KatanaProxyLoginMethodHandler(this));
       }
-
-      if (!FacebookSdk.bypassAppSwitch && behavior.allowsFacebookLiteAuth()) {
-        handlers.add(new FacebookLiteLoginMethodHandler(this));
-      }
     }
 
     if (behavior.allowsCustomTabAuth()) {
