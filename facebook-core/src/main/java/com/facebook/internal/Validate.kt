@@ -72,7 +72,6 @@ object Validate {
 
   @JvmStatic
   fun <T> containsNoNulls(container: Collection<T>, name: String) {
-    notNull(container, name)
     for (item in container) {
       if (item == null) {
         throw NullPointerException("Container '$name' cannot contain null values")
@@ -82,7 +81,6 @@ object Validate {
 
   @JvmStatic
   fun containsNoNullOrEmpty(container: Collection<String?>, name: String) {
-    notNull(container, name)
     for (item in container) {
       if (item == null) {
         throw NullPointerException("Container '$name' cannot contain null values")
@@ -155,7 +153,6 @@ object Validate {
 
   @JvmStatic
   fun hasInternetPermissions(context: Context, shouldThrow: Boolean) {
-    notNull(context, "context")
     if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET) ==
         PackageManager.PERMISSION_DENIED) {
       check(!shouldThrow) { NO_INTERNET_PERMISSION_REASON }
@@ -198,7 +195,6 @@ object Validate {
   @SuppressLint("WrongConstant")
   @JvmStatic
   fun hasFacebookActivity(context: Context, shouldThrow: Boolean) {
-    notNull(context, "context")
     val pm = context.packageManager
     var activityInfo: ActivityInfo? = null
     if (pm != null) {
@@ -217,7 +213,6 @@ object Validate {
 
   @JvmStatic
   fun hasCustomTabRedirectActivity(context: Context, redirectURI: String?): Boolean {
-    notNull(context, "context")
     val pm = context.packageManager
     var infos: List<ResolveInfo>? = null
     if (pm != null) {
@@ -247,7 +242,6 @@ object Validate {
 
   @JvmStatic
   fun hasContentProvider(context: Context) {
-    notNull(context, "context")
     val appId = hasAppID()
     val pm = context.packageManager
     if (pm != null) {

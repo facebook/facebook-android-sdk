@@ -32,7 +32,6 @@ import com.facebook.appevents.iap.InAppPurchaseEventManager
 import com.facebook.internal.FetchedAppGateKeepersManager.getGateKeeperForKey
 import com.facebook.internal.FetchedAppSettingsManager.getAppSettingsWithoutQuery
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
-import com.facebook.internal.Validate.notNull
 import java.math.BigDecimal
 import java.util.Currency
 import org.json.JSONException
@@ -55,7 +54,6 @@ object AutomaticAnalyticsLogger {
     val context = FacebookSdk.getApplicationContext()
     val appId = FacebookSdk.getApplicationId()
     val autoLogAppEvents = FacebookSdk.getAutoLogAppEventsEnabled()
-    notNull(context, "context")
     if (autoLogAppEvents) {
       if (context is Application) {
         AppEventsLogger.activateApp(context, appId)
@@ -75,7 +73,6 @@ object AutomaticAnalyticsLogger {
   fun logActivityTimeSpentEvent(activityName: String?, timeSpentInSeconds: Long) {
     val context = FacebookSdk.getApplicationContext()
     val appId = FacebookSdk.getApplicationId()
-    notNull(context, "context")
     val settings = queryAppSettings(appId, false)
     if (settings != null && settings.automaticLoggingEnabled && timeSpentInSeconds > 0) {
       val logger = InternalAppEventsLogger(context)
