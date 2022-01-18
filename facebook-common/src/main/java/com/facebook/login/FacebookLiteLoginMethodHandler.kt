@@ -65,6 +65,7 @@ internal class FacebookLiteLoginMethodHandler : NativeAppLoginMethodHandler {
 
   companion object {
     @JvmField
+    @Deprecated("fblite login is deprecated and we will remove this class in v13.0 release")
     val CREATOR =
         object : Parcelable.Creator<FacebookLiteLoginMethodHandler> {
           override fun createFromParcel(source: Parcel): FacebookLiteLoginMethodHandler {
