@@ -121,7 +121,7 @@ class TournamentShareDialog : FacebookDialogBase<TournamentConfig?, TournamentSh
   ) {
     val resultProcessor: ResultProcessor? =
         object : ResultProcessor(callback) {
-          override fun onSuccess(appCall: AppCall, results: Bundle) {
+          override fun onSuccess(appCall: AppCall, results: Bundle?) {
             if (results != null) {
               if (results.getString("error_message") != null) {
                 callback.onError(FacebookException(results.getString("error_message")))

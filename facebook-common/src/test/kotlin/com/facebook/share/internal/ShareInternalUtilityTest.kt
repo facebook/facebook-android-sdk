@@ -93,10 +93,17 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test removeNamespacesFromOGJsonObject with empty JSON object`() {
+    val emptyObject = JSONObject()
+    assertThat(ShareInternalUtility.removeNamespacesFromOGJsonObject(emptyObject, false)).isNull()
+  }
+
+  @Test
   fun testRemoveNamespaceFromComplexOGJsonObject() {
     try {
       var testObject = jsonOGActionTestObject
-      testObject = ShareInternalUtility.removeNamespacesFromOGJsonObject(testObject, false)
+      testObject =
+          checkNotNull(ShareInternalUtility.removeNamespacesFromOGJsonObject(testObject, false))
       val expectedResult = jsonOGActionTestObjectWithoutNamespace
       assertThat(simpleJsonObjComparer(testObject, expectedResult)).isTrue
     } catch (ex: JSONException) {
@@ -118,7 +125,8 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
             .setPlaceId(placeId)
             .build()
     try {
-      val objectForCall = ShareInternalUtility.toJSONObjectForCall(null, content)
+      val objectForCall =
+          checkNotNull(ShareInternalUtility.toJSONObjectForCall(UUID.randomUUID(), content))
       val peopleIds = jsonArrayToStringList(objectForCall.getJSONArray("tags"))
       assertThat(peopleIds.size.toLong()).isEqualTo(4)
       for (i in 1..4) {
@@ -140,8 +148,8 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
             .setPlaceId("2")
             .build()
     try {
-      val objectForCall = ShareInternalUtility.toJSONObjectForCall(null, content)
-      assertThat(objectForCall.getString("place")).isEqualTo("1")
+      val objectForCall = ShareInternalUtility.toJSONObjectForCall(UUID.randomUUID(), content)
+      assertThat(objectForCall?.getString("place")).isEqualTo("1")
     } catch (ex: JSONException) {
       // Fail
       assertThat(ex).isNotNull
@@ -371,7 +379,7 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
             .addPhoto(SharePhoto.Builder().setBitmap(testPhotoImage).build())
             .build()
     val returnList = ShareInternalUtility.getPhotoUrls(photoContent, appCall.callId)
-    assertThat(returnList.size).isEqualTo(1)
+    assertThat(returnList?.size).isEqualTo(1)
   }
 
   @Test
@@ -390,9 +398,9 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
     val testPhotoImage = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8)
     val sharePhoto = SharePhoto.Builder().setBitmap(testPhotoImage).build()
     val mediaContent = ShareMediaContent.Builder().addMedia(listOf(sharePhoto)).build()
-    val mediaInfos = ShareInternalUtility.getMediaInfos(mediaContent, appCall.callId)
+    val mediaInfos = checkNotNull(ShareInternalUtility.getMediaInfos(mediaContent, appCall.callId))
     assertThat(mediaInfos.size).isEqualTo(1)
-    val mediaInfo = checkNotNull(mediaInfos[0])
+    val mediaInfo = mediaInfos[0]
     assertThat(mediaInfo.getString(ShareConstants.MEDIA_TYPE))
         .isEqualTo(sharePhoto.mediaType.toString())
     assertThat(mediaInfo.getString(ShareConstants.MEDIA_URI)).isNotEmpty
@@ -426,7 +434,7 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
     val texture = CameraEffectTextures.Builder().putTexture("test", testPhotoImage).build()
     val effect = ShareCameraEffectContent.Builder().setTextures(texture).build()
     val urlBundle = ShareInternalUtility.getTextureUrlBundle(effect, appCall.callId)
-    assertThat(urlBundle.getString("test")).isNotNull
+    assertThat(urlBundle?.getString("test")).isNotNull
   }
 
   @Test

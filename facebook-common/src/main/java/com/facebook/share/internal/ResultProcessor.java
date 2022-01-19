@@ -21,6 +21,7 @@
 package com.facebook.share.internal;
 
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.internal.AppCall;
@@ -36,13 +37,13 @@ import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
  */
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class ResultProcessor {
-  private FacebookCallback appCallback;
+  private @Nullable FacebookCallback appCallback;
 
-  public ResultProcessor(FacebookCallback callback) {
+  public ResultProcessor(@Nullable FacebookCallback callback) {
     this.appCallback = callback;
   }
 
-  public abstract void onSuccess(AppCall appCall, Bundle results);
+  public abstract void onSuccess(AppCall appCall, @Nullable Bundle results);
 
   /** Override this if anything needs to be done on cancellation (e.g. Logging) */
   public void onCancel(AppCall appCall) {
