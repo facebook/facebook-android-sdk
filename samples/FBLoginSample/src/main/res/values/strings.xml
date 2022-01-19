@@ -1,7 +1,12 @@
 <resources>
+    <!-- Configurations of the app -->
     <string name="app_name">FB Login Sample</string>
     <string name="facebook_app_id">ENTER_YOUR_FB_APP_ID_HERE</string>
+    <!-- The client token is available in Settings > Advanced > Security section of the app dashboard. -->
+    <string name="facebook_client_token">ENTER_YOUR_FB_CLIENT_TOKEN_HERE</string>
     <string name="fb_login_protocol_scheme">fb{ENTER_YOUR_FB_APP_ID_HERE}</string> <!-- keep the fb prefix and remove braces-->
+
+    <!-- Other string resources -->
     <string name="posts_feed">Posts</string>
     <string name="logout">Logout</string>
     <string name="enter_text">Compose a post</string>

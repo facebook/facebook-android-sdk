@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
   private static final int RESULT_PERMISSIONS_ACTIVITY = 3;
 
   private static final String DEFAULT_FB_APP_ID = "ENTER_YOUR_FB_APP_ID_HERE";
+  private static final String DEFAULT_FB_CLIENT_COKEN = "ENTER_YOUR_FB_CLIENT_TOKEN_HERE";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,10 @@ public class MainActivity extends Activity {
     setContentView(R.layout.activity_main);
     if (getResources().getString(R.string.facebook_app_id).equals(DEFAULT_FB_APP_ID)) {
       showAlertNoFacebookAppId();
+      return;
+    }
+    if (getResources().getString(R.string.facebook_client_token).equals(DEFAULT_FB_CLIENT_COKEN)) {
+      showAlertNoFacebookClientToken();
       return;
     }
     final View view = findViewById(R.id.activity_main);
@@ -169,6 +174,16 @@ public class MainActivity extends Activity {
     alert.setMessage(
         "This sample app can not properly function without your app id. "
             + "Use your facebook app id in strings.xml. Check out https://developers.facebook.com/docs/android/getting-started/ for more info. "
+            + "Restart the app after that");
+    alert.show();
+  }
+
+  private void showAlertNoFacebookClientToken() {
+    AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+    alert.setTitle("Use your facebook client token in strings.xml");
+    alert.setMessage(
+        "On and above Facebook SDK v13.0, all Graph API calls must have a valid client token."
+            + "Add your client token to the facebook_client_token string in strings.xml. Check out https://developers.facebook.com/docs/android/getting-started#app_id for more info. "
             + "Restart the app after that");
     alert.show();
   }
