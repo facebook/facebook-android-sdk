@@ -35,7 +35,6 @@ import com.facebook.appevents.suggestedevents.SuggestedEventsManager
 import com.facebook.appevents.suggestedevents.ViewOnClickListener
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
-import com.facebook.internal.Utility.isNullOrEmpty
 import com.facebook.internal.Utility.resourceLocale
 import com.facebook.internal.Utility.runOnNonUiThread
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
@@ -173,19 +172,10 @@ object ModelManager {
         arrayOf(USE_CASE_KEY, VERSION_ID_KEY, ASSET_URI_KEY, RULES_URI_KEY, THRESHOLD_KEY)
     val appSettingsParams = Bundle()
     appSettingsParams.putString(GraphRequest.FIELDS_PARAM, TextUtils.join(",", appSettingFields))
-    val rawResponse =
-        if (isNullOrEmpty(FacebookSdk.getClientToken())) {
-          val graphRequest =
-              newGraphPathRequest(
-                  null, String.format(SDK_MODEL_ASSET, FacebookSdk.getApplicationId()), null)
-          graphRequest.setSkipClientToken(true)
-          graphRequest.parameters = appSettingsParams
-          graphRequest.executeAndWait().getJSONObject() ?: return null
-        } else {
-          val graphRequest = newGraphPathRequest(null, "app/model_asset", null)
-          graphRequest.parameters = appSettingsParams
-          graphRequest.executeAndWait().getJSONObject() ?: return null
-        }
+
+    val graphRequest = newGraphPathRequest(null, "app/model_asset", null)
+    graphRequest.parameters = appSettingsParams
+    val rawResponse = graphRequest.executeAndWait().getJSONObject() ?: return null
     return parseRawJsonObject(rawResponse)
   }
 

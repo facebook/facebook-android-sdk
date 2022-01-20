@@ -84,8 +84,6 @@ class ModelManagerTest : FacebookPowerMockTestCase() {
     ModelManager.enable()
     checkNotNull(capturedPath)
     assertThat(capturedPath).contains("model_asset")
-    assertThat(capturedPath).contains(MOCK_APP_ID)
-    verify(mockGraphRequest).setSkipClientToken(true)
   }
 
   @Test

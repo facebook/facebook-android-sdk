@@ -30,7 +30,6 @@ import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.internal.AttributionIdentifiers.Companion.getAttributionIdentifiers
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.facebook.internal.Utility.isAutoAppLinkSetup
-import com.facebook.internal.Utility.isNullOrEmpty
 import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.atomic.AtomicBoolean
@@ -150,18 +149,11 @@ internal object UserSettingsManager {
             val codelessSettingsParams = Bundle()
             codelessSettingsParams.putString(ADVERTISER_ID_KEY, advertiserId)
             codelessSettingsParams.putString(APPLICATION_FIELDS, EVENTS_CODELESS_SETUP_ENABLED)
-            val response =
-                if (isNullOrEmpty(FacebookSdk.getClientToken())) {
-                  val codelessRequest =
-                      newGraphPathRequest(null, FacebookSdk.getApplicationId(), null)
-                  codelessRequest.setSkipClientToken(true)
-                  codelessRequest.parameters = codelessSettingsParams
-                  codelessRequest.executeAndWait().getJSONObject()
-                } else {
-                  val codelessRequest = newGraphPathRequest(null, "app", null)
-                  codelessRequest.parameters = codelessSettingsParams
-                  codelessRequest.executeAndWait().getJSONObject()
-                }
+
+            val codelessRequest = newGraphPathRequest(null, "app", null)
+            codelessRequest.parameters = codelessSettingsParams
+            val response = codelessRequest.executeAndWait().getJSONObject()
+
             if (response != null) {
               codelessSetupEnabled.value = response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false)
               codelessSetupEnabled.lastTS = currTime

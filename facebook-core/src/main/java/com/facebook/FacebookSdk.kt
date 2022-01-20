@@ -857,9 +857,13 @@ object FacebookSdk {
    * @return the client token
    */
   @JvmStatic
-  fun getClientToken(): String? {
+  fun getClientToken(): String {
     Validate.sdkInitialized()
     return appClientToken
+        ?: throw FacebookException(
+            "A valid Facebook client token must be set in the " +
+                "AndroidManifest.xml or set by calling FacebookSdk.setClientToken " +
+                "before initializing the sdk.")
   }
 
   /**

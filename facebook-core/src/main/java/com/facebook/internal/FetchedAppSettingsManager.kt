@@ -293,19 +293,9 @@ object FetchedAppSettingsManager {
       appSettingFields.add(SDK_UPDATE_MESSAGE)
     }
     appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", appSettingFields))
-    val request =
-        if (isNullOrEmpty(FacebookSdk.getClientToken())) {
-          val request = GraphRequest.newGraphPathRequest(null, applicationId, null)
-          request.setForceApplicationRequest(true)
-          request.setSkipClientToken(true)
-          request.parameters = appSettingsParams
-          request
-        } else {
-          val request = GraphRequest.newGraphPathRequest(null, "app", null)
-          request.setForceApplicationRequest(true)
-          request.parameters = appSettingsParams
-          request
-        }
+    val request = GraphRequest.newGraphPathRequest(null, "app", null)
+    request.setForceApplicationRequest(true)
+    request.parameters = appSettingsParams
 
     return request.executeAndWait().jsonObject ?: JSONObject()
   }

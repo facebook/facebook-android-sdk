@@ -201,7 +201,6 @@ class GraphRequest {
       field = value ?: HttpMethod.GET
     }
 
-  private var skipClientToken = false
   private var forceApplicationRequest = false
   private var overriddenURL: String? = null
 
@@ -1429,13 +1428,6 @@ class GraphRequest {
   }
 
   /** This is an internal function that is not meant to be used by developers. */
-  @Deprecated(
-      "Starting in v13, the SDK will require a client token to be set before making GraphAPI calls.")
-  fun setSkipClientToken(skipClientToken: Boolean) {
-    this.skipClientToken = skipClientToken
-  }
-
-  /** This is an internal function that is not meant to be used by developers. */
   fun setForceApplicationRequest(forceOverride: Boolean) {
     this.forceApplicationRequest = forceOverride
   }
@@ -1492,9 +1484,8 @@ class GraphRequest {
   }
 
   private fun addCommonParameters() {
-    val accessToken = this.accessToken
     val parameters = this.parameters
-    if (!skipClientToken && shouldForceClientTokenForRequest()) {
+    if (shouldForceClientTokenForRequest()) {
       parameters.putString(ACCESS_TOKEN_PARAM, getClientTokenForRequest())
     } else {
       val accessTokenForRequest = getAccessTokenToUseForRequest()
@@ -1526,7 +1517,7 @@ class GraphRequest {
         registerAccessToken(token)
         return token
       }
-    } else if (!skipClientToken && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
+    } else if (!this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
       return getClientTokenForRequest()
     }
     return this.parameters.getString(ACCESS_TOKEN_PARAM)
@@ -1536,11 +1527,10 @@ class GraphRequest {
     var accessToken: String? = null
     val appID = FacebookSdk.getApplicationId()
     val clientToken = FacebookSdk.getClientToken()
-    if (!isNullOrEmpty(appID) && !isNullOrEmpty(clientToken)) {
-      accessToken = checkNotNull(appID) + "|" + checkNotNull(clientToken)
+    if (appID.isNotEmpty() && clientToken.isNotEmpty()) {
+      accessToken = "$appID|$clientToken"
     } else {
-      logd(
-          TAG, "Warning: Request without access token missing application ID or" + " client token.")
+      logd(TAG, "Warning: Request without access token missing application ID or client token.")
     }
     return accessToken
   }

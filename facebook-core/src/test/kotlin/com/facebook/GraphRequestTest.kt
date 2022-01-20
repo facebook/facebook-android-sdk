@@ -393,20 +393,6 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test GraphRequest raises a warning if no client is set`() {
-    whenever(FacebookSdk.getClientToken()).thenReturn(null)
-    PowerMockito.mockStatic(Log::class.java)
-    var capturedTag: String? = null
-    whenever(Log.w(any(), any<String>())).thenAnswer {
-      capturedTag = it.arguments[0].toString()
-      0
-    }
-    val requestMe = GraphRequest(null, "TourEiffel")
-    GraphRequest.toHttpConnection(requestMe)
-    assertThat(capturedTag).isEqualTo(GraphRequest.TAG)
-  }
-
-  @Test
   fun testRoutingNoTokenFacebookDomainApplicationRequest() {
     createTestCaseForDomainRoutingAndTokenType(
         null, null, "facebook", mockAppID, "graph.facebook.com", mockAppTokenString)

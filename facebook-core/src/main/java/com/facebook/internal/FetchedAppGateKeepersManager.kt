@@ -227,20 +227,9 @@ object FetchedAppGateKeepersManager {
     appGateKeepersParams.putString(APPLICATION_SDK_VERSION, FacebookSdk.getSdkVersion())
     appGateKeepersParams.putString(APPLICATION_FIELDS, APPLICATION_GATEKEEPER_FIELD)
     val request =
-        if (isNullOrEmpty(FacebookSdk.getClientToken())) {
-          val request =
-              GraphRequest.newGraphPathRequest(
-                  null, String.format("%s/%s", applicationId, APPLICATION_GATEKEEPER_EDGE), null)
-          request.setSkipClientToken(true)
-          request.parameters = appGateKeepersParams
-          request
-        } else {
-          val request =
-              GraphRequest.newGraphPathRequest(
-                  null, String.format("app/%s", APPLICATION_GATEKEEPER_EDGE), null)
-          request.parameters = appGateKeepersParams
-          request
-        }
+        GraphRequest.newGraphPathRequest(
+            null, String.format("app/%s", APPLICATION_GATEKEEPER_EDGE), null)
+    request.parameters = appGateKeepersParams
     return request.executeAndWait().jsonObject ?: JSONObject()
   }
 
