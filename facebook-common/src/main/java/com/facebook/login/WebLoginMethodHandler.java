@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
+import androidx.annotation.RestrictTo;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.AuthenticationToken;
@@ -39,7 +40,9 @@ import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import java.util.Locale;
 
-abstract class WebLoginMethodHandler extends LoginMethodHandler {
+/** This class is for internal use. SDK users should not access it directly. */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public abstract class WebLoginMethodHandler extends LoginMethodHandler {
   private static final String WEB_VIEW_AUTH_HANDLER_STORE =
       "com.facebook.login.AuthorizationClient.WebViewAuthHandler.TOKEN_STORE_KEY";
   private static final String WEB_VIEW_AUTH_HANDLER_TOKEN_KEY = "TOKEN";
