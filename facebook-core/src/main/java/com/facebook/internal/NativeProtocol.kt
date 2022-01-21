@@ -272,44 +272,6 @@ object NativeProtocol {
   }
 
   @JvmStatic
-  fun createFacebookLiteIntent(
-      context: Context,
-      applicationId: String,
-      permissions: Collection<String?>,
-      e2e: String,
-      isRerequest: Boolean,
-      isForPublish: Boolean,
-      defaultAudience: DefaultAudience,
-      clientState: String,
-      authType: String,
-      messengerPageId: String?,
-      resetMessengerState: Boolean,
-      isFamilyLogin: Boolean,
-      shouldSkipAccountDedupe: Boolean
-  ): Intent? {
-    val appInfo: NativeAppInfo = FBLiteAppInfo()
-    var intent =
-        createNativeAppIntent(
-            appInfo,
-            applicationId,
-            permissions,
-            e2e,
-            isForPublish,
-            defaultAudience,
-            clientState,
-            authType,
-            false,
-            messengerPageId,
-            resetMessengerState,
-            LoginTargetApp.FACEBOOK,
-            isFamilyLogin,
-            shouldSkipAccountDedupe,
-            "")
-    intent = validateActivityIntent(context, intent, appInfo)
-    return intent
-  }
-
-  @JvmStatic
   fun createInstagramIntent(
       context: Context,
       applicationId: String,
@@ -901,14 +863,6 @@ object NativeProtocol {
   private class WakizashiAppInfo : NativeAppInfo() {
     override fun getLoginActivity() = FACEBOOK_PROXY_AUTH_ACTIVITY
     override fun getPackage() = "com.facebook.wakizashi"
-  }
-
-  private class FBLiteAppInfo : NativeAppInfo() {
-    override fun getLoginActivity() = FACEBOOK_LITE_ACTIVITY
-    override fun getPackage() = "com.facebook.lite"
-    companion object {
-      const val FACEBOOK_LITE_ACTIVITY = "com.facebook.lite.platform.LoginGDPDialogActivity"
-    }
   }
 
   private class InstagramAppInfo : NativeAppInfo() {
