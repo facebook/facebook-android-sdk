@@ -665,6 +665,9 @@ object Utility {
     ImageDownloader.clearCache()
   }
 
+  @Deprecated(
+      "This method should not be used in Kotlin",
+      ReplaceWith("directoryOrFile?.deleteRecursively()"))
   @JvmStatic
   fun deleteDirectory(directoryOrFile: File?) {
     if (directoryOrFile === null || !directoryOrFile.exists()) {
