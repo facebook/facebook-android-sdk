@@ -25,6 +25,7 @@ import android.graphics.Bitmap
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.AttributionIdentifiers
@@ -38,12 +39,15 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileNotFoundException
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLDecoder
+import java.util.UUID
 import java.util.zip.GZIPInputStream
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
@@ -290,6 +294,59 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val parameters = request.parameters
     assertThat(parameters.containsKey("picture")).isTrue
     assertThat(parameters.getParcelable<Bitmap>("picture")).isEqualTo(image)
+    assertThat(request.graphPath).isEqualTo("me/photos")
+  }
+
+  @Test(expected = FileNotFoundException::class)
+  fun `test create upload photo request with an invalid file`() {
+    val testFile = File("no_exist")
+    GraphRequest.newUploadPhotoRequest(null, "me/photos", testFile, null, null, null)
+  }
+
+  @Test
+  fun `test create upload photo request with a valid file`() {
+    val testFileContent = byteArrayOf(1, 2, 3, 4)
+    val testFilename = UUID.randomUUID().toString()
+    val testFile = File(testFilename)
+    testFile.deleteOnExit()
+    testFile.createNewFile()
+    testFile.writeBytes(testFileContent)
+
+    val request =
+        GraphRequest.newUploadPhotoRequest(null, "me/photos", testFile, "test caption", null, null)
+
+    val parameters = request.parameters
+    assertThat(parameters.containsKey("picture")).isTrue
+    val fileDescriptor = parameters.getParcelable<ParcelFileDescriptor>("picture")
+    val fileInputStream = ParcelFileDescriptor.AutoCloseInputStream(fileDescriptor)
+    val readContent = fileInputStream.readBytes()
+    assertThat(readContent).isEqualTo(testFileContent)
+    assertThat(parameters.getString("caption")).isEqualTo("test caption")
+    assertThat(request.graphPath).isEqualTo("me/photos")
+  }
+
+  @Test(expected = FacebookException::class)
+  fun `test create upload photo request with an invalid uri`() {
+    val httpUri = Uri.parse("https://facebook.com")
+    GraphRequest.newUploadPhotoRequest(null, "me/photos", httpUri, null, null, null)
+  }
+
+  @Test(expected = FileNotFoundException::class)
+  fun `test create upload photo request with an invalid file uri`() {
+    val fileUri = Uri.parse("file://no-exists")
+    GraphRequest.newUploadPhotoRequest(null, "me/photos", fileUri, null, null, null)
+  }
+
+  @Test
+  fun `test create upload photo request with a content uri`() {
+    val contentUri = Uri.parse("content://test_content_uri")
+
+    val request =
+        GraphRequest.newUploadPhotoRequest(null, "me/photos", contentUri, null, null, null)
+
+    val parameters = request.parameters
+    assertThat(parameters.containsKey("picture")).isTrue
+    assertThat(parameters.getParcelable<Uri>("picture")).isEqualTo(contentUri)
     assertThat(request.graphPath).isEqualTo("me/photos")
   }
 

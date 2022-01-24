@@ -459,13 +459,11 @@ class GraphRequest {
     fun newUploadPhotoRequest(
         accessToken: AccessToken?,
         graphPath: String?,
-        image: Bitmap?,
+        image: Bitmap,
         caption: String?,
         params: Bundle?,
         callback: Callback?
     ): GraphRequest {
-      var graphPath = graphPath
-      graphPath = getDefaultPhotoPathIfNull(graphPath)
       val parameters = Bundle()
       if (params != null) {
         parameters.putAll(params)
@@ -474,7 +472,8 @@ class GraphRequest {
       if (caption != null && caption.isNotEmpty()) {
         parameters.putString(CAPTION_PARAM, caption)
       }
-      return GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback)
+      return GraphRequest(
+          accessToken, getDefaultPhotoPathIfNull(graphPath), parameters, HttpMethod.POST, callback)
     }
 
     /**
@@ -496,13 +495,11 @@ class GraphRequest {
     fun newUploadPhotoRequest(
         accessToken: AccessToken?,
         graphPath: String?,
-        file: File?,
+        file: File,
         caption: String?,
         params: Bundle?,
         callback: Callback?
     ): GraphRequest {
-      var graphPath = graphPath
-      graphPath = getDefaultPhotoPathIfNull(graphPath)
       val descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
       val parameters = Bundle()
       if (params != null) {
@@ -512,7 +509,8 @@ class GraphRequest {
       if (caption != null && caption.isNotEmpty()) {
         parameters.putString(CAPTION_PARAM, caption)
       }
-      return GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback)
+      return GraphRequest(
+          accessToken, getDefaultPhotoPathIfNull(graphPath), parameters, HttpMethod.POST, callback)
     }
 
     /**
@@ -528,9 +526,10 @@ class GraphRequest {
      * success or error conditions, can be null
      * @return a Request that is ready to execute
      * @throws FileNotFoundException if the Uri does not exist
+     * @throws FacebookException if the Uri is not a file or a content Uri
      */
     @JvmStatic
-    @Throws(FileNotFoundException::class)
+    @Throws(FileNotFoundException::class, FacebookException::class)
     fun newUploadPhotoRequest(
         accessToken: AccessToken?,
         graphPath: String?,
@@ -539,8 +538,6 @@ class GraphRequest {
         params: Bundle?,
         callback: Callback?
     ): GraphRequest {
-      var graphPath = graphPath
-      graphPath = getDefaultPhotoPathIfNull(graphPath)
       if (isFileUri(photoUri)) {
         return newUploadPhotoRequest(
             accessToken, graphPath, File(photoUri.path), caption, params, callback)
@@ -555,7 +552,8 @@ class GraphRequest {
       if (caption != null && caption.isNotEmpty()) {
         parameters.putString(CAPTION_PARAM, caption)
       }
-      return GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback)
+      return GraphRequest(
+          accessToken, getDefaultPhotoPathIfNull(graphPath), parameters, HttpMethod.POST, callback)
     }
 
     /**
