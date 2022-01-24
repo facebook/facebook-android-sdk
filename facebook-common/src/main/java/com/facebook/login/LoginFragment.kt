@@ -1,0 +1,165 @@
+/*
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
+ *
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package com.facebook.login
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.LayoutRes
+import androidx.fragment.app.Fragment
+import com.facebook.common.R
+
+/**
+ * This Fragment is a necessary part of the overall Facebook login process but is not meant to be
+ * used directly.
+ *
+ * @see com.facebook.FacebookActivity
+ */
+open class LoginFragment : Fragment() {
+  private var callingPackage: String? = null
+  lateinit var loginClient: LoginClient
+    private set
+  private var request: LoginClient.Request? = null
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val restoredLoginClient = savedInstanceState?.getParcelable<LoginClient>(SAVED_LOGIN_CLIENT)
+    loginClient =
+        if (restoredLoginClient != null) {
+          restoredLoginClient.setFragment(this)
+          restoredLoginClient
+        } else {
+          createLoginClient()
+        }
+    loginClient.setOnCompletedListener { outcome -> onLoginClientCompleted(outcome) }
+    val activity = activity ?: return
+    initializeCallingPackage(activity)
+    val intent = activity.intent
+    if (intent != null) {
+      val bundle = intent.getBundleExtra(REQUEST_KEY)
+      if (bundle != null) {
+        request = bundle.getParcelable(EXTRA_REQUEST)
+      }
+    }
+  }
+
+  protected open fun createLoginClient(): LoginClient {
+    return LoginClient(this)
+  }
+
+  override fun onDestroy() {
+    loginClient.cancelCurrentHandler()
+    super.onDestroy()
+  }
+
+  override fun onCreateView(
+      inflater: LayoutInflater,
+      container: ViewGroup?,
+      savedInstanceState: Bundle?
+  ): View? {
+    val view = inflater.inflate(layoutResId, container, false)
+    val progressBar = view.findViewById<View>(R.id.com_facebook_login_fragment_progress_bar)
+    loginClient.setBackgroundProcessingListener(
+        object : LoginClient.BackgroundProcessingListener {
+          override fun onBackgroundProcessingStarted() {
+            progressBar.visibility = View.VISIBLE
+          }
+
+          override fun onBackgroundProcessingStopped() {
+            progressBar.visibility = View.GONE
+          }
+        })
+    return view
+  }
+
+  @get:LayoutRes
+  protected open val layoutResId: Int
+    get() = R.layout.com_facebook_login_fragment
+
+  private fun onLoginClientCompleted(outcome: LoginClient.Result) {
+    request = null
+    val resultCode =
+        if (outcome.code == LoginClient.Result.Code.CANCEL) Activity.RESULT_CANCELED
+        else Activity.RESULT_OK
+    val bundle = Bundle()
+    bundle.putParcelable(RESULT_KEY, outcome)
+    val resultIntent = Intent()
+    resultIntent.putExtras(bundle)
+
+    val hostActivity = activity
+    // The activity might be detached we will send a cancel result in onDetach
+    if (isAdded && hostActivity != null) {
+      hostActivity.setResult(resultCode, resultIntent)
+      hostActivity.finish()
+    }
+  }
+
+  override fun onResume() {
+    super.onResume()
+
+    // If the calling package is null, this generally means that the callee was started
+    // with a launchMode of singleInstance. Unfortunately, Android does not allow a result
+    // to be set when the callee is a singleInstance, so we log an error and return.
+    if (callingPackage == null) {
+      Log.e(TAG, NULL_CALLING_PKG_ERROR_MSG)
+      activity?.finish()
+      return
+    }
+    loginClient.startOrContinueAuth(request)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    val progressBar = view?.findViewById<View>(R.id.com_facebook_login_fragment_progress_bar)
+    if (progressBar != null) {
+      progressBar.visibility = View.GONE
+    }
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    loginClient.onActivityResult(requestCode, resultCode, data)
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putParcelable(SAVED_LOGIN_CLIENT, loginClient)
+  }
+
+  private fun initializeCallingPackage(activity: Activity) {
+    val componentName = activity.callingActivity ?: return
+    callingPackage = componentName.packageName
+  }
+
+  companion object {
+    internal const val RESULT_KEY = "com.facebook.LoginFragment:Result"
+    internal const val REQUEST_KEY = "com.facebook.LoginFragment:Request"
+    internal const val EXTRA_REQUEST = "request"
+    private const val TAG = "LoginFragment"
+    private const val NULL_CALLING_PKG_ERROR_MSG =
+        "Cannot call LoginFragment with a null calling package. This can occur if the launchMode of the caller is singleInstance."
+    private const val SAVED_LOGIN_CLIENT = "loginClient"
+  }
+}

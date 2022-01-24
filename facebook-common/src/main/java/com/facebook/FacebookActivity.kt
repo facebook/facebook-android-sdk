@@ -123,7 +123,7 @@ open class FacebookActivity : FragmentActivity() {
 
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
-    currentFragment?.let { it.onConfigurationChanged(newConfig) }
+    currentFragment?.onConfigurationChanged(newConfig)
   }
 
   private fun handlePassThroughError() {
