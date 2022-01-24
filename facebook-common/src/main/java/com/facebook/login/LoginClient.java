@@ -798,7 +798,14 @@ public class LoginClient implements Parcelable {
         @Nullable String errorType,
         @Nullable String errorDescription,
         @Nullable String errorCode) {
-      String message = TextUtils.join(": ", Utility.asListNoNulls(errorType, errorDescription));
+      ArrayList<String> messageParts = new ArrayList<>();
+      if (errorType != null) {
+        messageParts.add(errorType);
+      }
+      if (errorDescription != null) {
+        messageParts.add(errorDescription);
+      }
+      String message = TextUtils.join(": ", messageParts);
       return new Result(request, Code.ERROR, null, message, errorCode);
     }
 

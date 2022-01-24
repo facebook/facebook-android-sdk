@@ -66,8 +66,6 @@ import java.net.URLDecoder
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.DecimalFormat
-import java.util.Arrays
-import java.util.Collections
 import java.util.Date
 import java.util.Locale
 import java.util.Random
@@ -116,108 +114,6 @@ object Utility {
   private const val FACEBOOK_PROFILE_FIELDS = "id,name,first_name,middle_name,last_name"
   private const val INSTAGRAM_PROFILE_FIELDS = "id,name,profile_picture"
 
-  /**
-   * Each array represents a set of closed or open Range, like so: [0,10,50,60] - Ranges are {0-9},
-   * {50-59} [20] - Ranges are {20-} [30,40,100] - Ranges are {30-39}, {100-}
-   *
-   * All Ranges in the array have a closed lower bound. Only the last Range in each array may be
-   * open. It is assumed that the passed in arrays are sorted with ascending order. It is assumed
-   * that no two elements in a given are equal (i.e. no 0-length ranges)
-   *
-   * The method returns an intersect of the two passed in Range-sets
-   *
-   * @param range1 The first range
-   * @param range2 The second range
-   * @return The intersection of the two ranges.
-   */
-  @Deprecated("It will be removed in v13.0.")
-  @JvmStatic
-  fun intersectRanges(range1: IntArray?, range2: IntArray?): IntArray? {
-    if (range1 == null) {
-      return range2
-    } else if (range2 == null) {
-      return range1
-    }
-    val outputRange = IntArray(range1.size + range2.size)
-    var outputIndex = 0
-    var index1 = 0
-    var lower1: Int
-    var upper1: Int
-    var index2 = 0
-    var lower2: Int
-    var upper2: Int
-    while (index1 < range1.size && index2 < range2.size) {
-      var newRangeLower = Int.MIN_VALUE
-      var newRangeUpper = Int.MAX_VALUE
-      lower1 = range1[index1]
-      upper1 = Int.MAX_VALUE
-      lower2 = range2[index2]
-      upper2 = Int.MAX_VALUE
-      if (index1 < range1.size - 1) {
-        upper1 = range1[index1 + 1]
-      }
-      if (index2 < range2.size - 1) {
-        upper2 = range2[index2 + 1]
-      }
-      if (lower1 < lower2) {
-        if (upper1 > lower2) {
-          newRangeLower = lower2
-          if (upper1 > upper2) {
-            newRangeUpper = upper2
-            index2 += 2
-          } else {
-            newRangeUpper = upper1
-            index1 += 2
-          }
-        } else {
-          index1 += 2
-        }
-      } else {
-        if (upper2 > lower1) {
-          newRangeLower = lower1
-          if (upper2 > upper1) {
-            newRangeUpper = upper1
-            index1 += 2
-          } else {
-            newRangeUpper = upper2
-            index2 += 2
-          }
-        } else {
-          index2 += 2
-        }
-      }
-      if (newRangeLower != Int.MIN_VALUE) {
-        outputRange[outputIndex++] = newRangeLower
-        if (newRangeUpper != Int.MAX_VALUE) {
-          outputRange[outputIndex++] = newRangeUpper
-        } else {
-          // If we reach an unbounded/open range, then we know we're done.
-          break
-        }
-      }
-    }
-    return Arrays.copyOf(outputRange, outputIndex)
-  }
-
-  // Returns true iff all items in subset are in superset, treating null and
-  // empty collections as
-  // the same.
-  @Deprecated(
-      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.containsAll"))
-  @JvmStatic
-  fun <T> isSubset(subset: Collection<T>?, superset: Collection<T>?): Boolean {
-    if (superset == null || superset.isEmpty()) {
-      return subset == null || subset.isEmpty()
-    }
-    val hash = HashSet(superset)
-    for (t in checkNotNull(subset)) {
-      if (!hash.contains(t)) {
-        return false
-      }
-    }
-    return true
-  }
-
   @JvmStatic
   fun <T> isNullOrEmpty(c: Collection<T>?): Boolean {
     return c == null || c.isEmpty()
@@ -241,23 +137,6 @@ object Utility {
     return if (isNullOrEmpty(s)) {
       valueIfNullOrEmpty
     } else s
-  }
-
-  @Deprecated("This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.listOf"))
-  @JvmStatic
-  fun <T> unmodifiableCollection(vararg ts: T): Collection<T> {
-    return Collections.unmodifiableCollection(Arrays.asList(*ts))
-  }
-
-  @Deprecated(
-      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.hashSetOf"))
-  @JvmStatic
-  fun <T> hashSet(vararg ts: T): HashSet<T> {
-    val hashSet = HashSet<T>(ts.size)
-    for (t in ts) {
-      hashSet.add(t)
-    }
-    return hashSet
   }
 
   @JvmStatic
@@ -628,22 +507,6 @@ object Utility {
     } else a == b
   }
 
-  @Deprecated("It will be removed in v13.0.")
-  @JvmStatic
-  fun hasSameId(a: JSONObject?, b: JSONObject?): Boolean {
-    if (a == null || b == null || !a.has("id") || !b.has("id")) {
-      return false
-    }
-    if (a == b) {
-      return true
-    }
-    val idA = a.optString("id")
-    val idB = b.optString("id")
-    return if (idA == null || idB == null) {
-      false
-    } else idA == idB
-  }
-
   @JvmStatic
   fun safeGetStringFromResponse(response: JSONObject?, propertyName: String?): String {
     return if (response != null) response.optString(propertyName, "") else ""
@@ -657,12 +520,6 @@ object Utility {
   @JvmStatic
   fun tryGetJSONArrayFromResponse(response: JSONObject?, propertyKey: String?): JSONArray? {
     return response?.optJSONArray(propertyKey)
-  }
-
-  @Deprecated("It will be removed in v13.0.")
-  @JvmStatic
-  fun clearCaches() {
-    ImageDownloader.clearCache()
   }
 
   @Deprecated(
@@ -682,19 +539,6 @@ object Utility {
       }
     }
     directoryOrFile.delete()
-  }
-
-  @Deprecated(
-      "This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.filterNotNull"))
-  @JvmStatic
-  fun <T> asListNoNulls(vararg array: T): List<T> {
-    val result = ArrayList<T>()
-    for (t in array) {
-      if (t != null) {
-        result.add(t)
-      }
-    }
-    return result
   }
 
   @Throws(JSONException::class)
@@ -948,37 +792,6 @@ object Utility {
     } else {
       context.javaClass.simpleName
     }
-  }
-
-  @Deprecated("This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.filter"))
-  @JvmStatic
-  fun <T> filter(target: List<T>?, predicate: Predicate<T>): List<T>? {
-    if (target == null) {
-      return null
-    }
-    val list: MutableList<T> = ArrayList()
-    for (item in target) {
-      if (predicate.apply(item)) {
-        list.add(item)
-      }
-    }
-    return if (list.size == 0) null else list
-  }
-
-  @Deprecated("This method should not be used in Kotlin.", ReplaceWith("kotlin.collections.map"))
-  @JvmStatic
-  fun <T, K> map(target: List<T>?, mapper: Mapper<T, K>): List<K>? {
-    if (target == null) {
-      return null
-    }
-    val list: MutableList<K> = ArrayList()
-    for (item in target) {
-      val mappedItem: K? = mapper.apply(item)
-      if (mappedItem != null) {
-        list.add(mappedItem)
-      }
-    }
-    return if (list.size == 0) null else list
   }
 
   @JvmStatic
@@ -1471,16 +1284,6 @@ object Utility {
       } catch (e: Exception) {}
       return false
     }
-
-  @Deprecated("This type should not be used in Kotlin.")
-  fun interface Predicate<T> {
-    fun apply(item: T): Boolean
-  }
-
-  @Deprecated("This type should not be used in Kotlin.")
-  fun interface Mapper<T, K> {
-    fun apply(item: T): K
-  }
 
   interface GraphMeRequestWithCacheCallback {
     fun onSuccess(userInfo: JSONObject?)
