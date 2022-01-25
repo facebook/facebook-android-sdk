@@ -112,6 +112,11 @@ abstract class LoginMethodHandler : Parcelable {
   open fun shouldKeepTrackOfMultipleIntents(): Boolean = false
 
   companion object {
+    internal const val USER_CANCELED_LOG_IN_ERROR_MESSAGE = "User canceled log in."
+    internal const val NO_SIGNED_REQUEST_ERROR_MESSAGE =
+        "Authorization response does not contain the signed_request"
+    internal const val NO_USER_ID_ERROR_MESSAGE = "Failed to retrieve user_id from signed_request"
+
     @JvmStatic
     @Throws(FacebookException::class)
     fun createAuthenticationTokenFromNativeLogin(
@@ -253,7 +258,7 @@ abstract class LoginMethodHandler : Parcelable {
     @Throws(FacebookException::class)
     fun getUserIDFromSignedRequest(signedRequest: String?): String {
       if (signedRequest == null || signedRequest.isEmpty()) {
-        throw FacebookException("Authorization response does not contain the signed_request")
+        throw FacebookException(NO_SIGNED_REQUEST_ERROR_MESSAGE)
       }
       try {
         val signatureAndPayload = signedRequest.split(".").toTypedArray()
@@ -264,7 +269,7 @@ abstract class LoginMethodHandler : Parcelable {
           return jsonObject.getString("user_id")
         }
       } catch (ex: UnsupportedEncodingException) {} catch (ex: JSONException) {}
-      throw FacebookException("Failed to retrieve user_id from signed_request")
+      throw FacebookException(NO_USER_ID_ERROR_MESSAGE)
     }
   }
 }
