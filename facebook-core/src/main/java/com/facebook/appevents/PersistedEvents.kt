@@ -37,6 +37,10 @@ internal class PersistedEvents : Serializable {
     return events.keys
   }
 
+  fun entrySet(): Set<Map.Entry<AccessTokenAppIdPair, MutableList<AppEvent>>> {
+    return events.entries
+  }
+
   operator fun get(accessTokenAppIdPair: AccessTokenAppIdPair): List<AppEvent>? {
     return events[accessTokenAppIdPair]
   }

@@ -70,8 +70,12 @@ internal class MetadataViewObserver private constructor(activity: Activity) :
   }
 
   override fun onGlobalFocusChanged(oldView: View?, newView: View?) {
-    oldView?.let { process(it) }
-    newView?.let { process(it) }
+    if (oldView != null) {
+      process(oldView)
+    }
+    if (newView != null) {
+      process(newView)
+    }
   }
 
   private fun process(view: View) {
@@ -139,10 +143,7 @@ internal class MetadataViewObserver private constructor(activity: Activity) :
     @JvmStatic
     fun stopTrackingActivity(activity: Activity) {
       val key = activity.hashCode()
-      observers[key]?.let {
-        observers.remove(key)
-        it.stopTracking()
-      }
+      observers.remove(key)?.stopTracking()
     }
 
     private fun preNormalize(key: String, value: String): String {

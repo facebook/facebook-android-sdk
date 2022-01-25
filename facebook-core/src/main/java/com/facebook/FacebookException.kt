@@ -56,7 +56,7 @@ open class FacebookException : RuntimeException {
    * @param format the format string (see [java.util.Formatter.format])
    * @param args the list of arguments passed to the formatter.
    */
-  constructor(format: String?, vararg args: Any?) : this(format?.let { String.format(it, *args) })
+  constructor(format: String?, vararg args: Any?) : this(format?.format(*args))
 
   /**
    * Constructs a new FacebookException.

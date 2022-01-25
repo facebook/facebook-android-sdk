@@ -108,10 +108,7 @@ internal class ViewObserver private constructor(activity: Activity) :
     @JvmStatic
     fun stopTrackingActivity(activity: Activity) {
       val key = activity.hashCode()
-      observers[key]?.let {
-        observers.remove(key)
-        it.stopTracking()
-      }
+      observers.remove(key)?.stopTracking()
     }
   }
 }

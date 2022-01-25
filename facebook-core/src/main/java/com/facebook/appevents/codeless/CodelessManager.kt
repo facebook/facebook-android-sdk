@@ -98,8 +98,8 @@ object CodelessManager {
       return
     }
     CodelessMatcher.getInstance().remove(activity)
-    viewIndexer?.let { it.unschedule() }
-    sensorManager?.let { it.unregisterListener(viewIndexingTrigger) }
+    viewIndexer?.unschedule()
+    sensorManager?.unregisterListener(viewIndexingTrigger)
   }
 
   @JvmStatic
@@ -156,7 +156,7 @@ object CodelessManager {
       if (!isAppIndexingEnabled.get()) {
         deviceSessionID = null
       } else {
-        viewIndexer?.let { it.schedule() }
+        viewIndexer?.schedule()
       }
       isCheckingSession = false
     }

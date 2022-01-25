@@ -32,10 +32,11 @@ internal class AppEventCollection {
     if (persistedEvents == null) {
       return
     }
-    for (accessTokenAppIdPair in persistedEvents.keySet()) {
-      getSessionEventsState(accessTokenAppIdPair)?.let {
-        for (appEvent in checkNotNull(persistedEvents[accessTokenAppIdPair])) {
-          it.addEvent(appEvent)
+    for (entry in persistedEvents.entrySet()) {
+      val state = getSessionEventsState(entry.key)
+      if (state != null) {
+        for (appEvent in entry.value) {
+          state.addEvent(appEvent)
         }
       }
     }
@@ -74,10 +75,11 @@ internal class AppEventCollection {
 
       // Retrieve attributionId, but we will only send it if attribution is supported for the
       // app.
-      eventsState =
-          getAttributionIdentifiers(context)?.let {
-            SessionEventsState(it, AppEventsLogger.getAnonymousAppDeviceGUID(context))
-          }
+      val identifier = getAttributionIdentifiers(context)
+      if (identifier != null) {
+        eventsState =
+            SessionEventsState(identifier, AppEventsLogger.getAnonymousAppDeviceGUID(context))
+      }
     }
     if (eventsState == null) {
       return null

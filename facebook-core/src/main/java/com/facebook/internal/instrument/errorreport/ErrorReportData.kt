@@ -80,7 +80,9 @@ class ErrorReportData {
     get() {
       val obj = JSONObject()
       try {
-        timestamp?.let { ts -> obj.put(PARAM_TIMESTAMP, ts) }
+        if (timestamp != null) {
+          obj.put(PARAM_TIMESTAMP, timestamp)
+        }
         obj.put(PRARAM_ERROR_MESSAGE, errorMessage)
         return obj
       } catch (e: JSONException) {

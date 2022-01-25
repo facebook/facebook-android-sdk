@@ -116,7 +116,7 @@ class ViewIndexer(activity: Activity) {
     try {
       getExecutor().execute {
         try {
-          indexingTimer?.let { it.cancel() }
+          indexingTimer?.cancel()
           previousDigest = null
           val timer = Timer()
           timer.scheduleAtFixedRate(
@@ -134,7 +134,7 @@ class ViewIndexer(activity: Activity) {
   fun unschedule() {
     activityReference.get() ?: return
     try {
-      indexingTimer?.let { it.cancel() }
+      indexingTimer?.cancel()
 
       indexingTimer = null
     } catch (e: Exception) {
@@ -225,7 +225,7 @@ class ViewIndexer(activity: Activity) {
      */
     @JvmStatic
     fun sendToServerUnityInstance(tree: String) {
-      instance?.let { it.sendToServer(tree) }
+      instance?.sendToServer(tree)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
