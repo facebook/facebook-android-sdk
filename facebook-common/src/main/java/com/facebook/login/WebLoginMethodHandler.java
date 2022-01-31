@@ -48,10 +48,6 @@ public abstract class WebLoginMethodHandler extends LoginMethodHandler {
   private static final String WEB_VIEW_AUTH_HANDLER_TOKEN_KEY = "TOKEN";
   protected AccessTokenSource tokenSource;
 
-  protected String getRedirectUrl() {
-    return "fb" + FacebookSdk.getApplicationId() + "://authorize/";
-  }
-
   private String e2e;
 
   WebLoginMethodHandler(LoginClient loginClient) {
