@@ -154,7 +154,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     return false;
   }
 
-  private void onCustomTabComplete(String url, LoginClient.Request request) {
+  private void onCustomTabComplete(String url, final LoginClient.Request request) {
     if (url != null
         && (url.startsWith(Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX)
             || url.startsWith(super.getRedirectUrl()))) {
@@ -192,12 +192,21 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
       if (Utility.isNullOrEmpty(error)
           && Utility.isNullOrEmpty(errorMessage)
           && errorCode == FacebookRequestError.INVALID_ERROR_CODE) {
-        try {
-          values = processCodeExchange(request, values);
-          super.onComplete(request, values, null);
-        } catch (FacebookException ex) {
-          super.onComplete(request, null, ex);
-        }
+        final Bundle codeExchangeValues = values;
+        FacebookSdk.getExecutor()
+            .execute(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    try {
+                      Bundle processedValues = processCodeExchange(request, codeExchangeValues);
+                      CustomTabLoginMethodHandler.super.onComplete(request, processedValues, null);
+                    } catch (FacebookException ex) {
+                      CustomTabLoginMethodHandler.super.onComplete(request, null, ex);
+                    }
+                  }
+                });
+
       } else if (error != null
           && (error.equals("access_denied") || error.equals("OAuthAccessDeniedException"))) {
         super.onComplete(request, null, new FacebookOperationCanceledException());
