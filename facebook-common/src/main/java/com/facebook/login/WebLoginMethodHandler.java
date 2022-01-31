@@ -118,8 +118,6 @@ public abstract class WebLoginMethodHandler extends LoginMethodHandler {
           ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SCOPES);
     } else {
       if (request.getPermissions().contains(LoginConfiguration.OPENID)) {
-        parameters.putString(
-            ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE);
         parameters.putString(ServerProtocol.DIALOG_PARAM_NONCE, request.getNonce());
       }
       parameters.putString(

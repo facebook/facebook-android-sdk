@@ -975,8 +975,7 @@ public class LoginManager {
     } catch (FacebookException _ex) {
       // fallback to 'plain' if device cannot support S256 for some reason
       codeChallengeMethod = CodeChallengeMethod.PLAIN;
-      codeChallenge =
-          PKCEUtil.generateCodeChallenge(loginConfig.getCodeVerifier(), codeChallengeMethod);
+      codeChallenge = loginConfig.getCodeVerifier();
     }
 
     LoginClient.Request request =
