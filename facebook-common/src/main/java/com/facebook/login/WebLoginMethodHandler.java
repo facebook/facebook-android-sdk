@@ -123,15 +123,18 @@ public abstract class WebLoginMethodHandler extends LoginMethodHandler {
     } else {
       if (request.getPermissions().contains(LoginConfiguration.OPENID)) {
         parameters.putString(
-            ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-            ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST);
+            ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE);
         parameters.putString(ServerProtocol.DIALOG_PARAM_NONCE, request.getNonce());
-      } else {
-        parameters.putString(
-            ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-            ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
       }
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE);
     }
+
+    // PKCE params
+    parameters.putString(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE, request.getCodeChallenge());
+    parameters.putString(
+        ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD, request.getCodeChallengeMethod().name());
+
     parameters.putString(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
     parameters.putString(ServerProtocol.DIALOG_PARAM_AUTH_TYPE, request.getAuthType());
