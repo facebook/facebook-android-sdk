@@ -247,6 +247,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   CustomTabLoginMethodHandler(Parcel source) {
     super(source);
     expectedChallenge = source.readString();
+    validRedirectURI = CustomTabUtils.getValidRedirectURI(this.getDeveloperDefinedRedirectURI());
   }
 
   @Override
