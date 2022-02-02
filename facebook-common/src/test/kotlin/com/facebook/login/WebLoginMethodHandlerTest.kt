@@ -56,7 +56,7 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
 
     override fun describeContents(): Int = 0
 
-    override fun getTokenSource(): AccessTokenSource = AccessTokenSource.CHROME_CUSTOM_TAB
+    override val tokenSource: AccessTokenSource = AccessTokenSource.CHROME_CUSTOM_TAB
 
     override val nameForLogging: String = "testlogin"
 

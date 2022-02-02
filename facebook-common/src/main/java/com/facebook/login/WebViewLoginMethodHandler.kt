@@ -42,7 +42,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
 
   override val nameForLogging = "web_view"
 
-  override fun getTokenSource(): AccessTokenSource = AccessTokenSource.WEB_VIEW
+  override val tokenSource: AccessTokenSource = AccessTokenSource.WEB_VIEW
 
   override fun needsInternetPermission(): Boolean = true
 
