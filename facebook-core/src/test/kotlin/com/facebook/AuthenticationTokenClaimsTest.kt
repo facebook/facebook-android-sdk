@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -105,27 +104,20 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
             .toEnCodedString()
     val authenticationToken =
         AuthenticationTokenClaims(encodedClaims, AuthenticationTokenTestUtil.NONCE)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.sub,
-        authenticationToken.sub)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.jti,
-        authenticationToken.jti)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.iss,
-        authenticationToken.iss)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.aud,
-        authenticationToken.aud)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.nonce,
-        authenticationToken.nonce)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.exp,
-        authenticationToken.exp)
-    Assert.assertEquals(
-        AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.iat,
-        authenticationToken.iat)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.sub)
+        .isEqualTo(authenticationToken.sub)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.jti)
+        .isEqualTo(authenticationToken.jti)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.iss)
+        .isEqualTo(authenticationToken.iss)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.aud)
+        .isEqualTo(authenticationToken.aud)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.nonce)
+        .isEqualTo(authenticationToken.nonce)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.exp)
+        .isEqualTo(authenticationToken.exp)
+    assertThat(AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly.iat)
+        .isEqualTo(authenticationToken.iat)
   }
 
   @Test
