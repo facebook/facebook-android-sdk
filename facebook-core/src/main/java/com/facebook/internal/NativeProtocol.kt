@@ -349,6 +349,8 @@ object NativeProtocol {
     if (!Utility.isNullOrEmpty(codeChallenge) && !Utility.isNullOrEmpty(codeChallengeMethod)) {
       intent.putExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE, codeChallenge)
       intent.putExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD, codeChallengeMethod)
+      intent.putExtra(
+          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
     }
     intent.putExtra(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
