@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
+ *
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.facebook.appevents
 
 import android.content.Context
@@ -8,22 +28,22 @@ import com.facebook.FacebookRequestError
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.GraphResponse
+import com.facebook.MockSharedPreference
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ScheduledFuture
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.api.mockito.PowerMockito.doAnswer
-import org.powermock.api.mockito.PowerMockito.doReturn
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -31,9 +51,7 @@ import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(
     AppEventStore::class,
-    AppEventQueue::class,
     FacebookSdk::class,
-    GraphRequest::class,
     FetchedAppSettingsManager::class,
     LocalBroadcastManager::class)
 class AppEventQueueTest : FacebookPowerMockTestCase() {
@@ -51,18 +69,17 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   private lateinit var mockScheduledExecutor: FacebookSerialThreadPoolExecutor
   private lateinit var mockPersistedEvents: PersistedEvents
   private lateinit var mockFacebookRequestError: FacebookRequestError
+  private lateinit var mockLocalBroadcastManager: LocalBroadcastManager
 
   private val executor = FacebookSerialExecutor()
   private val accessTokenAppIdPair = AccessTokenAppIdPair("swagtoken", "yoloapplication")
   private val flushStatistics = FlushStatistics()
   private val flushReason = FlushReason.EVENT_THRESHOLD
-  private val numLogEventsToTryToFlushAfter = 5
+  private val numLogEventsToTryToFlushAfter = 100
 
   @Before
   fun init() {
     mockStatic(AppEventStore::class.java)
-    mockStatic(GraphRequest::class.java)
-    PowerMockito.spy(AppEventQueue::class.java)
     mockStatic(FacebookSdk::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
 
@@ -79,6 +96,8 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     whenever(mockGraphResponse.error).thenReturn(mockFacebookRequestError)
 
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(mockContext.getSharedPreferences(any<String>(), any()))
+        .thenReturn(MockSharedPreference())
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", executor)
     whenever(FacebookSdk.getExecutor()).thenReturn(executor)
@@ -92,6 +111,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     mockAccessTokenAppIdPairSet = HashSet<AccessTokenAppIdPair>()
     mockAccessTokenAppIdPairSet.add(accessTokenAppIdPair)
     mockSessionEventsState = mock()
+    whenever(mockSessionEventsState.populateRequest(any(), any(), any(), any())).thenReturn(1)
     mockAppEventCollection = mock()
     whenever(mockAppEventCollection.keySet()).thenReturn(mockAccessTokenAppIdPairSet)
     whenever(mockAppEventCollection.get(accessTokenAppIdPair)).thenReturn(mockSessionEventsState)
@@ -106,23 +126,21 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
       null
     }
     whenever(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
-    Whitebox.setInternalState(
-        AppEventQueue::class.java,
-        "NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER",
-        numLogEventsToTryToFlushAfter)
     mockScheduledExecutor = spy(FacebookSerialThreadPoolExecutor(1))
     Whitebox.setInternalState(
         AppEventQueue::class.java, "singleThreadExecutor", mockScheduledExecutor)
     Whitebox.setInternalState(
         AppEventQueue::class.java, "appEventCollection", mockAppEventCollection)
-    doReturn(mockGraphRequest)
-        .`when`(
-            AppEventQueue::class.java,
-            "buildRequestForSession",
-            any<AccessTokenAppIdPair>(),
-            any<SessionEventsState>(),
-            any<Boolean>(),
-            any<FlushStatistics>())
+
+    val mockGraphRequestCompanion = mock<GraphRequest.Companion>()
+    whenever(
+            mockGraphRequestCompanion.newPostRequest(
+                anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
+        .thenReturn(mockGraphRequest)
+
+    mockLocalBroadcastManager = mock<LocalBroadcastManager>()
+    mockStatic(LocalBroadcastManager::class.java)
+    whenever(LocalBroadcastManager.getInstance(any())).thenReturn(mockLocalBroadcastManager)
   }
 
   @Test
@@ -133,17 +151,8 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `flush and wait`() {
-    val mockLocalBroadcastManager = mock<LocalBroadcastManager>()
     val intentCaptor = argumentCaptor<Intent>()
     whenever(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
-    doReturn(emptyList<GraphRequest>())
-        .`when`(
-            AppEventQueue::class.java,
-            "buildRequests",
-            any<AppEventCollection>(),
-            any<FlushReason>())
-    mockStatic(LocalBroadcastManager::class.java)
-    whenever(LocalBroadcastManager.getInstance(any())).thenReturn(mockLocalBroadcastManager)
 
     AppEventQueue.flushAndWait(flushReason)
 
@@ -196,51 +205,47 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   fun `add when flush behavior is not EXPLICIT_ONLY and try to flush`() {
     whenever(AppEventsLogger.getFlushBehavior()).thenReturn(AppEventsLogger.FlushBehavior.AUTO)
     whenever(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter + 1)
-    var flushAndWaitHasBeenCalledTimes = 0
-    doAnswer { flushAndWaitHasBeenCalledTimes++ }
-        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
+
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
-    assertEquals(1, flushAndWaitHasBeenCalledTimes)
+
+    verify(mockAppEventCollection).addPersistedEvents(anyOrNull())
   }
 
   @Test
   fun `add when flush behavior is EXPLICIT_ONLY and try to flush`() {
     whenever(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter + 1)
-    var flushAndWaitHasBeenCalledTimes = 0
-    doAnswer { flushAndWaitHasBeenCalledTimes++ }
-        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
 
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
-    assertEquals(0, flushAndWaitHasBeenCalledTimes)
+
+    verify(mockAppEventCollection, times(0)).addPersistedEvents(anyOrNull())
   }
 
   @Test
   fun `add when flush behavior is not EXPLICIT_ONLY and not try to flush`() {
     whenever(AppEventsLogger.getFlushBehavior()).thenReturn(AppEventsLogger.FlushBehavior.AUTO)
     whenever(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter - 1)
-    var flushAndWaitHasBeenCalledTimes = 0
-    doAnswer { flushAndWaitHasBeenCalledTimes++ }
-        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
 
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
-    assertEquals(0, flushAndWaitHasBeenCalledTimes)
+
+    verify(mockAppEventCollection, times(0)).addPersistedEvents(anyOrNull())
   }
 
   @Test
   fun `add when flush behavior is EXPLICIT_ONLY and not try to flush`() {
     whenever(mockAppEventCollection.eventCount).thenReturn(numLogEventsToTryToFlushAfter - 1)
-    var flushAndWaitHasBeenCalledTimes = 0
-    doAnswer { flushAndWaitHasBeenCalledTimes++ }
-        .`when`(AppEventQueue::class.java, "flushAndWait", any<FlushReason>())
+
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
-    assertEquals(0, flushAndWaitHasBeenCalledTimes)
+
+    verify(mockAppEventCollection, times(0)).addPersistedEvents(anyOrNull())
   }
 
   @Test
   fun `add when scheduledFuture is null`() {
     Whitebox.setInternalState(
         AppEventQueue::class.java, "scheduledFuture", null as ScheduledFuture<*>?)
+
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
+
     verify(mockScheduledExecutor).schedule(any(), any(), any())
   }
 
@@ -248,7 +253,9 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   fun `add when scheduledFuture is not null`() {
     val mockScheduleFuture: ScheduledFuture<*> = mock()
     Whitebox.setInternalState(AppEventQueue::class.java, "scheduledFuture", mockScheduleFuture)
+
     AppEventQueue.add(accessTokenAppIdPair, mockAppEvent)
+
     verify(mockScheduledExecutor, never()).schedule(any(), any(), any())
   }
 }
