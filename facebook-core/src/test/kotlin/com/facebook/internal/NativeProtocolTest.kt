@@ -21,9 +21,11 @@
 package com.facebook.internal
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.pm.ServiceInfo
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.login.DefaultAudience
 import com.facebook.util.common.AuthenticationTokenTestUtil
@@ -191,25 +193,95 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
             "S256")
 
     assertThat(intents.size).isEqualTo(2)
-    val katanaIntent = intents.get(0)
-    assertThat(katanaIntent?.getComponent()?.getClassName())
+    val katanaIntent = intents[0]
+    assertThat(katanaIntent.getComponent()?.getClassName())
         .isEqualTo("com.facebook.katana.ProxyAuth")
-    assertThat(katanaIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
+    assertThat(katanaIntent.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
         .isEqualTo(mockAppID)
-    assertThat(katanaIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
+    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
         .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
-    assertThat(katanaIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
+    assertThat(katanaIntent.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
         .isFalse()
+    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+        .isEqualTo("S256")
 
-    val wakizashiIntent = intents.get(1)
-    assertThat(wakizashiIntent?.getComponent()?.getClassName())
+    val wakizashiIntent = intents[1]
+    assertThat(wakizashiIntent.getComponent()?.getClassName())
         .isEqualTo("com.facebook.katana.ProxyAuth")
-    assertThat(wakizashiIntent?.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
+    assertThat(wakizashiIntent.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
         .isEqualTo(mockAppID)
-    assertThat(wakizashiIntent?.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
+    assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
         .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
-    assertThat(katanaIntent?.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
+    assertThat(wakizashiIntent.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
         .isFalse()
+    assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+        .isEqualTo("S256")
+  }
+
+  @Test
+  fun `native intent generation for FB app without code challenge method will use S256 as the default method`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val intents =
+        NativeProtocol.createProxyAuthIntents(
+            mockContext,
+            mockAppID,
+            listOf<String>(), // permissions
+            "", // e2e
+            false, // isRerequest
+            false, // isForPublish
+            DefaultAudience.FRIENDS, // defaultAudience
+            "", // clientState
+            "", // authType
+            false, // ignoreAppSwitchToLoggedOut
+            null, // messengerPageId
+            false, // resetMessengerState
+            false, // isFamilyLogin
+            false, // shouldSkipAccountDedupe
+            AuthenticationTokenTestUtil.NONCE,
+            "codeChallenge")
+
+    assertThat(intents.size).isEqualTo(2)
+    val katanaIntent = intents[0]
+    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+        .isEqualTo("S256")
+
+    val wakizashiIntent = intents[1]
+    assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+        .isEqualTo("S256")
+  }
+
+  @Test
+  fun `native intent generation for FB app with null code challenge method will not have code challenge method`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val intents =
+        NativeProtocol.createProxyAuthIntents(
+            mockContext,
+            mockAppID,
+            listOf<String>(), // permissions
+            "", // e2e
+            false, // isRerequest
+            false, // isForPublish
+            DefaultAudience.FRIENDS, // defaultAudience
+            "", // clientState
+            "", // authType
+            false, // ignoreAppSwitchToLoggedOut
+            null, // messengerPageId
+            false, // resetMessengerState
+            false, // isFamilyLogin
+            false, // shouldSkipAccountDedupe
+            AuthenticationTokenTestUtil.NONCE,
+            null)
+
+    assertThat(intents.size).isEqualTo(2)
+    val katanaIntent = intents[0]
+    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+        .isNull()
+
+    val wakizashiIntent = intents[1]
+    assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+        .isNull()
   }
 
   @Test
@@ -249,9 +321,79 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
         .isTrue()
   }
 
-  fun setUpMockingForNativeIntentGeneration(mockContext: Context) {
+  @Test
+  fun `test validate null intent for service intent`() {
+    val mockContext = mock<Context>()
+    setUpMockingForServiceIntentGeneration(mockContext)
+    assertThat(NativeProtocol.validateServiceIntent(mockContext, null, mock())).isNull()
+  }
+
+  @Test
+  fun `test validate service intent when signature validation passes`() {
+    val mockContext = mock<Context>()
+    setUpMockingForServiceIntentGeneration(mockContext)
+    val intent = mock<Intent>()
+    assertThat(NativeProtocol.validateServiceIntent(mockContext, intent, mock())).isEqualTo(intent)
+  }
+
+  @Test
+  fun `test validate service intent when signature validation fails`() {
+    val mockContext = mock<Context>()
+    setUpMockingForServiceIntentGeneration(mockContext, signatureValidationResult = false)
+    val intent = mock<Intent>()
+    assertThat(NativeProtocol.validateServiceIntent(mockContext, intent, mock())).isNull()
+  }
+
+  @Test
+  fun `test validate null intent for activity intent`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    assertThat(NativeProtocol.validateServiceIntent(mockContext, null, mock())).isNull()
+  }
+
+  @Test
+  fun `test validate activity intent when signature validation passes`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val intent = mock<Intent>()
+    assertThat(NativeProtocol.validateActivityIntent(mockContext, intent, mock())).isEqualTo(intent)
+  }
+
+  @Test
+  fun `test validate activity intent when signature validation fails`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext, false)
+    val intent = mock<Intent>()
+    assertThat(NativeProtocol.validateActivityIntent(mockContext, intent, mock())).isNull()
+  }
+
+  @Test
+  fun `test create token refresh intent from a valid context`() {
+    val mockContext = mock<Context>()
+    setUpMockingForServiceIntentGeneration(mockContext)
+    assertThat(NativeProtocol.createPlatformServiceIntent(mockContext)).isNotNull
+  }
+
+  @Test
+  fun `test latest known protocol version is compatible with bucketed intent`() {
+    val latestVersion = NativeProtocol.getLatestKnownVersion()
+    assertThat(NativeProtocol.isVersionCompatibleWithBucketedIntent(latestVersion))
+  }
+
+  @Test
+  fun `test create token refresh intent from a context without service intent available`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    assertThat(NativeProtocol.createPlatformServiceIntent(mockContext)).isNull()
+  }
+
+  fun setUpMockingForNativeIntentGeneration(
+      mockContext: Context,
+      signatureValidationResult: Boolean = true
+  ) {
     PowerMockito.mockStatic(FacebookSignatureValidator::class.java)
-    whenever(FacebookSignatureValidator.validateSignature(any(), any())).thenReturn(true)
+    whenever(FacebookSignatureValidator.validateSignature(any(), any()))
+        .thenReturn(signatureValidationResult)
     val mockPackageManager = mock<PackageManager>()
     val mockResolveInfo = mock<ResolveInfo>()
     val mockActivityInfo = mock<ActivityInfo>()
@@ -259,5 +401,21 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     mockResolveInfo.activityInfo = mockActivityInfo
     whenever(mockContext.getPackageManager()).thenReturn(mockPackageManager)
     whenever(mockPackageManager.resolveActivity(any(), any())).thenReturn(mockResolveInfo)
+  }
+
+  fun setUpMockingForServiceIntentGeneration(
+      mockContext: Context,
+      signatureValidationResult: Boolean = true
+  ) {
+    PowerMockito.mockStatic(FacebookSignatureValidator::class.java)
+    whenever(FacebookSignatureValidator.validateSignature(any(), any()))
+        .thenReturn(signatureValidationResult)
+    val mockPackageManager = mock<PackageManager>()
+    val mockResolveInfo = mock<ResolveInfo>()
+    val mockServiceInfo = mock<ServiceInfo>()
+    mockServiceInfo.packageName = mockPackageName
+    mockResolveInfo.serviceInfo = mockServiceInfo
+    whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+    whenever(mockPackageManager.resolveService(any(), any())).thenReturn(mockResolveInfo)
   }
 }
