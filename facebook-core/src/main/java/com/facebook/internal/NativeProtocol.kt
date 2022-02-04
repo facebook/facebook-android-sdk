@@ -419,19 +419,6 @@ object NativeProtocol {
     }
   }
 
-  @JvmStatic
-  fun createTokenRefreshIntent(context: Context): Intent? {
-    for (appInfo in facebookAppInfoList) {
-      var intent: Intent? =
-          Intent().setClassName(appInfo.getPackage(), FACEBOOK_TOKEN_REFRESH_ACTIVITY)
-      intent = validateServiceIntent(context, intent, appInfo)
-      if (intent != null) {
-        return intent
-      }
-    }
-    return null
-  }
-
   @JvmStatic fun getLatestKnownVersion(): Int = KNOWN_PROTOCOL_VERSIONS[0]
 
   // Note: be sure this stays sorted in descending order; add new versions at the beginning
