@@ -346,12 +346,15 @@ object NativeProtocol {
     intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState)
     intent.putExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, appInfo.getResponseType())
     intent.putExtra(ServerProtocol.DIALOG_PARAM_NONCE, nonce)
-    if (!Utility.isNullOrEmpty(codeChallenge) && !Utility.isNullOrEmpty(codeChallengeMethod)) {
-      intent.putExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE, codeChallenge)
-      intent.putExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD, codeChallengeMethod)
-      intent.putExtra(
-          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
-    }
+
+    // TODO T111412069
+    //    if (!Utility.isNullOrEmpty(codeChallenge) && !Utility.isNullOrEmpty(codeChallengeMethod))
+    // {
+    //      intent.putExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE, codeChallenge)
+    //      intent.putExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD, codeChallengeMethod)
+    //      intent.putExtra(
+    //          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
+    //    }
     intent.putExtra(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
     if (isForPublish) {
@@ -815,7 +818,8 @@ object NativeProtocol {
     abstract fun getPackage(): String
     abstract fun getLoginActivity(): String?
     private var availableVersions: TreeSet<Int>? = null
-    open fun getResponseType(): String = ServerProtocol.DIALOG_RESPONSE_TYPE_CODE
+    open fun getResponseType(): String =
+        ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST
     open fun onAvailableVersionsNullOrEmpty() = Unit
 
     fun getAvailableVersions(): TreeSet<Int>? {

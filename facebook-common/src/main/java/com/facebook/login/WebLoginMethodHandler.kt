@@ -100,7 +100,8 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
         parameters.putString(ServerProtocol.DIALOG_PARAM_NONCE, request.nonce)
       }
       parameters.putString(
-          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE, ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
+          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+          ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST)
     }
 
     // PKCE params

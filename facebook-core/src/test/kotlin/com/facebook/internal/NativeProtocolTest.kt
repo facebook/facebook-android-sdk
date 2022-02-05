@@ -199,11 +199,12 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     assertThat(katanaIntent.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
         .isEqualTo(mockAppID)
     assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
-        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST)
     assertThat(katanaIntent.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
         .isFalse()
-    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
-        .isEqualTo("S256")
+    // TODO T111412069
+    //    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+    //        .isEqualTo("S256")
 
     val wakizashiIntent = intents[1]
     assertThat(wakizashiIntent.getComponent()?.getClassName())
@@ -211,45 +212,49 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     assertThat(wakizashiIntent.getStringExtra(NativeProtocol.FACEBOOK_PROXY_AUTH_APP_ID_KEY))
         .isEqualTo(mockAppID)
     assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE))
-        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_CODE)
+        .isEqualTo(ServerProtocol.DIALOG_RESPONSE_TYPE_ID_TOKEN_AND_SIGNED_REQUEST)
     assertThat(wakizashiIntent.getBooleanExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, false))
         .isFalse()
-    assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
-        .isEqualTo("S256")
+    // TODO T111412069
+    // assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+    //        .isEqualTo("S256")
   }
 
-  @Test
-  fun `native intent generation for FB app without code challenge method will use S256 as the default method`() {
-    val mockContext = mock<Context>()
-    setUpMockingForNativeIntentGeneration(mockContext)
-    val intents =
-        NativeProtocol.createProxyAuthIntents(
-            mockContext,
-            mockAppID,
-            listOf<String>(), // permissions
-            "", // e2e
-            false, // isRerequest
-            false, // isForPublish
-            DefaultAudience.FRIENDS, // defaultAudience
-            "", // clientState
-            "", // authType
-            false, // ignoreAppSwitchToLoggedOut
-            null, // messengerPageId
-            false, // resetMessengerState
-            false, // isFamilyLogin
-            false, // shouldSkipAccountDedupe
-            AuthenticationTokenTestUtil.NONCE,
-            "codeChallenge")
-
-    assertThat(intents.size).isEqualTo(2)
-    val katanaIntent = intents[0]
-    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
-        .isEqualTo("S256")
-
-    val wakizashiIntent = intents[1]
-    assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
-        .isEqualTo("S256")
-  }
+  // TODO T111412069
+  //  @Test
+  //  fun `native intent generation for FB app without code challenge method will use S256 as the
+  // default method`() {
+  //    val mockContext = mock<Context>()
+  //    setUpMockingForNativeIntentGeneration(mockContext)
+  //    val intents =
+  //        NativeProtocol.createProxyAuthIntents(
+  //            mockContext,
+  //            mockAppID,
+  //            listOf<String>(), // permissions
+  //            "", // e2e
+  //            false, // isRerequest
+  //            false, // isForPublish
+  //            DefaultAudience.FRIENDS, // defaultAudience
+  //            "", // clientState
+  //            "", // authType
+  //            false, // ignoreAppSwitchToLoggedOut
+  //            null, // messengerPageId
+  //            false, // resetMessengerState
+  //            false, // isFamilyLogin
+  //            false, // shouldSkipAccountDedupe
+  //            AuthenticationTokenTestUtil.NONCE,
+  //            "codeChallenge")
+  //
+  //    assertThat(intents.size).isEqualTo(2)
+  //    val katanaIntent = intents[0]
+  //    assertThat(katanaIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+  //        .isEqualTo("S256")
+  //
+  //    val wakizashiIntent = intents[1]
+  //
+  // assertThat(wakizashiIntent.getStringExtra(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD))
+  //        .isEqualTo("S256")
+  //  }
 
   @Test
   fun `native intent generation for FB app with null code challenge method will not have code challenge method`() {

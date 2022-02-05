@@ -192,6 +192,10 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
       if (Utility.isNullOrEmpty(error)
           && Utility.isNullOrEmpty(errorMessage)
           && errorCode == FacebookRequestError.INVALID_ERROR_CODE) {
+        if (values.containsKey("access_token")) {
+          super.onComplete(request, values, null);
+          return;
+        }
         final Bundle codeExchangeValues = values;
         FacebookSdk.getExecutor()
             .execute(
