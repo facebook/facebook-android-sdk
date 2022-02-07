@@ -22,10 +22,14 @@ package com.facebook.login
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
+import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.internal.ServerProtocol
+import com.facebook.internal.security.OidcSecurityUtil
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -36,21 +40,31 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSdk::class)
+@PrepareForTest(FacebookSdk::class, OidcSecurityUtil::class)
 class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
   private lateinit var mockExecutor: Executor
-  private lateinit var testLoginHandler: NativeAppLoginMethodHandler
+  private lateinit var testLoginHandler: TestNativeAppLoginMethodHandler
   private lateinit var testRequest: LoginClient.Request
 
-  class TestNativeAppLoginMethodHandler : NativeAppLoginMethodHandler {
+  inner class TestNativeAppLoginMethodHandler : NativeAppLoginMethodHandler {
     constructor(loginClient: LoginClient) : super(loginClient)
     constructor(source: Parcel) : super(source)
 
     var capturedRequest: LoginClient.Request? = null
+    var mockCodeExchangeResult: Bundle? = null
 
     override fun tryAuthorize(request: LoginClient.Request): Int {
       capturedRequest = request
       return 1
+    }
+
+    override fun processCodeExchange(request: LoginClient.Request, values: Bundle): Bundle {
+      val result = mockCodeExchangeResult
+      if (result == null) {
+        throw FacebookException("No code exchange result available")
+      } else {
+        return result
+      }
     }
 
     override fun describeContents(): Int = 0
@@ -67,6 +81,7 @@ class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     whenever(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
+    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
     testLoginHandler = TestNativeAppLoginMethodHandler(mockLoginClient)
     testRequest = createRequest()
     whenever(mockLoginClient.getPendingRequest()).thenReturn(testRequest)
@@ -122,10 +137,83 @@ class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(capturedOutcome.errorMessage).isEqualTo(TEST_ERROR_MESSAGE)
   }
 
+  @Test
+  fun `test error result without extras`() {
+    val data = Intent()
+
+    testLoginHandler.onActivityResult(0, 15, data)
+
+    val outcomeCaptor = argumentCaptor<LoginClient.Result>()
+    verify(mockLoginClient).completeAndValidate(outcomeCaptor.capture())
+    val capturedOutcome = outcomeCaptor.firstValue
+    assertThat(capturedOutcome.code).isEqualTo(LoginClient.Result.Code.ERROR)
+  }
+
+  @Test
+  fun `test processing success response with code exchange enabled`() {
+    PowerMockito.mockStatic(OidcSecurityUtil::class.java)
+    whenever(OidcSecurityUtil.getRawKeyFromEndPoint(any())).thenReturn("key")
+    whenever(OidcSecurityUtil.getPublicKeyFromString(any())).thenReturn(mock())
+    whenever(OidcSecurityUtil.verify(any(), any(), any())).thenReturn(true)
+    val authenticationTokenString = AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest()
+    val data = Intent()
+    data.putExtra("code", "code_exchange")
+    val codeExchangeResult = Bundle()
+    codeExchangeResult.putString(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, TEST_ACCESS_TOKEN)
+    codeExchangeResult.putString(
+        ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN, authenticationTokenString)
+    codeExchangeResult.putString("signed_request", SIGNED_REQUEST_STR)
+
+    testLoginHandler.mockCodeExchangeResult = codeExchangeResult
+
+    testLoginHandler.onActivityResult(0, Activity.RESULT_OK, data)
+
+    val runnableCaptor = argumentCaptor<Runnable>()
+    verify(mockExecutor).execute(runnableCaptor.capture())
+    val capturedRunnable = runnableCaptor.firstValue
+    capturedRunnable.run()
+
+    val outcomeCaptor = argumentCaptor<LoginClient.Result>()
+    verify(mockLoginClient).completeAndValidate(outcomeCaptor.capture())
+    val capturedOutcome = outcomeCaptor.firstValue
+    assertThat(capturedOutcome.code).isEqualTo(LoginClient.Result.Code.SUCCESS)
+    assertThat(capturedOutcome.token?.token).isEqualTo(TEST_ACCESS_TOKEN)
+    assertThat(capturedOutcome.authenticationToken?.token).isEqualTo(authenticationTokenString)
+  }
+
+  @Test
+  fun `test processing success response with invalid code exchange result`() {
+    val data = Intent()
+    data.putExtra("code", "code_exchange")
+    val authenticationTokenString = AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest()
+    val codeExchangeResult = Bundle()
+    codeExchangeResult.putString(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, TEST_ACCESS_TOKEN)
+    codeExchangeResult.putString(
+        ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN, authenticationTokenString)
+    codeExchangeResult.putString("signed_request", "invalid result")
+
+    testLoginHandler.mockCodeExchangeResult = codeExchangeResult
+
+    testLoginHandler.onActivityResult(0, Activity.RESULT_OK, data)
+
+    val runnableCaptor = argumentCaptor<Runnable>()
+    verify(mockExecutor).execute(runnableCaptor.capture())
+    val capturedRunnable = runnableCaptor.firstValue
+    capturedRunnable.run()
+
+    val outcomeCaptor = argumentCaptor<LoginClient.Result>()
+    verify(mockLoginClient).completeAndValidate(outcomeCaptor.capture())
+    val capturedOutcome = outcomeCaptor.firstValue
+    assertThat(capturedOutcome.code).isEqualTo(LoginClient.Result.Code.ERROR)
+  }
+
   companion object {
     private const val ERROR_FIELD = "error"
     private const val ERROR_CODE_FIELD = "error_code"
     private const val ERROR_MESSAGE_FIELD = "error_message"
     private const val TEST_ERROR_MESSAGE = "test error"
+    private const val TEST_ACCESS_TOKEN = "test_access_token"
+    private const val SIGNED_REQUEST_STR =
+        "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJjb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0"
   }
 }
