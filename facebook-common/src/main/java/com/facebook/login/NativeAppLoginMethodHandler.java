@@ -36,10 +36,7 @@ import com.facebook.FacebookServiceException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 public abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
 
@@ -176,8 +173,10 @@ public abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
   protected void handleResultCancel(LoginClient.Request request, Intent data) {
     Bundle extras = data.getExtras();
     String error = getError(extras);
-    String errorCode =
-        extras.get("error_code") != null ? extras.get("error_code").toString() : null;
+    String errorCode = null;
+    if (extras != null) {
+      errorCode = extras.get("error_code") != null ? extras.get("error_code").toString() : null;
+    }
 
     // If the device has lost network, the result will be a cancel with a connection failure
     // error. We want our consumers to be notified of this as an error so they can tell their
@@ -185,6 +184,7 @@ public abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     if (ServerProtocol.getErrorConnectionFailure().equals(errorCode)) {
       String errorMessage = getErrorMessage(extras);
       completeLogin(LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode));
+      return;
     }
 
     completeLogin(LoginClient.Result.createCancelResult(request, error));

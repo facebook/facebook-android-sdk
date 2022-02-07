@@ -98,7 +98,9 @@ object ServerProtocol {
       listOf("service_disabled", "AndroidAuthKillSwitchException")
   @JvmStatic
   val errorsUserCanceled: Collection<String> = listOf("access_denied", "OAuthAccessDeniedException")
-  @JvmStatic val errorConnectionFailure = "CONNECTION_FAILURE"
+
+  @JvmStatic fun getErrorConnectionFailure(): String = "CONNECTION_FAILURE"
+
   @JvmStatic
   fun getDialogAuthority(): String =
       String.format(DIALOG_AUTHORITY_FORMAT, FacebookSdk.getFacebookDomain())
