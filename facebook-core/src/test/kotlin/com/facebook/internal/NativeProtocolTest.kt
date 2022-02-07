@@ -26,23 +26,44 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
+import android.os.Bundle
+import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.FacebookSdk
 import com.facebook.login.DefaultAudience
 import com.facebook.util.common.AuthenticationTokenTestUtil
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.TreeSet
+import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSignatureValidator::class)
+@PrepareForTest(FacebookSdk::class, FacebookSignatureValidator::class)
 class NativeProtocolTest : FacebookPowerMockTestCase() {
 
   private val mockAppID = "123456789"
   private val mockPackageName = "com.example"
+  private lateinit var mockCallId: String
+  private lateinit var mockNativeAppInfo: NativeProtocol.NativeAppInfo
+
+  override fun setup() {
+    super.setup()
+    mockNativeAppInfo = mock()
+    val mockAvailableVersions = TreeSet<Int>()
+    mockAvailableVersions.add(NativeProtocol.PROTOCOL_VERSION_20210906)
+    whenever(mockNativeAppInfo.getAvailableVersions()).thenReturn(mockAvailableVersions)
+    whenever(mockNativeAppInfo.getPackage()).thenReturn("com.facebook.test")
+    whenever(mockNativeAppInfo.getLoginActivity()).thenReturn("com.facebook.test.LoginActivity")
+    PowerMockito.mockStatic(FacebookSdk::class.java)
+    whenever(FacebookSdk.isInitialized()).thenReturn(true)
+    whenever(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
+    whenever(FacebookSdk.getApplicationName()).thenReturn(mockPackageName)
+    mockCallId = UUID.randomUUID().toString()
+  }
 
   @Test
   fun `sdk version older than app with version spec open`() {
@@ -390,6 +411,121 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     val mockContext = mock<Context>()
     setUpMockingForNativeIntentGeneration(mockContext)
     assertThat(NativeProtocol.createPlatformServiceIntent(mockContext)).isNull()
+  }
+
+  @Test
+  fun `test create platform activity intent with valid native app`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val extras = Bundle()
+    extras.putString("test_param_field", "test_param_value")
+    val versionResult =
+        NativeProtocol.ProtocolVersionQueryResult.create(
+            mockNativeAppInfo, NativeProtocol.PROTOCOL_VERSION_20210906)
+
+    val intent =
+        NativeProtocol.createPlatformActivityIntent(
+            mockContext, mockCallId, NativeProtocol.ACTION_LIKE_DIALOG, versionResult, extras)
+
+    checkNotNull(intent)
+    assertThat(intent.action).isEqualTo(NativeProtocol.INTENT_ACTION_PLATFORM_ACTIVITY)
+    assertThat(intent.`package`).isEqualTo(mockNativeAppInfo.getPackage())
+    assertThat(intent.getStringExtra(NativeProtocol.EXTRA_APPLICATION_ID)).isEqualTo(mockAppID)
+    val protocolMethodArgs =
+        checkNotNull(intent.getBundleExtra(NativeProtocol.EXTRA_PROTOCOL_METHOD_ARGS))
+    assertThat(protocolMethodArgs.getString("test_param_field")).isEqualTo("test_param_value")
+  }
+
+  @Test
+  fun `test create platform activity intent without native app query result`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+
+    val intent =
+        NativeProtocol.createPlatformActivityIntent(
+            mockContext, mockCallId, NativeProtocol.ACTION_LIKE_DIALOG, null, null)
+
+    assertThat(intent).isNull()
+  }
+
+  @Test
+  fun `test create platform activity intent with no native app in the query result`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val emptyResult = NativeProtocol.ProtocolVersionQueryResult.createEmpty()
+
+    val intent =
+        NativeProtocol.createPlatformActivityIntent(
+            mockContext, mockCallId, NativeProtocol.ACTION_LIKE_DIALOG, emptyResult, null)
+
+    assertThat(intent).isNull()
+  }
+
+  @Test
+  fun `test create protocol result intent with results`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val extras = Bundle()
+    extras.putString("test_param_field", "test_param_value")
+    val versionResult =
+        NativeProtocol.ProtocolVersionQueryResult.create(
+            mockNativeAppInfo, NativeProtocol.PROTOCOL_VERSION_20210906)
+    val requestIntent =
+        NativeProtocol.createPlatformActivityIntent(
+            mockContext, mockCallId, NativeProtocol.ACTION_LIKE_DIALOG, versionResult, extras)
+    val results = Bundle()
+    results.putString("test_result_field", "test_result_value")
+
+    val resultIntent =
+        checkNotNull(
+            NativeProtocol.createProtocolResultIntent(checkNotNull(requestIntent), results, null))
+
+    assertThat(resultIntent.getIntExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, 0))
+        .isEqualTo(versionResult.protocolVersion)
+    assertThat(
+            resultIntent
+                .getBundleExtra(NativeProtocol.EXTRA_PROTOCOL_BRIDGE_ARGS)
+                ?.getString(NativeProtocol.BRIDGE_ARG_ACTION_ID_STRING))
+        .isEqualTo(mockCallId)
+    assertThat(
+            resultIntent
+                .getBundleExtra(NativeProtocol.EXTRA_PROTOCOL_METHOD_RESULTS)
+                ?.getString("test_result_field"))
+        .isEqualTo("test_result_value")
+  }
+
+  @Test
+  fun `test create protocol result intent with error`() {
+    val mockContext = mock<Context>()
+    setUpMockingForNativeIntentGeneration(mockContext)
+    val extras = Bundle()
+    extras.putString("test_param_field", "test_param_value")
+    val versionResult =
+        NativeProtocol.ProtocolVersionQueryResult.create(
+            mockNativeAppInfo, NativeProtocol.PROTOCOL_VERSION_20210906)
+    val requestIntent =
+        NativeProtocol.createPlatformActivityIntent(
+            mockContext, mockCallId, NativeProtocol.ACTION_LIKE_DIALOG, versionResult, extras)
+    val error = FacebookException("test error message")
+
+    val resultIntent =
+        checkNotNull(
+            NativeProtocol.createProtocolResultIntent(checkNotNull(requestIntent), null, error))
+
+    assertThat(resultIntent.getIntExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, 0))
+        .isEqualTo(versionResult.protocolVersion)
+    assertThat(
+            resultIntent
+                .getBundleExtra(NativeProtocol.EXTRA_PROTOCOL_BRIDGE_ARGS)
+                ?.getString(NativeProtocol.BRIDGE_ARG_ACTION_ID_STRING))
+        .isEqualTo(mockCallId)
+    val errorBundle =
+        resultIntent
+            .getBundleExtra(NativeProtocol.EXTRA_PROTOCOL_BRIDGE_ARGS)
+            ?.getBundle(NativeProtocol.BRIDGE_ARG_ERROR_BUNDLE)
+    checkNotNull(errorBundle)
+    assertThat(errorBundle.getString(NativeProtocol.BRIDGE_ARG_ERROR_DESCRIPTION))
+        .isEqualTo(error.toString())
   }
 
   fun setUpMockingForNativeIntentGeneration(
