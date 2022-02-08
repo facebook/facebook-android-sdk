@@ -23,6 +23,7 @@ package com.facebook.referrals;
 import android.app.Activity;
 import android.content.Intent;
 
+@Deprecated
 interface StartActivityDelegate {
   public void startActivityForResult(Intent intent, int requestCode);
 
