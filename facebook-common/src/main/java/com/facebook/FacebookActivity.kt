@@ -37,7 +37,6 @@ import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import com.facebook.internal.logging.dumpsys.EndToEndDumper
 import com.facebook.login.LoginFragment
-import com.facebook.referrals.ReferralFragment
 import com.facebook.share.internal.DeviceShareDialogFragment
 import com.facebook.share.model.ShareContent
 import java.io.FileDescriptor
@@ -102,13 +101,6 @@ open class FacebookActivity : FragmentActivity() {
             intent.getParcelableExtra<Parcelable>("content") as ShareContent<*, *>)
         dialogFragment.show(manager, FRAGMENT_TAG)
         fragment = dialogFragment
-      } else if (ReferralFragment.TAG == intent.action) {
-        fragment = ReferralFragment()
-        fragment.setRetainInstance(true)
-        manager
-            .beginTransaction()
-            .add(R.id.com_facebook_fragment_container, fragment, FRAGMENT_TAG)
-            .commit()
       } else {
         fragment = LoginFragment()
         fragment.setRetainInstance(true)
