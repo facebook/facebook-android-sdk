@@ -33,6 +33,7 @@ import android.os.Parcel
 import android.os.StatFs
 import android.provider.OpenableColumns
 import android.telephony.TelephonyManager
+import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Display
@@ -115,7 +116,7 @@ object Utility {
   private const val INSTAGRAM_PROFILE_FIELDS = "id,name,profile_picture"
 
   @JvmStatic
-  fun <T> isNullOrEmpty(c: Collection<T>?): Boolean {
+  fun isNullOrEmpty(c: Collection<*>?): Boolean {
     return c == null || c.isEmpty()
   }
 
@@ -243,15 +244,7 @@ object Utility {
   @JvmStatic
   fun putCommaSeparatedStringList(b: Bundle, key: String?, list: List<String?>?) {
     if (list != null) {
-      val builder = StringBuilder()
-      for (string in list) {
-        builder.append(string)
-        builder.append(",")
-      }
-      var commaSeparated: String? = ""
-      if (builder.isNotEmpty()) {
-        commaSeparated = builder.substring(0, builder.length - 1)
-      }
+      val commaSeparated = TextUtils.join(",", list)
       b.putString(key, commaSeparated)
     }
   }
