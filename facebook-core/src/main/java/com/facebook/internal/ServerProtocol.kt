@@ -94,10 +94,12 @@ object ServerProtocol {
   @JvmStatic fun getDefaultAPIVersion() = "v12.0"
 
   @JvmStatic
-  val errorsProxyAuthDisabled: Collection<String> =
+  fun getErrorsProxyAuthDisabled(): Collection<String> =
       listOf("service_disabled", "AndroidAuthKillSwitchException")
+
   @JvmStatic
-  val errorsUserCanceled: Collection<String> = listOf("access_denied", "OAuthAccessDeniedException")
+  fun getErrorsUserCanceled(): Collection<String> =
+      listOf("access_denied", "OAuthAccessDeniedException")
 
   @JvmStatic fun getErrorConnectionFailure(): String = "CONNECTION_FAILURE"
 

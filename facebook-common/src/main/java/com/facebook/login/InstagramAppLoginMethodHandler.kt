@@ -29,9 +29,7 @@ internal class InstagramAppLoginMethodHandler : NativeAppLoginMethodHandler {
   constructor(loginClient: LoginClient) : super(loginClient)
   override val nameForLogging = "instagram_login"
 
-  override fun getTokenSource(): AccessTokenSource {
-    return AccessTokenSource.INSTAGRAM_APPLICATION_WEB
-  }
+  override val tokenSource: AccessTokenSource = AccessTokenSource.INSTAGRAM_APPLICATION_WEB
 
   override fun tryAuthorize(request: LoginClient.Request): Int {
     val e2e = LoginClient.getE2E()

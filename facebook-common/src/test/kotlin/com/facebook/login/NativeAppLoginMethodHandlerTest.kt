@@ -23,7 +23,6 @@ package com.facebook.login
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookException
 import com.facebook.FacebookSdk
@@ -46,9 +45,8 @@ class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
   private lateinit var testLoginHandler: TestNativeAppLoginMethodHandler
   private lateinit var testRequest: LoginClient.Request
 
-  inner class TestNativeAppLoginMethodHandler : NativeAppLoginMethodHandler {
-    constructor(loginClient: LoginClient) : super(loginClient)
-    constructor(source: Parcel) : super(source)
+  inner class TestNativeAppLoginMethodHandler(loginClient: LoginClient) :
+      NativeAppLoginMethodHandler(loginClient) {
 
     var capturedRequest: LoginClient.Request? = null
     var mockCodeExchangeResult: Bundle? = null
@@ -147,6 +145,20 @@ class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     verify(mockLoginClient).completeAndValidate(outcomeCaptor.capture())
     val capturedOutcome = outcomeCaptor.firstValue
     assertThat(capturedOutcome.code).isEqualTo(LoginClient.Result.Code.ERROR)
+    assertThat(capturedOutcome.errorMessage).contains("Unexpected resultCode")
+  }
+
+  @Test
+  fun `test ok result without extras`() {
+    val data = Intent()
+
+    testLoginHandler.onActivityResult(0, Activity.RESULT_OK, data)
+
+    val outcomeCaptor = argumentCaptor<LoginClient.Result>()
+    verify(mockLoginClient).completeAndValidate(outcomeCaptor.capture())
+    val capturedOutcome = outcomeCaptor.firstValue
+    assertThat(capturedOutcome.code).isEqualTo(LoginClient.Result.Code.ERROR)
+    assertThat(capturedOutcome.errorMessage).contains("Unexpected null")
   }
 
   @Test

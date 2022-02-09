@@ -30,7 +30,7 @@ import com.facebook.internal.ServerProtocol
 
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 class KatanaProxyLoginMethodHandler : NativeAppLoginMethodHandler {
-  constructor(loginClient: LoginClient?) : super(loginClient)
+  constructor(loginClient: LoginClient) : super(loginClient)
 
   override val nameForLogging = "katana_proxy_auth"
 
@@ -72,7 +72,7 @@ class KatanaProxyLoginMethodHandler : NativeAppLoginMethodHandler {
 
   override fun shouldKeepTrackOfMultipleIntents(): Boolean = true
 
-  constructor(source: Parcel?) : super(source)
+  constructor(source: Parcel) : super(source)
 
   override fun describeContents(): Int = 0
 
