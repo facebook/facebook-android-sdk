@@ -138,9 +138,9 @@ object ShareContentValidation {
   }
 
   private fun validateLinkContent(linkContent: ShareLinkContent, validator: Validator) {
-    val imageUrl = linkContent.imageUrl
-    if (imageUrl != null && !isWebUri(imageUrl)) {
-      throw FacebookException("Image Url must be an http:// or https:// url")
+    val contentUrl = linkContent.contentUrl
+    if (contentUrl != null && !isWebUri(contentUrl)) {
+      throw FacebookException("Content Url must be an http:// or https:// url")
     }
   }
 

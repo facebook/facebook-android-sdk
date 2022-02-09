@@ -150,10 +150,6 @@ public class NativeDialogParameters {
   private static Bundle create(ShareLinkContent linkContent, boolean dataErrorsFatal) {
     Bundle params = createBaseParameters(linkContent, dataErrorsFatal);
 
-    Utility.putNonEmptyString(params, ShareConstants.TITLE, linkContent.getContentTitle());
-    Utility.putNonEmptyString(
-        params, ShareConstants.DESCRIPTION, linkContent.getContentDescription());
-    Utility.putUri(params, ShareConstants.IMAGE_URL, linkContent.getImageUrl());
     Utility.putNonEmptyString(params, ShareConstants.QUOTE, linkContent.getQuote());
     Utility.putUri(params, ShareConstants.MESSENGER_URL, linkContent.getContentUrl());
     Utility.putUri(params, ShareConstants.TARGET_DISPLAY, linkContent.getContentUrl());

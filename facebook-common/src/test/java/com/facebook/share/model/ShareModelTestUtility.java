@@ -130,10 +130,7 @@ public class ShareModelTestUtility {
   }
 
   public static ShareLinkContent.Builder getLinkContentBuilder() {
-    return new ShareLinkContent.Builder()
-        .setContentDescription(STATUS_CONTENT_DESCRIPTION)
-        .setImageUrl(STATUS_CONTENT_IMAGE_URL)
-        .setContentTitle(STATUS_CONTENT_TITLE);
+    return new ShareLinkContent.Builder();
   }
 
   public static ShareVideo.Builder getVideoBuilder() {
@@ -255,9 +252,6 @@ public class ShareModelTestUtility {
   }
 
   public static void assertEquals(final ShareLinkContent a, final ShareLinkContent b) {
-    Assert.assertEquals(a.getContentDescription(), b.getContentDescription());
-    Assert.assertEquals(a.getImageUrl(), b.getImageUrl());
-    Assert.assertEquals(a.getContentTitle(), b.getContentTitle());
     assertContentEquals(a, b);
   }
 

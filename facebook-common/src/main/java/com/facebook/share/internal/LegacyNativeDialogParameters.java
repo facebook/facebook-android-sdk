@@ -82,11 +82,6 @@ public class LegacyNativeDialogParameters {
   private static Bundle create(ShareLinkContent linkContent, boolean dataErrorsFatal) {
     Bundle params = createBaseParameters(linkContent, dataErrorsFatal);
 
-    Utility.putNonEmptyString(params, ShareConstants.LEGACY_TITLE, linkContent.getContentTitle());
-    Utility.putNonEmptyString(
-        params, ShareConstants.LEGACY_DESCRIPTION, linkContent.getContentDescription());
-    Utility.putUri(params, ShareConstants.LEGACY_IMAGE, linkContent.getImageUrl());
-
     return params;
   }
 

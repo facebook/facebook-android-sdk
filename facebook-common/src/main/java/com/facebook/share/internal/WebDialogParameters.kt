@@ -127,13 +127,7 @@ object WebDialogParameters {
   fun createForFeed(shareLinkContent: ShareLinkContent): Bundle {
     val webParams = Bundle()
     putNonEmptyString(
-        webParams, ShareConstants.WEB_DIALOG_PARAM_NAME, shareLinkContent.contentTitle)
-    putNonEmptyString(
-        webParams, ShareConstants.WEB_DIALOG_PARAM_DESCRIPTION, shareLinkContent.contentDescription)
-    putNonEmptyString(
         webParams, ShareConstants.WEB_DIALOG_PARAM_LINK, getUriString(shareLinkContent.contentUrl))
-    putNonEmptyString(
-        webParams, ShareConstants.WEB_DIALOG_PARAM_PICTURE, getUriString(shareLinkContent.imageUrl))
     putNonEmptyString(webParams, ShareConstants.WEB_DIALOG_PARAM_QUOTE, shareLinkContent.quote)
     putNonEmptyString(
         webParams, ShareConstants.WEB_DIALOG_PARAM_HASHTAG, shareLinkContent.shareHashtag?.hashtag)

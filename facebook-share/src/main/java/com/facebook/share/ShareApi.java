@@ -411,9 +411,6 @@ public final class ShareApi {
     this.addCommonParameters(parameters, linkContent);
     parameters.putString("message", this.getMessage());
     parameters.putString("link", Utility.getUriString(linkContent.getContentUrl()));
-    parameters.putString("picture", Utility.getUriString(linkContent.getImageUrl()));
-    parameters.putString("name", linkContent.getContentTitle());
-    parameters.putString("description", linkContent.getContentDescription());
     parameters.putString("ref", linkContent.getRef());
     new GraphRequest(
             AccessToken.getCurrentAccessToken(),

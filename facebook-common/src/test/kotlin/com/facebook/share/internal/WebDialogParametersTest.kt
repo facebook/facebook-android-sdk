@@ -148,10 +148,7 @@ class WebDialogParametersTest : FacebookTestCase() {
   fun `test createForFeed with ShareLinkContent`() {
     val shareLinkContent =
         ShareLinkContent.Builder()
-            .setContentTitle("contentTitle")
-            .setContentDescription("contentDescription")
             .setContentUrl(Uri.parse("www.facebook.com/content_url"))
-            .setImageUrl(Uri.parse("www.facebook.com/image_url"))
             .setQuote("quote")
             .setShareHashtag(ShareHashtag.Builder().setHashtag("#hashtag").build())
             .build()

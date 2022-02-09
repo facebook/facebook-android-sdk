@@ -272,9 +272,6 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     Profile profile = Profile.getCurrentProfile();
     ShareLinkContent linkContent =
         new ShareLinkContent.Builder()
-            .setContentTitle("Hello Facebook")
-            .setContentDescription(
-                "The 'Hello Facebook' sample  showcases simple Facebook integration")
             .setContentUrl(Uri.parse("http://developers.facebook.com/docs/android"))
             .build();
     if (canPresentShareDialog) {

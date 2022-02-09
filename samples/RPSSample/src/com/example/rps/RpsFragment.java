@@ -405,10 +405,7 @@ public class RpsFragment extends Fragment {
   }
 
   private ShareLinkContent getLinkContent() {
-    return new ShareLinkContent.Builder()
-        .setContentTitle(SHARE_GAME_NAME)
-        .setContentUrl(Uri.parse(SHARE_GAME_LINK))
-        .build();
+    return new ShareLinkContent.Builder().setContentUrl(Uri.parse(SHARE_GAME_LINK)).build();
   }
 
   // Workaround to bug where sometimes response codes come as Long instead of Integer
