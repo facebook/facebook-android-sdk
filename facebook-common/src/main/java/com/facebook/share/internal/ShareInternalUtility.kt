@@ -191,12 +191,7 @@ object ShareInternalUtility {
         if (results != null) {
           val gesture = getNativeDialogCompletionGesture(results)
           if (gesture == null || "post".equals(gesture, ignoreCase = true)) {
-            val postId = getShareDialogPostId(results)
-            if (postId != null) {
-              invokeOnSuccessCallback(callback, postId)
-            } else {
-              invokeOnErrorCallback(callback, FacebookException(NativeProtocol.ERROR_UNKNOWN_ERROR))
-            }
+            invokeOnSuccessCallback(callback, getShareDialogPostId(results))
           } else if ("cancel".equals(gesture, ignoreCase = true)) {
             invokeOnCancelCallback(callback)
           } else {

@@ -343,7 +343,7 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
     val resultProcessor = ShareInternalUtility.getShareResultProcessor(mockCallback)
     val result = Bundle()
     resultProcessor.onSuccess(appCall, result)
-    verify(mockCallback).onError(any())
+    verify(mockCallback).onSuccess(any())
   }
 
   @Test
