@@ -81,14 +81,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({
-  FacebookSdk.class,
-  AccessToken.class,
-  AuthenticationToken.class,
-  Profile.class,
-  OidcSecurityUtil.class
-})
+@PrepareForTest({FacebookSdk.class, OidcSecurityUtil.class})
 public class LoginManagerTest extends FacebookPowerMockTestCase {
 
   private static final String MOCK_APP_ID = AuthenticationTokenTestUtil.APP_ID;
@@ -112,18 +107,22 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   @Mock public SharedPreferences mockSharedPreferences;
   @Mock public SharedPreferences.Editor mockEditor;
   @Mock public Looper mockLooper;
+  @Mock public AccessToken.Companion mockAccessTokenCompanion;
+  @Mock public AuthenticationToken.Companion mockAuthenticationTokenCompanion;
+  @Mock public Profile.Companion mockProfileCompanion;
 
   @Before
   public void before() throws Exception {
     mockStatic(FacebookSdk.class);
 
-    mockStatic(AccessToken.class);
-    when(AccessToken.getCurrentAccessToken()).thenReturn(null);
+    when(mockAccessTokenCompanion.getCurrentAccessToken()).thenReturn(null);
+    Whitebox.setInternalState(AccessToken.class, "Companion", mockAccessTokenCompanion);
 
-    mockStatic(AuthenticationToken.class);
-    when(AuthenticationToken.getCurrentAuthenticationToken()).thenReturn(null);
+    when(mockAuthenticationTokenCompanion.getCurrentAuthenticationToken()).thenReturn(null);
+    Whitebox.setInternalState(
+        AuthenticationToken.class, "Companion", mockAuthenticationTokenCompanion);
 
-    mockStatic(Profile.class);
+    Whitebox.setInternalState(Profile.class, "Companion", mockProfileCompanion);
 
     when(FacebookSdk.isInitialized()).thenReturn(true);
     when(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID);
@@ -306,7 +305,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   @Test
   public void testLogInWithReadAndAccessTokenCreatesReauthRequest() {
     AccessToken accessToken = createAccessToken();
-    when(AccessToken.getCurrentAccessToken()).thenReturn(accessToken);
+    when(mockAccessTokenCompanion.getCurrentAccessToken()).thenReturn(accessToken);
 
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
@@ -397,7 +396,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   @Test
   public void testLogInWithPublishAndAccessTokenCreatesReauthRequest() {
     AccessToken accessToken = createAccessToken();
-    when(AccessToken.getCurrentAccessToken()).thenReturn(accessToken);
+    when(mockAccessTokenCompanion.getCurrentAccessToken()).thenReturn(accessToken);
 
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithPublishPermissions(
@@ -441,7 +440,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
     final int[] setTokenTimes = {0};
-    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", any(AccessToken.class))
+    PowerMockito.when(mockAccessTokenCompanion, "setCurrentAccessToken", any(AccessToken.class))
         .thenAnswer(
             new Answer() {
               @Override
@@ -533,7 +532,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
     final int[] setTokenTimes = {0};
-    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", any(AccessToken.class))
+    PowerMockito.when(mockAccessTokenCompanion, "setCurrentAccessToken", any(AccessToken.class))
         .thenAnswer(
             new Answer() {
               @Override
@@ -556,7 +555,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         mockActivity, Arrays.asList("public_profile", "user_friends", "openid"));
     final int[] setTokenTimes = {0};
     PowerMockito.when(
-            AuthenticationToken.class,
+            mockAuthenticationTokenCompanion,
             "setCurrentAuthenticationToken",
             eq(createAuthenticationToken()))
         .thenAnswer(
@@ -604,7 +603,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     loginManager.logInWithReadPermissions(
         mockActivity, Arrays.asList("public_profile", "user_friends"));
     final int[] setTokenTimes = {0};
-    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", eq(createAccessToken()))
+    PowerMockito.when(mockAccessTokenCompanion, "setCurrentAccessToken", eq(createAccessToken()))
         .thenAnswer(
             new Answer() {
               @Override
@@ -624,7 +623,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         mockActivity, Arrays.asList("public_profile", "user_friends", "openid"));
     final int[] setTokenTimes = {0};
     PowerMockito.when(
-            AuthenticationToken.class,
+            mockAuthenticationTokenCompanion,
             "setCurrentAuthenticationToken",
             eq(createAuthenticationToken()))
         .thenAnswer(
@@ -660,7 +659,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     LoginManager loginManager = new LoginManager();
     final int[] setAccessTokenTimes = {0};
     final int[] setAuthenticationTokenTimes = {0};
-    PowerMockito.when(AuthenticationToken.class, "setCurrentAuthenticationToken", eq(null))
+    PowerMockito.when(mockAuthenticationTokenCompanion, "setCurrentAuthenticationToken", eq(null))
         .thenAnswer(
             new Answer() {
               @Override
@@ -669,7 +668,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
                 return null;
               }
             });
-    PowerMockito.when(AccessToken.class, "setCurrentAccessToken", eq(null))
+    PowerMockito.when(mockAccessTokenCompanion, "setCurrentAccessToken", eq(null))
         .thenAnswer(
             new Answer() {
               @Override
