@@ -9,7 +9,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.common.R
 import com.facebook.internal.ServerProtocol.INSTAGRAM_OAUTH_PATH
-import com.facebook.login.CustomTabLoginMethodHandler.OAUTH_DIALOG
+import com.facebook.login.CustomTabLoginMethodHandler
 import com.facebook.login.LoginTargetApp
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
@@ -29,7 +29,7 @@ class WebDialogTest : FacebookPowerMockTestCase() {
     const val SDK_VERSION = "12.1.0"
     const val FB_DOMAIN = "facebook.com"
     const val IG_DOMAIN = "instagram.com"
-    const val ACTION = OAUTH_DIALOG
+    const val ACTION = CustomTabLoginMethodHandler.OAUTH_DIALOG
   }
 
   private lateinit var mockContext: Context

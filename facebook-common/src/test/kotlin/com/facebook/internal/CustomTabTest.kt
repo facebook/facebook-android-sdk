@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsIntent
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.facebook.login.CustomTabLoginMethodHandler.OAUTH_DIALOG
+import com.facebook.login.CustomTabLoginMethodHandler
 import com.facebook.login.CustomTabPrefetchHelper
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
@@ -41,7 +41,7 @@ class CustomTabTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test get URI for action`() {
-    val uri = CustomTab.getURIForAction(OAUTH_DIALOG, parameters)
+    val uri = CustomTab.getURIForAction(CustomTabLoginMethodHandler.OAUTH_DIALOG, parameters)
     val version = FacebookSdk.getGraphApiVersion()
     assertThat(uri.toString())
         .isEqualTo("https://m.facebook.com/$version/dialog/oauth?scope=user_name%2Cuser_birthday")
@@ -49,7 +49,7 @@ class CustomTabTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test open custom tab`() {
-    val customTab = CustomTab(OAUTH_DIALOG, parameters)
+    val customTab = CustomTab(CustomTabLoginMethodHandler.OAUTH_DIALOG, parameters)
     customTab.openCustomTab(mock(), "com.facebook.internal")
     verify(mockCustomTabsIntent).launchUrl(any(), any())
   }
