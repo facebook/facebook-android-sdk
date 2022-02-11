@@ -22,9 +22,12 @@ package com.facebook
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.Signature
 import android.os.Bundle
 import android.os.ConditionVariable
+import android.util.Base64
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.ServerProtocol.getGraphUrlBase
@@ -46,11 +49,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.robolectric.RuntimeEnvironment
 
-@PrepareForTest(
-    FacebookSdk::class,
-    FetchedAppSettingsManager::class,
-    Utility::class,
-    UserSettingsManager::class)
+@PrepareForTest(FetchedAppSettingsManager::class, Utility::class, UserSettingsManager::class)
 class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Before
   fun before() {
@@ -102,8 +101,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   fun testLoadDefaults() {
     // Set to null since the value might have been set by another test
     Whitebox.setInternalState(FacebookSdk::class.java, "applicationId", null as String?)
-    MemberModifier.stub<Any>(MemberMatcher.method(FacebookSdk::class.java, "isInitialized"))
-        .toReturn(true)
+    Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(true))
     FacebookSdk.loadDefaultsFromMetadata(mockContextWithAppIdAndClientToken())
     assertThat(FacebookSdk.getApplicationId()).isEqualTo(TEST_APPLICATION_ID)
     assertThat(FacebookSdk.getClientToken()).isEqualTo(TEST_CLIENT_TOKEN)
@@ -173,8 +171,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
     val field = FacebookSdk::class.java.getDeclaredField("isFullyInitialized")
     field.isAccessible = true
     field[null] = false
-    MemberModifier.stub<Any>(MemberMatcher.method(FacebookSdk::class.java, "getAutoInitEnabled"))
-        .toReturn(false)
+    UserSettingsManager.setAutoInitEnabled(false)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
     assertThat(FacebookSdk.isFullyInitialized()).isFalse
   }
@@ -217,6 +214,37 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
 
     assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, ""))
         .isEqualTo(expectedDataProcessingOptionsJSONObject.toString())
+  }
+
+  @Test
+  fun `test get signature return a valid base64 result`() {
+    Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(true))
+    val mockContext = mock<Context>()
+    val mockPackageManager = mock<PackageManager>()
+    val mockPackageInfo = mock<PackageInfo>()
+    val mockSignature = mock<Signature>()
+    whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+    whenever(mockContext.packageName).thenReturn("com.facebook.test")
+    whenever(mockPackageManager.getPackageInfo(any<String>(), any())).thenReturn(mockPackageInfo)
+    whenever(mockSignature.toByteArray()).thenReturn(byteArrayOf(1, 2, 3, 4))
+    mockPackageInfo.signatures = arrayOf(mockSignature)
+
+    val obtainedSignature = FacebookSdk.getApplicationSignature(mockContext)
+
+    Base64.decode(obtainedSignature, Base64.URL_SAFE or Base64.NO_PADDING)
+  }
+
+  @Test
+  fun `test get signature return null if package info is not available`() {
+    Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(true))
+    val mockContext = mock<Context>()
+    val mockPackageManager = mock<PackageManager>()
+    whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+    whenever(mockContext.packageName).thenReturn("com.facebook.test")
+    whenever(mockPackageManager.getPackageInfo(any<String>(), any()))
+        .thenThrow(PackageManager.NameNotFoundException())
+
+    assertThat(FacebookSdk.getApplicationSignature(mockContext)).isNull()
   }
 
   companion object {
