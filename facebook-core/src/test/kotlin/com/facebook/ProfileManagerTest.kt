@@ -24,18 +24,18 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(ProfileCache::class, FacebookSdk::class)
+@PrepareForTest(FacebookSdk::class)
 class ProfileManagerTest : FacebookPowerMockTestCase() {
-
   private val mockAppID = "123456789"
   @Before
   fun before() {
@@ -49,20 +49,21 @@ class ProfileManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testLoadCurrentProfileEmptyCache() {
-    val profileCache = PowerMockito.mock(ProfileCache::class.java)
+    val profileCache = mock<ProfileCache>()
     val localBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
     val profileManager = ProfileManager(localBroadcastManager, profileCache)
-    Assert.assertFalse(profileManager.loadCurrentProfile())
+    assertThat(profileManager.loadCurrentProfile()).isFalse
     verify(profileCache, times(1)).load()
   }
 
+  @Test
   fun testLoadCurrentProfileWithCache() {
-    val profileCache = PowerMockito.mock(ProfileCache::class.java)
+    val profileCache = mock<ProfileCache>()
     val profile = createDefaultProfile()
     whenever(profileCache.load()).thenReturn(profile)
-    val localBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
+    val localBroadcastManager = mock<LocalBroadcastManager>()
     val profileManager = ProfileManager(localBroadcastManager, profileCache)
-    Assert.assertTrue(profileManager.loadCurrentProfile())
+    assertThat(profileManager.loadCurrentProfile()).isTrue
     verify(profileCache, times(1)).load()
 
     profileManager.currentProfile = createDefaultProfile()
@@ -71,5 +72,19 @@ class ProfileManagerTest : FacebookPowerMockTestCase() {
     // Verify that if we unset the profile there is a broadcast
     profileManager.currentProfile = null
     verify(localBroadcastManager, times(2)).sendBroadcast(any())
+  }
+
+  @Test
+  fun `test setting a new profile will write to the cache`() {
+    val profileCache = mock<ProfileCache>()
+    val profile = createDefaultProfile()
+    val localBroadcastManager = mock<LocalBroadcastManager>()
+    val profileManager = ProfileManager(localBroadcastManager, profileCache)
+
+    profileManager.currentProfile = profile
+
+    verify(profileCache, times(1)).save(profile)
+    verify(localBroadcastManager, times(1)).sendBroadcast(any())
+    assertThat(profileManager.currentProfile).isEqualTo(profile)
   }
 }

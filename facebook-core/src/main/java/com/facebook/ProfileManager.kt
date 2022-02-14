@@ -75,19 +75,16 @@ internal constructor(
     const val EXTRA_OLD_PROFILE = "com.facebook.sdk.EXTRA_OLD_PROFILE"
     const val EXTRA_NEW_PROFILE = "com.facebook.sdk.EXTRA_NEW_PROFILE"
 
-    @Volatile private var instance: ProfileManager? = null
+    @Volatile private lateinit var instance: ProfileManager
     @JvmStatic
+    @Synchronized
     fun getInstance(): ProfileManager {
-      if (instance == null) {
-        synchronized(this) {
-          if (instance == null) {
-            val applicationContext = FacebookSdk.getApplicationContext()
-            val localBroadcastManager = LocalBroadcastManager.getInstance(applicationContext)
-            instance = ProfileManager(localBroadcastManager, ProfileCache())
-          }
-        }
+      if (!this::instance.isInitialized) {
+        val applicationContext = FacebookSdk.getApplicationContext()
+        val localBroadcastManager = LocalBroadcastManager.getInstance(applicationContext)
+        instance = ProfileManager(localBroadcastManager, ProfileCache())
       }
-      return checkNotNull(instance)
+      return instance
     }
   }
 }
