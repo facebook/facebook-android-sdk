@@ -515,25 +515,6 @@ object Utility {
     return response?.optJSONArray(propertyKey)
   }
 
-  @Deprecated(
-      "This method should not be used in Kotlin",
-      ReplaceWith("directoryOrFile?.deleteRecursively()"))
-  @JvmStatic
-  fun deleteDirectory(directoryOrFile: File?) {
-    if (directoryOrFile === null || !directoryOrFile.exists()) {
-      return
-    }
-    if (directoryOrFile.isDirectory) {
-      val children = directoryOrFile.listFiles()
-      if (children != null) {
-        for (child in children) {
-          deleteDirectory(child)
-        }
-      }
-    }
-    directoryOrFile.delete()
-  }
-
   @Throws(JSONException::class)
   @JvmStatic
   fun jsonArrayToStringList(jsonArray: JSONArray): List<String> {

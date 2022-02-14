@@ -135,9 +135,7 @@ object NativeAppCallAttachmentStore {
   @JvmStatic
   fun cleanupAttachmentsForCall(callId: UUID) {
     val dir = getAttachmentsDirectoryForCall(callId, false)
-    if (dir != null) {
-      Utility.deleteDirectory(dir)
-    }
+    dir?.deleteRecursively()
   }
 
   @Throws(FileNotFoundException::class)
@@ -199,7 +197,7 @@ object NativeAppCallAttachmentStore {
   fun cleanupAllAttachments() {
     // Attachments directory may or may not exist; we won't create it if not, since we are just
     // going to delete it.
-    Utility.deleteDirectory(getAttachmentsDirectory())
+    getAttachmentsDirectory()?.deleteRecursively()
   }
 
   class Attachment(val callId: UUID, val bitmap: Bitmap?, val originalUri: Uri?) {
