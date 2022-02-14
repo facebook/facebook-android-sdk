@@ -33,7 +33,6 @@ import com.facebook.share.model.ShareContent;
  * A button to share content through Messenger. Tapping the receiver will invoke the {@link
  * com.facebook.share.widget.MessageDialog} with the attached shareContent.
  */
-@Deprecated
 public final class SendButton extends ShareButtonBase {
   public SendButton(final Context context) {
     super(

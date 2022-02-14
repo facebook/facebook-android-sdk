@@ -51,7 +51,6 @@ import java.util.List;
  * <p>UNSUPPORTED SHARE TYPES (DEPRECATED AUGUST 2018) - ShareOpenGraphContent - SharePhotoContent -
  * ShareVideoContent - Any other types that are not one of the four supported types listed above
  */
-@Deprecated
 public final class MessageDialog extends FacebookDialogBase<ShareContent, Sharer.Result>
     implements Sharer {
 

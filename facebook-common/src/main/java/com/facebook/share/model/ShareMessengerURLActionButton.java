@@ -26,7 +26,6 @@ import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** Provides a data model class for a Messenger share URL action button. */
-@Deprecated
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerURLActionButton extends ShareMessengerActionButton {
 
