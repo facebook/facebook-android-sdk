@@ -56,14 +56,12 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
-import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.widget.AppInviteDialog;
 import com.facebook.share.widget.MessageDialog;
 import com.facebook.share.widget.ShareDialog;
 import java.util.ArrayList;
@@ -140,7 +138,6 @@ public class RpsFragment extends Fragment {
   private CallbackManager callbackManager;
   private ShareDialog shareDialog;
   private MessageDialog messageDialog;
-  private AppInviteDialog appInviteDialog;
   private IInAppBillingService inAppBillingService;
   private ServiceConnection serviceConnection;
   private Context context;
@@ -532,20 +529,6 @@ public class RpsFragment extends Fragment {
     alert.show();
   }
 
-  public void presentAppInviteDialog() {
-    AppInviteContent content =
-        new AppInviteContent.Builder()
-            .setApplinkUrl("https://d3uu10x6fsg06w.cloudfront.net/hosting-rps/applink.html")
-            .setPreviewImageUrl(
-                "https://d3uu10x6fsg06w.cloudfront.net/hosting-rps/rps-preview-image.jpg")
-            .build();
-    if (AppInviteDialog.canShow()) {
-      appInviteDialog.show(this, content);
-    } else {
-      showError(R.string.appinvite_error);
-    }
-  }
-
   @Override
   public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -690,26 +673,6 @@ public class RpsFragment extends Fragment {
     shareDialog.registerCallback(callbackManager, callback);
     messageDialog = new MessageDialog(this);
     messageDialog.registerCallback(callbackManager, callback);
-
-    FacebookCallback<AppInviteDialog.Result> appInviteCallback =
-        new FacebookCallback<AppInviteDialog.Result>() {
-          @Override
-          public void onSuccess(@NonNull AppInviteDialog.Result result) {
-            Log.d(TAG, "Success!");
-          }
-
-          @Override
-          public void onCancel() {
-            Log.d(TAG, "Canceled");
-          }
-
-          @Override
-          public void onError(@NonNull FacebookException error) {
-            Log.d(TAG, String.format("Error: %s", error.toString()));
-          }
-        };
-    appInviteDialog = new AppInviteDialog(this);
-    appInviteDialog.registerCallback(callbackManager, appInviteCallback);
 
     // Initialize in-app billing service
     serviceConnection =
