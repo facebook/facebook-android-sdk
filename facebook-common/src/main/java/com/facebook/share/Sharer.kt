@@ -18,15 +18,16 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share;
+package com.facebook.share
 
 /**
  * The common interface for components that initiate sharing.
  *
  * @see com.facebook.share.widget.ShareDialog
+ *
  * @see com.facebook.share.widget.MessageDialog
  */
-public interface Sharer {
+interface Sharer {
   /**
    * Specifies whether the sharer should fail if it finds an error with the share content. If false,
    * the share dialog will still be displayed without the data that was mis-configured. For example,
@@ -34,7 +35,7 @@ public interface Sharer {
    *
    * @return A Boolean value.
    */
-  public boolean getShouldFailOnDataError();
+  fun getShouldFailOnDataError(): Boolean
 
   /**
    * Specifies whether the sharer should fail if it finds an error with the share content. If false,
@@ -43,28 +44,21 @@ public interface Sharer {
    *
    * @param shouldFailOnDataError whether the dialog should fail if it finds an error.
    */
-  public void setShouldFailOnDataError(boolean shouldFailOnDataError);
+  fun setShouldFailOnDataError(shouldFailOnDataError: Boolean)
 
   /** Helper object for handling the result from a share dialog or share operation */
-  public static class Result {
-    final String postId;
-
-    /**
-     * Constructor.
-     *
-     * @param postId the resulting post id.
-     */
-    public Result(String postId) {
-      this.postId = postId;
-    }
-
-    /**
-     * Returns the post id, if available.
-     *
-     * @return the post id.
-     */
-    public String getPostId() {
-      return postId;
-    }
-  }
+  class Result
+  /**
+   * Constructor.
+   *
+   * @param postId the resulting post id.
+   */
+  (
+      /**
+       * Returns the post id, if available.
+       *
+       * @return the post id.
+       */
+      val postId: String?
+  )
 }
