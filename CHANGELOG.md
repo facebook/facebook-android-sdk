@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Removed deprecated LikeView and various related classes (LikeButton, LikeContent, LikeDialog etc)
+- Removed deprecated device sharing classes (DeviceShareButton, DeviceShareDialog, DeviceShareDialogFragment)
 
 ### Fixed
 - Fixed reauthorization of data access.

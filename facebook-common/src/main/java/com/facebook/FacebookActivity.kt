@@ -22,8 +22,6 @@ package com.facebook
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Parcelable
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.facebook.FacebookSdk.isInitialized
@@ -37,8 +35,6 @@ import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import com.facebook.internal.logging.dumpsys.EndToEndDumper
 import com.facebook.login.LoginFragment
-import com.facebook.share.internal.DeviceShareDialogFragment
-import com.facebook.share.model.ShareContent
 import java.io.FileDescriptor
 import java.io.PrintWriter
 
@@ -89,16 +85,6 @@ open class FacebookActivity : FragmentActivity() {
       if (FacebookDialogFragment.TAG == intent.action) {
         val dialogFragment = FacebookDialogFragment()
         dialogFragment.retainInstance = true
-        dialogFragment.show(manager, FRAGMENT_TAG)
-        fragment = dialogFragment
-      } else if (DeviceShareDialogFragment.TAG == intent.action) {
-        Log.w(
-            TAG,
-            "Please stop use Device Share Dialog, this feature has been disabled and all related classes in Facebook Android SDK will be removed from v13.0.0 release.")
-        val dialogFragment = DeviceShareDialogFragment()
-        dialogFragment.retainInstance = true
-        dialogFragment.setShareContent(
-            intent.getParcelableExtra<Parcelable>("content") as ShareContent<*, *>)
         dialogFragment.show(manager, FRAGMENT_TAG)
         fragment = dialogFragment
       } else {
