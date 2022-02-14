@@ -18,9 +18,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share.model;
+package com.facebook.share.model
 
-import android.os.Parcelable;
+import android.os.Parcelable
 
 /** Base interface for share models. */
-public interface ShareModel extends Parcelable {}
+interface ShareModel : Parcelable
