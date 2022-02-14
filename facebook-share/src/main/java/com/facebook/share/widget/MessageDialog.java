@@ -235,12 +235,6 @@ public final class MessageDialog extends FacebookDialogBase<ShareContent, Sharer
   private static DialogFeature getFeature(Class<? extends ShareContent> type) {
     if (ShareLinkContent.class.isAssignableFrom(type)) {
       return MessageDialogFeature.MESSAGE_DIALOG;
-    } else if (ShareMessengerGenericTemplateContent.class.isAssignableFrom(type)) {
-      return MessageDialogFeature.MESSENGER_GENERIC_TEMPLATE;
-    } else if (ShareMessengerOpenGraphMusicTemplateContent.class.isAssignableFrom(type)) {
-      return MessageDialogFeature.MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE;
-    } else if (ShareMessengerMediaTemplateContent.class.isAssignableFrom(type)) {
-      return MessageDialogFeature.MESSENGER_MEDIA_TEMPLATE;
     }
     return null;
   }

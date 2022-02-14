@@ -30,9 +30,6 @@ import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareMediaContent;
-import com.facebook.share.model.ShareMessengerGenericTemplateContent;
-import com.facebook.share.model.ShareMessengerMediaTemplateContent;
-import com.facebook.share.model.ShareMessengerOpenGraphMusicTemplateContent;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareStoryContent;
@@ -95,18 +92,6 @@ public class NativeDialogParameters {
           ShareInternalUtility.getTextureUrlBundle(cameraEffectContent, callId);
 
       nativeParams = create(cameraEffectContent, attachmentUrlsBundle, shouldFailOnDataError);
-    } else if (shareContent instanceof ShareMessengerGenericTemplateContent) {
-      final ShareMessengerGenericTemplateContent genericTemplateContent =
-          (ShareMessengerGenericTemplateContent) shareContent;
-      nativeParams = create(genericTemplateContent, shouldFailOnDataError);
-    } else if (shareContent instanceof ShareMessengerOpenGraphMusicTemplateContent) {
-      final ShareMessengerOpenGraphMusicTemplateContent openGraphMusicTemplateContent =
-          (ShareMessengerOpenGraphMusicTemplateContent) shareContent;
-      nativeParams = create(openGraphMusicTemplateContent, shouldFailOnDataError);
-    } else if (shareContent instanceof ShareMessengerMediaTemplateContent) {
-      final ShareMessengerMediaTemplateContent mediaTemplateContent =
-          (ShareMessengerMediaTemplateContent) shareContent;
-      nativeParams = create(mediaTemplateContent, shouldFailOnDataError);
     } else if (shareContent instanceof ShareStoryContent) {
       final ShareStoryContent storyContent = (ShareStoryContent) shareContent;
       Bundle mediaInfo = ShareInternalUtility.getBackgroundAssetMediaInfo(storyContent, callId);
@@ -201,54 +186,6 @@ public class NativeDialogParameters {
         params, ShareConstants.ACTION_TYPE, openGraphContent.getAction().getActionType());
 
     Utility.putNonEmptyString(params, ShareConstants.ACTION, openGraphActionJSON.toString());
-
-    return params;
-  }
-
-  private static Bundle create(
-      ShareMessengerGenericTemplateContent genericTemplateContent, boolean dataErrorsFatal) {
-    Bundle params = createBaseParameters(genericTemplateContent, dataErrorsFatal);
-
-    try {
-      MessengerShareContentUtility.addGenericTemplateContent(params, genericTemplateContent);
-    } catch (JSONException e) {
-      throw new FacebookException(
-          "Unable to create a JSON Object from the provided "
-              + "ShareMessengerGenericTemplateContent: "
-              + e.getMessage());
-    }
-    return params;
-  }
-
-  private static Bundle create(
-      ShareMessengerOpenGraphMusicTemplateContent openGraphMusicTemplateContent,
-      boolean dataErrorsFatal) {
-    Bundle params = createBaseParameters(openGraphMusicTemplateContent, dataErrorsFatal);
-
-    try {
-      MessengerShareContentUtility.addOpenGraphMusicTemplateContent(
-          params, openGraphMusicTemplateContent);
-    } catch (JSONException e) {
-      throw new FacebookException(
-          "Unable to create a JSON Object from the provided "
-              + "ShareMessengerOpenGraphMusicTemplateContent: "
-              + e.getMessage());
-    }
-    return params;
-  }
-
-  private static Bundle create(
-      ShareMessengerMediaTemplateContent mediaTemplateContent, boolean dataErrorsFatal) {
-    Bundle params = createBaseParameters(mediaTemplateContent, dataErrorsFatal);
-
-    try {
-      MessengerShareContentUtility.addMediaTemplateContent(params, mediaTemplateContent);
-    } catch (JSONException e) {
-      throw new FacebookException(
-          "Unable to create a JSON Object from the provided "
-              + "ShareMessengerMediaTemplateContent: "
-              + e.getMessage());
-    }
 
     return params;
   }

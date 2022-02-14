@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Set Java source and target compatibility to 1.8 (Java 8). All apps that integrate with Facebook Android SDK should also set source and compatibility to 1.8 or above.
 
+### Removed
+- Removed deprecated LikeView and various related classes (LikeButton, LikeContent, LikeDialog etc)
+- Removed deprecated Device Sharing classes (DeviceShareButton, DeviceShareDialog, DeviceShareDialogFragment)
+- Removed deprecated Messenger Sharing classes (ShareMessengerMediaTemplateContent, ShareMessengerGenericTemplateContent etc)
+
 ## [12.3.0] - 2022-01-04
 
 ### Added
@@ -18,10 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - Fblite Login is deprecated.
 - Internal utility methods on collections are deprecated and will be replaced by `kotlin.collections`.
-
-### Removed
-- Removed deprecated LikeView and various related classes (LikeButton, LikeContent, LikeDialog etc)
-- Removed deprecated device sharing classes (DeviceShareButton, DeviceShareDialog, DeviceShareDialogFragment)
 
 ### Fixed
 - Fixed reauthorization of data access.

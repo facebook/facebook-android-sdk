@@ -33,9 +33,6 @@ import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.model.ShareMedia
 import com.facebook.share.model.ShareMediaContent
 import com.facebook.share.model.ShareMessengerActionButton
-import com.facebook.share.model.ShareMessengerGenericTemplateContent
-import com.facebook.share.model.ShareMessengerMediaTemplateContent
-import com.facebook.share.model.ShareMessengerOpenGraphMusicTemplateContent
 import com.facebook.share.model.ShareMessengerURLActionButton
 import com.facebook.share.model.ShareOpenGraphAction
 import com.facebook.share.model.ShareOpenGraphContent
@@ -106,15 +103,6 @@ object ShareContentValidation {
         validator.validate(content)
       }
       is ShareCameraEffectContent -> {
-        validator.validate(content)
-      }
-      is ShareMessengerOpenGraphMusicTemplateContent -> {
-        validator.validate(content)
-      }
-      is ShareMessengerMediaTemplateContent -> {
-        validator.validate(content)
-      }
-      is ShareMessengerGenericTemplateContent -> {
         validator.validate(content)
       }
       is ShareStoryContent -> {
@@ -313,48 +301,6 @@ object ShareContentValidation {
     }
   }
 
-  private fun validateMessengerOpenGraphMusicTemplate(
-      content: ShareMessengerOpenGraphMusicTemplateContent
-  ) {
-    if (isNullOrEmpty(content.pageId)) {
-      throw FacebookException(
-          "Must specify Page Id for ShareMessengerOpenGraphMusicTemplateContent")
-    }
-    if (content.url == null) {
-      throw FacebookException("Must specify url for ShareMessengerOpenGraphMusicTemplateContent")
-    }
-    validateShareMessengerActionButton(content.button)
-  }
-
-  private fun validateShareMessengerGenericTemplateContent(
-      content: ShareMessengerGenericTemplateContent
-  ) {
-    if (isNullOrEmpty(content.pageId)) {
-      throw FacebookException("Must specify Page Id for ShareMessengerGenericTemplateContent")
-    }
-    if (content.genericTemplateElement == null) {
-      throw FacebookException("Must specify element for ShareMessengerGenericTemplateContent")
-    }
-    if (isNullOrEmpty(content.genericTemplateElement.title)) {
-      throw FacebookException("Must specify title for ShareMessengerGenericTemplateElement")
-    }
-    validateShareMessengerActionButton(content.genericTemplateElement.button)
-  }
-
-  private fun validateShareMessengerMediaTemplateContent(
-      content: ShareMessengerMediaTemplateContent
-  ) {
-    if (isNullOrEmpty(content.pageId)) {
-      throw FacebookException("Must specify Page Id for ShareMessengerMediaTemplateContent")
-    }
-    if (content.mediaUrl == null && isNullOrEmpty(content.attachmentId)) {
-      throw FacebookException(
-          "Must specify either attachmentId or mediaURL for " +
-              "ShareMessengerMediaTemplateContent")
-    }
-    validateShareMessengerActionButton(content.button)
-  }
-
   private fun validateShareMessengerActionButton(button: ShareMessengerActionButton?) {
     if (button == null) {
       return
@@ -498,18 +444,6 @@ object ShareContentValidation {
 
     open fun validate(medium: ShareMedia) {
       validateMedium(medium, this)
-    }
-
-    open fun validate(content: ShareMessengerOpenGraphMusicTemplateContent) {
-      validateMessengerOpenGraphMusicTemplate(content)
-    }
-
-    open fun validate(content: ShareMessengerGenericTemplateContent) {
-      validateShareMessengerGenericTemplateContent(content)
-    }
-
-    open fun validate(content: ShareMessengerMediaTemplateContent) {
-      validateShareMessengerMediaTemplateContent(content)
     }
 
     open fun validate(storyContent: ShareStoryContent?) {
