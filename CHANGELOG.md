@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fblite Login is deprecated.
 - Internal utility methods on collections are deprecated and will be replaced by `kotlin.collections`.
 
+### Removed
+- Removed deprecated LikeView and various related classes (LikeButton, LikeContent, LikeDialog etc)
+
 ### Fixed
 - Fixed reauthorization of data access.
 - Add fields parameters for login GET requests to remove warning messages.

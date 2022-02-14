@@ -69,7 +69,6 @@ import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
 import com.facebook.share.model.ShareVideo
 import com.facebook.share.model.ShareVideoContent
-import com.facebook.share.widget.LikeView
 import java.io.File
 import java.io.FileNotFoundException
 import java.lang.Exception
@@ -593,28 +592,6 @@ object ShareInternalUtility {
     val parameters = Bundle(1)
     parameters.putParcelable(STAGING_PARAM, resourceWithMimeType)
     return GraphRequest(accessToken, MY_STAGING_RESOURCES, parameters, HttpMethod.POST, callback)
-  }
-
-  @JvmStatic
-  fun getMostSpecificObjectType(
-      objectType1: LikeView.ObjectType,
-      objectType2: LikeView.ObjectType
-  ): LikeView.ObjectType? {
-    if (objectType1 == objectType2) {
-      return objectType1
-    }
-    return when {
-      objectType1 == LikeView.ObjectType.UNKNOWN -> {
-        objectType2
-      }
-      objectType2 == LikeView.ObjectType.UNKNOWN -> {
-        objectType1
-      }
-      else -> {
-        // We can't have a PAGE and an OPEN_GRAPH type be compatible.
-        null
-      }
-    }
   }
 
   @JvmStatic
