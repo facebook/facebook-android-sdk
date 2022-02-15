@@ -187,11 +187,7 @@ object FeatureManager {
 
     // Features in ShareKit
     /** Essential of ShareKit */
-    Share(0x02000000),
-
-    // Features in PlacesKit
-    /** Essential of PlacesKit */
-    Places(0x03000000);
+    Share(0x02000000);
 
     override fun toString(): String =
         when (this) {
@@ -222,7 +218,6 @@ object FeatureManager {
           IgnoreAppSwitchToLoggedOut -> "IgnoreAppSwitchToLoggedOut"
           BypassAppSwitch -> "BypassAppSwitch"
           Share -> "ShareKit"
-          Places -> "PlacesKit"
           else -> "unknown"
         }
 
