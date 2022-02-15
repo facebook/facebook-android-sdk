@@ -88,13 +88,13 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
         CustomTabPrefetchHelper.mayLaunchUrl(getURIForAction(OAUTH_DIALOG, parameters))
       }
     }
-    val activity: Activity = loginClient.activity
+    val activity: Activity = loginClient.activity ?: return 0
     val intent = Intent(activity, CustomTabMainActivity::class.java)
     intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, OAUTH_DIALOG)
     intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters)
     intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, chromePackage)
     intent.putExtra(CustomTabMainActivity.EXTRA_TARGET_APP, request.loginTargetApp.toString())
-    loginClient.getFragment().startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE)
+    loginClient.fragment?.startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE)
     return 1
   }
 
@@ -118,7 +118,7 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
     if (requestCode != CUSTOM_TAB_REQUEST_CODE) {
       return super.onActivityResult(requestCode, resultCode, data)
     }
-    val request = loginClient.getPendingRequest()
+    val request = loginClient.pendingRequest ?: return false
     if (resultCode == Activity.RESULT_OK) {
       var extraUrl: String? = null
       if (data != null) {

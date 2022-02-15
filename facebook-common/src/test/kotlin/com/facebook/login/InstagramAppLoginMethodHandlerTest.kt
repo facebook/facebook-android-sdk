@@ -69,7 +69,7 @@ class InstagramAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     val handler = InstagramAppLoginMethodHandler(mockLoginClient)
 
     val request = createRequest()
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(request)
+    whenever(mockLoginClient.pendingRequest).thenReturn(request)
 
     handler.tryAuthorize(request)
     handler.onActivityResult(0, Activity.RESULT_OK, intent)

@@ -65,11 +65,11 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     e2e = LoginClient.getE2E()
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e)
 
-    val fragmentActivity = loginClient.activity
+    val fragmentActivity = loginClient.activity ?: return 0
     val isChromeOS = Utility.isChromeOS(fragmentActivity)
 
     val builder =
-        AuthDialogBuilder(fragmentActivity, request.getApplicationId(), parameters)
+        AuthDialogBuilder(fragmentActivity, request.applicationId, parameters)
             .setE2E(e2e as String)
             .setIsChromeOS(isChromeOS)
             .setAuthType(request.authType)

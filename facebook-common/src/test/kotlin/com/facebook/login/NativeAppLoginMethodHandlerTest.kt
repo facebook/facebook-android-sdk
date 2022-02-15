@@ -82,7 +82,7 @@ class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
     testLoginHandler = TestNativeAppLoginMethodHandler(mockLoginClient)
     testRequest = createRequest()
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(testRequest)
+    whenever(mockLoginClient.pendingRequest).thenReturn(testRequest)
   }
 
   @Test

@@ -49,7 +49,7 @@ class KatanaProxyLoginMethodHandler : NativeAppLoginMethodHandler {
             e2e,
             request.isRerequest,
             request.hasPublishPermission(),
-            request.defaultAudience,
+            request.defaultAudience ?: DefaultAudience.NONE,
             getClientState(request.authId),
             request.authType,
             ignoreAppSwitchToLoggedOut,

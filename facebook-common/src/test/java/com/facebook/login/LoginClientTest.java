@@ -31,6 +31,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.test.core.app.ApplicationProvider;
 import com.facebook.AccessToken;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
@@ -38,6 +39,7 @@ import com.facebook.TestUtils;
 import com.facebook.internal.FetchedAppSettingsManager;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,16 +47,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 
-@PrepareForTest({FetchedAppSettingsManager.class})
+@PrepareForTest({FetchedAppSettingsManager.class, FacebookSdk.class})
 public class LoginClientTest extends FacebookPowerMockTestCase {
 
   private static final String ACCESS_TOKEN = "An access token for user 1";
   private static final String USER_ID = "1001";
   private static final String APP_ID = "2002";
+  private static final String AUTH_TYPE = "test auth type";
+  private static final String AUTH_ID = UUID.randomUUID().toString();
 
   private static final HashSet<String> PERMISSIONS =
       new HashSet<String>(Arrays.asList("go outside", "come back in"));
@@ -66,10 +68,13 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
 
   @Before
   public void before() throws Exception {
-    Whitebox.setInternalState(FacebookSdk.class, "executor", serialExecutor);
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.setAutoLogAppEventsEnabled(false);
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    PowerMockito.mockStatic(FacebookSdk.class);
+    when(FacebookSdk.isInitialized()).thenReturn(true);
+    when(FacebookSdk.getApplicationId()).thenReturn("123456789");
+    when(FacebookSdk.getExecutor()).thenReturn(serialExecutor);
+    when(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false);
+    when(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext());
 
     FragmentActivity activity = Robolectric.buildActivity(FragmentActivity.class).create().get();
     when(mockFragment.getActivity()).thenReturn(activity);
@@ -128,33 +133,15 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testRequestParcelingWithNullFields() {
-    LoginClient.Request request =
-        new LoginClient.Request(null, null, null, "rerequest", "1234", "5678", null);
-
-    LoginClient.Request unparceledRequest = TestUtils.parcelAndUnparcel(request);
-
-    assertThat(unparceledRequest.getLoginBehavior()).isNull();
-    assertThat(unparceledRequest.getLoginTargetApp()).isNull();
-    assertThat(unparceledRequest.getPermissions()).isEqualTo(new HashSet<String>());
-    assertThat(unparceledRequest.getDefaultAudience()).isNull();
-    assertThat(unparceledRequest.getApplicationId()).isEqualTo("1234");
-    assertThat(unparceledRequest.getAuthId()).isEqualTo("5678");
-    assertThat(unparceledRequest.isRerequest()).isFalse();
-    assertThat(unparceledRequest.isFamilyLogin()).isFalse();
-    assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isFalse();
-  }
-
-  @Test
   public void testResultParceling() {
     LoginClient.Request request =
         new LoginClient.Request(
             LoginBehavior.WEB_ONLY,
             null,
             DefaultAudience.EVERYONE,
-            null,
-            null,
-            null,
+            AUTH_TYPE,
+            FacebookSdk.getApplicationId(),
+            AUTH_ID,
             LoginTargetApp.FACEBOOK);
     request.setRerequest(true);
     request.setResetMessengerState(false);
@@ -162,7 +149,17 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     request.setFamilyLogin(true);
     request.setShouldSkipAccountDeduplication(true);
     AccessToken token1 =
-        new AccessToken("Token2", "12345", "1000", null, null, null, null, null, null, null);
+        new AccessToken(
+            "Token2",
+            FacebookSdk.getApplicationId(),
+            "1000",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
     LoginClient.Result result =
         new LoginClient.Result(request, LoginClient.Result.Code.SUCCESS, token1, "error 1", "123");
 
@@ -173,8 +170,8 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     assertEquals(LoginTargetApp.FACEBOOK, unparceledRequest.getLoginTargetApp());
     assertEquals(new HashSet<String>(), unparceledRequest.getPermissions());
     assertEquals(DefaultAudience.EVERYONE, unparceledRequest.getDefaultAudience());
-    assertEquals(null, unparceledRequest.getApplicationId());
-    assertEquals(null, unparceledRequest.getAuthId());
+    assertEquals(FacebookSdk.getApplicationId(), unparceledRequest.getApplicationId());
+    assertEquals(AUTH_ID, unparceledRequest.getAuthId());
     assertTrue(unparceledRequest.isRerequest());
     assertThat(unparceledRequest.isFamilyLogin()).isTrue();
     assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isTrue();
@@ -194,9 +191,9 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
             LoginBehavior.NATIVE_WITH_FALLBACK,
             null,
             DefaultAudience.EVERYONE,
-            null,
-            null,
-            null,
+            "test auth",
+            FacebookSdk.getApplicationId(),
+            "test auth id",
             LoginTargetApp.FACEBOOK);
     LoginClient client = new LoginClient(mockFragment);
     LoginMethodHandler[] handlers = client.getHandlersToTry(request);
@@ -215,9 +212,9 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
             LoginBehavior.WEB_ONLY,
             null,
             DefaultAudience.EVERYONE,
-            null,
-            null,
-            null,
+            AUTH_TYPE,
+            FacebookSdk.getApplicationId(),
+            AUTH_ID,
             LoginTargetApp.FACEBOOK);
     LoginClient client = new LoginClient(mockFragment);
     LoginMethodHandler[] handlers = client.getHandlersToTry(request);
@@ -234,9 +231,9 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
             LoginBehavior.NATIVE_WITH_FALLBACK,
             null,
             DefaultAudience.EVERYONE,
-            null,
-            null,
-            null,
+            "test auth",
+            FacebookSdk.getApplicationId(),
+            "test auth id",
             LoginTargetApp.INSTAGRAM);
     LoginClient client = new LoginClient(mockFragment);
     LoginMethodHandler[] handlers = client.getHandlersToTry(request);
@@ -254,9 +251,9 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
             LoginBehavior.WEB_ONLY,
             null,
             DefaultAudience.EVERYONE,
-            null,
-            null,
-            null,
+            AUTH_TYPE,
+            FacebookSdk.getApplicationId(),
+            AUTH_ID,
             LoginTargetApp.INSTAGRAM);
     LoginClient client = new LoginClient(mockFragment);
     LoginMethodHandler[] handlers = client.getHandlersToTry(request);

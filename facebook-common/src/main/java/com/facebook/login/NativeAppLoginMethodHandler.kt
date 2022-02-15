@@ -76,7 +76,7 @@ abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
   open val tokenSource: AccessTokenSource = AccessTokenSource.FACEBOOK_APPLICATION_WEB
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-    val request = loginClient.getPendingRequest()
+    val request = loginClient.pendingRequest
     if (data == null) {
       // This happens if the user presses 'Back'.
       completeLogin(LoginClient.Result.createCancelResult(request, "Operation canceled"))
@@ -101,7 +101,7 @@ abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
       if (!isNullOrEmpty(e2e)) {
         logWebLoginCompleted(e2e)
       }
-      if (error == null && errorCode == null && errorMessage == null) {
+      if (error == null && errorCode == null && errorMessage == null && request != null) {
         processSuccessResponse(request, extras)
       } else {
         handleResultError(request, error, errorMessage, errorCode)
@@ -178,7 +178,7 @@ abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
       return false
     }
     try {
-      loginClient.getFragment().startActivityForResult(intent, requestCode)
+      loginClient.fragment?.startActivityForResult(intent, requestCode)
     } catch (e: Exception) {
       // We do not know if we have the activity until we try starting it.
       // FB is not installed if ActivityNotFoundException is thrown and this might fallback

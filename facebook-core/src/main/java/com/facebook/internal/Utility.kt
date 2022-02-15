@@ -863,6 +863,37 @@ object Utility {
   }
 
   @JvmStatic
+  fun writeNonnullStringMapToParcel(parcel: Parcel, map: Map<String, String>?) {
+    if (map == null) {
+      // 0 is for empty map, -1 to indicate null
+      parcel.writeInt(-1)
+    } else {
+      parcel.writeInt(map.size)
+      for ((key, value) in map) {
+        parcel.writeString(key)
+        parcel.writeString(value)
+      }
+    }
+  }
+
+  @JvmStatic
+  fun readNonnullStringMapFromParcel(parcel: Parcel): Map<String, String>? {
+    val size = parcel.readInt()
+    if (size < 0) {
+      return null
+    }
+    val map: MutableMap<String, String> = HashMap()
+    for (i in 0 until size) {
+      val key = parcel.readString()
+      val value = parcel.readString()
+      if (key != null && value != null) {
+        map[key] = value
+      }
+    }
+    return map
+  }
+
+  @JvmStatic
   fun isCurrentAccessToken(token: AccessToken?): Boolean {
     return token != null && token == AccessToken.getCurrentAccessToken()
   }

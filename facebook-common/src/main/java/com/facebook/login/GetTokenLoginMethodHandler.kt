@@ -26,6 +26,7 @@ import android.os.Parcelable
 import android.text.TextUtils
 import com.facebook.AccessTokenSource
 import com.facebook.FacebookException
+import com.facebook.FacebookSdk
 import com.facebook.internal.NativeProtocol
 import com.facebook.internal.PlatformServiceClient
 import com.facebook.internal.Utility
@@ -50,7 +51,8 @@ internal class GetTokenLoginMethodHandler : LoginMethodHandler {
   }
 
   override fun tryAuthorize(request: LoginClient.Request): Int {
-    getTokenClient = GetTokenClient(loginClient.activity, request)
+    getTokenClient =
+        GetTokenClient(loginClient.activity ?: FacebookSdk.getApplicationContext(), request)
     if (getTokenClient?.start() == false) {
       return 0
     }
@@ -109,7 +111,7 @@ internal class GetTokenLoginMethodHandler : LoginMethodHandler {
           val authenticationToken = createAuthenticationTokenFromNativeLogin(result, request.nonce)
           LoginClient.Result.createCompositeTokenResult(request, token, authenticationToken)
         } catch (ex: FacebookException) {
-          LoginClient.Result.createErrorResult(loginClient.getPendingRequest(), null, ex.message)
+          LoginClient.Result.createErrorResult(loginClient.pendingRequest, null, ex.message)
         }
     loginClient.completeAndValidate(outcome)
   }
@@ -131,14 +133,14 @@ internal class GetTokenLoginMethodHandler : LoginMethodHandler {
               } catch (ex: JSONException) {
                 loginClient.complete(
                     LoginClient.Result.createErrorResult(
-                        loginClient.getPendingRequest(), "Caught exception", ex.message))
+                        loginClient.pendingRequest, "Caught exception", ex.message))
               }
             }
 
             override fun onFailure(error: FacebookException?) {
               loginClient.complete(
                   LoginClient.Result.createErrorResult(
-                      loginClient.getPendingRequest(), "Caught exception", error?.message))
+                      loginClient.pendingRequest, "Caught exception", error?.message))
             }
           })
     } else {

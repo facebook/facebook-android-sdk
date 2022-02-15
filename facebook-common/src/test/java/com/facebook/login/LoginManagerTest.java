@@ -754,7 +754,13 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
 
     Set<String> permissions = Sets.newSet("public_profile", "user_friends");
     LoginClient.Request request =
-        new LoginClient.Request(null, permissions, null, null, null, null);
+        new LoginClient.Request(
+            LoginBehavior.NATIVE_WITH_FALLBACK,
+            permissions,
+            DefaultAudience.NONE,
+            "test auth",
+            "123456789",
+            "12345");
 
     AccessToken accessToken = createAccessToken();
     LoginClient.Result result = LoginClient.Result.createTokenResult(request, accessToken);
@@ -769,12 +775,12 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     Set<String> permissions = Sets.newSet("public_profile", "user_friends", "opendid");
     LoginClient.Request request =
         new LoginClient.Request(
-            null,
+            LoginBehavior.NATIVE_WITH_FALLBACK,
             permissions,
-            null,
-            null,
-            null,
-            null,
+            DefaultAudience.ONLY_ME,
+            "auth type",
+            "123456789",
+            "12345",
             LoginTargetApp.FACEBOOK,
             AuthenticationTokenTestUtil.NONCE,
             codeVerifier,

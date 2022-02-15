@@ -26,6 +26,7 @@ import android.view.View
 import androidx.fragment.app.FragmentActivity
 import com.facebook.FacebookTestCase
 import com.facebook.common.R
+import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.robolectric.Robolectric
@@ -67,9 +68,9 @@ class LoginFragmentTest : FacebookTestCase() {
             LoginBehavior.NATIVE_WITH_FALLBACK,
             null,
             DefaultAudience.EVERYONE,
-            null,
-            null,
-            null,
+            "testAuthType",
+            "123456789",
+            UUID.randomUUID().toString(),
             LoginTargetApp.FACEBOOK)
     val result = LoginClient.Result(request, LoginClient.Result.Code.CANCEL, null, null, null)
 

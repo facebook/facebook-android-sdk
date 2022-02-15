@@ -57,7 +57,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope)
       addLoggingExtra(ServerProtocol.DIALOG_PARAM_SCOPE, scope)
     }
-    val audience = request.defaultAudience
+    val audience = request.defaultAudience ?: DefaultAudience.NONE
     parameters.putString(
         ServerProtocol.DIALOG_PARAM_DEFAULT_AUDIENCE, audience.nativeProtocolAudience)
     parameters.putString(ServerProtocol.DIALOG_PARAM_STATE, getClientState(request.authId))
@@ -71,7 +71,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
     } else {
       // The call to clear cookies will create the first instance of CookieSyncManager if
       // necessary
-      clearFacebookCookies(loginClient.activity)
+      loginClient.activity?.let { clearFacebookCookies(it) }
       addLoggingExtra(
           ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, AppEventsConstants.EVENT_PARAM_VALUE_NO)
     }
@@ -107,7 +107,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
     // PKCE params
     parameters.putString(ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE, request.codeChallenge)
     parameters.putString(
-        ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD, request.codeChallengeMethod.name)
+        ServerProtocol.DIALOG_PARAM_CODE_CHALLENGE_METHOD, request.codeChallengeMethod?.name)
 
     parameters.putString(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
@@ -139,7 +139,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
 
   @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
   open fun onComplete(request: LoginClient.Request, values: Bundle?, error: FacebookException?) {
-    var outcome: LoginClient.Result?
+    var outcome: LoginClient.Result
     val loginClient = loginClient
     e2e = null
     if (values != null) {
@@ -154,7 +154,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
         val authenticationToken = createAuthenticationTokenFromWebBundle(values, request.nonce)
         outcome =
             LoginClient.Result.createCompositeTokenResult(
-                loginClient.getPendingRequest(), token, authenticationToken)
+                loginClient.pendingRequest, token, authenticationToken)
 
         // Ensure any cookies set by the dialog are saved
         // This is to work around a bug where CookieManager may fail to instantiate if
@@ -167,14 +167,13 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
           }
         }
       } catch (ex: FacebookException) {
-        outcome =
-            LoginClient.Result.createErrorResult(loginClient.getPendingRequest(), null, ex.message)
+        outcome = LoginClient.Result.createErrorResult(loginClient.pendingRequest, null, ex.message)
       }
     } else {
       if (error is FacebookOperationCanceledException) {
         outcome =
             LoginClient.Result.createCancelResult(
-                loginClient.getPendingRequest(), USER_CANCELED_LOG_IN_ERROR_MESSAGE)
+                loginClient.pendingRequest, USER_CANCELED_LOG_IN_ERROR_MESSAGE)
       } else {
         // Something went wrong, don't log a completion event since it will skew timing
         // results.
@@ -188,7 +187,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
         }
         outcome =
             LoginClient.Result.createErrorResult(
-                loginClient.getPendingRequest(), null, errorMessage, errorCode)
+                loginClient.pendingRequest, null, errorMessage, errorCode)
       }
     }
     if (!isNullOrEmpty(e2e)) {
@@ -198,14 +197,14 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
   }
 
   private fun loadCookieToken(): String? {
-    val context: Context = loginClient.activity
+    val context: Context = loginClient.activity ?: FacebookSdk.getApplicationContext()
     val sharedPreferences =
         context.getSharedPreferences(WEB_VIEW_AUTH_HANDLER_STORE, Context.MODE_PRIVATE)
     return sharedPreferences.getString(WEB_VIEW_AUTH_HANDLER_TOKEN_KEY, "")
   }
 
   private fun saveCookieToken(token: String) {
-    val context: Context = loginClient.activity
+    val context: Context = loginClient.activity ?: FacebookSdk.getApplicationContext()
     context
         .getSharedPreferences(WEB_VIEW_AUTH_HANDLER_STORE, Context.MODE_PRIVATE)
         .edit()
