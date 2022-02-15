@@ -7,13 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.0.0] - 2022-02-14
+
 ### Added
 - Set Java source and target compatibility to 1.8 (Java 8). All apps that integrate with Facebook Android SDK should also set source and compatibility to 1.8 or above.
+- GMS AD_ID Permission is added to the SDK by default for requesting the advertising ID. You can follow [this guide](https://support.google.com/googleplay/android-developer/answer/6048248) to remove the permission request.
 
 ### Removed
+- Removed the support for tokenless requests. Now all Graph API requests must be associated with an access token and the app needs to have a client token to construct the access token without a logged in user. Please follow [this document](https://developers.facebook.com/docs/android/getting-started/#add-app_id) to add the client token into `AndroidManifest.xml`.
 - Removed deprecated LikeView and various related classes (LikeButton, LikeContent, LikeDialog etc)
 - Removed deprecated Device Sharing classes (DeviceShareButton, DeviceShareDialog, DeviceShareDialogFragment)
 - Removed deprecated Messenger Sharing classes (ShareMessengerMediaTemplateContent, ShareMessengerGenericTemplateContent etc)
+- Removed deprecated Fblite Login
+- Removed deprecated PerformanceGuardian
+- Removed end-to-end dumpsys utility for testing
+
+### Fixed
+- Fixed the bug of handling sharing result if the post id is not available.
 
 ## [12.3.0] - 2022-01-04
 
@@ -396,6 +406,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[13.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.3.0...sdk-version-13.0.0
 [12.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.2.0...sdk-version-12.3.0
 [12.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.1.0...sdk-version-12.2.0
 [12.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.1...sdk-version-12.1.0

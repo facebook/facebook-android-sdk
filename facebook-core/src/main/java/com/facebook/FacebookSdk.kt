@@ -861,9 +861,10 @@ object FacebookSdk {
     Validate.sdkInitialized()
     return appClientToken
         ?: throw FacebookException(
-            "A valid Facebook client token must be set in the " +
-                "AndroidManifest.xml or set by calling FacebookSdk.setClientToken " +
-                "before initializing the sdk.")
+            "A valid Facebook client token must be set in the AndroidManifest.xml or set by calling" +
+                " FacebookSdk.setClientToken before initializing the sdk. Visit " +
+                "https://developers.facebook.com/docs/android/getting-started#add-app_id" +
+                " for more information.")
   }
 
   /**

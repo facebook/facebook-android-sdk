@@ -21,5 +21,5 @@
 package com.facebook
 
 internal object FacebookSdkVersion {
-  const val BUILD = "12.3.0"
+  const val BUILD = "13.0.0"
 }
