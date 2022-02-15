@@ -80,7 +80,6 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
   @Test
   public void testProxyAuthHandlesSuccessWithEmptyAuthenticationToken() {
     LoginClient.Result result = testProxyAuthHandlesSuccess("");
-
     AuthenticationToken authenticationToken = result.authenticationToken;
     assertEquals(authenticationToken, null);
   }

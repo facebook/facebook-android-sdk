@@ -239,7 +239,7 @@ open class LoginManager internal constructor() {
     var accessToken: AccessToken? = null
     var authenticationToken: AuthenticationToken? = null
     var code = LoginClient.Result.Code.ERROR
-    var loggingExtras: Map<String?, String?>? = null
+    var loggingExtras: Map<String, String>? = null
     var originalRequest: LoginClient.Request? = null
     var isCanceled = false
     if (data != null) {
@@ -702,7 +702,9 @@ open class LoginManager internal constructor() {
   fun logIn(fragment: FragmentWrapper, permissions: Collection<String>?, loggerID: String?) {
     val loginConfig = LoginConfiguration(permissions)
     val loginRequest = createLoginRequestWithConfig(loginConfig)
-    loginRequest.authId = loggerID
+    if (loggerID != null) {
+      loginRequest.authId = loggerID
+    }
     startLogin(FragmentStartActivityDelegate(fragment), loginRequest)
   }
 
@@ -754,7 +756,9 @@ open class LoginManager internal constructor() {
   fun logIn(activity: Activity, permissions: Collection<String>?, loggerID: String?) {
     val loginConfig = LoginConfiguration(permissions)
     val loginRequest = createLoginRequestWithConfig(loginConfig)
-    loginRequest.authId = loggerID
+    if (loggerID != null) {
+      loginRequest.authId = loggerID
+    }
     startLogin(ActivityStartActivityDelegate(activity), loginRequest)
   }
 
@@ -796,7 +800,9 @@ open class LoginManager internal constructor() {
   ) {
     val loginConfig = LoginConfiguration(permissions)
     val loginRequest = createLoginRequestWithConfig(loginConfig)
-    loginRequest.authId = loggerID
+    if (loggerID != null) {
+      loginRequest.authId = loggerID
+    }
     startLogin(
         AndroidxActivityResultRegistryOwnerStartActivityDelegate(
             activityResultRegistryOwner, callbackManager),
@@ -956,7 +962,7 @@ open class LoginManager internal constructor() {
   private fun logCompleteLogin(
       context: Context?,
       result: LoginClient.Result.Code,
-      resultExtras: Map<String?, String?>?,
+      resultExtras: Map<String, String>?,
       exception: Exception?,
       wasLoginActivityTried: Boolean,
       request: LoginClient.Request?
@@ -968,7 +974,7 @@ open class LoginManager internal constructor() {
           LoginLogger.EVENT_NAME_LOGIN_COMPLETE,
           "Unexpected call to logCompleteLogin with null pendingAuthorizationRequest.")
     } else {
-      val pendingLoggingExtras = HashMap<String?, String?>()
+      val pendingLoggingExtras = HashMap<String, String>()
       pendingLoggingExtras[LoginLogger.EVENT_EXTRAS_TRY_LOGIN_ACTIVITY] =
           if (wasLoginActivityTried) AppEventsConstants.EVENT_PARAM_VALUE_YES
           else AppEventsConstants.EVENT_PARAM_VALUE_NO

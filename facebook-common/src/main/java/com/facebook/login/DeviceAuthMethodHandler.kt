@@ -56,15 +56,13 @@ open class DeviceAuthMethodHandler : LoginMethodHandler {
   /** Invoke it when the user cancels the login. */
   open fun onCancel() {
     val outcome =
-        LoginClient.Result.createCancelResult(
-            loginClient.getPendingRequest(), "User canceled log in.")
+        LoginClient.Result.createCancelResult(loginClient.pendingRequest, "User canceled log in.")
     loginClient.completeAndValidate(outcome)
   }
 
   /** Invoke it when an error is received. */
   open fun onError(ex: Exception) {
-    val outcome =
-        LoginClient.Result.createErrorResult(loginClient.getPendingRequest(), null, ex.message)
+    val outcome = LoginClient.Result.createErrorResult(loginClient.pendingRequest, null, ex.message)
     loginClient.completeAndValidate(outcome)
   }
 
@@ -93,7 +91,7 @@ open class DeviceAuthMethodHandler : LoginMethodHandler {
             expirationTime,
             lastRefreshTime,
             dataAccessExpirationTime)
-    val outcome = LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token)
+    val outcome = LoginClient.Result.createTokenResult(loginClient.pendingRequest, token)
     loginClient.completeAndValidate(outcome)
   }
 

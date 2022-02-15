@@ -93,7 +93,7 @@ class DeviceAuthMethodHandlerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test on cancel will trigger a cancel outcome`() {
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(mockLoginRequest)
+    whenever(mockLoginClient.pendingRequest).thenReturn(mockLoginRequest)
 
     testHandler.onCancel()
 
@@ -105,7 +105,7 @@ class DeviceAuthMethodHandlerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test on error will trigger an error outcome`() {
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(mockLoginRequest)
+    whenever(mockLoginClient.pendingRequest).thenReturn(mockLoginRequest)
 
     testHandler.onError(FacebookException())
 
@@ -117,7 +117,7 @@ class DeviceAuthMethodHandlerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test on success will pass the access token to login client`() {
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(mockLoginRequest)
+    whenever(mockLoginClient.pendingRequest).thenReturn(mockLoginRequest)
 
     testHandler.onSuccess(
         "access_token", // accessToken

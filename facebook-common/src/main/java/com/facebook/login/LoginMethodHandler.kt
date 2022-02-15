@@ -103,7 +103,7 @@ abstract class LoginMethodHandler : Parcelable {
   }
 
   protected open fun logWebLoginCompleted(e2e: String?) {
-    val applicationId = loginClient.getPendingRequest().applicationId
+    val applicationId = loginClient.pendingRequest?.applicationId ?: FacebookSdk.getApplicationId()
     val logger = InternalAppEventsLogger(loginClient.activity, applicationId)
     val parameters = Bundle()
     parameters.putString(AnalyticsEvents.PARAMETER_WEB_LOGIN_E2E, e2e)
@@ -132,13 +132,14 @@ abstract class LoginMethodHandler : Parcelable {
 
     // PKCE code exchange step for access_token and authentication_token
     val codeExchangeRequest =
-        code?.let { createCodeExchangeRequest(it, this.getRedirectUrl(), request.codeVerifier) }
+        code?.let {
+          createCodeExchangeRequest(it, this.getRedirectUrl(), request.codeVerifier ?: "")
+        }
             ?: throw FacebookException("Failed to create code exchange request")
 
     val PKCEResponse = codeExchangeRequest.executeAndWait()
-    if (PKCEResponse.error != null) {
-      val requestError = PKCEResponse.error
-      throw requestError?.let { FacebookServiceException(it, requestError.errorMessage) }!!
+    PKCEResponse.error?.let { requestError ->
+      throw FacebookServiceException(requestError, requestError.errorMessage)
     }
 
     // add result of the code exchange to result bundle
@@ -152,10 +153,10 @@ abstract class LoginMethodHandler : Parcelable {
       values.putString(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, accessTokenString)
 
       // add AuthenticationToken to values
-      if (PKCEResultJson?.has(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN)) {
+      if (PKCEResultJson.has(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN)) {
         values.putString(
             ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN,
-            PKCEResultJson?.getString(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN))
+            PKCEResultJson.getString(ServerProtocol.DIALOG_PARAM_AUTHENTICATION_TOKEN))
       }
     } catch (ex: JSONException) {
       throw FacebookException("Fail to process code exchange response: " + ex.message)

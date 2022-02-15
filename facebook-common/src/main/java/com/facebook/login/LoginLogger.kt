@@ -65,9 +65,9 @@ internal class LoginLogger(context: Context, val applicationId: String) {
   @JvmOverloads
   fun logCompleteLogin(
       loginRequestId: String?,
-      loggingExtras: Map<String?, String?>,
+      loggingExtras: Map<String, String>,
       result: LoginClient.Result.Code?,
-      resultExtras: Map<String?, String?>?,
+      resultExtras: Map<String, String>?,
       exception: Exception?,
       eventName: String? = EVENT_NAME_LOGIN_COMPLETE
   ) {

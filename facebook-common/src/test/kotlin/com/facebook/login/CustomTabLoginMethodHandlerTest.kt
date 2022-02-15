@@ -69,7 +69,7 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
     Whitebox.setInternalState(AccessToken::class.java, "Companion", mockAccessTokenCompanion)
 
     val fragment: Fragment = mock<LoginFragment>()
-    whenever(mockLoginClient.getFragment()).thenReturn(fragment)
+    whenever(mockLoginClient.fragment).thenReturn(fragment)
     request = createRequest()
 
     // mock and bypass signature verification
@@ -262,7 +262,7 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
   @Test
   fun `test receiving user cancel result`() {
     mockCustomTabRedirectActivity(true)
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(request)
+    whenever(mockLoginClient.pendingRequest).thenReturn(request)
     val handler = CustomTabLoginMethodHandler(mockLoginClient)
     assertThat(handler.onActivityResult(1, Activity.RESULT_CANCELED, null)).isFalse
     val resultCaptor = argumentCaptor<LoginClient.Result>()
@@ -275,7 +275,7 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
   @Test
   fun `test receiving user ok result`() {
     mockCustomTabRedirectActivity(true)
-    whenever(mockLoginClient.getPendingRequest()).thenReturn(request)
+    whenever(mockLoginClient.pendingRequest).thenReturn(request)
     val handler = CustomTabLoginMethodHandler(mockLoginClient)
     assertThat(handler.onActivityResult(1, Activity.RESULT_OK, null)).isTrue
   }

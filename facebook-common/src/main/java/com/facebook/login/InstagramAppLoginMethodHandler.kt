@@ -21,6 +21,7 @@ package com.facebook.login
 import android.os.Parcel
 import android.os.Parcelable
 import com.facebook.AccessTokenSource
+import com.facebook.FacebookSdk
 import com.facebook.internal.NativeProtocol
 import com.facebook.internal.ServerProtocol
 
@@ -35,13 +36,13 @@ internal class InstagramAppLoginMethodHandler : NativeAppLoginMethodHandler {
     val e2e = LoginClient.getE2E()
     val intent =
         NativeProtocol.createInstagramIntent(
-            loginClient.activity,
+            loginClient.activity ?: FacebookSdk.getApplicationContext(),
             request.applicationId,
             request.permissions,
             e2e,
             request.isRerequest,
             request.hasPublishPermission(),
-            request.defaultAudience,
+            request.defaultAudience ?: DefaultAudience.NONE,
             getClientState(request.authId),
             request.authType,
             request.messengerPageId,

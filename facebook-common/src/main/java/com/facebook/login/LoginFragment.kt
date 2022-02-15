@@ -48,12 +48,13 @@ open class LoginFragment : Fragment() {
     val restoredLoginClient = savedInstanceState?.getParcelable<LoginClient>(SAVED_LOGIN_CLIENT)
     loginClient =
         if (restoredLoginClient != null) {
-          restoredLoginClient.setFragment(this)
+          restoredLoginClient.fragment = this
           restoredLoginClient
         } else {
           createLoginClient()
         }
-    loginClient.setOnCompletedListener { outcome -> onLoginClientCompleted(outcome) }
+    loginClient.onCompletedListener =
+        LoginClient.OnCompletedListener { outcome -> onLoginClientCompleted(outcome) }
     val activity = activity ?: return
     initializeCallingPackage(activity)
     val intent = activity.intent
@@ -81,7 +82,7 @@ open class LoginFragment : Fragment() {
   ): View? {
     val view = inflater.inflate(layoutResId, container, false)
     val progressBar = view.findViewById<View>(R.id.com_facebook_login_fragment_progress_bar)
-    loginClient.setBackgroundProcessingListener(
+    loginClient.backgroundProcessingListener =
         object : LoginClient.BackgroundProcessingListener {
           override fun onBackgroundProcessingStarted() {
             progressBar.visibility = View.VISIBLE
@@ -90,7 +91,7 @@ open class LoginFragment : Fragment() {
           override fun onBackgroundProcessingStopped() {
             progressBar.visibility = View.GONE
           }
-        })
+        }
     return view
   }
 
