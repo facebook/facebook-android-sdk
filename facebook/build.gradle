@@ -66,9 +66,6 @@ dependencies {
 
     testImplementation "com.android.installreferrer:installreferrer:1.0"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
-
-    testImplementation project(":facebook-places")
-
 }
 
 android {

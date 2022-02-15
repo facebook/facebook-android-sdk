@@ -131,11 +131,6 @@ class FeatureManagerTest {
   }
 
   @Test
-  fun `test features parents inside Places`() {
-    assertEquals(Feature.Core, Feature.Places.parent)
-  }
-
-  @Test
   fun `test return unknown feature`() {
     assertEquals(Feature.Unknown, Feature.fromInt(0x12345678))
   }
