@@ -21,15 +21,12 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 import androidx.annotation.Nullable;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMediaContent
     extends ShareContent<ShareMediaContent, ShareMediaContent.Builder> {
   private final List<ShareMedia> media;
@@ -41,9 +38,14 @@ public final class ShareMediaContent
 
   ShareMediaContent(final Parcel in) {
     super(in);
-    ShareMedia[] shareMedia =
-        (ShareMedia[]) in.readParcelableArray(ShareMedia.class.getClassLoader());
-    this.media = Arrays.asList(shareMedia);
+    Parcelable[] shareMedia = in.readParcelableArray(ShareMedia.class.getClassLoader());
+    ArrayList<ShareMedia> media = new ArrayList<>();
+    for (Parcelable item : shareMedia) {
+      if (item instanceof ShareMedia) {
+        media.add((ShareMedia) item);
+      }
+    }
+    this.media = Collections.unmodifiableList(media);
   }
 
   /**
@@ -62,7 +64,7 @@ public final class ShareMediaContent
 
   public void writeToParcel(final Parcel out, final int flags) {
     super.writeToParcel(out, flags);
-    out.writeParcelableArray((ShareMedia[]) this.media.toArray(), flags);
+    out.writeParcelableArray(this.media.toArray(new ShareMedia[0]), flags);
   }
 
   @SuppressWarnings("unused")
