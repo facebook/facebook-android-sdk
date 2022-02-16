@@ -67,7 +67,7 @@ public abstract class ShareMedia implements ShareModel {
   public abstract Type getMediaType();
 
   /** Builder for the {@link com.facebook.share.model.ShareMedia} class. */
-  public abstract static class Builder<M extends ShareMedia, B extends Builder>
+  public abstract static class Builder<M extends ShareMedia, B extends Builder<M, B>>
       implements ShareModelBuilder<M, B> {
     private Bundle params = new Bundle();
 
