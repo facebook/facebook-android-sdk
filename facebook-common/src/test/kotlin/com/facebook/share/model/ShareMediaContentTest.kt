@@ -44,7 +44,7 @@ class ShareMediaContentTest : FacebookTestCase() {
   fun `test building media content with photo`() {
     val content = ShareMediaContent.Builder().addMedium(testPhoto).build()
 
-    val contentUrl = (content.media?.first() as SharePhoto?)?.imageUrl
+    val contentUrl = (content.media.first() as SharePhoto?)?.imageUrl
     assertThat(contentUrl).isEqualTo(testPhoto.imageUrl)
   }
 
@@ -52,7 +52,7 @@ class ShareMediaContentTest : FacebookTestCase() {
   fun `test building media content with video`() {
     val content = ShareMediaContent.Builder().addMedium(testVideo).build()
 
-    val contentUrl = (content.media?.first() as ShareVideo?)?.localUrl
+    val contentUrl = (content.media.first() as ShareVideo?)?.localUrl
     assertThat(contentUrl).isEqualTo(testVideo.localUrl)
   }
 
@@ -64,7 +64,7 @@ class ShareMediaContentTest : FacebookTestCase() {
   @Test
   fun `test building media content with a list of media`() {
     val content = ShareMediaContent.Builder().addMedia(listOf(testPhoto, testVideo)).build()
-    assertThat(content.media?.size).isEqualTo(2)
+    assertThat(content.media.size).isEqualTo(2)
   }
 
   @Test
@@ -86,7 +86,7 @@ class ShareMediaContentTest : FacebookTestCase() {
     val content = ShareMediaContent.Builder().addMedia(listOf(testPhoto)).build()
     val newContent = ShareMediaContent.Builder().readFrom(content).build()
 
-    assertThat((newContent.media?.first() as SharePhoto?)?.imageUrl).isEqualTo(testPhoto.imageUrl)
+    assertThat((newContent.media.first() as SharePhoto?)?.imageUrl).isEqualTo(testPhoto.imageUrl)
   }
 
   @Test
@@ -94,7 +94,7 @@ class ShareMediaContentTest : FacebookTestCase() {
     val content =
         ShareMediaContent.Builder().addMedium(testPhoto).setMedia(listOf(testVideo)).build()
 
-    assertThat(content.media?.first() is ShareVideo).isTrue
-    assertThat(content.media?.size).isEqualTo(1)
+    assertThat(content.media.first() is ShareVideo).isTrue
+    assertThat(content.media.size).isEqualTo(1)
   }
 }
