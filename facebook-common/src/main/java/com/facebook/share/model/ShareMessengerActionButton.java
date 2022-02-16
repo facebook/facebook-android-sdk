@@ -55,7 +55,8 @@ public abstract class ShareMessengerActionButton implements ShareModel {
   }
 
   /** Abstract builder for {@link com.facebook.share.model.ShareMessengerActionButton} */
-  public abstract static class Builder<M extends ShareMessengerActionButton, B extends Builder>
+  public abstract static class Builder<
+          M extends ShareMessengerActionButton, B extends Builder<M, B>>
       implements ShareModelBuilder<M, B> {
     private String title;
 

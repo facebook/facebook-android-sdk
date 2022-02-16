@@ -40,7 +40,7 @@ public abstract class ShareOpenGraphValueContainer<
     implements ShareModel {
   private final Bundle bundle;
 
-  protected ShareOpenGraphValueContainer(final Builder<P, E> builder) {
+  protected ShareOpenGraphValueContainer(final Builder builder) {
     super();
     this.bundle = (Bundle) builder.bundle.clone();
   }
@@ -264,7 +264,8 @@ public abstract class ShareOpenGraphValueContainer<
   /**
    * Abstract builder for the {@link com.facebook.share.model.ShareOpenGraphValueContainer} class.
    */
-  public abstract static class Builder<P extends ShareOpenGraphValueContainer, E extends Builder>
+  public abstract static class Builder<
+          P extends ShareOpenGraphValueContainer, E extends Builder<P, E>>
       implements ShareModelBuilder<P, E> {
     private Bundle bundle = new Bundle();
 

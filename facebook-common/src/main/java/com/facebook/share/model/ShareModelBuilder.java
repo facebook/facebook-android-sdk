@@ -28,7 +28,7 @@ import com.facebook.share.ShareBuilder;
  * @param <P> The model protocol to be built.
  * @param <E> The concrete builder class.
  */
-public interface ShareModelBuilder<P extends ShareModel, E extends ShareModelBuilder>
+public interface ShareModelBuilder<P extends ShareModel, E extends ShareModelBuilder<P, E>>
     extends ShareBuilder<P, E> {
   /**
    * Reads the values from a ShareModel into the builder.

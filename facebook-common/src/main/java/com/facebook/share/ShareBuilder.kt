@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share;
+package com.facebook.share
 
 /**
  * Interface for builders related to sharing.
@@ -26,11 +26,11 @@ package com.facebook.share;
  * @param <P> The class of the object to be built.
  * @param <E> The concrete builder class.
  */
-public interface ShareBuilder<P, E extends ShareBuilder> {
+fun interface ShareBuilder<P, E : ShareBuilder<P, E>> {
   /**
    * Builds the object.
    *
    * @return The built object.
    */
-  public P build();
+  fun build(): P
 }
