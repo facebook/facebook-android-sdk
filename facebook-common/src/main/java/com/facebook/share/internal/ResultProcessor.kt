@@ -18,41 +18,30 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share.internal;
+package com.facebook.share.internal
 
-import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.internal.AppCall;
+import android.os.Bundle
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.internal.AppCall
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  *
- * <p>Callback class to allow derivations of FacebookDialogBase to do custom operations
+ * Callback class to allow derivations of FacebookDialogBase to do custom operations
  */
-public abstract class ResultProcessor {
-  private @Nullable FacebookCallback appCallback;
-
-  public ResultProcessor(@Nullable FacebookCallback callback) {
-    this.appCallback = callback;
-  }
-
-  public abstract void onSuccess(AppCall appCall, @Nullable Bundle results);
+abstract class ResultProcessor(private val appCallback: FacebookCallback<*>?) {
+  abstract fun onSuccess(appCall: AppCall, results: Bundle?)
 
   /** Override this if anything needs to be done on cancellation (e.g. Logging) */
-  public void onCancel(AppCall appCall) {
-    if (appCallback != null) {
-      appCallback.onCancel();
-    }
+  open fun onCancel(appCall: AppCall) {
+    appCallback?.onCancel()
   }
 
   /** Override this if anything needs to be done on error (e.g. Logging) */
-  public void onError(AppCall appCall, FacebookException error) {
-    if (appCallback != null) {
-      appCallback.onError(error);
-    }
+  open fun onError(appCall: AppCall, error: FacebookException) {
+    appCallback?.onError(error)
   }
 }
