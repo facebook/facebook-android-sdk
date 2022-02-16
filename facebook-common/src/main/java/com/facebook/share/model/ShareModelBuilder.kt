@@ -18,9 +18,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share.model;
+package com.facebook.share.model
 
-import com.facebook.share.ShareBuilder;
+import com.facebook.share.ShareBuilder
 
 /**
  * Interface for builders related to sharing.
@@ -28,13 +28,12 @@ import com.facebook.share.ShareBuilder;
  * @param <P> The model protocol to be built.
  * @param <E> The concrete builder class.
  */
-public interface ShareModelBuilder<P extends ShareModel, E extends ShareModelBuilder<P, E>>
-    extends ShareBuilder<P, E> {
+interface ShareModelBuilder<P : ShareModel, E : ShareModelBuilder<P, E>> : ShareBuilder<P, E> {
   /**
    * Reads the values from a ShareModel into the builder.
    *
    * @param model The source ShareModel
    * @return The builder.
    */
-  public E readFrom(P model);
+  fun readFrom(model: P?): E
 }
