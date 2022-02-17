@@ -20,73 +20,90 @@
 
 package com.facebook.appevents.internal
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.format.DateUtils
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.MockSharedPreference
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.internal.security.CertificateUtil
+import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Locale
-import org.junit.Assert.assertEquals
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.Offset
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyDouble
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.same
-import org.powermock.api.mockito.PowerMockito.doNothing
-import org.powermock.api.mockito.PowerMockito.mock
-import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.verifyNew
-import org.powermock.api.mockito.PowerMockito.whenNew
+import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(SessionLogger::class)
+@PrepareForTest(HashUtils::class, CertificateUtil::class)
 class SessionLoggerTest : FacebookPowerMockTestCase() {
-
   private lateinit var mockSessionInfo: SessionInfo
-  private lateinit var mockBundle: Bundle
   private lateinit var mockInternalAppEventsLogger: InternalAppEventsLogger
-  private lateinit var doubleArgumentCaptor: ArgumentCaptor<Double>
+  private lateinit var mockInternalAppEventsLoggerCompanion: InternalAppEventsLogger.Companion
+  private lateinit var mockContext: Context
+  private lateinit var mockPreferences: SharedPreferences
+  private lateinit var mockPackageManager: PackageManager
+  private lateinit var doubleArgumentCaptor: KArgumentCaptor<Double>
+  private lateinit var bundleArgumentCaptor: KArgumentCaptor<Bundle>
 
   private val activityName = "swagactivity"
   private val appId = "yoloapplication"
   private val diskRestoreTime = 10L
   private val sessionLastEventTime = 1L
   private val zeroDelta = 0.0
+  private val mockChecksum = "1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
   @Before
   fun init() {
-    doubleArgumentCaptor = ArgumentCaptor.forClass(Double::class.java)
-    mockSessionInfo = mock(SessionInfo::class.java)
+    doubleArgumentCaptor = argumentCaptor()
+    bundleArgumentCaptor = argumentCaptor()
+    mockSessionInfo = mock()
     whenever(mockSessionInfo.sessionLength).thenReturn(10L)
     Whitebox.setInternalState(mockSessionInfo, "sessionLastEventTime", sessionLastEventTime)
     Whitebox.setInternalState(mockSessionInfo, "diskRestoreTime", diskRestoreTime)
 
-    mockBundle = mock(Bundle::class.java)
-    whenNew(Bundle::class.java).withNoArguments().thenReturn(mockBundle)
-
-    mockInternalAppEventsLogger = mock(InternalAppEventsLogger::class.java)
-    doNothing()
-        .`when`(mockInternalAppEventsLogger)
-        .logEvent(anyString(), anyDouble(), any(Bundle::class.java))
-    whenNew(InternalAppEventsLogger::class.java)
-        .withArguments(activityName, appId, null)
+    mockInternalAppEventsLogger = mock()
+    mockInternalAppEventsLoggerCompanion = mock()
+    whenever(mockInternalAppEventsLoggerCompanion.createInstance(activityName, appId, null))
         .thenReturn(mockInternalAppEventsLogger)
+    Whitebox.setInternalState(
+        InternalAppEventsLogger::class.java, "Companion", mockInternalAppEventsLoggerCompanion)
 
-    mockStatic(SessionLogger::class.java)
-    whenever(SessionLogger.logDeactivateApp(anyString(), any(SessionInfo::class.java), anyString()))
-        .thenCallRealMethod()
+    mockContext = mock()
+    mockPackageManager = mock()
+    whenever(mockContext.packageName).thenReturn(appId)
+    whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+    val mockPackageInfo = mock<PackageInfo>()
+    mockPackageInfo.versionName = "v0.0"
+    whenever(mockPackageManager.getPackageInfo(any<String>(), any())).thenReturn(mockPackageInfo)
+    mockPreferences = MockSharedPreference()
+    whenever(mockContext.getSharedPreferences(any<String>(), any())).thenReturn(mockPreferences)
+    PowerMockito.mockStatic(HashUtils::class.java)
+    whenever(HashUtils.computeChecksumWithPackageManager(eq(mockContext), anyOrNull()))
+        .thenReturn(mockChecksum)
+    PowerMockito.mockStatic(CertificateUtil::class.java)
+    whenever(CertificateUtil.getCertificateHash(mockContext)).thenReturn("")
   }
 
   @Test
   fun `logDeactivateApp when sessionInfo is null`() {
     SessionLogger.logDeactivateApp(activityName, null, appId)
-    verifyNew(Bundle::class.java, never()).withNoArguments()
+    verify(mockInternalAppEventsLogger, never())
+        .logEvent(eq(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP), any(), any())
   }
 
   @Test
@@ -96,14 +113,14 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
     whenever(mockSessionInfo.sessionLength).thenReturn(sessionLengthNegative)
 
     SessionLogger.logDeactivateApp(activityName, mockSessionInfo, appId)
-    verifyNew(Bundle::class.java).withNoArguments()
-    verifyNew(InternalAppEventsLogger::class.java).withArguments(activityName, appId, null)
+
     verify(mockInternalAppEventsLogger)
         .logEvent(
-            same(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP),
+            eq(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP),
             doubleArgumentCaptor.capture(),
-            same(mockBundle))
-    assertEquals(doubleArgumentCaptor.value, expectedValueToSum, zeroDelta)
+            bundleArgumentCaptor.capture())
+    assertThat(doubleArgumentCaptor.firstValue)
+        .isEqualTo(expectedValueToSum, Offset.offset(zeroDelta))
   }
 
   @Test
@@ -122,16 +139,18 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
     val expectedValueToSum = mockSessionInfo.sessionLength.toDouble() / DateUtils.SECOND_IN_MILLIS
 
     SessionLogger.logDeactivateApp(activityName, mockSessionInfo, appId)
-    verifyNew(Bundle::class.java).withNoArguments()
-    verifyNew(InternalAppEventsLogger::class.java).withArguments(activityName, appId, null)
-    verify(mockBundle)
-        .putString(AppEventsConstants.EVENT_NAME_TIME_BETWEEN_SESSIONS, fbMobileTimeBetweenSessions)
+
     verify(mockInternalAppEventsLogger)
         .logEvent(
-            same(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP),
+            eq(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP),
             doubleArgumentCaptor.capture(),
-            same(mockBundle))
-    assertEquals(doubleArgumentCaptor.value, expectedValueToSum, zeroDelta)
+            bundleArgumentCaptor.capture())
+    assertThat(doubleArgumentCaptor.firstValue)
+        .isEqualTo(expectedValueToSum, Offset.offset(zeroDelta))
+    assertThat(
+            bundleArgumentCaptor.firstValue.getString(
+                AppEventsConstants.EVENT_NAME_TIME_BETWEEN_SESSIONS))
+        .isEqualTo(fbMobileTimeBetweenSessions)
   }
 
   @Test
@@ -145,15 +164,28 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
             SessionLogger.getQuantaIndex(interruptionDurationMillis))
 
     SessionLogger.logDeactivateApp(activityName, mockSessionInfo, appId)
-    verifyNew(Bundle::class.java).withNoArguments()
-    verifyNew(InternalAppEventsLogger::class.java).withArguments(activityName, appId, null)
-    verify(mockBundle)
-        .putString(AppEventsConstants.EVENT_NAME_TIME_BETWEEN_SESSIONS, fbMobileTimeBetweenSessions)
+
     verify(mockInternalAppEventsLogger)
         .logEvent(
-            same(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP),
+            eq(AppEventsConstants.EVENT_NAME_DEACTIVATED_APP),
             doubleArgumentCaptor.capture(),
-            same(mockBundle))
-    assertEquals(doubleArgumentCaptor.value, expectedValueToSum, zeroDelta)
+            bundleArgumentCaptor.capture())
+    assertThat(doubleArgumentCaptor.firstValue)
+        .isEqualTo(expectedValueToSum, Offset.offset(zeroDelta))
+    assertThat(
+            bundleArgumentCaptor.firstValue.getString(
+                AppEventsConstants.EVENT_NAME_TIME_BETWEEN_SESSIONS))
+        .isEqualTo(fbMobileTimeBetweenSessions)
+  }
+
+  @Test
+  fun `test logActivateApp will log EVENT_NAME_ACTIVATED_APP event and package checksum`() {
+    SessionLogger.logActivateApp(activityName, null, appId, mockContext)
+
+    verify(mockInternalAppEventsLogger)
+        .logEvent(eq(AppEventsConstants.EVENT_NAME_ACTIVATED_APP), bundleArgumentCaptor.capture())
+    val capturedBundle = bundleArgumentCaptor.firstValue
+    assertThat(capturedBundle.getString(AppEventsConstants.EVENT_PARAM_PACKAGE_FP))
+        .isEqualTo(mockChecksum)
   }
 }

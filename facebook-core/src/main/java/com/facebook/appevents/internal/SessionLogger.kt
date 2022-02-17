@@ -73,7 +73,7 @@ internal object SessionLogger {
     eventParams.putString(
         AppEventsConstants.EVENT_PARAM_PACKAGE_FP, computePackageChecksum(context))
     eventParams.putString(AppEventsConstants.EVENT_PARAM_APP_CERT_HASH, getCertificateHash(context))
-    val logger = InternalAppEventsLogger(activityName, appId, null)
+    val logger = InternalAppEventsLogger.createInstance(activityName, appId, null)
     logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams)
     if (InternalAppEventsLogger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
       logger.flush()
@@ -107,7 +107,7 @@ internal object SessionLogger {
     eventParams.putString(AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION, sourAppInfoStr)
     eventParams.putLong(
         Constants.LOG_TIME_APP_EVENT_KEY, (sessionInfo.sessionLastEventTime ?: 0) / 1000)
-    InternalAppEventsLogger(activityName, appId, null)
+    InternalAppEventsLogger.createInstance(activityName, appId, null)
         .logEvent(
             AppEventsConstants.EVENT_NAME_DEACTIVATED_APP,
             sessionLength.toDouble() / DateUtils.SECOND_IN_MILLIS,
@@ -128,7 +128,7 @@ internal object SessionLogger {
     return quantaIndex
   }
 
-  fun computePackageChecksum(context: Context): String? {
+  private fun computePackageChecksum(context: Context): String? {
     return try {
       // First, try to check if package hash already computed
       val pm = context.packageManager
