@@ -63,6 +63,7 @@ class NativeDialogParametersTest : FacebookPowerMockTestCase() {
 
     val params = NativeDialogParameters.create(testCallId, linkContent, true)
 
+    checkNotNull(params)
     assertThat(params.getString(ShareConstants.CONTENT_URL)).isEqualTo(contentUrl)
     assertThat(params.getString(ShareConstants.MESSENGER_URL)).isEqualTo(contentUrl)
     assertThat(params.getString(ShareConstants.TARGET_DISPLAY)).isEqualTo(contentUrl)
@@ -77,6 +78,7 @@ class NativeDialogParametersTest : FacebookPowerMockTestCase() {
 
     val params = NativeDialogParameters.create(testCallId, photoContent, true)
 
+    checkNotNull(params)
     assertThat(params.getStringArrayList(ShareConstants.PHOTOS))
         .containsExactlyInAnyOrder(*photoUrls.toTypedArray())
   }
@@ -91,6 +93,7 @@ class NativeDialogParametersTest : FacebookPowerMockTestCase() {
 
     val params = NativeDialogParameters.create(testCallId, videoContent, true)
 
+    checkNotNull(params)
     assertThat(params.getString(ShareConstants.VIDEO_URL)).isEqualTo(videoUrl)
     assertThat(params.getString(ShareConstants.TITLE)).isEqualTo(videoTitle)
     assertThat(params.getString(ShareConstants.DESCRIPTION)).isNull()
@@ -107,6 +110,7 @@ class NativeDialogParametersTest : FacebookPowerMockTestCase() {
 
     val params = NativeDialogParameters.create(testCallId, shareMediaContent, true)
 
+    checkNotNull(params)
     val mediaInfos = checkNotNull(params.getParcelableArrayList<Bundle>(ShareConstants.MEDIA))
     val mediaInfoUrls = mediaInfos.map { it.getString("uri") }
     assertThat(mediaInfoUrls).containsExactlyInAnyOrder(photoUrl, videoUrl)
@@ -129,6 +133,7 @@ class NativeDialogParametersTest : FacebookPowerMockTestCase() {
 
     val params = NativeDialogParameters.create(testCallId, shareStoryContent, true)
 
+    checkNotNull(params)
     assertThat(params.getParcelable<Bundle>(ShareConstants.STORY_BG_ASSET)?.getString("uri"))
         .isEqualTo(backgroundPhotoUrl)
     assertThat(
