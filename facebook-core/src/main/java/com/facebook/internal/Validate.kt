@@ -142,7 +142,9 @@ object Validate {
   @JvmStatic
   fun hasClientToken(): String {
     return checkNotNull(FacebookSdk.getClientToken()) {
-      "No Client Token found, please set the Client Token."
+      "No Client Token found, please set the Client Token. Please follow " +
+          "https://developers.facebook.com/docs/android/getting-started/#client-access-token " +
+          "to get the token and fill it in AndroidManifest.xml"
     }
   }
 
@@ -212,7 +214,7 @@ object Validate {
   }
 
   @JvmStatic
-  fun hasCustomTabRedirectActivity(context: Context, redirectURI: String?): Boolean {
+  fun hasCustomTabRedirectActivity(context: Context, redirectURI: String): Boolean {
     val pm = context.packageManager
     var infos: List<ResolveInfo>? = null
     if (pm != null) {
