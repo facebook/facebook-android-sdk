@@ -21,11 +21,8 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** Describes the content that will be displayed by the AppGroupCreationDialog */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class AppGroupCreationContent implements ShareModel {
   private final String name;
   private final String description;
