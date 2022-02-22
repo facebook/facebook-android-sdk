@@ -1271,7 +1271,7 @@ class GraphRequest {
         }
       } else if (String::class.java.isAssignableFrom(valueClass) ||
           Number::class.java.isAssignableFrom(valueClass) ||
-          Boolean::class.java.isAssignableFrom(valueClass)) {
+          java.lang.Boolean::class.java.isAssignableFrom(valueClass)) {
         serializer.writeString(key, value.toString())
       } else if (Date::class.java.isAssignableFrom(valueClass)) {
         val date = value as Date
@@ -1283,6 +1283,10 @@ class GraphRequest {
         // rather than Dates.
         val iso8601DateFormat = SimpleDateFormat(ISO_8601_FORMAT_STRING, Locale.US)
         serializer.writeString(key, iso8601DateFormat.format(date))
+      } else {
+        logd(
+            TAG,
+            "The type of property $key in the graph object is unknown. It won't be sent in the request.")
       }
     }
 

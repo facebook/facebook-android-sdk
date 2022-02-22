@@ -69,6 +69,8 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
   private val mockInstagramTokenString = "IGasdf"
   private val mockAppTokenString = mockAppID + "|" + mockClientToken
   private val mockUserID = "1000"
+  private lateinit var mockHttpURLConnection: HttpURLConnection
+  private lateinit var mockHttpURLConnectionDataStream: PipedInputStream
 
   @Before
   override fun setup() {
@@ -84,6 +86,11 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
     whenever(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
     mockLoggedInWithTokenDomain("facebook")
+
+    mockHttpURLConnectionDataStream = PipedInputStream()
+    mockHttpURLConnection = mock()
+    val pipedOutputStreamForMockConnection = PipedOutputStream(mockHttpURLConnectionDataStream)
+    whenever(mockHttpURLConnection.outputStream).thenReturn(pipedOutputStreamForMockConnection)
   }
 
   @Test
@@ -740,10 +747,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test serializing request batch to url connection`() {
-    val pipedInputStream = PipedInputStream()
-    val pipedOutputStream = PipedOutputStream(pipedInputStream)
-    val mockConnection = mock<HttpURLConnection>()
-    whenever(mockConnection.outputStream).thenReturn(pipedOutputStream)
+    val mockConnection = mockHttpURLConnection
     whenever(mockConnection.url).thenReturn(URL("https", "graph.facebook.com", 443, "testfile"))
     whenever(mockConnection.requestMethod).thenReturn(HttpMethod.POST.name)
     whenever(mockConnection.getRequestProperty(any())).thenReturn("test property value")
@@ -754,7 +758,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
             GraphRequest.newGraphPathRequest(null, "testGetPath", null))
     GraphRequest.serializeToUrlConnection(requestBatch, mockConnection)
     verify(mockConnection).requestMethod = HttpMethod.POST.name
-    val dataInputStream = BufferedInputStream(GZIPInputStream(pipedInputStream))
+    val dataInputStream = BufferedInputStream(GZIPInputStream(mockHttpURLConnectionDataStream))
     val data = dataInputStream.reader().readText()
     val decodeData = URLDecoder.decode(data, "UTF-8")
     // check requests are in the decoded data
@@ -768,10 +772,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test serializing bytearray attachment to url connection`() {
-    val pipedInputStream = PipedInputStream()
-    val pipedOutputStream = PipedOutputStream(pipedInputStream)
-    val mockConnection = mock<HttpURLConnection>()
-    whenever(mockConnection.outputStream).thenReturn(pipedOutputStream)
+    val mockConnection = mockHttpURLConnection
     whenever(mockConnection.url).thenReturn(URL("https", "graph.facebook.com", 443, "testfile"))
     whenever(mockConnection.requestMethod).thenReturn(HttpMethod.POST.name)
     whenever(mockConnection.getRequestProperty(any())).thenReturn("test property value")
@@ -780,11 +781,74 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val requestBatch = GraphRequestBatch(request)
     GraphRequest.serializeToUrlConnection(requestBatch, mockConnection)
     verify(mockConnection).requestMethod = HttpMethod.POST.name
-    val dataInputStream = BufferedInputStream((pipedInputStream))
+    val dataInputStream = BufferedInputStream((mockHttpURLConnectionDataStream))
     val data = dataInputStream.reader().readText()
     val decodeData = URLDecoder.decode(data, "UTF-8")
     // check requests are in the decoded data
     assertThat(decodeData).contains("test attachment data")
+  }
+
+  @Test
+  fun `test serializing graph object to url connection`() {
+    val mockConnection = mockHttpURLConnection
+    whenever(mockConnection.url).thenReturn(URL("https", "graph.facebook.com", 443, "testfile"))
+    whenever(mockConnection.requestMethod).thenReturn(HttpMethod.POST.name)
+    whenever(mockConnection.getRequestProperty(any())).thenReturn("test property value")
+
+    val graphObjectToSerialized =
+        JSONObject("""
+      {"v1":1,"v2":"test","v3":true,"v4":[1,2,3]}
+      """.trim())
+    val request = GraphRequest.newPostRequest(null, "testPath", graphObjectToSerialized, null)
+    GraphRequest.serializeToUrlConnection(GraphRequestBatch(request), mockConnection)
+
+    val dataInputStream = BufferedInputStream(GZIPInputStream(mockHttpURLConnectionDataStream))
+    val data = dataInputStream.reader().readText()
+    val decodeData = URLDecoder.decode(data, "UTF-8")
+    val dataItems = decodeData.split("&")
+    assertThat(dataItems)
+        .containsAll(listOf("v1=1", "v2=test", "v3=true", "v4[0]=1", "v4[1]=2", "v4[2]=3"))
+  }
+
+  @Test
+  fun `test serializing graph object of id reference to url connection`() {
+    val mockConnection = mockHttpURLConnection
+    whenever(mockConnection.url).thenReturn(URL("https", "graph.facebook.com", 443, "testfile"))
+    whenever(mockConnection.requestMethod).thenReturn(HttpMethod.POST.name)
+    whenever(mockConnection.getRequestProperty(any())).thenReturn("test property value")
+
+    val graphObjectToSerialized = JSONObject("""
+      {"obj":{"id":"12345"}}
+      """.trim())
+    val request = GraphRequest.newPostRequest(null, "testPath", graphObjectToSerialized, null)
+    GraphRequest.serializeToUrlConnection(GraphRequestBatch(request), mockConnection)
+
+    val dataInputStream = BufferedInputStream(GZIPInputStream(mockHttpURLConnectionDataStream))
+    val data = dataInputStream.reader().readText()
+    val decodeData = URLDecoder.decode(data, "UTF-8")
+    val dataItems = decodeData.split("&")
+    assertThat(dataItems).contains("obj=12345")
+  }
+
+  @Test
+  fun `test serializing graph object of url reference to url connection`() {
+    val mockConnection = mockHttpURLConnection
+    whenever(mockConnection.url).thenReturn(URL("https", "graph.facebook.com", 443, "testfile"))
+    whenever(mockConnection.requestMethod).thenReturn(HttpMethod.POST.name)
+    whenever(mockConnection.getRequestProperty(any())).thenReturn("test property value")
+
+    val graphObjectToSerialized =
+        JSONObject("""
+      {"obj":{"url":"http://facebook.com/"}}
+      """.trim())
+    val request = GraphRequest.newPostRequest(null, "testPath", graphObjectToSerialized, null)
+    GraphRequest.serializeToUrlConnection(GraphRequestBatch(request), mockConnection)
+
+    val dataInputStream = BufferedInputStream(GZIPInputStream(mockHttpURLConnectionDataStream))
+    val data = dataInputStream.reader().readText()
+    val decodeData = URLDecoder.decode(data, "UTF-8")
+    val dataItems = decodeData.split("&")
+    assertThat(dataItems).contains("obj=http://facebook.com/")
   }
 
   @Test
