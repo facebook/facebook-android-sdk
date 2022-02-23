@@ -25,6 +25,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
@@ -41,8 +42,7 @@ import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.RuntimeEnvironment
 
-@PrepareForTest(
-    AccessTokenCache::class, FacebookSdk::class, LegacyTokenHelper::class, Utility::class)
+@PrepareForTest(FacebookSdk::class, LegacyTokenHelper::class, Utility::class)
 class AccessTokenCacheTest : FacebookPowerMockTestCase() {
   companion object {
     private const val TOKEN_STRING = "A token of my esteem"
@@ -216,5 +216,18 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
         EXPIRES,
         LAST_REFRESH,
         null)
+  }
+
+  @Test
+  fun `test the token caching strategy factory will create a cache from the application context`() {
+    val mockContext = mock<Context>()
+    whenever(mockContext.applicationContext).thenReturn(mockContext)
+    whenever(mockContext.getSharedPreferences(any<String>(), any())).thenReturn(mock())
+    whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+
+    val factory = AccessTokenCache.SharedPreferencesTokenCachingStrategyFactory()
+    factory.create()
+    verify(mockContext)
+        .getSharedPreferences(eq(LegacyTokenHelper.DEFAULT_CACHE_KEY), eq(Context.MODE_PRIVATE))
   }
 }
