@@ -1,0 +1,18 @@
+<!--
+  You need to use your App ID (app_id) and client token (client_token) here to run the sample app.
+  App ID is a string of digits and Client Token is a string of hexadecimal digits.
+
+  Login into "Facebook for Developers" dashboard (https://developers.facebook.com/apps/) and select
+  your app, you will find:
+   * App ID: it's displayed at the top of the screen, in the right of the selection box of apps.
+   * Client Token: In Settings -> Advanced -> Security. There's a field named "Client Token".
+
+  Before running this sample app, please copy these two strings into this file.
+-->
+<resources>
+    <string name="app_name" translatable="false">KotlinSampleApp</string>
+    <string name="fb_app_id" translatable="false">{app_id}</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb{app_id}</string>
+    <string name="fb_client_token" translatable="false">{client_token}</string>
+    <string name="fb_authority" translatable="false">com.facebook.app.FacebookContentProvider{app_id}</string>
+</resources>
