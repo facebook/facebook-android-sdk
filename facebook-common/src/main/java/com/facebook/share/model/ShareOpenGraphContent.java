@@ -46,10 +46,10 @@ public final class ShareOpenGraphContent
     this.previewPropertyName = builder.previewPropertyName;
   }
 
-  ShareOpenGraphContent(final Parcel in) {
-    super(in);
-    this.action = new ShareOpenGraphAction.Builder().readFrom(in).build();
-    this.previewPropertyName = in.readString();
+  ShareOpenGraphContent(final Parcel parcel) {
+    super(parcel);
+    this.action = new ShareOpenGraphAction.Builder().readFrom(parcel).build();
+    this.previewPropertyName = parcel.readString();
   }
 
   /**
@@ -86,8 +86,8 @@ public final class ShareOpenGraphContent
   @SuppressWarnings("unused")
   public static final Creator<ShareOpenGraphContent> CREATOR =
       new Creator<ShareOpenGraphContent>() {
-        public ShareOpenGraphContent createFromParcel(final Parcel in) {
-          return new ShareOpenGraphContent(in);
+        public ShareOpenGraphContent createFromParcel(final Parcel parcel) {
+          return new ShareOpenGraphContent(parcel);
         }
 
         public ShareOpenGraphContent[] newArray(final int size) {

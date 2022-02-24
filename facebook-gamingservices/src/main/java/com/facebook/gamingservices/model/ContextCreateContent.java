@@ -33,8 +33,8 @@ public class ContextCreateContent implements ShareModel {
     this.suggestedPlayerID = builder.suggestedPlayerID;
   }
 
-  ContextCreateContent(final Parcel in) {
-    this.suggestedPlayerID = in.readString();
+  ContextCreateContent(final Parcel parcel) {
+    this.suggestedPlayerID = parcel.readString();
   }
 
   public @Nullable String getSuggestedPlayerID() {

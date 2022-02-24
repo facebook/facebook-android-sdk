@@ -35,8 +35,8 @@ public abstract class ShareMessengerActionButton implements ShareModel {
     this.title = builder.title;
   }
 
-  ShareMessengerActionButton(final Parcel in) {
-    this.title = in.readString();
+  ShareMessengerActionButton(final Parcel parcel) {
+    this.title = parcel.readString();
   }
 
   /** The title displayed to the user for the Messenger action button. */

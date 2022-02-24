@@ -38,8 +38,8 @@ public class CameraEffectTextures implements ShareModel {
     textures = builder.textures;
   }
 
-  CameraEffectTextures(final Parcel in) {
-    textures = in.readBundle(getClass().getClassLoader());
+  CameraEffectTextures(final Parcel parcel) {
+    textures = parcel.readBundle(getClass().getClassLoader());
   }
 
   @Nullable
@@ -81,8 +81,8 @@ public class CameraEffectTextures implements ShareModel {
 
   public static final Creator<CameraEffectTextures> CREATOR =
       new Creator<CameraEffectTextures>() {
-        public CameraEffectTextures createFromParcel(final Parcel in) {
-          return new CameraEffectTextures(in);
+        public CameraEffectTextures createFromParcel(final Parcel parcel) {
+          return new CameraEffectTextures(parcel);
         }
 
         public CameraEffectTextures[] newArray(final int size) {

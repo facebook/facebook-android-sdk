@@ -39,10 +39,10 @@ public class ContextChooseContent implements ShareModel {
     this.minSize = builder.minSize;
   }
 
-  ContextChooseContent(final Parcel in) {
-    this.filters = in.createStringArrayList();
-    this.maxSize = in.readInt();
-    this.minSize = in.readInt();
+  ContextChooseContent(final Parcel parcel) {
+    this.filters = parcel.createStringArrayList();
+    this.maxSize = parcel.readInt();
+    this.minSize = parcel.readInt();
   }
 
   public @Nullable List<String> getFilters() {

@@ -585,12 +585,12 @@ public class DeviceAuthDialog extends DialogFragment {
       this.lastPoll = lastPoll;
     }
 
-    protected RequestState(Parcel in) {
-      authorizationUri = in.readString();
-      userCode = in.readString();
-      requestCode = in.readString();
-      interval = in.readLong();
-      lastPoll = in.readLong();
+    protected RequestState(Parcel parcel) {
+      authorizationUri = parcel.readString();
+      userCode = parcel.readString();
+      requestCode = parcel.readString();
+      interval = parcel.readLong();
+      lastPoll = parcel.readLong();
     }
 
     /** @return True if the current time is less than last poll time + polling interval. */
@@ -621,8 +621,8 @@ public class DeviceAuthDialog extends DialogFragment {
     public static final Parcelable.Creator<RequestState> CREATOR =
         new Parcelable.Creator<RequestState>() {
           @Override
-          public RequestState createFromParcel(Parcel in) {
-            return new RequestState(in);
+          public RequestState createFromParcel(Parcel parcel) {
+            return new RequestState(parcel);
           }
 
           @Override

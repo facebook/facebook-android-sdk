@@ -44,8 +44,8 @@ public abstract class ShareMedia implements ShareModel {
     this.params = new Bundle(builder.params);
   }
 
-  ShareMedia(final Parcel in) {
-    this.params = in.readBundle();
+  ShareMedia(final Parcel parcel) {
+    this.params = parcel.readBundle();
   }
 
   /** @deprecated This method is deprecated. Use GraphRequest directly to set parameters. */
@@ -97,8 +97,8 @@ public abstract class ShareMedia implements ShareModel {
       out.writeParcelableArray((ShareMedia[]) media.toArray(), parcelFlags);
     }
 
-    static List<ShareMedia> readListFrom(final Parcel in) {
-      Parcelable[] parcelables = in.readParcelableArray(ShareMedia.class.getClassLoader());
+    static List<ShareMedia> readListFrom(final Parcel parcel) {
+      Parcelable[] parcelables = parcel.readParcelableArray(ShareMedia.class.getClassLoader());
       List<ShareMedia> shareMedia = new ArrayList<>(parcelables.length);
       for (Parcelable parcelable : parcelables) {
         shareMedia.add((ShareMedia) parcelable);

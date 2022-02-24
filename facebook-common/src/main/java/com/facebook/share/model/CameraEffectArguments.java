@@ -37,8 +37,8 @@ public class CameraEffectArguments implements ShareModel {
     params = builder.params;
   }
 
-  CameraEffectArguments(final Parcel in) {
-    params = in.readBundle(getClass().getClassLoader());
+  CameraEffectArguments(final Parcel parcel) {
+    params = parcel.readBundle(getClass().getClassLoader());
   }
 
   /**
@@ -100,8 +100,8 @@ public class CameraEffectArguments implements ShareModel {
 
   public static final Creator<CameraEffectArguments> CREATOR =
       new Creator<CameraEffectArguments>() {
-        public CameraEffectArguments createFromParcel(final Parcel in) {
-          return new CameraEffectArguments(in);
+        public CameraEffectArguments createFromParcel(final Parcel parcel) {
+          return new CameraEffectArguments(parcel);
         }
 
         public CameraEffectArguments[] newArray(final int size) {

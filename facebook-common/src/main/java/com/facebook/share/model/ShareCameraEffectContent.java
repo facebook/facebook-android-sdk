@@ -48,12 +48,12 @@ public class ShareCameraEffectContent
     this.textures = builder.textures;
   }
 
-  ShareCameraEffectContent(final Parcel in) {
-    super(in);
+  ShareCameraEffectContent(final Parcel parcel) {
+    super(parcel);
 
-    this.effectId = in.readString();
-    this.arguments = new CameraEffectArguments.Builder().readFrom(in).build();
-    this.textures = new CameraEffectTextures.Builder().readFrom(in).build();
+    this.effectId = parcel.readString();
+    this.arguments = new CameraEffectArguments.Builder().readFrom(parcel).build();
+    this.textures = new CameraEffectTextures.Builder().readFrom(parcel).build();
   }
 
   @Override
@@ -97,8 +97,8 @@ public class ShareCameraEffectContent
   @SuppressWarnings("unused")
   public static final Creator<ShareCameraEffectContent> CREATOR =
       new Creator<ShareCameraEffectContent>() {
-        public ShareCameraEffectContent createFromParcel(final Parcel in) {
-          return new ShareCameraEffectContent(in);
+        public ShareCameraEffectContent createFromParcel(final Parcel parcel) {
+          return new ShareCameraEffectContent(parcel);
         }
 
         public ShareCameraEffectContent[] newArray(final int size) {

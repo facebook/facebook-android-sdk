@@ -41,8 +41,8 @@ public final class ShareOpenGraphAction
     super(builder);
   }
 
-  ShareOpenGraphAction(final Parcel in) {
-    super(in);
+  ShareOpenGraphAction(final Parcel parcel) {
+    super(parcel);
   }
 
   /**
@@ -58,8 +58,8 @@ public final class ShareOpenGraphAction
   @SuppressWarnings("unused")
   public static final Creator<ShareOpenGraphAction> CREATOR =
       new Creator<ShareOpenGraphAction>() {
-        public ShareOpenGraphAction createFromParcel(final Parcel in) {
-          return new ShareOpenGraphAction(in);
+        public ShareOpenGraphAction createFromParcel(final Parcel parcel) {
+          return new ShareOpenGraphAction(parcel);
         }
 
         public ShareOpenGraphAction[] newArray(final int size) {

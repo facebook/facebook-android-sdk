@@ -27,12 +27,12 @@ public final class ShareStoryContent
     this.mAttributionLink = builder.mAttributionLink;
   }
 
-  ShareStoryContent(final Parcel in) {
-    super(in);
-    this.mBackgroundAsset = in.readParcelable(ShareMedia.class.getClassLoader());
-    this.mStickerAsset = in.readParcelable(SharePhoto.class.getClassLoader());
-    this.mBackgroundColorList = readUnmodifiableStringList(in);
-    this.mAttributionLink = in.readString();
+  ShareStoryContent(final Parcel parcel) {
+    super(parcel);
+    this.mBackgroundAsset = parcel.readParcelable(ShareMedia.class.getClassLoader());
+    this.mStickerAsset = parcel.readParcelable(SharePhoto.class.getClassLoader());
+    this.mBackgroundColorList = readUnmodifiableStringList(parcel);
+    this.mAttributionLink = parcel.readString();
   }
 
   public ShareMedia getBackgroundAsset() {
@@ -71,8 +71,8 @@ public final class ShareStoryContent
   @SuppressWarnings("unused")
   public static final Creator<ShareStoryContent> CREATOR =
       new Creator<ShareStoryContent>() {
-        public ShareStoryContent createFromParcel(final Parcel in) {
-          return new ShareStoryContent(in);
+        public ShareStoryContent createFromParcel(final Parcel parcel) {
+          return new ShareStoryContent(parcel);
         }
 
         public ShareStoryContent[] newArray(final int size) {
@@ -81,9 +81,9 @@ public final class ShareStoryContent
       };
 
   @Nullable
-  private List<String> readUnmodifiableStringList(final Parcel in) {
+  private List<String> readUnmodifiableStringList(final Parcel parcel) {
     final List<String> list = new ArrayList<>();
-    in.readStringList(list);
+    parcel.readStringList(list);
     return (list.isEmpty() ? null : Collections.unmodifiableList(list));
   }
 

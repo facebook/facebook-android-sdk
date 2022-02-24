@@ -33,8 +33,8 @@ public final class ContextSwitchContent implements ShareModel {
     this.contextID = builder.contextID;
   }
 
-  ContextSwitchContent(final Parcel in) {
-    this.contextID = in.readString();
+  ContextSwitchContent(final Parcel parcel) {
+    this.contextID = parcel.readString();
   }
 
   public @Nullable String getContextID() {

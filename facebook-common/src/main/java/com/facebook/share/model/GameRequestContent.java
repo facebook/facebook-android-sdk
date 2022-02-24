@@ -66,17 +66,17 @@ public final class GameRequestContent implements ShareModel {
     this.suggestions = builder.suggestions;
   }
 
-  GameRequestContent(final Parcel in) {
-    this.message = in.readString();
-    this.cta = in.readString();
-    this.recipients = in.createStringArrayList();
-    this.title = in.readString();
-    this.data = in.readString();
-    this.actionType = (ActionType) in.readSerializable();
-    this.objectId = in.readString();
-    this.filters = (Filters) in.readSerializable();
-    this.suggestions = in.createStringArrayList();
-    in.readStringList(this.suggestions);
+  GameRequestContent(final Parcel parcel) {
+    this.message = parcel.readString();
+    this.cta = parcel.readString();
+    this.recipients = parcel.createStringArrayList();
+    this.title = parcel.readString();
+    this.data = parcel.readString();
+    this.actionType = (ActionType) parcel.readSerializable();
+    this.objectId = parcel.readString();
+    this.filters = (Filters) parcel.readSerializable();
+    this.suggestions = parcel.createStringArrayList();
+    parcel.readStringList(this.suggestions);
   }
 
   /** Gets the message that users receiving the request will see. */
@@ -152,8 +152,8 @@ public final class GameRequestContent implements ShareModel {
   @SuppressWarnings("unused")
   public static final Creator<GameRequestContent> CREATOR =
       new Creator<GameRequestContent>() {
-        public GameRequestContent createFromParcel(final Parcel in) {
-          return new GameRequestContent(in);
+        public GameRequestContent createFromParcel(final Parcel parcel) {
+          return new GameRequestContent(parcel);
         }
 
         public GameRequestContent[] newArray(final int size) {

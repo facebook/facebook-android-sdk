@@ -54,13 +54,13 @@ public final class ShareMessengerURLActionButton extends ShareMessengerActionBut
     this.shouldHideWebviewShareButton = builder.shouldHideWebviewShareButton;
   }
 
-  ShareMessengerURLActionButton(final Parcel in) {
-    super(in);
-    this.url = in.readParcelable(Uri.class.getClassLoader());
-    this.isMessengerExtensionURL = (in.readByte() != 0);
-    this.fallbackUrl = in.readParcelable(Uri.class.getClassLoader());
-    this.webviewHeightRatio = (WebviewHeightRatio) in.readSerializable();
-    this.shouldHideWebviewShareButton = (in.readByte() != 0);
+  ShareMessengerURLActionButton(final Parcel parcel) {
+    super(parcel);
+    this.url = parcel.readParcelable(Uri.class.getClassLoader());
+    this.isMessengerExtensionURL = (parcel.readByte() != 0);
+    this.fallbackUrl = parcel.readParcelable(Uri.class.getClassLoader());
+    this.webviewHeightRatio = (WebviewHeightRatio) parcel.readSerializable();
+    this.shouldHideWebviewShareButton = (parcel.readByte() != 0);
   }
 
   /** Get the URL that this button should open when tapped. */
@@ -93,8 +93,8 @@ public final class ShareMessengerURLActionButton extends ShareMessengerActionBut
   @SuppressWarnings("unused")
   public static final Creator<ShareMessengerURLActionButton> CREATOR =
       new Creator<ShareMessengerURLActionButton>() {
-        public ShareMessengerURLActionButton createFromParcel(final Parcel in) {
-          return new ShareMessengerURLActionButton(in);
+        public ShareMessengerURLActionButton createFromParcel(final Parcel parcel) {
+          return new ShareMessengerURLActionButton(parcel);
         }
 
         public ShareMessengerURLActionButton[] newArray(final int size) {

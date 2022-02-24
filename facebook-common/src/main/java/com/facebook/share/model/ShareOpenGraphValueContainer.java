@@ -45,8 +45,8 @@ public abstract class ShareOpenGraphValueContainer<
     this.bundle = (Bundle) builder.bundle.clone();
   }
 
-  ShareOpenGraphValueContainer(final Parcel in) {
-    this.bundle = in.readBundle(Builder.class.getClassLoader());
+  ShareOpenGraphValueContainer(final Parcel parcel) {
+    this.bundle = parcel.readBundle(Builder.class.getClassLoader());
   }
 
   /**
