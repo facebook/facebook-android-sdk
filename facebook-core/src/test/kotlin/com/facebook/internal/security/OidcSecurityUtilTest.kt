@@ -34,7 +34,7 @@ class OidcSecurityUtilTest : FacebookPowerMockTestCase() {
           "-----END PUBLIC KEY-----"
 
   @Before
-  fun `before`() {
+  fun before() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getFacebookDomain()).thenReturn("facebook.com")
     whenever(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())

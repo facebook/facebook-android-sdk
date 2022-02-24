@@ -55,17 +55,17 @@ class TournamentConfig : ShareModel {
     payload = builder.payload
   }
 
-  internal constructor(`in`: Parcel) {
-    title = `in`.readString()
-    sortOrder = TournamentSortOrder.values().find { it.name == `in`.readString() }
-    scoreType = TournamentScoreType.values().find { it.name == `in`.readString() }
+  internal constructor(parcel: Parcel) {
+    title = parcel.readString()
+    sortOrder = TournamentSortOrder.values().find { it.name == parcel.readString() }
+    scoreType = TournamentScoreType.values().find { it.name == parcel.readString() }
     endTime =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          Instant.from(DateFormatter.format(`in`.readString()))
+          Instant.from(DateFormatter.format(parcel.readString()))
         } else {
           null
         }
-    payload = `in`.readString()
+    payload = parcel.readString()
     image = null
   }
 

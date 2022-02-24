@@ -41,8 +41,8 @@ class ShareVideo : ShareMedia {
     localUrl = builder.localUrl
   }
 
-  internal constructor(`in`: Parcel) : super(`in`) {
-    localUrl = `in`.readParcelable(Uri::class.java.classLoader)
+  internal constructor(parcel: Parcel) : super(parcel) {
+    localUrl = parcel.readParcelable(Uri::class.java.classLoader)
   }
 
   override fun describeContents(): Int = 0

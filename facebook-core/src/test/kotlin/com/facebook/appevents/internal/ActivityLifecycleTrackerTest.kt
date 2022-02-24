@@ -34,7 +34,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
   private val appID = "123"
 
   @Before
-  fun `init`() {
+  fun init() {
     mockApplication = PowerMockito.mock(Application::class.java)
     mockActivity = PowerMockito.mock(Activity::class.java)
     PowerMockito.mockStatic(FeatureManager::class.java)
