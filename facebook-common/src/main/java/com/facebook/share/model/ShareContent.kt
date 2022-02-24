@@ -29,7 +29,7 @@ import kotlin.collections.ArrayList
  * Provides the base class for content to be shared. Contains all common methods for the different
  * types of content.
  */
-abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, E>> : ShareModel {
+abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, B>> : ShareModel {
   /**
    * URL for the content being shared. This URL will be checked for app link meta tags for linking
    * in platform specific ways.
@@ -81,7 +81,7 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
    */
   val shareHashtag: ShareHashtag?
 
-  protected constructor(builder: Builder<P, E>) : super() {
+  protected constructor(builder: Builder<M, B>) : super() {
     contentUrl = builder.contentUrl
     peopleIds = builder.peopleIds
     placeId = builder.placeId
@@ -117,7 +117,7 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
   }
 
   /** Abstract builder for [com.facebook.share.model.ShareContent] */
-  abstract class Builder<P : ShareContent<P, E>, E : Builder<P, E>> : ShareModelBuilder<P, E> {
+  abstract class Builder<M : ShareContent<M, B>, B : Builder<M, B>> : ShareModelBuilder<M, B> {
     internal var contentUrl: Uri? = null
     internal var peopleIds: List<String>? = null
     internal var placeId: String? = null
@@ -131,9 +131,9 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
      * @param contentUrl [android.net.Uri] representation of the content link.
      * @return The builder.
      */
-    fun setContentUrl(contentUrl: Uri?): E {
+    fun setContentUrl(contentUrl: Uri?): B {
       this.contentUrl = contentUrl
-      return this as E
+      return this as B
     }
 
     /**
@@ -142,9 +142,9 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
      * @param peopleIds [java.util.List] of Ids for people to tag.
      * @return The builder.
      */
-    fun setPeopleIds(peopleIds: List<String>?): E {
+    fun setPeopleIds(peopleIds: List<String>?): B {
       this.peopleIds = if (peopleIds == null) null else Collections.unmodifiableList(peopleIds)
-      return this as E
+      return this as B
     }
 
     /**
@@ -153,9 +153,9 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
      * @param placeId The Id for the place to tag.
      * @return The builder.
      */
-    fun setPlaceId(placeId: String?): E {
+    fun setPlaceId(placeId: String?): B {
       this.placeId = placeId
-      return this as E
+      return this as B
     }
 
     /**
@@ -164,9 +164,9 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
      * @param pageId The Id for the Page
      * @return The builder
      */
-    fun setPageId(pageId: String?): E {
+    fun setPageId(pageId: String?): B {
       this.pageId = pageId
-      return this as E
+      return this as B
     }
 
     /**
@@ -176,9 +176,9 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
      * @param ref The ref for the content.
      * @return The builder.
      */
-    fun setRef(ref: String?): E {
+    fun setRef(ref: String?): B {
       this.ref = ref
-      return this as E
+      return this as B
     }
 
     /**
@@ -187,14 +187,14 @@ abstract class ShareContent<P : ShareContent<P, E>, E : ShareContent.Builder<P, 
      * @param shareHashtag The hashtag for this content
      * @return The builder
      */
-    fun setShareHashtag(shareHashtag: ShareHashtag?): E {
+    fun setShareHashtag(shareHashtag: ShareHashtag?): B {
       hashtag = shareHashtag
-      return this as E
+      return this as B
     }
 
-    override fun readFrom(content: P?): E {
+    override fun readFrom(content: M?): B {
       return if (content == null) {
-        this as E
+        this as B
       } else
           setContentUrl(content.contentUrl)
               .setPeopleIds(content.peopleIds)

@@ -25,15 +25,15 @@ import com.facebook.share.ShareBuilder
 /**
  * Interface for builders related to sharing.
  *
- * @param <P> The model protocol to be built.
- * @param <E> The concrete builder class.
+ * @param <M> The model protocol to be built.
+ * @param <B> The concrete builder class.
  */
-interface ShareModelBuilder<P : ShareModel, E : ShareModelBuilder<P, E>> : ShareBuilder<P, E> {
+interface ShareModelBuilder<M : ShareModel, B : ShareModelBuilder<M, B>> : ShareBuilder<M, B> {
   /**
    * Reads the values from a ShareModel into the builder.
    *
    * @param model The source ShareModel
    * @return The builder.
    */
-  fun readFrom(model: P?): E
+  fun readFrom(model: M?): B
 }

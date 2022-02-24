@@ -265,8 +265,8 @@ public abstract class ShareOpenGraphValueContainer<
    * Abstract builder for the {@link com.facebook.share.model.ShareOpenGraphValueContainer} class.
    */
   public abstract static class Builder<
-          P extends ShareOpenGraphValueContainer, E extends Builder<P, E>>
-      implements ShareModelBuilder<P, E> {
+          M extends ShareOpenGraphValueContainer, B extends Builder<M, B>>
+      implements ShareModelBuilder<M, B> {
     private Bundle bundle = new Bundle();
 
     /**
@@ -276,9 +276,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putBoolean(final String key, final boolean value) {
+    public B putBoolean(final String key, final boolean value) {
       this.bundle.putBoolean(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -288,9 +288,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putBooleanArray(final String key, @Nullable final boolean[] value) {
+    public B putBooleanArray(final String key, @Nullable final boolean[] value) {
       this.bundle.putBooleanArray(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -300,9 +300,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putDouble(final String key, final double value) {
+    public B putDouble(final String key, final double value) {
       this.bundle.putDouble(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -312,9 +312,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putDoubleArray(final String key, @Nullable final double[] value) {
+    public B putDoubleArray(final String key, @Nullable final double[] value) {
       this.bundle.putDoubleArray(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -324,9 +324,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putInt(final String key, final int value) {
+    public B putInt(final String key, final int value) {
       this.bundle.putInt(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -336,9 +336,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putIntArray(final String key, @Nullable final int[] value) {
+    public B putIntArray(final String key, @Nullable final int[] value) {
       this.bundle.putIntArray(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -348,9 +348,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putLong(final String key, final long value) {
+    public B putLong(final String key, final long value) {
       this.bundle.putLong(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -360,9 +360,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putLongArray(final String key, @Nullable final long[] value) {
+    public B putLongArray(final String key, @Nullable final long[] value) {
       this.bundle.putLongArray(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -372,9 +372,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putObject(final String key, @Nullable final ShareOpenGraphObject value) {
+    public B putObject(final String key, @Nullable final ShareOpenGraphObject value) {
       this.bundle.putParcelable(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -384,10 +384,10 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putObjectArrayList(
+    public B putObjectArrayList(
         final String key, @Nullable final ArrayList<ShareOpenGraphObject> value) {
       this.bundle.putParcelableArrayList(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -397,9 +397,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putPhoto(final String key, @Nullable final SharePhoto value) {
+    public B putPhoto(final String key, @Nullable final SharePhoto value) {
       this.bundle.putParcelable(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -409,9 +409,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putPhotoArrayList(final String key, @Nullable final ArrayList<SharePhoto> value) {
+    public B putPhotoArrayList(final String key, @Nullable final ArrayList<SharePhoto> value) {
       this.bundle.putParcelableArrayList(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -421,9 +421,9 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putString(final String key, @Nullable final String value) {
+    public B putString(final String key, @Nullable final String value) {
       this.bundle.putString(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     /**
@@ -433,17 +433,17 @@ public abstract class ShareOpenGraphValueContainer<
      * @param value The value.
      * @return The builder.
      */
-    public E putStringArrayList(final String key, @Nullable final ArrayList<String> value) {
+    public B putStringArrayList(final String key, @Nullable final ArrayList<String> value) {
       this.bundle.putStringArrayList(key, value);
-      return (E) this;
+      return (B) this;
     }
 
     @Override
-    public E readFrom(final P model) {
+    public B readFrom(final M model) {
       if (model != null) {
         this.bundle.putAll(model.getBundle());
       }
-      return (E) this;
+      return (B) this;
     }
   }
 }
