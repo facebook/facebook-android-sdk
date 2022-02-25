@@ -520,7 +520,7 @@ class Task<TResult> {
     }
   }
 
-  @Deprecated("Please use [com.facebook.bolts.TaskCompletionSource] instead. ")
+  @Deprecated("Please use [TaskCompletionSource] instead. ")
   inner class TaskCompletionSource internal constructor() :
       com.facebook.bolts.TaskCompletionSource<TResult>()
 

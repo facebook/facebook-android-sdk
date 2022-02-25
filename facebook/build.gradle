@@ -130,6 +130,7 @@ repositories {
 tasks.named("dokkaJavadoc").configure {
     dokkaSourceSets {
         named("main").configure {
+            sourceRoots.from(file("../facebook-bolts/src/main"))
             sourceRoots.from(file("../facebook-core/src/main"))
             sourceRoots.from(file("../facebook-common/src/main"))
             sourceRoots.from(file("../facebook-login/src/main"))

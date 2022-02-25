@@ -23,21 +23,15 @@ apply plugin: 'kotlin-android'
 
 project.group = 'com.facebook.android'
 
-project.ext.name = 'Facebook-Core-Android-SDK'
-project.ext.artifactId = "facebook-core"
-project.ext.description = 'Facebook Core Android SDK'
+project.ext.name = 'Facebook-Bolts-Android-SDK'
+project.ext.artifactId = "facebook-bolts"
+project.ext.description = 'Facebook Android SDK Bolts support library'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     def kotlin_ver = project.ext.kotlinVersion
-    api project(':facebook-bolts')
 
-    // Support Dependencies
     implementation "androidx.annotation:annotation:${project.ext.androidxVersion}"
-    implementation "androidx.legacy:legacy-support-core-utils:${project.ext.androidxLegacyVersion}"
-
-    //https://developer.android.com/google/play/installreferrer/library.html#java
-    implementation 'com.android.installreferrer:installreferrer:1.0' //there are issues with 1.1 regarding permissions, asks for unnecessary permissions
     implementation "androidx.core:core-ktx:1.3.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
 
@@ -61,7 +55,6 @@ dependencies {
     testImplementation "com.android.installreferrer:installreferrer:1.0"
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
-    testImplementation 'com.google.android.gms:play-services-gcm:17.0.0'
 
 }
 
@@ -98,15 +91,6 @@ android {
         unitTests.all {
             jvmArgs '-XX:MaxPermSize=1024m'
             maxHeapSize = "4096m"
-            // CrashShieldHandlerDebugTest is only available on Sandcastle and Github Actions
-            // Because local compiling environment may recompile CrashShieldHandler multiple times
-            // and generate false signals
-            if (System.getenv("SANDCASTLE") != "1" && System.getenv("GITHUB_ACTIONS") != "1") {
-                exclude "com/facebook/internal/instrument/crashshield/CrashShieldHandlerDebugTest.class"
-            }
-            if (System.getenv("GITHUB_ACTIONS") == "1") {
-                exclude "com/facebook/appevents/ondeviceprocessing/OnDeviceProcessingManagerTest.class"
-            }
         }
     }
 
@@ -120,10 +104,6 @@ android {
             }
         }
     }
-}
-
-if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
-    project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
 apply from: "${rootDir}/maven.gradle"

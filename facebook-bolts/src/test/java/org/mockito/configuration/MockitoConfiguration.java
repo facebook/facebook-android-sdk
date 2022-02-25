@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -18,32 +18,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Facebook SDK
-include ':facebook-testutil'
-include ':facebook-core'
-include ':facebook-bolts'
-include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-applinks', ':facebook-messenger'
-// @fb-only: include ':facebook-livestreaming'
-// @fb-only: include ':facebook-beta'
-include ':facebook-gamingservices'
-include ':facebook'
+package org.mockito.configuration;
 
-// Samples
-include ':samples:HelloFacebookSample'
-include ':samples:Iconicus'
-// @fb-only: include ':samples:LoginSample'
-include ':samples:RPSSample'
-include ':samples:MessengerSendSample'
-include ':samples:Scrumptious'
-include ':samples:SwitchUserSample'
-include ':samples:ShareIt'
-include ':samples:FBLoginSample'
+public class MockitoConfiguration extends DefaultMockitoConfiguration {
 
-if (file('internal/internal-settings.gradle').exists()) {
-    apply from: 'internal/internal-settings.gradle'
+  @Override
+  public boolean enableClassCache() {
+    return false;
+  }
 }
-
-if (file('local.gradle').exists()) {
-    apply from: 'local.gradle'
-}
-// @fb-only: project(':facebook-beta').projectDir = new File('internal/facebook-beta')
