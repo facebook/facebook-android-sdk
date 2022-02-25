@@ -160,8 +160,12 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
         // This is to work around a bug where CookieManager may fail to instantiate if
         // CookieSyncManager has never been created.
         if (loginClient.activity != null) {
-          val syncManager = CookieSyncManager.createInstance(loginClient.activity)
-          syncManager.sync()
+          try {
+            val syncManager = CookieSyncManager.createInstance(loginClient.activity)
+            syncManager.sync()
+          } catch (e: Exception) {
+            // A crash happens in clearing the cookies. It's likely that webview is not available.
+          }
           if (token != null) {
             saveCookieToken(token.token)
           }

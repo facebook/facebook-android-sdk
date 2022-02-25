@@ -466,10 +466,14 @@ object Utility {
     // setCookie acts differently when trying to expire cookies between builds of Android that
     // are using Chromium HTTP stack and those that are not. Using both of these domains to
     // ensure it works on both.
-    clearCookiesForDomain(context, "facebook.com")
-    clearCookiesForDomain(context, ".facebook.com")
-    clearCookiesForDomain(context, "https://facebook.com")
-    clearCookiesForDomain(context, "https://.facebook.com")
+    try {
+      clearCookiesForDomain(context, "facebook.com")
+      clearCookiesForDomain(context, ".facebook.com")
+      clearCookiesForDomain(context, "https://facebook.com")
+      clearCookiesForDomain(context, "https://.facebook.com")
+    } catch (e: Exception) {
+      // An exception is thrown during cookie clearance. It's likely that webview is not available.
+    }
   }
 
   @JvmStatic
