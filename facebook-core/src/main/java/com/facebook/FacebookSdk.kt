@@ -149,8 +149,8 @@ object FacebookSdk {
   @Volatile private var facebookDomain = FACEBOOK_COM
   private var graphRequestCreator: GraphRequestCreator =
       GraphRequestCreator { accessToken, publishUrl, publishParams, callback ->
-    GraphRequest.newPostRequest(accessToken, publishUrl, publishParams, callback)
-  }
+        GraphRequest.newPostRequest(accessToken, publishUrl, publishParams, callback)
+      }
   private var isFullyInitialized = false
 
   /**
