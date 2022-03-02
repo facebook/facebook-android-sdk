@@ -35,15 +35,16 @@ import java.net.HttpURLConnection
  */
 object ImageResponseCache {
   val TAG = ImageResponseCache::class.java.simpleName
-  private var imageCache: FileLruCache? = null
+  private lateinit var imageCache: FileLruCache
+
   @Synchronized
   @JvmStatic
   @Throws(IOException::class)
   fun getCache(): FileLruCache {
-    if (imageCache == null) {
+    if (!this::imageCache.isInitialized) {
       imageCache = FileLruCache(TAG, FileLruCache.Limits())
     }
-    return checkNotNull(imageCache)
+    return imageCache
   }
 
   // Get stream from cache, or return null if the image is not cached.
