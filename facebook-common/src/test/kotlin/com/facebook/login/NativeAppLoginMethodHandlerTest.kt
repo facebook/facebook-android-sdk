@@ -70,8 +70,8 @@ class NativeAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     override val nameForLogging: String = "test_native_app_login"
   }
 
-  override fun before() {
-    super.before()
+  override fun setup() {
+    super.setup()
     mockExecutor = mock()
     mockLoginClient = mock()
     PowerMockito.mockStatic(FacebookSdk::class.java)

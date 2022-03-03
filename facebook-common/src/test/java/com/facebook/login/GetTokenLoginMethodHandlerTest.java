@@ -43,24 +43,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({LoginClient.class, FacebookSdk.class, OidcSecurityUtil.class})
 public class GetTokenLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   String ID_TOKEN_STRING = AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest();
   String NONCE = AuthenticationTokenTestUtil.NONCE;
 
-  @Before
   @Override
-  public void before() throws Exception {
-    super.before();
+  public void setup() {
+    super.setup();
     PowerMockito.mockStatic(FacebookSdk.class);
     PowerMockito.when(FacebookSdk.getApplicationId())
         .thenReturn(AuthenticationTokenTestUtil.APP_ID);

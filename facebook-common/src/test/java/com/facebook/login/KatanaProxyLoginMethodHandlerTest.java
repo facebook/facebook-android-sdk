@@ -40,24 +40,20 @@ import com.facebook.TestUtils;
 import com.facebook.internal.security.OidcSecurityUtil;
 import java.security.PublicKey;
 import java.util.Date;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({LoginClient.class, FacebookSdk.class, OidcSecurityUtil.class})
 public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
   private static final String SIGNED_REQUEST_STR =
       "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
           + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
 
-  @Before
   @Override
-  public void before() throws Exception {
-    super.before();
+  public void setup() {
+    super.setup();
     PowerMockito.mockStatic(FacebookSdk.class);
     PowerMockito.when(FacebookSdk.getApplicationId())
         .thenReturn(AuthenticationTokenTestUtil.APP_ID);

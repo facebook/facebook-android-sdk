@@ -31,7 +31,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Date
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
@@ -47,10 +46,8 @@ class InstagramAppLoginMethodHandlerTest : LoginHandlerTestCase() {
             "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0"
   }
 
-  @Throws(Exception::class)
-  @Before
-  override fun before() {
-    super.before()
+  override fun setup() {
+    super.setup()
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
     PowerMockito.`when`(FacebookSdk.getApplicationId()).thenReturn("123456789")
