@@ -30,7 +30,7 @@ import android.os.Parcelable
  *
  * Use [SharePhoto.Builder] to build instances
  */
-class SharePhoto : ShareMedia {
+class SharePhoto : ShareMedia<SharePhoto, SharePhoto.Builder> {
   /**
    * If the photo is resident in memory, this method supplies the data.
    *
@@ -86,7 +86,7 @@ class SharePhoto : ShareMedia {
     out.writeString(caption)
   }
 
-  override fun getMediaType(): Type = Type.PHOTO
+  override val mediaType: Type = Type.PHOTO
 
   /** Builder for the [com.facebook.share.model.SharePhoto] class. */
   class Builder : ShareMedia.Builder<SharePhoto, Builder>() {

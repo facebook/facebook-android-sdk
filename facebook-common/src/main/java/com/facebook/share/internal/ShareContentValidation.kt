@@ -215,7 +215,7 @@ object ShareContentValidation {
   }
 
   @JvmStatic
-  fun validateMedium(medium: ShareMedia, validator: Validator) {
+  fun validateMedium(medium: ShareMedia<*, *>, validator: Validator) {
     when (medium) {
       is SharePhoto -> {
         validator.validate(medium)
@@ -442,7 +442,7 @@ object ShareContentValidation {
       validateVideo(video, this)
     }
 
-    open fun validate(medium: ShareMedia) {
+    open fun validate(medium: ShareMedia<*, *>) {
       validateMedium(medium, this)
     }
 

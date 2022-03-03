@@ -26,7 +26,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.share.model.ShareLinkContent
-import com.facebook.share.model.ShareMedia
 import com.facebook.share.model.ShareMediaContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
@@ -105,8 +104,7 @@ class NativeDialogParametersTest : FacebookPowerMockTestCase() {
     val videoUrl = "https://test.net/video1.avi"
     val photo = SharePhoto.Builder().setImageUrl(Uri.parse(photoUrl)).build()
     val video = ShareVideo.Builder().setLocalUrl(Uri.parse(videoUrl)).build()
-    val shareMediaContent =
-        ShareMediaContent.Builder().addMedia(listOf<ShareMedia>(photo, video)).build()
+    val shareMediaContent = ShareMediaContent.Builder().addMedia(listOf(photo, video)).build()
 
     val params = NativeDialogParameters.create(testCallId, shareMediaContent, true)
 

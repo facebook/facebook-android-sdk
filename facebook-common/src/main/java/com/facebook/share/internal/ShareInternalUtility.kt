@@ -440,7 +440,7 @@ object ShareInternalUtility {
 
   private fun getAttachment(
       callId: UUID,
-      medium: ShareMedia
+      medium: ShareMedia<*, *>
   ): NativeAppCallAttachmentStore.Attachment? {
     var bitmap: Bitmap? = null
     var uri: Uri? = null

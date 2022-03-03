@@ -25,7 +25,7 @@ import android.os.Parcelable
 import java.lang.IllegalArgumentException
 
 class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Builder> {
-  val media: List<ShareMedia>
+  val media: List<ShareMedia<*, *>>
 
   private constructor(builder: Builder) : super(builder) {
     media = builder.media.toList()
@@ -34,7 +34,7 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
   internal constructor(source: Parcel) : super(source) {
     this.media =
         source.readParcelableArray(ShareMedia::class.java.classLoader)?.mapNotNull {
-          it as ShareMedia?
+          it as ShareMedia<*, *>?
         }
             ?: listOf()
   }
@@ -48,7 +48,7 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
 
   /** Builder for the [SharePhotoContent] interface. */
   class Builder : ShareContent.Builder<ShareMediaContent, Builder>() {
-    internal val media: MutableList<ShareMedia> = ArrayList()
+    internal val media: MutableList<ShareMedia<*, *>> = ArrayList()
 
     /**
      * Adds a medium to the content.
@@ -56,9 +56,9 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
      * @param medium [com.facebook.share.model.ShareMedia] to add.
      * @return The builder.
      */
-    fun addMedium(medium: ShareMedia?): Builder {
+    fun addMedium(medium: ShareMedia<*, *>?): Builder {
       if (medium != null) {
-        val mediumToAdd: ShareMedia =
+        val mediumToAdd: ShareMedia<*, *> =
             when (medium) {
               is SharePhoto -> {
                 SharePhoto.Builder().readFrom(medium).build()
@@ -81,7 +81,7 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
      * @param media [java.util.List] of [com.facebook.share.model.ShareMedia] to add.
      * @return The builder.
      */
-    fun addMedia(media: List<ShareMedia>?): Builder {
+    fun addMedia(media: List<ShareMedia<*, *>>?): Builder {
       if (media != null) {
         for (medium in media) {
           addMedium(medium)
@@ -106,7 +106,7 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
      * @param media [java.util.List] of [com.facebook.share.model.ShareMedia] to add.
      * @return The builder.
      */
-    fun setMedia(media: List<ShareMedia>?): Builder {
+    fun setMedia(media: List<ShareMedia<*, *>>?): Builder {
       this.media.clear()
       addMedia(media)
       return this

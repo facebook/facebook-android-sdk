@@ -29,7 +29,7 @@ import android.os.Parcelable
  *
  * Use [ShareVideo.Builder] to create instances
  */
-class ShareVideo : ShareMedia {
+class ShareVideo : ShareMedia<ShareVideo, ShareVideo.Builder> {
   /**
    * This method supplies the URL to locate the video.
    *
@@ -52,7 +52,7 @@ class ShareVideo : ShareMedia {
     out.writeParcelable(localUrl, 0)
   }
 
-  override fun getMediaType(): Type = Type.VIDEO
+  override val mediaType: Type = Type.VIDEO
 
   /** Builder for the [com.facebook.share.model.ShareVideo] class. */
   class Builder : ShareMedia.Builder<ShareVideo, Builder>() {

@@ -31,7 +31,7 @@ import org.junit.Test
 class ShareMediaContentTest : FacebookTestCase() {
   private lateinit var testPhoto: SharePhoto
   private lateinit var testVideo: ShareVideo
-  private lateinit var mockUnknownMedium: ShareMedia
+  private lateinit var mockUnknownMedium: ShareMedia<*, *>
 
   override fun setUp() {
     super.setUp()
