@@ -38,6 +38,7 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.DialogFragment;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
@@ -57,8 +58,6 @@ import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -68,15 +67,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class DeviceAuthDialog extends DialogFragment {
-  private static final String DEVICE_LOGIN_ENDPOINT = "device/login";
-  private static final String DEVICE_LOGIN_STATUS_ENDPOINT = "device/login_status";
+  @VisibleForTesting static final String DEVICE_LOGIN_ENDPOINT = "device/login";
+  @VisibleForTesting static final String DEVICE_LOGIN_STATUS_ENDPOINT = "device/login_status";
   private static final String REQUEST_STATE_KEY = "request_state";
 
   private static final int LOGIN_ERROR_SUBCODE_EXCESSIVE_POLLING = 1349172;
   private static final int LOGIN_ERROR_SUBCODE_AUTHORIZATION_DECLINED = 1349173;
-  private static final int LOGIN_ERROR_SUBCODE_AUTHORIZATION_PENDING = 1349174;
+  @VisibleForTesting static final int LOGIN_ERROR_SUBCODE_AUTHORIZATION_PENDING = 1349174;
   private static final int LOGIN_ERROR_SUBCODE_CODE_EXPIRED = 1349152;
 
   private View progressBar;
@@ -190,11 +188,10 @@ public class DeviceAuthDialog extends DialogFragment {
         DeviceRequestsHelper.getDeviceInfo(additionalDeviceInfo()));
 
     GraphRequest graphRequest =
-        new GraphRequest(
+        GraphRequest.newPostRequestWithBundle(
             null,
             DEVICE_LOGIN_ENDPOINT,
             parameters,
-            HttpMethod.POST,
             new GraphRequest.Callback() {
               @Override
               public void onCompleted(GraphResponse response) {
@@ -303,11 +300,10 @@ public class DeviceAuthDialog extends DialogFragment {
   private GraphRequest getPollRequest() {
     Bundle parameters = new Bundle();
     parameters.putString("code", currentRequestState.getRequestCode());
-    return new GraphRequest(
+    return GraphRequest.newPostRequestWithBundle(
         null,
         DEVICE_LOGIN_STATUS_ENDPOINT,
         parameters,
-        HttpMethod.POST,
         new GraphRequest.Callback() {
           @Override
           public void onCompleted(GraphResponse response) {
@@ -431,11 +427,9 @@ public class DeviceAuthDialog extends DialogFragment {
             dataAccessExpirationTimeDate);
 
     GraphRequest request =
-        new GraphRequest(
+        GraphRequest.newGraphPathRequest(
             temporaryToken,
             "me",
-            parameters,
-            HttpMethod.GET,
             new GraphRequest.Callback() {
               @Override
               public void onCompleted(GraphResponse response) {
@@ -483,6 +477,8 @@ public class DeviceAuthDialog extends DialogFragment {
                     userId, permissions, accessToken, expirationTime, dataAccessExpirationTimeDate);
               }
             });
+    request.setHttpMethod(HttpMethod.GET);
+    request.setParameters(parameters);
     request.executeAsync();
   }
 

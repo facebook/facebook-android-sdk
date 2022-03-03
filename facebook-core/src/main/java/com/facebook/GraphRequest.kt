@@ -351,6 +351,26 @@ class GraphRequest {
     }
 
     /**
+     * Creates a new Request configured to post some parameters to a particular graph path.
+     *
+     * @param accessToken the access token to use, or null
+     * @param graphPath the graph path to retrieve, create, or delete
+     * @param parameters the parameters to be carried in the request
+     * @param callback a callback that will be called when the request is completed to handle
+     * success or error conditions
+     * @return a Request that is ready to execute
+     */
+    @JvmStatic
+    fun newPostRequestWithBundle(
+        accessToken: AccessToken?,
+        graphPath: String?,
+        parameters: Bundle?,
+        callback: Callback?
+    ): GraphRequest {
+      return GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback)
+    }
+
+    /**
      * Creates a new Request configured to retrieve a user's friend list.
      *
      * @param accessToken the access token to use, or null
