@@ -294,7 +294,7 @@ open class DeviceAuthDialog : DialogFragment() {
 
   private fun presentConfirmation(
       userId: String,
-      permissions: Utility.PermissionsLists,
+      permissions: PermissionsLists,
       accessToken: String,
       name: String,
       expirationTime: Date?,
@@ -354,12 +354,12 @@ open class DeviceAuthDialog : DialogFragment() {
                 return@Callback
               }
               val userId: String
-              val permissions: Utility.PermissionsLists
+              val permissions: PermissionsLists
               val name: String
               try {
                 val jsonObject = response.getJSONObject() ?: JSONObject()
                 userId = jsonObject.getString("id")
-                permissions = Utility.handlePermissionResponse(jsonObject)
+                permissions = handlePermissionResponse(jsonObject)
                 name = jsonObject.getString("name")
               } catch (ex: JSONException) {
                 onError(FacebookException(ex))
@@ -394,7 +394,7 @@ open class DeviceAuthDialog : DialogFragment() {
 
   private fun completeLogin(
       userId: String,
-      permissions: Utility.PermissionsLists,
+      permissions: PermissionsLists,
       accessToken: String,
       expirationTime: Date?,
       dataAccessExpirationTime: Date?
@@ -513,5 +513,44 @@ open class DeviceAuthDialog : DialogFragment() {
 
     @VisibleForTesting internal val LOGIN_ERROR_SUBCODE_AUTHORIZATION_PENDING = 1349174
     private const val LOGIN_ERROR_SUBCODE_CODE_EXPIRED = 1349152
+
+    @Throws(JSONException::class)
+    private fun handlePermissionResponse(result: JSONObject): PermissionsLists {
+      val permissions = result.getJSONObject("permissions")
+      val data = permissions.getJSONArray("data")
+      val grantedPermissions = arrayListOf<String>()
+      val declinedPermissions = arrayListOf<String>()
+      val expiredPermissions = arrayListOf<String>()
+      for (i in 0 until data.length()) {
+        val obj = data.optJSONObject(i)
+        val permission = obj.optString("permission")
+        if (permission.isEmpty() || permission == "installed") {
+          continue
+        }
+        when (obj.optString("status")) {
+          "granted" -> {
+            grantedPermissions.add(permission)
+          }
+          "declined" -> {
+            declinedPermissions.add(permission)
+          }
+          "expired" -> {
+            expiredPermissions.add(permission)
+          }
+          else -> continue
+        }
+      }
+      return PermissionsLists(grantedPermissions, declinedPermissions, expiredPermissions)
+    }
   }
+
+  /**
+   * Internal helper class that is used to hold three different permission lists (granted, declined
+   * and expired)
+   */
+  private class PermissionsLists(
+      var grantedPermissions: List<String>,
+      var declinedPermissions: List<String>,
+      var expiredPermissions: List<String>
+  )
 }

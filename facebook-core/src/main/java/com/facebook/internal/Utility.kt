@@ -1122,32 +1122,6 @@ object Utility {
     return !(connectionResult !is Int || connectionResult != 0)
   }
 
-  @Throws(JSONException::class)
-  @JvmStatic
-  fun handlePermissionResponse(result: JSONObject): PermissionsLists {
-    val permissions = result.getJSONObject("permissions")
-    val data = permissions.getJSONArray("data")
-    val grantedPermissions: MutableList<String> = ArrayList(data.length())
-    val declinedPermissions: MutableList<String> = ArrayList(data.length())
-    val expiredPermissions: MutableList<String> = ArrayList(data.length())
-    for (i in 0 until data.length()) {
-      val obj = data.optJSONObject(i)
-      val permission = obj.optString("permission")
-      if (permission == null || permission == "installed") {
-        continue
-      }
-      val status = obj.optString("status") ?: continue
-      if (status == "granted") {
-        grantedPermissions.add(permission)
-      } else if (status == "declined") {
-        declinedPermissions.add(permission)
-      } else if (status == "expired") {
-        expiredPermissions.add(permission)
-      }
-    }
-    return PermissionsLists(grantedPermissions, declinedPermissions, expiredPermissions)
-  }
-
   @JvmStatic
   fun generateRandomString(length: Int): String {
     val r = Random()
@@ -1298,14 +1272,4 @@ object Utility {
     fun onSuccess(userInfo: JSONObject?)
     fun onFailure(error: FacebookException?)
   }
-
-  /**
-   * Internal helper class that is used to hold three different permission lists (granted, declined
-   * and expired)
-   */
-  class PermissionsLists(
-      var grantedPermissions: List<String>,
-      var declinedPermissions: List<String>,
-      var expiredPermissions: List<String>
-  )
 }
