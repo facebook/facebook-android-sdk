@@ -32,6 +32,8 @@ import com.facebook.internal.NativeProtocol
  * See the documentation for
  * [Open Graph Objects](https://developers.facebook.com/docs/opengraph/objects/).
  */
+@Deprecated(
+    "Effective May 1st 2019, all newly published Open Graph stories will render as a plain link share in newsfeed. This means that Open Graph actions will not appear when posting.")
 class ShareOpenGraphObject :
     ShareOpenGraphValueContainer<ShareOpenGraphObject, ShareOpenGraphObject.Builder> {
   private constructor(builder: Builder) : super(builder)

@@ -33,8 +33,12 @@ import java.util.Set;
  * Provides an abstract class to contain Open Graph values.
  *
  * <p>Use {@link ShareOpenGraphValueContainer.Builder} to create instances
+ *
+ * @deprecated Effective May 1st 2019, all newly published Open Graph stories will render as a plain
+ *     link share in newsfeed. This means that Open Graph actions will not appear when posting.
  */
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
+@Deprecated
 public abstract class ShareOpenGraphValueContainer<
         P extends ShareOpenGraphValueContainer, E extends ShareOpenGraphValueContainer.Builder>
     implements ShareModel {

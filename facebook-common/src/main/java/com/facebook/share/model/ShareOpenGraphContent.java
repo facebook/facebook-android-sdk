@@ -33,8 +33,12 @@ import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
  * <p>See the documentation for <a href="https://developers.facebook.com/docs/opengraph">Open
  * Graph</a> and for <a href="https://developers.facebook.com/docs/sharing/best-practices">best
  * practices</a>.
+ *
+ * @deprecated Effective May 1st 2019, all newly published Open Graph stories will render as a plain
+ *     link share in newsfeed. This means that Open Graph actions will not appear when posting.
  */
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
+@Deprecated
 public final class ShareOpenGraphContent
     extends ShareContent<ShareOpenGraphContent, ShareOpenGraphContent.Builder> {
   private final ShareOpenGraphAction action;
