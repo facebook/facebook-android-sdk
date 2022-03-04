@@ -17,25 +17,22 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.share.model
 
-package com.facebook.share.model;
-
-import android.os.Bundle;
-import android.os.Parcel;
-import androidx.annotation.Nullable;
-import java.util.Set;
+import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 
 /** This class represents a set of Arguments that are used to configure an Effect in the Camera. */
-public class CameraEffectArguments implements ShareModel {
+class CameraEffectArguments : ShareModel {
+  private val params: Bundle?
 
-  private final Bundle params;
-
-  private CameraEffectArguments(final Builder builder) {
-    params = builder.params;
+  private constructor(builder: Builder) {
+    params = builder.params
   }
 
-  CameraEffectArguments(final Parcel parcel) {
-    params = parcel.readBundle(getClass().getClassLoader());
+  internal constructor(parcel: Parcel) {
+    params = parcel.readBundle(javaClass.classLoader)
   }
 
   /**
@@ -44,27 +41,24 @@ public class CameraEffectArguments implements ShareModel {
    *
    * @param key Key for the value desired.
    * @return The String associated with the passed in key, or null if the key does not exist or if
-   *     the value is not a String.
+   * the value is not a String.
    */
-  @Nullable
-  public String getString(final String key) {
-    return params.getString(key);
+  fun getString(key: String?): String? {
+    return params?.getString(key)
   }
 
-  @Nullable
   /**
    * Returns the value of a String[] argument associated with the passed in key. If the key does not
    * exist, or if it points to an object that is not a String[], null will be returned.
    *
    * @param key Key for the value desired.
    * @return The String[] associated with the passed in key, or null if the key does not exist or if
-   *     the value is not a String[].
+   * the value is not a String[].
    */
-  public String[] getStringArray(final String key) {
-    return params.getStringArray(key);
+  fun getStringArray(key: String?): Array<String>? {
+    return params?.getStringArray(key)
   }
 
-  @Nullable
   /**
    * Returns the value of the argument associated with the passed in key. If the key does not exist,
    * null will be returned
@@ -72,8 +66,8 @@ public class CameraEffectArguments implements ShareModel {
    * @param key Key for the value desired.
    * @return The value associated with the passed in key, or null if the key does not exist.
    */
-  public Object get(final String key) {
-    return this.params.get(key);
+  operator fun get(key: String?): Any? {
+    return params?.get(key)
   }
 
   /**
@@ -81,35 +75,21 @@ public class CameraEffectArguments implements ShareModel {
    *
    * @return The set of keys that have been set in this instance of CameraEffectArguments
    */
-  public Set<String> keySet() {
-    return this.params.keySet();
+  fun keySet(): Set<String> {
+    return params?.keySet() ?: setOf()
   }
 
-  @Override
-  public int describeContents() {
-    return 0;
+  override fun describeContents(): Int {
+    return 0
   }
 
-  @Override
-  public void writeToParcel(final Parcel out, final int flags) {
-    out.writeBundle(params);
+  override fun writeToParcel(out: Parcel, flags: Int) {
+    out.writeBundle(params)
   }
 
-  public static final Creator<CameraEffectArguments> CREATOR =
-      new Creator<CameraEffectArguments>() {
-        public CameraEffectArguments createFromParcel(final Parcel parcel) {
-          return new CameraEffectArguments(parcel);
-        }
-
-        public CameraEffectArguments[] newArray(final int size) {
-          return new CameraEffectArguments[size];
-        }
-      };
-
-  /** Builder for the {@link com.facebook.share.model.CameraEffectArguments} class. */
-  public static class Builder implements ShareModelBuilder<CameraEffectArguments, Builder> {
-
-    private Bundle params = new Bundle();
+  /** Builder for the [com.facebook.share.model.CameraEffectArguments] class. */
+  class Builder : ShareModelBuilder<CameraEffectArguments, Builder> {
+    internal val params = Bundle()
 
     /**
      * Sets the passed in value for the passed in key. This will override any previous calls with
@@ -119,9 +99,9 @@ public class CameraEffectArguments implements ShareModel {
      * @param value Value of the argument
      * @return This Builder instance
      */
-    public Builder putArgument(final String key, final String value) {
-      params.putString(key, value);
-      return this;
+    fun putArgument(key: String, value: String): Builder {
+      params.putString(key, value)
+      return this
     }
 
     /**
@@ -132,23 +112,23 @@ public class CameraEffectArguments implements ShareModel {
      * @param arrayValue Value of the argument
      * @return This Builder instance
      */
-    public Builder putArgument(final String key, final String[] arrayValue) {
-      params.putStringArray(key, arrayValue);
-      return this;
+    fun putArgument(key: String, arrayValue: Array<String>): Builder {
+      params.putStringArray(key, arrayValue)
+      return this
     }
 
-    @Override
-    public Builder readFrom(final CameraEffectArguments model) {
+    override fun readFrom(model: CameraEffectArguments?): Builder {
       if (model != null) {
-        this.params.putAll(model.params);
+        params.putAll(model.params)
       }
-      return this;
+      return this
     }
 
-    public Builder readFrom(final Parcel parcel) {
+    /** This method is for internal use only. */
+    fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(
-          (CameraEffectArguments)
-              parcel.readParcelable(CameraEffectArguments.class.getClassLoader()));
+          parcel.readParcelable(CameraEffectArguments::class.java.classLoader) as
+              CameraEffectArguments?)
     }
 
     /**
@@ -157,9 +137,22 @@ public class CameraEffectArguments implements ShareModel {
      *
      * @return A new instance of CameraEffectArguments.
      */
-    @Override
-    public CameraEffectArguments build() {
-      return new CameraEffectArguments(this);
+    override fun build(): CameraEffectArguments {
+      return CameraEffectArguments(this)
     }
+  }
+
+  companion object {
+    @JvmField
+    val CREATOR: Parcelable.Creator<CameraEffectArguments> =
+        object : Parcelable.Creator<CameraEffectArguments> {
+          override fun createFromParcel(parcel: Parcel): CameraEffectArguments {
+            return CameraEffectArguments(parcel)
+          }
+
+          override fun newArray(size: Int): Array<CameraEffectArguments?> {
+            return arrayOfNulls(size)
+          }
+        }
   }
 }
