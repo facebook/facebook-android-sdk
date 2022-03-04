@@ -22,11 +22,8 @@ package com.facebook.share.model;
 import android.net.Uri;
 import android.os.Parcel;
 import androidx.annotation.Nullable;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** Provides a data model class for a Messenger share URL action button. */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareMessengerURLActionButton extends ShareMessengerActionButton {
 
   /** The display height ratio of the webview when shown in the Messenger app. */
@@ -88,6 +85,17 @@ public final class ShareMessengerURLActionButton extends ShareMessengerActionBut
   /** Get whether the webview shows the share button. */
   public boolean getShouldHideWebviewShareButton() {
     return this.shouldHideWebviewShareButton;
+  }
+
+  @Override
+  public void writeToParcel(Parcel out, int flags) {
+    super.writeToParcel(out, flags);
+
+    out.writeParcelable(url, 0);
+    out.writeByte((byte) (isMessengerExtensionURL ? 1 : 0));
+    out.writeParcelable(fallbackUrl, 0);
+    out.writeSerializable(webviewHeightRatio);
+    out.writeByte((byte) (shouldHideWebviewShareButton ? 1 : 0));
   }
 
   @SuppressWarnings("unused")
