@@ -492,10 +492,10 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
      *
      * The user ID will be persisted between application instances.
      *
-     * @param userID A User ID
+     * @param userID A User ID, or null to clear the User ID
      */
     @JvmStatic
-    fun setUserID(userID: String) {
+    fun setUserID(userID: String?) {
       AnalyticsUserIDStore.setUserID(userID)
     }
 
