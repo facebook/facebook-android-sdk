@@ -453,9 +453,7 @@ open class LoginClient : Parcelable {
       this.codeChallengeMethod = codeChallengeMethod
     }
 
-    fun shouldSkipAccountDeduplication(): Boolean {
-      return shouldSkipAccountDeduplication
-    }
+    fun shouldSkipAccountDeduplication(): Boolean = shouldSkipAccountDeduplication
 
     fun setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication: Boolean) {
       this.shouldSkipAccountDeduplication = shouldSkipAccountDeduplication

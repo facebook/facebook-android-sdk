@@ -177,9 +177,7 @@ open class DeviceAuthDialog : DialogFragment() {
   }
 
   /** Additional device information for this device auth. It's only for internal use. */
-  open fun additionalDeviceInfo(): Map<String, String>? {
-    return null
-  }
+  open fun additionalDeviceInfo(): Map<String, String>? = null
 
   private fun setCurrentRequestState(currentRequestState: RequestState) {
     this.currentRequestState = currentRequestState
@@ -445,9 +443,7 @@ open class DeviceAuthDialog : DialogFragment() {
     var interval: Long = 0
     private var lastPoll: Long = 0
     internal constructor()
-    fun getUserCode(): String? {
-      return userCode
-    }
+    fun getUserCode(): String? = userCode
 
     fun setUserCode(userCode: String?) {
       this.userCode = userCode
@@ -476,9 +472,7 @@ open class DeviceAuthDialog : DialogFragment() {
       return diff < 0
     }
 
-    override fun describeContents(): Int {
-      return 0
-    }
+    override fun describeContents(): Int = 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
       dest.writeString(authorizationUri)

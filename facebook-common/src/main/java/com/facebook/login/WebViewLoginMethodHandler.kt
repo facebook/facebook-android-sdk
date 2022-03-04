@@ -122,9 +122,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
      * @deprecated This is no longer used
      * @return the AuthDialogBuilder
      */
-    fun setIsRerequest(isRerequest: Boolean): AuthDialogBuilder {
-      return this
-    }
+    fun setIsRerequest(isRerequest: Boolean): AuthDialogBuilder = this
 
     fun setIsChromeOS(isChromeOS: Boolean): AuthDialogBuilder {
       this.redirect_uri =

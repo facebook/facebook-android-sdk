@@ -64,9 +64,7 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
   private val developerDefinedRedirectURI: String
     get() = super.getRedirectUrl()
 
-  override fun getRedirectUrl(): String {
-    return validRedirectURI
-  }
+  override fun getRedirectUrl(): String = validRedirectURI
 
   override fun getSSODevice(): String? = "chrome_custom_tab"
 
@@ -203,9 +201,7 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
     }
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   internal constructor(source: Parcel) : super(source) {
     expectedChallenge = source.readString()

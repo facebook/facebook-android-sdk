@@ -17,6 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.facebook.login
 
 import android.app.Activity
@@ -1164,9 +1165,7 @@ open class LoginManager internal constructor() {
           activityResultRegistryOwner.activityResultRegistry.register<Intent, Pair<Int, Intent>>(
               "facebook-login",
               object : ActivityResultContract<Intent, Pair<Int, Intent>>() {
-                override fun createIntent(context: Context, input: Intent): Intent {
-                  return input
-                }
+                override fun createIntent(context: Context, input: Intent): Intent = input
 
                 override fun parseResult(resultCode: Int, intent: Intent?): Pair<Int, Intent> {
                   return Pair.create(resultCode, intent)

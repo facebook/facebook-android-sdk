@@ -41,9 +41,7 @@ class DeviceAuthMethodHandlerTest : FacebookPowerMockTestCase() {
       loginClient: LoginClient,
       private val mockDeviceAuthDialog: DeviceAuthDialog
   ) : DeviceAuthMethodHandler(loginClient) {
-    override fun createDeviceAuthDialog(): DeviceAuthDialog {
-      return mockDeviceAuthDialog
-    }
+    override fun createDeviceAuthDialog(): DeviceAuthDialog = mockDeviceAuthDialog
   }
 
   private lateinit var mockDeviceAuthDialog: DeviceAuthDialog

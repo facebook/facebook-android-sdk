@@ -40,9 +40,7 @@ class ShareHashtag : ShareModel {
     hashtag = parcel.readString()
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
     dest.writeString(hashtag)
