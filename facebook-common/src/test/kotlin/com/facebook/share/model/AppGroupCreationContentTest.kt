@@ -69,9 +69,10 @@ class AppGroupCreationContentTest : FacebookTestCase() {
     val recoveredContent =
         parcel.readParcelable<AppGroupCreationContent>(
             AppGroupCreationContent::class.java.classLoader)
-    assertThat(recoveredContent?.name).isEqualTo(appGroupCreationContent.name)
-    assertThat(recoveredContent?.description).isEqualTo(appGroupCreationContent.description)
-    assertThat(recoveredContent?.appGroupPrivacy).isEqualTo(appGroupCreationContent.appGroupPrivacy)
+    checkNotNull(recoveredContent)
+    assertThat(recoveredContent.name).isEqualTo(appGroupCreationContent.name)
+    assertThat(recoveredContent.description).isEqualTo(appGroupCreationContent.description)
+    assertThat(recoveredContent.appGroupPrivacy).isEqualTo(appGroupCreationContent.appGroupPrivacy)
     parcel.recycle()
   }
 
@@ -79,8 +80,9 @@ class AppGroupCreationContentTest : FacebookTestCase() {
   fun `test builder read from existing content`() {
     val recoveredContent =
         AppGroupCreationContent.Builder().readFrom(appGroupCreationContent).build()
-    assertThat(recoveredContent?.name).isEqualTo(appGroupCreationContent.name)
-    assertThat(recoveredContent?.description).isEqualTo(appGroupCreationContent.description)
-    assertThat(recoveredContent?.appGroupPrivacy).isEqualTo(appGroupCreationContent.appGroupPrivacy)
+    checkNotNull(recoveredContent)
+    assertThat(recoveredContent.name).isEqualTo(appGroupCreationContent.name)
+    assertThat(recoveredContent.description).isEqualTo(appGroupCreationContent.description)
+    assertThat(recoveredContent.appGroupPrivacy).isEqualTo(appGroupCreationContent.appGroupPrivacy)
   }
 }

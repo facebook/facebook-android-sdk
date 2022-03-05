@@ -51,7 +51,8 @@ class ShareVideoTest : FacebookTestCase() {
     parcel.setDataPosition(0)
 
     val recoveredContent = parcel.readParcelable<ShareVideo>(ShareVideo::class.java.classLoader)
-    assertThat(recoveredContent?.localUrl).isEqualTo(shareVideo.localUrl)
+    checkNotNull(recoveredContent)
+    assertThat(recoveredContent.localUrl).isEqualTo(shareVideo.localUrl)
     parcel.recycle()
   }
 

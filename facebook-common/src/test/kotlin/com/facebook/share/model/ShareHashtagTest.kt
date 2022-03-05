@@ -50,7 +50,8 @@ class ShareHashtagTest : FacebookTestCase() {
     parcel.setDataPosition(0)
 
     val recoveredContent = parcel.readParcelable<ShareHashtag>(ShareHashtag::class.java.classLoader)
-    assertThat(recoveredContent?.hashtag).isEqualTo(shareHashtag.hashtag)
+    checkNotNull(recoveredContent)
+    assertThat(recoveredContent.hashtag).isEqualTo(shareHashtag.hashtag)
     parcel.recycle()
   }
 

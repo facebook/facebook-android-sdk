@@ -78,9 +78,10 @@ class CameraEffectTexturesTest : FacebookTestCase() {
 
     val recoveredContent =
         parcel.readParcelable<CameraEffectTextures>(CameraEffectTextures::class.java.classLoader)
-    assertThat(recoveredContent?.getTextureBitmap("bitmap")).isNotNull
-    assertThat(recoveredContent?.getTextureUri("uri")).isEqualTo(uri)
-    assertThat(recoveredContent?.keySet()).isEqualTo(setOf("bitmap", "uri"))
+    checkNotNull(recoveredContent)
+    assertThat(recoveredContent.getTextureBitmap("bitmap")).isNotNull
+    assertThat(recoveredContent.getTextureUri("uri")).isEqualTo(uri)
+    assertThat(recoveredContent.keySet()).isEqualTo(setOf("bitmap", "uri"))
     parcel.recycle()
   }
 

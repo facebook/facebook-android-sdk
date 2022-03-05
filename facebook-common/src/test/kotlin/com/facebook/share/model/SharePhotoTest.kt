@@ -56,10 +56,10 @@ class SharePhotoTest : FacebookTestCase() {
             .build()
 
     assertThat(sharePhoto.imageUrl).isNull()
-    assertThat(sharePhoto.bitmap).isNotNull
-    assertThat(sharePhoto.bitmap?.width).isEqualTo(1)
-    assertThat(sharePhoto.bitmap?.height).isEqualTo(2)
-    assertThat(sharePhoto.bitmap?.config).isEqualTo(Bitmap.Config.ALPHA_8)
+    val bitmap = checkNotNull(sharePhoto.bitmap)
+    assertThat(bitmap.width).isEqualTo(1)
+    assertThat(bitmap.height).isEqualTo(2)
+    assertThat(bitmap.config).isEqualTo(Bitmap.Config.ALPHA_8)
     assertThat(sharePhoto.caption).isEqualTo(testCaption)
     assertThat(sharePhoto.userGenerated).isTrue
   }
@@ -84,10 +84,10 @@ class SharePhotoTest : FacebookTestCase() {
     val sharePhoto = SharePhoto.Builder().readFrom(testSharePhoto).build()
 
     assertThat(sharePhoto.imageUrl.toString()).isEqualTo(testImageUri.toString())
-    assertThat(sharePhoto.bitmap).isNotNull
-    assertThat(sharePhoto.bitmap?.width).isEqualTo(1)
-    assertThat(sharePhoto.bitmap?.height).isEqualTo(2)
-    assertThat(sharePhoto.bitmap?.config).isEqualTo(Bitmap.Config.ALPHA_8)
+    val bitmap = checkNotNull(sharePhoto.bitmap)
+    assertThat(bitmap.width).isEqualTo(1)
+    assertThat(bitmap.height).isEqualTo(2)
+    assertThat(bitmap.config).isEqualTo(Bitmap.Config.ALPHA_8)
     assertThat(sharePhoto.caption).isEqualTo(testCaption)
     assertThat(sharePhoto.userGenerated).isTrue
   }
@@ -102,10 +102,10 @@ class SharePhotoTest : FacebookTestCase() {
 
     checkNotNull(sharePhoto)
     assertThat(sharePhoto.imageUrl.toString()).isEqualTo(testImageUri.toString())
-    assertThat(sharePhoto.bitmap).isNotNull
-    assertThat(sharePhoto.bitmap?.width).isEqualTo(1)
-    assertThat(sharePhoto.bitmap?.height).isEqualTo(2)
-    assertThat(sharePhoto.bitmap?.config).isEqualTo(Bitmap.Config.ALPHA_8)
+    val bitmap = checkNotNull(sharePhoto.bitmap)
+    assertThat(bitmap.width).isEqualTo(1)
+    assertThat(bitmap.height).isEqualTo(2)
+    assertThat(bitmap.config).isEqualTo(Bitmap.Config.ALPHA_8)
     assertThat(sharePhoto.caption).isEqualTo(testCaption)
     assertThat(sharePhoto.userGenerated).isTrue
 
