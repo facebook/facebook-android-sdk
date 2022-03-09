@@ -161,7 +161,7 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
   }
 
   protected val activityContext: Activity?
-    protected get() = activity ?: fragmentWrapper?.activity
+    get() = activity ?: fragmentWrapper?.activity
 
   protected fun startActivityForResult(intent: Intent, requestCode: Int) {
     var error: String? = null

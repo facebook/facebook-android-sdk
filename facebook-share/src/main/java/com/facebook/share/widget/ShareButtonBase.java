@@ -28,7 +28,6 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookButtonBase;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.FacebookDialogBase;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.model.ShareContent;
@@ -172,7 +171,7 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
     };
   }
 
-  protected abstract FacebookDialogBase<ShareContent, Sharer.Result> getDialog();
+  protected abstract ShareDialog getDialog();
 
   private void internalSetEnabled(boolean enabled) {
     setEnabled(enabled);
