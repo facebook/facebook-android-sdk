@@ -28,6 +28,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
@@ -38,8 +39,6 @@ import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeAppCallAttachmentStore;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.CameraEffectFeature;
 import com.facebook.share.internal.LegacyNativeDialogParameters;
@@ -65,7 +64,6 @@ import java.util.List;
 import java.util.UUID;
 
 /** Provides functionality to share content via the Facebook Share Dialog */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ShareDialog extends FacebookDialogBase<ShareContent, Sharer.Result>
     implements Sharer {
 
@@ -176,7 +174,7 @@ public final class ShareDialog extends FacebookDialogBase<ShareContent, Sharer.R
       } catch (Exception e) {
         Utility.logd(
             TAG,
-            "canShow returned false because the content of the Opem Graph object"
+            "canShow returned false because the content of the Open Graph object"
                 + " can't be shared via the web dialog",
             e);
         return false;
@@ -191,9 +189,7 @@ public final class ShareDialog extends FacebookDialogBase<ShareContent, Sharer.R
    * @param activity Activity to use to share the provided content.
    */
   public ShareDialog(Activity activity) {
-    super(activity, DEFAULT_REQUEST_CODE);
-
-    ShareInternalUtility.registerStaticShareCallback(DEFAULT_REQUEST_CODE);
+    this(activity, DEFAULT_REQUEST_CODE);
   }
 
   /**
@@ -215,9 +211,7 @@ public final class ShareDialog extends FacebookDialogBase<ShareContent, Sharer.R
   }
 
   private ShareDialog(FragmentWrapper fragmentWrapper) {
-    super(fragmentWrapper, DEFAULT_REQUEST_CODE);
-
-    ShareInternalUtility.registerStaticShareCallback(DEFAULT_REQUEST_CODE);
+    this(fragmentWrapper, DEFAULT_REQUEST_CODE);
   }
 
   // for ShareDialog use only
@@ -603,7 +597,8 @@ public final class ShareDialog extends FacebookDialogBase<ShareContent, Sharer.R
       contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_UNKNOWN;
     }
 
-    InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+    InternalAppEventsLogger logger =
+        InternalAppEventsLogger.createInstance(context, FacebookSdk.getApplicationId());
     Bundle parameters = new Bundle();
     parameters.putString(AnalyticsEvents.PARAMETER_SHARE_DIALOG_SHOW, displayType);
     parameters.putString(AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_TYPE, contentType);
