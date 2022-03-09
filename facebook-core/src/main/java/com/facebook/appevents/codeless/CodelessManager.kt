@@ -31,7 +31,7 @@ import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.FacebookSdk.getApplicationId
 import com.facebook.FacebookSdk.getCodelessSetupEnabled
 import com.facebook.FacebookSdk.getExecutor
-import com.facebook.GraphRequest.Companion.newPostRequest
+import com.facebook.GraphRequest
 import com.facebook.appevents.codeless.internal.Constants
 import com.facebook.appevents.internal.AppEventUtility.isEmulator
 import com.facebook.core.BuildConfig
@@ -66,12 +66,12 @@ object CodelessManager {
     val appId = getApplicationId()
     val appSettings = getAppSettingsWithoutQuery(appId)
     if (appSettings?.codelessEventsEnabled == true || isDebugOnEmulator()) {
-      sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager?
-      if (sensorManager == null) {
-        return
-      }
-      val accelerometer = checkNotNull(sensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-      viewIndexer = ViewIndexer(activity)
+      val sensorManager =
+          applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager? ?: return
+      this.sensorManager = sensorManager
+      val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+      val viewIndexer = ViewIndexer(activity)
+      this.viewIndexer = viewIndexer
       viewIndexingTrigger.setOnShakeListener {
         val codelessEventsEnabled = appSettings != null && appSettings.codelessEventsEnabled
         val codelessSetupEnabled = (getCodelessSetupEnabled() || BuildConfig.DEBUG && isEmulator())
@@ -79,10 +79,10 @@ object CodelessManager {
           checkCodelessSession(appId)
         }
       }
-      checkNotNull(sensorManager)
-          .registerListener(viewIndexingTrigger, accelerometer, SensorManager.SENSOR_DELAY_UI)
+      sensorManager.registerListener(
+          viewIndexingTrigger, accelerometer, SensorManager.SENSOR_DELAY_UI)
       if (appSettings != null && appSettings.codelessEventsEnabled) {
-        checkNotNull(viewIndexer).schedule()
+        viewIndexer.schedule()
       }
     }
     if (isDebugOnEmulator() && !isAppIndexingEnabled.get()) {
@@ -117,20 +117,13 @@ object CodelessManager {
     isCodelessEnabled.set(false)
   }
 
-  @JvmStatic
-  internal fun checkCodelessSession(applicationId: String?) {
+  private fun checkCodelessSession(applicationId: String?) {
     if (isCheckingSession) {
       return
     }
     isCheckingSession = true
     getExecutor().execute {
-      val request =
-          newPostRequest(
-              null, String.format(Locale.US, "%s/app_indexing_session", applicationId), null, null)
-      var requestParameters = request.parameters
-      if (requestParameters == null) {
-        requestParameters = Bundle()
-      }
+      val requestParameters = Bundle()
       val context = getApplicationContext()
       val identifiers = getAttributionIdentifiers(context)
       val extInfoArray = JSONArray()
@@ -148,7 +141,12 @@ object CodelessManager {
       val extInfo = extInfoArray.toString()
       requestParameters.putString(Constants.DEVICE_SESSION_ID, getCurrentDeviceSessionID())
       requestParameters.putString(Constants.EXTINFO, extInfo)
-      request.parameters = requestParameters
+      val request =
+          GraphRequest.newPostRequestWithBundle(
+              null,
+              String.format(Locale.US, "%s/app_indexing_session", applicationId),
+              requestParameters,
+              null)
       val res = request.executeAndWait()
       val jsonRes = res.getJSONObject()
       isAppIndexingEnabled.set(
@@ -162,8 +160,7 @@ object CodelessManager {
     }
   }
 
-  @JvmStatic
-  internal fun isDebugOnEmulator(): Boolean {
+  private fun isDebugOnEmulator(): Boolean {
     return BuildConfig.DEBUG && isEmulator()
   }
 
