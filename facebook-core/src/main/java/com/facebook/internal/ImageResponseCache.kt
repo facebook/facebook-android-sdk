@@ -90,11 +90,13 @@ object ImageResponseCache {
   private fun isCDNURL(uri: Uri?): Boolean {
     if (uri != null) {
       val uriHost = uri.host
-      if (uriHost != null && uriHost.endsWith("fbcdn.net")) {
-        return true
-      }
-      if (uriHost != null && uriHost.startsWith("fbcdn") && uriHost.endsWith("akamaihd.net")) {
-        return true
+      if (uriHost != null) {
+        if (uriHost == "fbcdn.net" || uriHost.endsWith(".fbcdn.net")) {
+          return true
+        }
+        if (uriHost.startsWith("fbcdn") && uriHost.endsWith(".akamaihd.net")) {
+          return true
+        }
       }
     }
     return false
