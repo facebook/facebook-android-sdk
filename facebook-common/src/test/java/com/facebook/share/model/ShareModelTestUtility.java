@@ -20,10 +20,10 @@
 
 package com.facebook.share.model;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.Environment;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import junit.framework.Assert;
 
 public class ShareModelTestUtility {
@@ -64,35 +64,6 @@ public class ShareModelTestUtility {
       };
   public static final String OPEN_GRAPH_STRING_ARRAY_LIST_KEY = "OPEN_GRAPH_STRING_ARRAY_LIST";
   public static final String OPEN_GRAPH_UNUSED_KEY = "unused";
-  public static final Bitmap PHOTO_BITMAP = Bitmap.createBitmap(10, 10, Bitmap.Config.ALPHA_8);
-  public static final ArrayList<SharePhoto> PHOTO_CONTENT_PHOTOS =
-      new ArrayList<SharePhoto>() {
-        {
-          add(getPhotoBuilder(PhotoBuilderType.LOCAL_URL).build());
-        }
-      };
-  public static final boolean PHOTO_USER_GENERATED = true;
-  public static final String STATUS_CONTENT_DESCRIPTION = "this is a description";
-  public static final Uri STATUS_CONTENT_IMAGE_URL = Uri.parse("http://www.facebook.com/image/url");
-  public static final String STATUS_CONTENT_TITLE = "this is a title";
-  public static final SharePhoto VIDEO_CONTENT_PREVIEW_PHOTO =
-      getPhotoBuilder(PhotoBuilderType.LOCAL_URL).build();
-  public static final ShareVideo VIDEO_CONTENT_VIDEO = getVideoBuilder().build();
-
-  public enum PhotoBuilderType {
-    BITMAP,
-    LOCAL_URL,
-  }
-
-  public static Uri getTestPhotoImageUrl() {
-    return Uri.parse(
-        "file://" + Environment.getExternalStorageDirectory().getPath() + "crazy-cat-photo.jpg");
-  }
-
-  public static Uri getTestVideoLocalUrl() {
-    return Uri.parse(
-        "file://" + Environment.getExternalStorageDirectory().getPath() + "crazy-cat-video.mp4");
-  }
 
   public static ShareOpenGraphAction.Builder getOpenGraphActionBuilder() {
     return prepareOpenGraphValueContainerBuilder(new ShareOpenGraphAction.Builder())
@@ -109,38 +80,6 @@ public class ShareModelTestUtility {
 
   public static ShareOpenGraphObject.Builder getOpenGraphObjectBuilder() {
     return prepareOpenGraphValueContainerBuilder(new ShareOpenGraphObject.Builder());
-  }
-
-  public static SharePhoto.Builder getPhotoBuilder(final PhotoBuilderType type) {
-    final SharePhoto.Builder builder =
-        new SharePhoto.Builder().setUserGenerated(PHOTO_USER_GENERATED);
-    switch (type) {
-      case BITMAP:
-        builder.setBitmap(PHOTO_BITMAP);
-        break;
-      case LOCAL_URL:
-        builder.setImageUrl(getTestPhotoImageUrl());
-        break;
-    }
-    return builder;
-  }
-
-  public static SharePhotoContent.Builder getPhotoContentBuilder() {
-    return new SharePhotoContent.Builder().addPhotos(PHOTO_CONTENT_PHOTOS);
-  }
-
-  public static ShareLinkContent.Builder getLinkContentBuilder() {
-    return new ShareLinkContent.Builder();
-  }
-
-  public static ShareVideo.Builder getVideoBuilder() {
-    return new ShareVideo.Builder().setLocalUrl(getTestVideoLocalUrl());
-  }
-
-  public static ShareVideoContent.Builder getVideoContentBuilder() {
-    return new ShareVideoContent.Builder()
-        .setPreviewPhoto(VIDEO_CONTENT_PREVIEW_PHOTO)
-        .setVideo(VIDEO_CONTENT_VIDEO);
   }
 
   private static <E extends ShareOpenGraphValueContainer.Builder>
