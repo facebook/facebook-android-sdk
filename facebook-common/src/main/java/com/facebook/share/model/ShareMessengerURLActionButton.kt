@@ -72,18 +72,18 @@ class ShareMessengerURLActionButton : ShareMessengerActionButton {
     shouldHideWebviewShareButton = parcel.readByte().toInt() != 0
   }
 
-  override fun writeToParcel(out: Parcel, flags: Int) {
-    super.writeToParcel(out, flags)
+  override fun writeToParcel(dest: Parcel, flags: Int) {
+    super.writeToParcel(dest, flags)
 
-    out.writeParcelable(url, 0)
-    out.writeByte((if (isMessengerExtensionURL) 1 else 0).toByte())
-    out.writeParcelable(fallbackUrl, 0)
-    out.writeSerializable(webviewHeightRatio)
-    out.writeByte((if (isMessengerExtensionURL) 1 else 0).toByte())
+    dest.writeParcelable(url, 0)
+    dest.writeByte((if (isMessengerExtensionURL) 1 else 0).toByte())
+    dest.writeParcelable(fallbackUrl, 0)
+    dest.writeSerializable(webviewHeightRatio)
+    dest.writeByte((if (isMessengerExtensionURL) 1 else 0).toByte())
   }
 
   /** Builder class for [ShareMessengerURLActionButton] class. */
-  class Builder : ShareMessengerActionButton.Builder<ShareMessengerURLActionButton?, Builder?>() {
+  class Builder : ShareMessengerActionButton.Builder<ShareMessengerURLActionButton, Builder>() {
     internal var url: Uri? = null
     internal var isMessengerExtensionURL = false
     internal var fallbackUrl: Uri? = null
@@ -135,15 +135,15 @@ class ShareMessengerURLActionButton : ShareMessengerActionButton {
       return this
     }
 
-    override fun readFrom(content: ShareMessengerURLActionButton?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: ShareMessengerURLActionButton?): Builder {
+      return if (model == null) {
         this
       } else
-          setUrl(content.url)
-              .setIsMessengerExtensionURL(content.isMessengerExtensionURL)
-              .setFallbackUrl(content.fallbackUrl)
-              .setWebviewHeightRatio(content.webviewHeightRatio)
-              .setShouldHideWebviewShareButton(content.shouldHideWebviewShareButton)
+          setUrl(model.url)
+              .setIsMessengerExtensionURL(model.isMessengerExtensionURL)
+              .setFallbackUrl(model.fallbackUrl)
+              .setWebviewHeightRatio(model.webviewHeightRatio)
+              .setShouldHideWebviewShareButton(model.shouldHideWebviewShareButton)
     }
 
     override fun build(): ShareMessengerURLActionButton {

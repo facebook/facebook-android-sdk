@@ -18,57 +18,46 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share.model;
+package com.facebook.share.model
 
-import android.os.Parcel;
-import androidx.annotation.Nullable;
+import android.os.Parcel
 
 /** The base class for Messenger share action buttons. */
-public abstract class ShareMessengerActionButton implements ShareModel {
-
-  private final String title;
-
-  protected ShareMessengerActionButton(final Builder builder) {
-    this.title = builder.title;
-  }
-
-  ShareMessengerActionButton(final Parcel parcel) {
-    this.title = parcel.readString();
-  }
-
+abstract class ShareMessengerActionButton : ShareModel {
   /** The title displayed to the user for the Messenger action button. */
-  public String getTitle() {
-    return title;
+  val title: String?
+
+  protected constructor(builder: Builder<*, *>) {
+    title = builder.title
   }
 
-  @Override
-  public int describeContents() {
-    return 0;
+  internal constructor(parcel: Parcel) {
+    title = parcel.readString()
   }
 
-  @Override
-  public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(title);
+  override fun describeContents(): Int {
+    return 0
   }
 
-  /** Abstract builder for {@link com.facebook.share.model.ShareMessengerActionButton} */
-  public abstract static class Builder<
-          M extends ShareMessengerActionButton, B extends Builder<M, B>>
-      implements ShareModelBuilder<M, B> {
-    private String title;
+  override fun writeToParcel(dest: Parcel, flags: Int) {
+    dest.writeString(title)
+  }
+
+  /** Abstract builder for [com.facebook.share.model.ShareMessengerActionButton] */
+  abstract class Builder<M : ShareMessengerActionButton, B : Builder<M, B>> :
+      ShareModelBuilder<M, B> {
+    internal var title: String? = null
 
     /** Sets the title for the Messenger action button. */
-    public B setTitle(@Nullable final String title) {
-      this.title = title;
-      return (B) this;
+    fun setTitle(title: String?): B {
+      this.title = title
+      return this as B
     }
 
-    @Override
-    public B readFrom(final M model) {
-      if (model == null) {
-        return (B) this;
-      }
-      return this.setTitle(model.getTitle());
+    override fun readFrom(model: M?): B {
+      return if (model == null) {
+        this as B
+      } else setTitle(model.title)
     }
   }
 }
