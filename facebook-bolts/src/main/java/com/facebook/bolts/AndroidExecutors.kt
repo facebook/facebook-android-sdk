@@ -93,9 +93,6 @@ internal class AndroidExecutors private constructor() {
     }
 
     /** An [java.util.concurrent.Executor] that executes tasks on the UI thread. */
-    @JvmStatic
-    fun uiThread(): Executor {
-      return INSTANCE.uiThread
-    }
+    @JvmStatic fun uiThread(): Executor = INSTANCE.uiThread
   }
 }

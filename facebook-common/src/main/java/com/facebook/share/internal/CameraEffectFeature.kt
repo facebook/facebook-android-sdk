@@ -32,9 +32,7 @@ enum class CameraEffectFeature(private val minVersion: Int) : DialogFeature {
   SHARE_CAMERA_EFFECT(NativeProtocol.PROTOCOL_VERSION_20170417);
 
   /** This method is for internal use only. */
-  override fun getAction(): String {
-    return NativeProtocol.ACTION_CAMERA_EFFECT
-  }
+  override fun getAction(): String = NativeProtocol.ACTION_CAMERA_EFFECT
 
   /** This method is for internal use only. */
   override fun getMinVersion(): Int = minVersion

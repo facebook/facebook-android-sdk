@@ -51,9 +51,7 @@ enum class ShareDialogFeature(private val minVersion: Int) : DialogFeature {
   LINK_SHARE_QUOTES(NativeProtocol.PROTOCOL_VERSION_20160327);
 
   /** This method is for internal use only. */
-  override fun getAction(): String {
-    return NativeProtocol.ACTION_FEED_DIALOG
-  }
+  override fun getAction(): String = NativeProtocol.ACTION_FEED_DIALOG
 
   /** This method is for internal use only. */
   override fun getMinVersion(): Int = minVersion

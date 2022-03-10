@@ -14,9 +14,7 @@ enum class ShareStoryFeature(private val minVersion: Int) : DialogFeature {
   SHARE_STORY_ASSET(NativeProtocol.PROTOCOL_VERSION_20170417);
 
   /** This method is for internal use only. */
-  override fun getAction(): String {
-    return NativeProtocol.ACTION_SHARE_STORY
-  }
+  override fun getAction(): String = NativeProtocol.ACTION_SHARE_STORY
 
   /** This method is for internal use only. */
   override fun getMinVersion(): Int = minVersion

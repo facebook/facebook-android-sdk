@@ -17,6 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.facebook.share.model
 
 import android.os.Bundle
@@ -79,9 +80,7 @@ class CameraEffectArguments : ShareModel {
     return params?.keySet() ?: setOf()
   }
 
-  override fun describeContents(): Int {
-    return 0
-  }
+  override fun describeContents(): Int = 0
 
   override fun writeToParcel(out: Parcel, flags: Int) {
     out.writeBundle(params)

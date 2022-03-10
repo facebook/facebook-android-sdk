@@ -1966,9 +1966,7 @@ class GraphRequest {
     val mimeType: String?
     val resource: RESOURCE?
 
-    override fun describeContents(): Int {
-      return Parcelable.CONTENTS_FILE_DESCRIPTOR
-    }
+    override fun describeContents(): Int = Parcelable.CONTENTS_FILE_DESCRIPTOR
 
     override fun writeToParcel(out: Parcel, flags: Int) {
       out.writeString(mimeType)

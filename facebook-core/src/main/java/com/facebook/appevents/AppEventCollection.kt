@@ -47,10 +47,7 @@ internal class AppEventCollection {
     getSessionEventsState(accessTokenAppIdPair)?.addEvent(appEvent)
   }
 
-  @Synchronized
-  fun keySet(): Set<AccessTokenAppIdPair> {
-    return stateMap.keys
-  }
+  @Synchronized fun keySet(): Set<AccessTokenAppIdPair> = stateMap.keys
 
   @Synchronized
   operator fun get(accessTokenAppIdPair: AccessTokenAppIdPair): SessionEventsState? {

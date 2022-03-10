@@ -104,24 +104,15 @@ internal class BoltsExecutors private constructor() {
       }
 
     /** An [java.util.concurrent.Executor] that executes tasks in parallel. */
-    @JvmStatic
-    fun background(): ExecutorService {
-      return INSTANCE.background
-    }
+    @JvmStatic fun background(): ExecutorService = INSTANCE.background
 
-    @JvmStatic
-    internal fun scheduled(): ScheduledExecutorService {
-      return INSTANCE.scheduled
-    }
+    @JvmStatic internal fun scheduled(): ScheduledExecutorService = INSTANCE.scheduled
 
     /**
      * An [java.util.concurrent.Executor] that executes tasks in the current thread unless the stack
      * runs too deep, at which point it will delegate to [BoltsExecutors.background] in order to
      * trim the stack.
      */
-    @JvmStatic
-    internal fun immediate(): Executor {
-      return INSTANCE.immediate
-    }
+    @JvmStatic internal fun immediate(): Executor = INSTANCE.immediate
   }
 }

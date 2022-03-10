@@ -683,10 +683,7 @@ object FacebookSdk {
    *
    * @return the current version of the SDK
    */
-  @JvmStatic
-  fun getSdkVersion(): String {
-    return FacebookSdkVersion.BUILD
-  }
+  @JvmStatic fun getSdkVersion(): String = FacebookSdkVersion.BUILD
 
   /**
    * Returns whether data such as those generated through AppEventsLogger and sent to Facebook

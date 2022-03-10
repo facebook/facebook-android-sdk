@@ -52,9 +52,7 @@ class ShareMessengerURLActionButton : ShareMessengerActionButton {
   @Deprecated(
       "getIsMessengerExtensionURL is deprecated. Use isMessengerExtensionURL instead",
       replaceWith = ReplaceWith("isMessengerExtensionURL"))
-  fun getIsMessengerExtensionURL(): Boolean {
-    return isMessengerExtensionURL
-  }
+  fun getIsMessengerExtensionURL(): Boolean = isMessengerExtensionURL
 
   private constructor(builder: Builder) : super(builder) {
     url = builder.url
