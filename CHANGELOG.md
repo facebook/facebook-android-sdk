@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.1.0] - 2022-03-14
+### Added
+- All classes from the deprecated [Bolts](https://github.com/BoltsFramework/Bolts-Android) library are moved to an independent `facebook-bolts` kit. Now all kits depend on it to keep the back-compatibility, but we will gradually remove the dependency.
+### Fixed
+- `AppEventsLogger.setUserID()` allows to receive null value to clear the user ID.
+- Fixed the crashes if WebView is not available.
+
+### Deprecated
+- Deprecate `ShareOpenGraphAction`, `ShareOpenGraphContent`, `ShareOpenGraphValueContainer` and `ShareOpenGraphObject` since Open Graph stories will only render as plan link shares. See [Open Graph Stories document](https://developers.facebook.com/docs/sharing/opengraph) for more details.
+
 ## [13.0.0] - 2022-02-14
 
 ### Added
@@ -406,6 +416,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[13.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
 [13.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.3.0...sdk-version-13.0.0
 [12.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.2.0...sdk-version-12.3.0
 [12.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.1.0...sdk-version-12.2.0
