@@ -225,7 +225,7 @@ public class LoginButton extends FacebookButtonBase {
    * @see View#View(Context, AttributeSet)
    */
   public LoginButton(Context context) {
-    super(
+    this(
         context,
         null,
         0,
@@ -240,7 +240,7 @@ public class LoginButton extends FacebookButtonBase {
    * @see View#View(Context, AttributeSet)
    */
   public LoginButton(Context context, AttributeSet attrs) {
-    super(
+    this(
         context,
         attrs,
         0,
@@ -255,7 +255,7 @@ public class LoginButton extends FacebookButtonBase {
    * @see View#View(Context, AttributeSet, int)
    */
   public LoginButton(Context context, AttributeSet attrs, int defStyle) {
-    super(
+    this(
         context,
         attrs,
         defStyle,
