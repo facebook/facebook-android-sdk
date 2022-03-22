@@ -65,6 +65,7 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
     mMockContentResolver = mock(ContentResolver.class);
     when(mMockActivity.getContentResolver()).thenReturn(mMockContentResolver);
     FacebookSdk.setApplicationId("200");
+    FacebookSdk.setClientToken("abcdefg");
     FacebookSdk.setAutoLogAppEventsEnabled(false);
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     PowerMockito.mockStatic(FacebookSignatureValidator.class);

@@ -69,6 +69,7 @@ import org.robolectric.RuntimeEnvironment
 class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   private val mockAppID = "12345"
+  private val mockClientSecret = "abcdefg"
   private val mockEventName = "fb_mock_event"
   private val mockValueToSum = 1.0
   private val mockCurrency = Currency.getInstance(Locale.US)
@@ -83,6 +84,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
   @Before
   fun setupTest() {
     FacebookSdk.setApplicationId(mockAppID)
+    FacebookSdk.setClientToken(mockClientSecret)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
     FacebookSdk.setExecutor(mockExecutor)
 
