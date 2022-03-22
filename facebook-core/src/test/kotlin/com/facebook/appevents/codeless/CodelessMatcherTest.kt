@@ -20,19 +20,23 @@
 
 package com.facebook.appevents.codeless
 
+import android.app.Activity
+import android.os.Handler
 import android.view.View
+import android.view.Window
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.codeless.internal.EventBinding
 import com.facebook.appevents.codeless.internal.ParameterComponent
 import com.facebook.appevents.codeless.internal.ViewHierarchy
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlin.collections.ArrayList
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
@@ -41,9 +45,9 @@ import org.powermock.reflect.Whitebox
 
 @PrepareForTest(ViewHierarchy::class)
 class CodelessMatcherTest : FacebookPowerMockTestCase() {
-
   private lateinit var mockHostView: View
   private lateinit var mockRootView: View
+  private lateinit var mockActivity: Activity
   private lateinit var mockMapping: EventBinding
   private lateinit var parameterComponentList: ArrayList<ParameterComponent>
   private lateinit var matchedViews: ArrayList<CodelessMatcher.MatchedView>
@@ -59,6 +63,12 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     mockRootView = mock()
     mockHostView = mock()
     mockMapping = mock()
+    mockActivity = mock()
+    val mockActivityWindow = mock<Window>()
+    whenever(mockActivity.window).thenReturn(mockActivityWindow)
+    val mockDecorView = mock<View>()
+    whenever(mockActivityWindow.decorView).thenReturn(mockDecorView)
+    whenever(mockDecorView.rootView).thenReturn(mockRootView)
 
     parameterComponentList = ArrayList()
     matchedViews = ArrayList()
@@ -74,18 +84,21 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(CodelessMatcher.ViewMatcher::class.java, "Companion", mockCompanion)
     whenever(mockCompanion.findViewByPath(anyOrNull(), anyOrNull(), any(), any(), any(), any()))
         .thenReturn(matchedViews)
+    // clear the singleton instance
+    Whitebox.setInternalState(
+        CodelessMatcher::class.java, "codelessMatcher", null as CodelessMatcher?)
   }
 
   @Test
   fun `when mapping is null`() {
     val bundle = CodelessMatcher.getParameters(null, mockRootView, mockHostView)
-    assertTrue(bundle.isEmpty)
+    assertThat(bundle.isEmpty).isTrue
   }
 
   @Test
   fun `when mapping is not null and ViewParameters is empty`() {
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
-    assertTrue(bundle.isEmpty)
+    assertThat(bundle.isEmpty).isTrue
   }
 
   @Test
@@ -94,7 +107,7 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     updateParameterComponentList(parameterComponentJsonString)
 
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
-    assertEquals(testValue, bundle.getString(testName))
+    assertThat(bundle.getString(testName)).isEqualTo(testValue)
   }
 
   @Test
@@ -103,7 +116,7 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     updateParameterComponentList(parameterComponentJsonString)
 
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
-    assertTrue(bundle.isEmpty)
+    assertThat(bundle.isEmpty).isTrue
   }
 
   @Test
@@ -119,7 +132,7 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
         .thenReturn(mockMatchedViews)
 
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
-    assertTrue(bundle.isEmpty)
+    assertThat(bundle.isEmpty).isTrue
   }
 
   @Test
@@ -128,7 +141,7 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     updateParameterComponentList(parameterComponentJsonString)
 
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
-    assertEquals(testViewText, bundle.getString(testName))
+    assertThat(bundle.getString(testName)).isEqualTo(testViewText)
   }
 
   @Test
@@ -143,7 +156,52 @@ class CodelessMatcherTest : FacebookPowerMockTestCase() {
     matchedViews.add(matchedView2)
 
     val bundle = CodelessMatcher.getParameters(mockMapping, mockRootView, mockHostView)
-    assertEquals(testViewText, bundle.getString(testName))
+    assertThat(bundle.getString(testName)).isEqualTo(testViewText)
+  }
+
+  @Test
+  fun `add an activity will start tracking the root view`() {
+    val matcher = CodelessMatcher.getInstance()
+    val mockUIHandler = mock<Handler>()
+    Whitebox.setInternalState(matcher, "uiThreadHandler", mockUIHandler)
+
+    matcher.add(mockActivity)
+
+    val uiRunnableCaptor = argumentCaptor<Runnable>()
+    val delayCaptor = argumentCaptor<Long>()
+    verify(mockUIHandler).postDelayed(uiRunnableCaptor.capture(), delayCaptor.capture())
+    assertThat(delayCaptor.firstValue).isGreaterThan(0)
+    assertThat(uiRunnableCaptor.firstValue).isInstanceOf(CodelessMatcher.ViewMatcher::class.java)
+  }
+
+  @Test
+  fun `add or remove an activity will add or remove the activity to activity set`() {
+    val matcher = CodelessMatcher.getInstance()
+    val mockUIHandler = mock<Handler>()
+    Whitebox.setInternalState(matcher, "uiThreadHandler", mockUIHandler)
+    val activities = Whitebox.getInternalState<MutableSet<Activity>>(matcher, "activitiesSet")
+
+    matcher.add(mockActivity)
+    assertThat(activities).isNotEmpty()
+
+    matcher.remove(mockActivity)
+    assertThat(activities).isEmpty()
+  }
+
+  @Test
+  fun `remove an activity will save the listeners until it is destroyed`() {
+    val matcher = CodelessMatcher.getInstance()
+    val mockUIHandler = mock<Handler>()
+    Whitebox.setInternalState(matcher, "uiThreadHandler", mockUIHandler)
+    val listenerMap =
+        Whitebox.getInternalState<HashMap<Int, HashSet<String>>>(matcher, "activityToListenerMap")
+
+    matcher.add(mockActivity)
+    matcher.remove(mockActivity)
+    assertThat(listenerMap[mockActivity.hashCode()]).isNotNull
+
+    matcher.destroy(mockActivity)
+    assertThat(listenerMap[mockActivity.hashCode()]).isNull()
   }
 
   private fun updateParameterComponentList(parameterComponentJsonString: String) {
