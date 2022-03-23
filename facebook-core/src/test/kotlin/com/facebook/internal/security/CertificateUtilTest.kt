@@ -8,7 +8,6 @@ import com.facebook.FacebookPowerMockTestCase
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
@@ -72,6 +71,6 @@ class CertificateUtilTest : FacebookPowerMockTestCase() {
     val certificateHash = CertificateUtil.getCertificateHash(mockContext)
     assertThat(certificateHash).contains(certificateHash1)
     assertThat(certificateHash).contains(CertificateUtil.DELIMITER)
-    assertFalse(certificateHash.endsWith(CertificateUtil.DELIMITER))
+    assertThat(certificateHash.endsWith(CertificateUtil.DELIMITER)).isFalse
   }
 }

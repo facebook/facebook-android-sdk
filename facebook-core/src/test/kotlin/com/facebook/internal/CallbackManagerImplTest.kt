@@ -27,7 +27,6 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.CallbackManagerImpl.Companion.registerStaticCallback
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
@@ -126,6 +125,6 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
     assertThat(capturedResult).isTrue
-    Assert.assertFalse(capturedResultStatic)
+    assertThat(capturedResultStatic).isFalse
   }
 }

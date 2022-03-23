@@ -57,7 +57,7 @@ class LockOnGetVariableTest : FacebookPowerMockTestCase() {
     var fetchValue = false
     val thread = Thread { fetchValue = lock.value ?: false }
     thread.start()
-    Assert.assertFalse(fetchValue)
+    assertThat(fetchValue).isFalse
     Assert.assertNotNull(executor.capturedRunnable)
     executor.capturedRunnable?.run()
 

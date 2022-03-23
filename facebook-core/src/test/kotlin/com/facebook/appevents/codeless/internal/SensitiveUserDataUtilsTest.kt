@@ -27,7 +27,6 @@ import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils.isSensiti
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -50,7 +49,7 @@ class SensitiveUserDataUtilsTest : CodelessTestBase() {
 
     // input type == Text
     whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
-    Assert.assertFalse(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isFalse
 
     // input type == Person Name
     whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PERSON_NAME)

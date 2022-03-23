@@ -31,7 +31,6 @@ import java.util.Date
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -92,7 +91,7 @@ class AccessTokenTrackerTest : FacebookPowerMockTestCase() {
     accessTokenTracker = TestAccessTokenTracker()
     accessTokenTracker?.let {
       it.stopTracking()
-      Assert.assertFalse(it.isTracking)
+      assertThat(it.isTracking).isFalse
     }
   }
 

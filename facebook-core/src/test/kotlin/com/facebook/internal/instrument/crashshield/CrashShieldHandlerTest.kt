@@ -30,7 +30,6 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -69,7 +68,7 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     val exception = RuntimeException()
     CrashShieldHandler.disable()
     CrashShieldHandler.handleThrowable(exception, probe)
-    Assert.assertFalse(CrashShieldHandler.isObjectCrashing(probe))
+    assertThat(CrashShieldHandler.isObjectCrashing(probe)).isFalse
   }
 
   @Test
@@ -90,6 +89,6 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     CrashShieldHandler.handleThrowable(exception, probe)
     assertThat(CrashShieldHandler.isObjectCrashing(probe)).isTrue
     CrashShieldHandler.reset()
-    Assert.assertFalse(CrashShieldHandler.isObjectCrashing(probe))
+    assertThat(CrashShieldHandler.isObjectCrashing(probe)).isFalse
   }
 }

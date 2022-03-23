@@ -6,7 +6,7 @@ import com.facebook.appevents.AppEventsLogger
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert.assertFalse
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -56,7 +56,7 @@ class AppEventsLoggerUtilityTest : FacebookPowerMockTestCase() {
             false,
             mockContext)
     assertNotNull(result["event"])
-    assertFalse(result.has("app_user_id"))
+    assertThat(result.has("app_user_id")).isFalse
     assertNotNull(result["application_package_name"])
   }
 }

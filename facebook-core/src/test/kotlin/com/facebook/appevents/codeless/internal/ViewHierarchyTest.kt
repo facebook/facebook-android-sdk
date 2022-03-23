@@ -32,7 +32,6 @@ import com.facebook.internal.Utility.sha256hash
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -88,6 +87,6 @@ class ViewHierarchyTest : CodelessTestBase() {
 
     // mock other cases -> false
     whenever(mockView.parent).thenReturn(mockViewParent)
-    Assert.assertFalse(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
+    assertThat(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean).isFalse
   }
 }

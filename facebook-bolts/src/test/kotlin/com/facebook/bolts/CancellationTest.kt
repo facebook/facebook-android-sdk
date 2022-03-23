@@ -30,8 +30,8 @@ class CancellationTest {
   fun testTokenIsCancelled() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
     cts.cancel()
     assertThat(token.isCancellationRequested).isTrue
     assertThat(cts.isCancellationRequested).isTrue
@@ -41,7 +41,7 @@ class CancellationTest {
   fun testTokenIsCancelledAfterNoDelay() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(0)
     assertThat(token.isCancellationRequested).isTrue
     assertThat(cts.isCancellationRequested).isTrue
@@ -51,10 +51,10 @@ class CancellationTest {
   fun testTokenIsCancelledAfterDelay() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(100)
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
     Thread.sleep(150)
     assertThat(token.isCancellationRequested).isTrue
     assertThat(cts.isCancellationRequested).isTrue
@@ -66,12 +66,12 @@ class CancellationTest {
     val token = cts.token
     assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(100)
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
     cts.cancelAfter(-1)
     Thread.sleep(150)
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
   }
 
   @Test

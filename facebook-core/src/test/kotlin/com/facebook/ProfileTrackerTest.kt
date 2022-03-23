@@ -56,9 +56,9 @@ class ProfileTrackerTest : FacebookPowerMockTestCase() {
     // Starts tracking
     assertThat(testProfileTracker.isTracking).isTrue
     testProfileTracker.stopTracking()
-    Assert.assertFalse(testProfileTracker.isTracking)
+    assertThat(testProfileTracker.isTracking).isFalse
     sendBroadcast(localBroadcastManager, null, createDefaultProfile())
-    Assert.assertFalse(testProfileTracker.isCallbackCalled)
+    assertThat(testProfileTracker.isCallbackCalled).isFalse
     testProfileTracker.startTracking()
     assertThat(testProfileTracker.isTracking).isTrue
     val profile = createDefaultProfile()

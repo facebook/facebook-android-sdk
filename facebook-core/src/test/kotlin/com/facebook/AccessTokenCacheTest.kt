@@ -187,7 +187,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.save(accessToken)
     cache.clear()
-    Assert.assertFalse(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY))
+    assertThat(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY)).isFalse
     verify(cachingStrategy, never()).clear()
   }
 
@@ -198,7 +198,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.save(accessToken)
     cache.clear()
-    Assert.assertFalse(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY))
+    assertThat(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY)).isFalse
     verify(cachingStrategy, times(1)).clear()
   }
 

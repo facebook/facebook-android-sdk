@@ -4,7 +4,6 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert.assertFalse
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -28,7 +27,7 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     val dumpMap = HashMap<String, Boolean>()
     cache.dumpGateKeepers(APPLICATION_ID)?.forEach { dumpMap[it.name] = it.value }
     assertThat(dumpMap.getValue(GK1)).isTrue
-    assertFalse(dumpMap.getValue(GK2))
+    assertThat(dumpMap.getValue(GK2)).isFalse
   }
 
   @Test
@@ -36,7 +35,7 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     val cache = GateKeeperRuntimeCache()
 
     assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, true)).isTrue
-    assertFalse(cache.getGateKeeperValue(APPLICATION_ID, GK1, false))
+    assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, false)).isFalse
   }
 
   @Test
@@ -45,7 +44,7 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     cache.setGateKeeperValue(APPLICATION_ID, GK1, true)
     cache.setGateKeeperValue(APPLICATION_ID2, GK1, false)
     assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, false)).isTrue
-    assertFalse(cache.getGateKeeperValue(APPLICATION_ID2, GK1, true))
+    assertThat(cache.getGateKeeperValue(APPLICATION_ID2, GK1, true)).isFalse
   }
 
   @Test
@@ -56,6 +55,7 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     val cache = GateKeeperRuntimeCache()
     cache.setGateKeeperValue(name = GK1, value = true)
     assertThat(cache.getGateKeeperValue(name = GK1, defaultValue = false)).isTrue
-    assertFalse(cache.getGateKeeperValue(appId = APPLICATION_ID, name = GK1, defaultValue = false))
+    assertThat(cache.getGateKeeperValue(appId = APPLICATION_ID, name = GK1, defaultValue = false))
+        .isFalse
   }
 }

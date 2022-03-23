@@ -73,7 +73,7 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
           null
         }
     CrashHandler.enable()
-    Assert.assertFalse(hitSendReports)
+    assertThat(hitSendReports).isFalse
   }
 
   @Test

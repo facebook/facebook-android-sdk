@@ -5,7 +5,6 @@ import java.util.EnumSet
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -47,7 +46,7 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(result.dialogConfigurations.isEmpty()).isTrue
 
     // defaults
-    assertFalse(result.nuxEnabled)
+    assertThat(result.nuxEnabled).isFalse
     assertEquals("", result.nuxContent)
     assertThat(result.dialogConfigurations.isEmpty()).isTrue
     assertEquals("", result.restrictiveDataSetting)

@@ -40,7 +40,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -79,13 +78,13 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     val settingsJSON = JSONObject()
     settingsJSON.put("app_events_feature_bitmask", "0")
     var settings = parseAppSettingsFromJSON("123", settingsJSON)
-    Assert.assertFalse(settings.automaticLoggingEnabled)
+    assertThat(settings.automaticLoggingEnabled).isFalse
     settingsJSON.put("app_events_feature_bitmask", "7")
     settings = parseAppSettingsFromJSON("123", settingsJSON)
-    Assert.assertFalse(settings.automaticLoggingEnabled)
+    assertThat(settings.automaticLoggingEnabled).isFalse
     settingsJSON.put("app_events_feature_bitmask", "23")
     settings = parseAppSettingsFromJSON("123", settingsJSON)
-    Assert.assertFalse(settings.automaticLoggingEnabled)
+    assertThat(settings.automaticLoggingEnabled).isFalse
     settingsJSON.put("app_events_feature_bitmask", "8")
     settings = parseAppSettingsFromJSON("123", settingsJSON)
     assertThat(settings.automaticLoggingEnabled).isTrue
@@ -94,7 +93,7 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     assertThat(settings.automaticLoggingEnabled).isTrue
     val noBitmaskFieldSettings = JSONObject()
     settings = parseAppSettingsFromJSON("123", noBitmaskFieldSettings)
-    Assert.assertFalse(settings.automaticLoggingEnabled)
+    assertThat(settings.automaticLoggingEnabled).isFalse
   }
 
   @Test

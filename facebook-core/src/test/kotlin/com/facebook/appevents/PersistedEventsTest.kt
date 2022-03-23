@@ -4,7 +4,6 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -40,7 +39,7 @@ class PersistedEventsTest : FacebookPowerMockTestCase() {
   fun `test add an event with new token`() {
     val accessTokenAppIdPair2 = AccessTokenAppIdPair("anothertoken1337", "yoloapplication")
     val appEvent3 = AppEvent("ctxName", "eventName3", 0.0, Bundle(), true, true, null)
-    assertFalse(persistedEvents.containsKey(accessTokenAppIdPair2))
+    assertThat(persistedEvents.containsKey(accessTokenAppIdPair2)).isFalse
     persistedEvents.addEvents(accessTokenAppIdPair2, listOf(appEvent3))
     assertThat(persistedEvents.containsKey(accessTokenAppIdPair2)).isTrue
     assertEquals(mutableListOf(appEvent3), persistedEvents.get(accessTokenAppIdPair2))

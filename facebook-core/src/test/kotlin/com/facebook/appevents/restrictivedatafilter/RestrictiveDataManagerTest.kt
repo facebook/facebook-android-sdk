@@ -109,8 +109,8 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
     assertThat(mockEventParam.containsKey("key1")).isTrue
     assertThat(mockEventParam.containsKey("key2")).isTrue
     assertThat(mockEventParam.containsKey("_restrictedParams")).isTrue
-    Assert.assertFalse(mockEventParam.containsKey("last_name"))
-    Assert.assertFalse(mockEventParam.containsKey("first_name"))
+    assertThat(mockEventParam.containsKey("last_name")).isFalse
+    assertThat(mockEventParam.containsKey("first_name")).isFalse
   }
 
   @Test

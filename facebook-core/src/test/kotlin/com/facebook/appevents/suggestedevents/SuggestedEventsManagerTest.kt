@@ -3,7 +3,6 @@ package com.facebook.appevents.suggestedevents
 import com.facebook.FacebookPowerMockTestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
-import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.powermock.reflect.Whitebox
@@ -43,29 +42,29 @@ class SuggestedEventsManagerTest : FacebookPowerMockTestCase() {
     assertThat(SuggestedEventsManager.isProductionEvents("a")).isTrue
     assertThat(SuggestedEventsManager.isProductionEvents("b")).isTrue
     assertThat(SuggestedEventsManager.isProductionEvents("c")).isTrue
-    assertFalse(SuggestedEventsManager.isProductionEvents("d"))
+    assertThat(SuggestedEventsManager.isProductionEvents("d")).isFalse
     assertThat(SuggestedEventsManager.isEligibleEvents("x")).isTrue
     assertThat(SuggestedEventsManager.isEligibleEvents("y")).isTrue
     assertThat(SuggestedEventsManager.isEligibleEvents("z")).isTrue
-    assertFalse(SuggestedEventsManager.isEligibleEvents("a"))
+    assertThat(SuggestedEventsManager.isEligibleEvents("a")).isFalse
   }
 
   @Test
   fun `parse zero production events`() {
     SuggestedEventsManager.populateEventsFromRawJsonString(emptyProdEventOnlyJson)
-    assertFalse(SuggestedEventsManager.isProductionEvents("a"))
+    assertThat(SuggestedEventsManager.isProductionEvents("a")).isFalse
   }
 
   @Test
   fun `parse zero eligible events`() {
     SuggestedEventsManager.populateEventsFromRawJsonString(emptyEligibleEventOnlyJson)
-    assertFalse(SuggestedEventsManager.isProductionEvents("a"))
+    assertThat(SuggestedEventsManager.isProductionEvents("a")).isFalse
   }
 
   @Test
   fun `parse invalid json`() {
     SuggestedEventsManager.populateEventsFromRawJsonString(invalidJson)
-    assertFalse(SuggestedEventsManager.isProductionEvents("a"))
-    assertFalse(SuggestedEventsManager.isEligibleEvents("b"))
+    assertThat(SuggestedEventsManager.isProductionEvents("a")).isFalse
+    assertThat(SuggestedEventsManager.isEligibleEvents("b")).isFalse
   }
 }

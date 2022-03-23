@@ -503,7 +503,7 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     AccessToken.setCurrentAccessToken(instagramAccessToken)
     assertThat(AccessToken.isLoggedInWithInstagram()).isTrue
     AccessToken.setCurrentAccessToken(facebookAccessToken)
-    Assert.assertFalse(AccessToken.isLoggedInWithInstagram())
+    assertThat(AccessToken.isLoggedInWithInstagram()).isFalse
   }
 
   @Test
