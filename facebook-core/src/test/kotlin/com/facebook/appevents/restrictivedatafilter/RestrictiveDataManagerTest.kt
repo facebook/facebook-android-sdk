@@ -39,11 +39,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(
-    RestrictiveDataManager::class,
-    FacebookSdk::class,
-    FetchedAppSettings::class,
-    FetchedAppSettingsManager::class)
+@PrepareForTest(FacebookSdk::class, FetchedAppSettings::class, FetchedAppSettingsManager::class)
 class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
 
   companion object {
@@ -55,7 +51,6 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
   @Before
   override fun setup() {
     super.setup()
-    PowerMockito.spy(RestrictiveDataManager::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
     Whitebox.setInternalState(RestrictiveDataManager::class.java, "enabled", true)

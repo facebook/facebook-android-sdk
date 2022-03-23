@@ -36,7 +36,7 @@ import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.RuntimeEnvironment
 
-@PrepareForTest(AuthenticationTokenCache::class, FacebookSdk::class, OidcSecurityUtil::class)
+@PrepareForTest(FacebookSdk::class, OidcSecurityUtil::class)
 internal class AuthenticationTokenCacheTest : FacebookPowerMockTestCase() {
   private lateinit var sharedPreferences: SharedPreferences
 

@@ -44,11 +44,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(
-    FacebookSdk::class,
-    AuthenticationTokenCache::class,
-    AuthenticationTokenManager::class,
-    Utility::class,
-    OidcSecurityUtil::class)
+    FacebookSdk::class, AuthenticationTokenCache::class, Utility::class, OidcSecurityUtil::class)
 class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
   private lateinit var localBroadcastManager: LocalBroadcastManager
   private lateinit var authenticationTokenCache: AuthenticationTokenCache
