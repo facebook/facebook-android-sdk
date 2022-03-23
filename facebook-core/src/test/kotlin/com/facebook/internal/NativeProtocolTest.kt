@@ -28,6 +28,7 @@ import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.os.Bundle
 import com.facebook.FacebookException
+import com.facebook.FacebookOperationCanceledException
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.login.DefaultAudience
@@ -526,6 +527,52 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     checkNotNull(errorBundle)
     assertThat(errorBundle.getString(NativeProtocol.BRIDGE_ARG_ERROR_DESCRIPTION))
         .isEqualTo(error.toString())
+  }
+
+  @Test
+  fun `test parse error data from bridge arg error data bundle`() {
+    val data = Bundle()
+    val errorType = "TestError"
+    val errorDescription = "test error description"
+    data.putString(NativeProtocol.BRIDGE_ARG_ERROR_TYPE, errorType)
+    data.putString(NativeProtocol.BRIDGE_ARG_ERROR_DESCRIPTION, errorDescription)
+    val exception = NativeProtocol.getExceptionFromErrorData(data)
+    checkNotNull(exception)
+    assertThat(exception.message).isEqualTo(errorDescription)
+  }
+
+  @Test
+  fun `test parse error data from bridge arg canceled error bundle`() {
+    val data = Bundle()
+    val errorType = "USERCANCELED" // full capitalized only for testing
+    val errorDescription = "test error description"
+    data.putString(NativeProtocol.BRIDGE_ARG_ERROR_TYPE, errorType)
+    data.putString(NativeProtocol.BRIDGE_ARG_ERROR_DESCRIPTION, errorDescription)
+    val exception = NativeProtocol.getExceptionFromErrorData(data)
+    checkNotNull(exception)
+    assertThat(exception).isInstanceOf(FacebookOperationCanceledException::class.java)
+    assertThat(exception.message).isEqualTo(errorDescription)
+  }
+
+  @Test
+  fun `test recognizing error result intent with bridge arguments and obtain error data`() {
+    val errorType = "TestError"
+    val errorDescription = "test error description"
+    val intent = Intent()
+    val bridgeArgs = Bundle()
+    val errorBundle = Bundle()
+    errorBundle.putString(NativeProtocol.BRIDGE_ARG_ERROR_TYPE, errorType)
+    errorBundle.putString(NativeProtocol.BRIDGE_ARG_ERROR_DESCRIPTION, errorDescription)
+    bridgeArgs.putBundle(NativeProtocol.BRIDGE_ARG_ERROR_BUNDLE, errorBundle)
+    intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.PROTOCOL_VERSION_20171115)
+    intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_BRIDGE_ARGS, bridgeArgs)
+
+    assertThat(NativeProtocol.isErrorResult(intent)).isTrue
+    val parsedException =
+        NativeProtocol.getExceptionFromErrorData(
+            NativeProtocol.getErrorDataFromResultIntent(intent))
+    checkNotNull(parsedException)
+    assertThat(parsedException.message).isEqualTo(errorDescription)
   }
 
   fun setUpMockingForNativeIntentGeneration(
