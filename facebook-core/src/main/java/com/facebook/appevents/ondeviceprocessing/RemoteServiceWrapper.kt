@@ -157,7 +157,7 @@ object RemoteServiceWrapper {
     override fun toString(): String = eventType
   }
 
-  internal class RemoteServiceConnection : ServiceConnection {
+  private class RemoteServiceConnection : ServiceConnection {
     private val latch = CountDownLatch(1)
     private var binder: IBinder? = null
     override fun onServiceConnected(name: ComponentName, serviceBinder: IBinder) {

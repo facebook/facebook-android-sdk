@@ -21,6 +21,7 @@
 package com.facebook.appevents.ondeviceprocessing
 
 import android.content.Context
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.Bundle
@@ -47,18 +48,15 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.powermock.api.mockito.PowerMockito
-import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
 @PrepareForTest(
     FacebookSdk::class,
     FacebookSignatureValidator::class,
-    RemoteServiceWrapper::class,
     IReceiverService.Stub::class,
     FetchedAppSettingsManager::class,
     AppEventUtility::class)
@@ -67,8 +65,9 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
   private val appEvents: List<AppEvent> =
       listOf(AppEvent("context_name", "test_event", 0.0, null, false, false, null))
   private lateinit var mockContext: Context
-  @Before
-  fun setUp() {
+
+  override fun setup() {
+    super.setup()
     mockContext = mock()
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
@@ -222,22 +221,23 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FacebookSignatureValidator::class.java)
     whenever(validateSignature(any(), any())).thenReturn(isSignatureValid)
 
-    // Mock Context.bindService
-    whenever(mockContext.bindService(any(), any(), any())).thenReturn(isServiceBindSuccessful)
-
     // Mock FetchedAppSettings
     val mockAppSettings: FetchedAppSettings = mock()
     whenever(mockAppSettings.supportsImplicitLogging()).thenReturn(false)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
     whenever(queryAppSettings(any(), any())).thenReturn(mockAppSettings)
 
-    // Mock remote service creation
-    val mockRemoteServiceConnection: RemoteServiceWrapper.RemoteServiceConnection = mock()
+    // Mock remote service binder
     val mockBinder: IBinder? = if (isBinderNull) null else mock()
-    whenever(mockRemoteServiceConnection.getBinder()).thenReturn(mockBinder)
-    PowerMockito.whenNew(RemoteServiceWrapper.RemoteServiceConnection::class.java)
-        .withNoArguments()
-        .thenReturn(mockRemoteServiceConnection)
+    // Mock Context.bindService
+    whenever(mockContext.bindService(any(), any(), any())).thenAnswer {
+      val connection = it.arguments[1] as ServiceConnection
+      if (!isBinderNull) {
+        connection.onServiceConnected(mock(), mockBinder)
+      }
+      return@thenAnswer isServiceBindSuccessful
+    }
+
     val mockRemoteService: IReceiverService = mock()
     PowerMockito.mockStatic(IReceiverService.Stub::class.java)
     whenever(IReceiverService.Stub.asInterface(mockBinder)).thenReturn(mockRemoteService)
