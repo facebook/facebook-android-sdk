@@ -48,5 +48,15 @@ internal class LoginStatusClient(
 
   companion object {
     const val DEFAULT_TOAST_DURATION_MS = 5000L
+    internal fun newInstance(
+        context: Context,
+        applicationId: String,
+        loggerRef: String,
+        graphApiVersion: String,
+        toastDurationMs: Long,
+        nonce: String?
+    ): LoginStatusClient =
+        LoginStatusClient(
+            context, applicationId, loggerRef, graphApiVersion, toastDurationMs, nonce)
   }
 }

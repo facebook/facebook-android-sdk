@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.os.Bundle
 import android.os.Looper
 import android.util.Pair
 import androidx.activity.ComponentActivity
@@ -44,12 +45,17 @@ import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdkNotInitializedException
+import com.facebook.LoginStatusCallback
 import com.facebook.MockSharedPreference
 import com.facebook.Profile
 import com.facebook.internal.CallbackManagerImpl
+import com.facebook.internal.NativeProtocol
+import com.facebook.internal.PlatformServiceClient
+import com.facebook.internal.ServerProtocol
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.login.AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
@@ -92,6 +98,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext)
     whenever(FacebookSdk.getExecutor()).thenReturn(threadExecutor)
+    whenever(FacebookSdk.getGraphApiVersion()).thenReturn(ServerProtocol.getDefaultAPIVersion())
     whenever(mockFragment.activity).thenReturn(mockFragmentActivity)
     whenever(mockActivity.applicationContext).thenReturn(mockApplicationContext)
     whenever(FacebookSdk.getApplicationContext().getSharedPreferences(any<String>(), any()))
@@ -104,6 +111,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
     whenever(mockApplicationContext.mainLooper).thenReturn(mockLooper)
     whenever(mockApplicationContext.applicationContext).thenReturn(mockApplicationContext)
     whenever(mockPackageManager.resolveActivity(any(), any())).thenReturn(resolveInfo)
+    whenever(mockPackageManager.resolveService(any(), any())).thenReturn(resolveInfo)
 
     // mock and bypass signature verification
     PowerMockito.mockStatic(OidcSecurityUtil::class.java)
@@ -470,6 +478,151 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         .logInWithReadPermissions(mockFragment, CallbackManagerImpl(), permissions)
     verify(mockLauncher).launch(any())
   }
+
+  @Test
+  fun `test retrieve login status will set a completed listener and start connection with login status client`() {
+    val mockLoginStatusClientCompanion: LoginStatusClient.Companion = mock()
+    val mockLoginStatusClient: LoginStatusClient = mock()
+    whenever(
+            mockLoginStatusClientCompanion.newInstance(
+                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()))
+        .thenReturn(mockLoginStatusClient)
+    whenever(mockLoginStatusClient.start()).thenReturn(true)
+    Whitebox.setInternalState(
+        LoginStatusClient::class.java, "Companion", mockLoginStatusClientCompanion)
+
+    LoginManager.getInstance().retrieveLoginStatus(mockApplicationContext, mock())
+
+    val completedListenerCaptor = argumentCaptor<PlatformServiceClient.CompletedListener>()
+    verify(mockLoginStatusClient).setCompletedListener(completedListenerCaptor.capture())
+    verify(mockLoginStatusClient).start()
+  }
+
+  @Test
+  fun `test retrieve login status if a correct result is received`() {
+    val mockLoginStatusClientCompanion: LoginStatusClient.Companion = mock()
+    val mockLoginStatusClient: LoginStatusClient = mock()
+    whenever(
+            mockLoginStatusClientCompanion.newInstance(
+                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()))
+        .thenReturn(mockLoginStatusClient)
+    whenever(mockLoginStatusClient.start()).thenReturn(true)
+    Whitebox.setInternalState(
+        LoginStatusClient::class.java, "Companion", mockLoginStatusClientCompanion)
+
+    val mockLoginStatusCallback = mock<LoginStatusCallback>()
+    LoginManager.getInstance().retrieveLoginStatus(mockApplicationContext, mockLoginStatusCallback)
+
+    val completedListenerCaptor = argumentCaptor<PlatformServiceClient.CompletedListener>()
+    verify(mockLoginStatusClient).setCompletedListener(completedListenerCaptor.capture())
+    val completedListener = checkNotNull(completedListenerCaptor.firstValue)
+
+    val successResult = Bundle()
+    successResult.putString(NativeProtocol.EXTRA_ACCESS_TOKEN, TOKEN_STRING)
+    successResult.putStringArrayList(
+        NativeProtocol.EXTRA_PERMISSIONS, arrayListOf(*PERMISSIONS.toTypedArray()))
+    successResult.putString(NativeProtocol.RESULT_ARGS_SIGNED_REQUEST, SIGNATURE_AND_PAYLOAD)
+    successResult.putString(NativeProtocol.RESULT_ARGS_GRAPH_DOMAIN, GRAPH_DOMAIN)
+    completedListener.completed(successResult)
+
+    // verify a access token will be constructed from the result
+    val accessTokenCaptor = argumentCaptor<AccessToken>()
+    verify(mockLoginStatusCallback).onCompleted(accessTokenCaptor.capture())
+    val capturedAccessToken = checkNotNull(accessTokenCaptor.firstValue)
+    assertThat(capturedAccessToken.token).isEqualTo(TOKEN_STRING)
+    assertThat(capturedAccessToken.userId).isEqualTo(USER_ID)
+    assertThat(capturedAccessToken.permissions)
+        .containsExactlyInAnyOrder(*PERMISSIONS.toTypedArray())
+    assertThat(capturedAccessToken.graphDomain).isEqualTo(GRAPH_DOMAIN)
+    // verify the same access token will be set to global status
+    verify(mockAccessTokenCompanion).setCurrentAccessToken(eq(capturedAccessToken))
+  }
+
+  @Test
+  fun `test retrieve login status when an invalid result is received`() {
+    val mockLoginStatusClientCompanion: LoginStatusClient.Companion = mock()
+    val mockLoginStatusClient: LoginStatusClient = mock()
+    whenever(
+            mockLoginStatusClientCompanion.newInstance(
+                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()))
+        .thenReturn(mockLoginStatusClient)
+    whenever(mockLoginStatusClient.start()).thenReturn(true)
+    Whitebox.setInternalState(
+        LoginStatusClient::class.java, "Companion", mockLoginStatusClientCompanion)
+
+    val mockLoginStatusCallback = mock<LoginStatusCallback>()
+    LoginManager.getInstance().retrieveLoginStatus(mockApplicationContext, mockLoginStatusCallback)
+
+    val completedListenerCaptor = argumentCaptor<PlatformServiceClient.CompletedListener>()
+    verify(mockLoginStatusClient).setCompletedListener(completedListenerCaptor.capture())
+    val completedListener = checkNotNull(completedListenerCaptor.firstValue)
+
+    val result = Bundle()
+    // empty access token string
+    result.putString(NativeProtocol.EXTRA_ACCESS_TOKEN, "")
+    result.putStringArrayList(
+        NativeProtocol.EXTRA_PERMISSIONS, arrayListOf(*PERMISSIONS.toTypedArray()))
+    result.putString(NativeProtocol.RESULT_ARGS_GRAPH_DOMAIN, GRAPH_DOMAIN)
+    completedListener.completed(result)
+
+    // verify that onFailure will be called if the received result is invalid
+    verify(mockLoginStatusCallback).onFailure()
+    // and no access token will be set
+    verify(mockAccessTokenCompanion, never()).setCurrentAccessToken(any())
+  }
+
+  @Test
+  fun `test failing to start connection in retrieving login status will call onFailure at the callback`() {
+    val mockLoginStatusClientCompanion: LoginStatusClient.Companion = mock()
+    val mockLoginStatusClient: LoginStatusClient = mock()
+    whenever(
+            mockLoginStatusClientCompanion.newInstance(
+                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()))
+        .thenReturn(mockLoginStatusClient)
+    whenever(mockLoginStatusClient.start()).thenReturn(false)
+    Whitebox.setInternalState(
+        LoginStatusClient::class.java, "Companion", mockLoginStatusClientCompanion)
+
+    val mockLoginStatusCallback = mock<LoginStatusCallback>()
+    LoginManager.getInstance().retrieveLoginStatus(mockApplicationContext, mockLoginStatusCallback)
+    verify(mockLoginStatusCallback).onFailure()
+  }
+
+  @Test
+  fun `test retrieve login status when an error result is received`() {
+    val mockLoginStatusClientCompanion: LoginStatusClient.Companion = mock()
+    val mockLoginStatusClient: LoginStatusClient = mock()
+    whenever(
+            mockLoginStatusClientCompanion.newInstance(
+                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()))
+        .thenReturn(mockLoginStatusClient)
+    whenever(mockLoginStatusClient.start()).thenReturn(true)
+    Whitebox.setInternalState(
+        LoginStatusClient::class.java, "Companion", mockLoginStatusClientCompanion)
+
+    val mockLoginStatusCallback = mock<LoginStatusCallback>()
+    LoginManager.getInstance().retrieveLoginStatus(mockApplicationContext, mockLoginStatusCallback)
+
+    val completedListenerCaptor = argumentCaptor<PlatformServiceClient.CompletedListener>()
+    verify(mockLoginStatusClient).setCompletedListener(completedListenerCaptor.capture())
+    val completedListener = checkNotNull(completedListenerCaptor.firstValue)
+
+    val result = Bundle()
+    result.putString(NativeProtocol.STATUS_ERROR_TYPE, "test_error")
+    result.putString(NativeProtocol.STATUS_ERROR_DESCRIPTION, "test error description")
+    completedListener.completed(result)
+
+    val exceptionCaptor = argumentCaptor<FacebookException>()
+    verify(mockLoginStatusCallback).onError(exceptionCaptor.capture())
+    val capturedException = exceptionCaptor.firstValue
+    assertThat(capturedException.message)
+        .contains(result.getString(NativeProtocol.STATUS_ERROR_TYPE))
+    assertThat(capturedException.message)
+        .contains(result.getString(NativeProtocol.STATUS_ERROR_DESCRIPTION))
+    // and no access token will be set
+    verify(mockAccessTokenCompanion, never()).setCurrentAccessToken(any())
+  }
+
   private fun verifyTestLogInCreatesPendingRequestWithCorrectValues(
       expectedPermissions: Collection<String>
   ) {
@@ -507,12 +660,15 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
   }
   companion object {
     private const val MOCK_APP_ID = AuthenticationTokenTestUtil.APP_ID
-    private const val USER_ID = "1000"
     private const val TOKEN_STRING = "A token of my esteem"
+    private const val USER_ID = "54321"
+    // user_id = 54321 for this base64 code
+    private const val SIGNATURE_AND_PAYLOAD = "signature.eyJ1c2VyX2lkIjo1NDMyMX0="
     private val PERMISSIONS = listOf("walk", "chew gum")
     private val EXPIRES = Date(2025, 5, 3)
     private val LAST_REFRESH = Date(2023, 8, 15)
     private val DATA_ACCESS_EXPIRATION_TIME = Date(2025, 5, 3)
+    private val GRAPH_DOMAIN = "test.facebook.com"
     private const val codeVerifier = "codeVerifier"
     private const val codeChallenge = "codeChallenge"
     private val codeChallengeMethod = CodeChallengeMethod.S256
