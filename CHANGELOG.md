@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [13.1.0] - 2022-03-14
+## [13.1.0]
 ### Added
 - All classes from the deprecated [Bolts](https://github.com/BoltsFramework/Bolts-Android) library are moved to an independent `facebook-bolts` kit. Now all kits depend on it to keep the back-compatibility, but we will gradually remove the dependency.
 ### Fixed
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - Deprecate `ShareOpenGraphAction`, `ShareOpenGraphContent`, `ShareOpenGraphValueContainer` and `ShareOpenGraphObject` since Open Graph stories will only render as plan link shares. See [Open Graph Stories document](https://developers.facebook.com/docs/sharing/opengraph) for more details.
 
-## [13.0.0] - 2022-02-14
+## [13.0.0]
 
 ### Added
 - Set Java source and target compatibility to 1.8 (Java 8). All apps that integrate with Facebook Android SDK should also set source and compatibility to 1.8 or above.
@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed the bug of handling sharing result if the post id is not available.
 
-## [12.3.0] - 2022-01-04
+## [12.3.0]
 
 ### Added
 - Avoid tokenless requests if the client token is presented. Tokenless request support will be removed in v13.0.
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed reauthorization of data access.
 - Add fields parameters for login GET requests to remove warning messages.
 
-## [12.2.0] - 2021-11-29
+## [12.2.0]
 
 ### Added
 - Added parsing entry intent to look for gaming payload and tournament data for user coming from FB surface. Gaming tournament feature is available for selected partners now.
@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - On Android 12 and above, AppEvents will send attribution ID and anonymous ID if GMS is supported and isTrackingLimited is OFF. On Android 11 and below, nothing is changed. This feature will be turned on after Google Play Store starts the enforcement of the new policy.
 
-## [12.1.0] - 2021-11-01
+## [12.1.0]
 
 ### Fixed
 - Fixed a bug that causes multiple login intents to launch when the user has previously authorized the app and is logging in with the `openid` scope.
@@ -65,12 +65,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Adds Tournaments for native games, this feature is only available for select partners.
 
-## [12.0.1] - 2021-10-12
+## [12.0.1]
 
 ### Added
 - Added AuthenticationToken Cache to enhance OIDC experience. NOTE: This feature is currently in beta testing and not broadly available to developers
 
-## [12.0.0] - 2021-10-04
+## [12.0.0]
 
 ### Changed
 - `com.facebook.bolts.AppLinkResolver` will only receive nonnull parameters and return nonnull values. `com.facebook.bolts.Capture` is removed.
@@ -81,14 +81,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added the ability to perform login based on OpenID Connect standard. NOTE: This feature is currently in beta testing and not broadly available to developers
 
-## [11.3.0] - 2021-09-06
+## [11.3.0]
 
 ### Added
 - Add Custom Updates for Cloud Games
 ### Fixed
 - Fixed Login Connect support in CCT and Webview
 
-## [11.2.0] - 2021-08-02
+## [11.2.0]
 
 ### Added
 - Access token and profile management for Instagram users, support for querying graph.instagram.com, and Instagram login dialogs. NOTE: These changes support a feature currently in alpha testing and not broadly available to developers.
@@ -96,20 +96,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed the crash when calling `AppEventsLoggerImpl.augmentWebView(WebView, Context)`.
 
-## [11.1.1] - 2021-07-16
+## [11.1.1]
 
 ### Fixed
 - Fixed the bug in `GraphRequest` when passing an attachment through POST method.
 - Fixed the race condition in cloud game.
 - Fixed the bug of accessing WindowManager from a non-visual context on Android 11.
 
-## [11.1.0] - 2021-06-29
+## [11.1.0]
 
 ### Added
 - Validating the package checksum's providers when requesting it on Android S+.
 - Application Not Response (ANR) detector for improving the SDK quality. It will only collect ANR that caused by Facebook SDK and can be turned off by disabling automatically logged events. More details: https://developers.facebook.com/docs/app-events/getting-started-app-events-android/#auto-events
 
-## [11.0.0] - 2021-06-08
+## [11.0.0]
 
 ### Added
 - Released `user_messenger_contact` permission to enable Login Connect with Messenger. This new feature allows people to opt in to being contacted by a business on Messenger following the FB Login flow. Learn more at https://developers.facebook.com/docs/facebook-login/login-connect
@@ -132,38 +132,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GraphRequest#setSkipClientToken()`
 
 
-## [9.1.1] - 2021-04-12
+## [9.1.1]
 
 ## Changed
 - Supported refetching Gate Keeper values after switching app IDs.
 - Fixed POM validation error in staging phase.
 - Fixed IAP enable logic
 
-## [9.1.0] - 2021-03-05
+## [9.1.0]
 
 ## Added
 - GameRequests has a new UI for Gaming Domain Apps.
 - Added a GamingPayload class that can retrieve Payloads sent from our messenger XMAs.
 
-## [9.0.0] - 2021-01-11
+## [9.0.0]
 
 ### Changed
 
 - The default Graph API version is updated to v9.0
 
-## [8.2.0] - 2020-10-26
+## [8.2.0]
 
 ## Added
 
 - Added SDK on-device signal processing capabilities, but feature is not yet active
 
-## [8.1.0] - 2020-10-13
+## [8.1.0]
 
 ## Changed
 
 - Mitigations for switching to Facebook app for logging in, due to Android 11 package visibility change
 
-## [8.0.0] - 2020-09-23
+## [8.0.0]
 
 **Note: The current version uses Graph API v8.0. To use the latest Graph API version, please specific that version in your GraphRequest call.**
 
@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated GameRequestDialog
 - Deprecated DeviceShareDialog
 
-## [7.1.0] - 2020-06-19
+## [7.1.0]
 
 ## Added
 
@@ -195,14 +195,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove UserProperties API
 
-## [7.0.1] - 2020-06-09
+## [7.0.1]
 - AAM improvement
 - Corrected the report type of Crash Reports
 - Handle RejectedExecutionException in ViewIndexer.schedule()
 - Fixed the exception in getRootView
 - Fixed model cache issue
 
-## [7.0.0] - 2020-05-05
+## [7.0.0]
 
 ### Added
 - Android X, to use v7 please upgrade to Android X. Big thanks to @sunyal for helping with the migration.
@@ -210,13 +210,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - Marketing kit is deprecated
 
-## [6.5.1] - 2020-04-23
+## [6.5.1]
 
 ### Fixed
 - Fixed AppLinkData issue: [issue 761](https://github.com/facebook/facebook-android-sdk/issues/761)
 - Fixed timestamp issue of Model Delivery
 
-## [6.5.0] - 2020-04-20
+## [6.5.0]
 
 ## Added
 - More usecase for Integrity is supported.
@@ -224,7 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed bugs for suggested events
 
-## [6.4.0] - 2020-04-14
+## [6.4.0]
 
 ## Added
 
@@ -233,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed crash in Codeless
 
-## [6.3.0] - 2020-03-25
+## [6.3.0]
 
 ### Added
 - Support new event type for suggested events
@@ -241,14 +241,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed an issue in for suggested events
 
-## [6.2.0] - 2020-03-09
+## [6.2.0]
 
 ### Added
 - Support for Gaming Video Uploads
 - Allow Gaming Image Uploader to accept a callback
 - [Messenger Sharing](https://developers.facebook.com/docs/messenger-platform/changelog/#20200304)
 
-## [6.1.0] - 2020-02-14
+## [6.1.0]
 
 ### Added
 - New SDK component: Gaming Services
@@ -256,51 +256,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - Places Kit
 
-## [6.0.0] - 2020-02-03
+## [6.0.0]
 ### Changed
 - Graph API call upgrade to [v6.0](https://developers.facebook.com/docs/graph-api/changelog/version6.0)
 
-## [5.15.2] - 2020-02-03
+## [5.15.2]
 ### Fixed
 - Attempts to fix #665
 
-## [5.15.1] - 2020-01-29
+## [5.15.1]
 
 ### Added
 - FB Login improvements
 
-## [5.15.0] - 2020-01-21
+## [5.15.0]
 
 ### Added
 - Install Referrer uses new API
 - Deprecates messenger sharing. See: https://developers.facebook.com/docs/sharing/messenger for more details on why the deprecation is occurring and how you can update your application to account for this change
 - Chrome Custom Tabs for FB Login improvements
 
-## [5.13.0] - 2019-12-11
+## [5.13.0]
 
 ### Added
 - Parameter deactivation
 
-## [5.12.1] - 2019-12-08
+## [5.12.1]
 
 ### Fixed
 - Fixed a corner case
 
-## [5.12.0] - 2019-12-03
+## [5.12.0]
 
 ### Changed
 - Updated suggested events
 
-## [5.11.2] - 2019-11-21
+## [5.11.2]
 
-## [5.11.1] - 2019-11-21
+## [5.11.1]
 
 ### Fixed
 - Fix java.lang.SecurityException in AccessTokenManager: [issue 627](https://github.com/facebook/facebook-android-sdk/issues/627)
 - Fix Google Api Error because of values-fb: [issue 614](https://github.com/facebook/facebook-android-sdk/issues/614)
 - Minor fixes
 
-## [5.11.0] - 2019-11-14
+## [5.11.0]
 
 ### Added
 - Launch event suggestions
@@ -308,19 +308,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix NPE on AccessTokenAppIdPair
 
-## [5.9.0] - 2019-10-28
+## [5.9.0]
 
 ### Changed
 
 - API call upgrade to v5.0
 
-## [5.8.0] - 2019-10-08
+## [5.8.0]
 
 ### Added
 
 - Launch automatic advanced matching: https://www.facebook.com/business/help/2445860982357574
 
-## [5.5.2] - 2019-10-04
+## [5.5.2]
 
 ### Fixed
 
@@ -328,48 +328,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix memory leak in Codeless
 - Fix issue of listing crash report files
 
-## [5.5.1] - 2019-09-05
+## [5.5.1]
 
 ### Fixed
 
 - Crash in FetchedAppGateKeepersManager
 
-## [5.5.0] - 2019-08-30
+## [5.5.0]
 
 - Various bug fixes
 
-## [5.4.0] - 2019-08-15
+## [5.4.0]
 
 ### Changed
 
 - Add handling for crash and error to make SDK more stable
 
-## [5.2.0] - 2019-07-29
+## [5.2.0]
 
 ### Changed
 
 - API call upgrade to v4.0
 
-## [5.1.1] - 2019-07-21
+## [5.1.1]
 
 ### Fixed
 
 - Various bug fixes
 
 
-## [5.1.0] - 2019-06-21
+## [5.1.0]
 
 ### Added
 
 - Auto log Subscribe and StartTrial going through GooglePlay store when the developer enables it in Facebook Developer setting page
 
-## [5.0.2] - 2019-06-07
+## [5.0.2]
 
 ### Fixed
 
 - Fix in-app purchase auto-logging issue which was introduced in 5.0.1
 
-## [5.0.1] - 2019-05-16
+## [5.0.1]
 
 ### Added
 
@@ -379,7 +379,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed a crash that caused by absence of Google Play Store services
 
-## [5.0.0] - 2019-04-30
+## [5.0.0]
 
 ### Added
 - support manual SDK initialization
@@ -391,7 +391,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Deprecate several activateApp and deactivateApp functions in AppEventsLogger.java
 
-## [4.41.0] - 2019-03-08
+## [4.41.0]
 
 ### Removed
 
@@ -401,13 +401,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Various bug fixes
 
-## [4.40.0] - 2019-01-17
+## [4.40.0]
 
 ### Fixed
 
 - Various bug fixes
 
-## [4.39.0] - 2018-12-03
+## [4.39.0]
 
 ### Other
 
