@@ -21,6 +21,7 @@
 package com.facebook.bolts
 
 import java.util.concurrent.CancellationException
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Test
 
@@ -32,8 +33,8 @@ class CancellationTest {
     Assert.assertFalse(token.isCancellationRequested)
     Assert.assertFalse(cts.isCancellationRequested)
     cts.cancel()
-    Assert.assertTrue(token.isCancellationRequested)
-    Assert.assertTrue(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isTrue
+    assertThat(cts.isCancellationRequested).isTrue
   }
 
   @Test
@@ -42,8 +43,8 @@ class CancellationTest {
     val token = cts.token
     Assert.assertFalse(token.isCancellationRequested)
     cts.cancelAfter(0)
-    Assert.assertTrue(token.isCancellationRequested)
-    Assert.assertTrue(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isTrue
+    assertThat(cts.isCancellationRequested).isTrue
   }
 
   @Test
@@ -55,15 +56,15 @@ class CancellationTest {
     Assert.assertFalse(token.isCancellationRequested)
     Assert.assertFalse(cts.isCancellationRequested)
     Thread.sleep(150)
-    Assert.assertTrue(token.isCancellationRequested)
-    Assert.assertTrue(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isTrue
+    assertThat(cts.isCancellationRequested).isTrue
   }
 
   @Test
   fun testTokenCancelAfterDelayCancellation() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(100)
     Assert.assertFalse(token.isCancellationRequested)
     Assert.assertFalse(cts.isCancellationRequested)

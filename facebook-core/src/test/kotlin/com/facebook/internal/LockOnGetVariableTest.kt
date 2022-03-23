@@ -25,6 +25,7 @@ import com.facebook.FacebookSdk
 import com.facebook.util.common.CaptureExecutor
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Callable
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -62,7 +63,7 @@ class LockOnGetVariableTest : FacebookPowerMockTestCase() {
 
     // wait for at most 10 second before checking the result
     thread.join(10_000)
-    Assert.assertTrue(fetchValue)
+    assertThat(fetchValue).isTrue
   }
 
   @Test

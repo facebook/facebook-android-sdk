@@ -27,6 +27,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -275,13 +276,13 @@ class WorkQueueTest : FacebookTestCase() {
       get() = runnables.size
 
     fun runNext() {
-      Assert.assertTrue(runnables.size > 0)
+      assertThat(runnables.size).isGreaterThan(0)
       runnables[0].run()
       runnables.removeAt(0)
     }
 
     fun runLast() {
-      Assert.assertTrue(runnables.size > 0)
+      assertThat(runnables.size).isGreaterThan(0)
       val index = runnables.size - 1
       runnables[index].run()
       runnables.removeAt(index)

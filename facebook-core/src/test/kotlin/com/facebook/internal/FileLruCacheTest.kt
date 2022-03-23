@@ -32,9 +32,9 @@ import java.util.Random
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
-import junit.framework.TestCase
 import kotlin.concurrent.withLock
 import kotlin.math.min
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -188,8 +188,8 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
         // than the data content but not more than twice as large.  This guarantees
         // that sizeInBytes is doing at least approximately the right thing.
         val totalDataSize = (i + 1) * dataSize
-        TestCase.assertTrue(cache.sizeInBytesForTest() > totalDataSize)
-        TestCase.assertTrue(cache.sizeInBytesForTest() < 2 * totalDataSize)
+        assertThat(cache.sizeInBytesForTest() > totalDataSize).isTrue
+        assertThat(cache.sizeInBytesForTest() < 2 * totalDataSize).isTrue
       }
       for (i in 0 until count) {
         checkValue(cache, i.toString(), data)
@@ -219,8 +219,8 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
         // This changes verification such that the final cache size lands somewhere
         // between half and full quota.
         val totalDataSize = (i + 1) * dataSize
-        TestCase.assertTrue(cache.sizeInBytesForTest() > min(totalDataSize, cacheSize / 2))
-        TestCase.assertTrue(cache.sizeInBytesForTest() < min(2 * totalDataSize, cacheSize))
+        assertThat(cache.sizeInBytesForTest() > min(totalDataSize, cacheSize / 2)).isTrue
+        assertThat(cache.sizeInBytesForTest() < min(2 * totalDataSize, cacheSize)).isTrue
       }
 
       // sleep for a bit to make sure the trim finishes

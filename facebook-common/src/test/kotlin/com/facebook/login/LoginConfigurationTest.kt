@@ -23,7 +23,7 @@ class LoginConfigurationTest : FacebookPowerMockTestCase() {
     val config =
         LoginConfiguration(listOf("user_email"), AuthenticationTokenTestUtil.NONCE, codeVerifier)
     assertThat(config.permissions).isNotNull
-    assertThat(config.permissions.contains(LoginConfiguration.OPENID)).isTrue
+    assertThat(config.permissions).contains(LoginConfiguration.OPENID)
     assertThat(config.nonce).isEqualTo(AuthenticationTokenTestUtil.NONCE)
     assertThat(config.codeVerifier).isEqualTo(codeVerifier)
   }

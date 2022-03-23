@@ -38,6 +38,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -87,10 +88,10 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
     Assert.assertFalse(settings.automaticLoggingEnabled)
     settingsJSON.put("app_events_feature_bitmask", "8")
     settings = parseAppSettingsFromJSON("123", settingsJSON)
-    Assert.assertTrue(settings.automaticLoggingEnabled)
+    assertThat(settings.automaticLoggingEnabled).isTrue
     settingsJSON.put("app_events_feature_bitmask", "9")
     settings = parseAppSettingsFromJSON("123", settingsJSON)
-    Assert.assertTrue(settings.automaticLoggingEnabled)
+    assertThat(settings.automaticLoggingEnabled).isTrue
     val noBitmaskFieldSettings = JSONObject()
     settings = parseAppSettingsFromJSON("123", noBitmaskFieldSettings)
     Assert.assertFalse(settings.automaticLoggingEnabled)

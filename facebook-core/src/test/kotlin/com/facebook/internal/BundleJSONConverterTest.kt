@@ -23,6 +23,7 @@ package com.facebook.internal
 import android.os.Bundle
 import com.facebook.FacebookTestCase
 import com.facebook.FacebookTestUtility
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
@@ -115,7 +116,7 @@ class BundleJSONConverterTest : FacebookTestCase() {
     } catch (a: IllegalArgumentException) {
       exceptionCaught = true
     }
-    Assert.assertTrue(exceptionCaught)
+    assertThat(exceptionCaught).isTrue
     val jsonArray = JSONArray()
     jsonArray.put(10)
     val json = JSONObject()
@@ -126,6 +127,6 @@ class BundleJSONConverterTest : FacebookTestCase() {
     } catch (a: IllegalArgumentException) {
       exceptionCaught = true
     }
-    Assert.assertTrue(exceptionCaught)
+    assertThat(exceptionCaught).isTrue
   }
 }

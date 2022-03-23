@@ -2,6 +2,7 @@ package com.facebook.internal
 
 import com.facebook.FacebookPowerMockTestCase
 import java.util.EnumSet
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -36,19 +37,19 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
     val test = JSONObject(validJson)
     val result = FetchedAppSettingsManager.parseAppSettingsFromJSON("aa", test)
 
-    assertTrue(result.supportsImplicitLogging())
+    assertThat(result.supportsImplicitLogging()).isTrue
     assertEquals("{}", result.suggestedEventsSetting)
     assertEquals("{}", result.rawAamRules)
     assertEquals(60, result.sessionTimeoutInSeconds)
     assertEquals(EnumSet.of(SmartLoginOption.Enabled), result.smartLoginOptions)
     assertEquals("swag", result.smartLoginBookmarkIconURL)
     assertEquals("yolo", result.smartLoginMenuIconURL)
-    assertTrue(result.dialogConfigurations.isEmpty())
+    assertThat(result.dialogConfigurations.isEmpty()).isTrue
 
     // defaults
     assertFalse(result.nuxEnabled)
     assertEquals("", result.nuxContent)
-    assertTrue(result.dialogConfigurations.isEmpty())
+    assertThat(result.dialogConfigurations.isEmpty()).isTrue
     assertEquals("", result.restrictiveDataSetting)
   }
 

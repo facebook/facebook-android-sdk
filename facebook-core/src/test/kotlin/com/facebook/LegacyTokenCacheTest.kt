@@ -30,6 +30,7 @@ import java.lang.reflect.Array
 import java.util.ArrayList
 import java.util.Date
 import java.util.Random
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -177,7 +178,7 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
     assertSameCollectionContents(permissions, accessToken.permissions)
     Assert.assertEquals(token, accessToken.token)
     Assert.assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_NATIVE, accessToken.source)
-    Assert.assertTrue(!accessToken.isExpired)
+    assertThat(accessToken.isExpired).isFalse
     val cachedBundle = AccessTokenTestHelper.toLegacyCacheBundle(accessToken)
     assertEqualContentsWithoutOrder(bundle, cachedBundle)
   }
@@ -220,7 +221,7 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
       checkNotNull(a1)
       checkNotNull(a2)
       Assert.assertEquals(a1.javaClass, a2.javaClass)
-      Assert.assertTrue("Not an array", a1.javaClass.isArray)
+      assertThat(a1.javaClass.isArray).isTrue
       val length = Array.getLength(a1)
       Assert.assertEquals(length.toLong(), Array.getLength(a2).toLong())
       for (i in 0 until length) {
@@ -238,8 +239,8 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
       while (i1.hasNext() && i2.hasNext()) {
         Assert.assertEquals(i1.next(), i2.next())
       }
-      Assert.assertTrue("Lists not of the same length", !i1.hasNext())
-      Assert.assertTrue("Lists not of the same length", !i2.hasNext())
+      assertThat(i1.hasNext()).isFalse // "Lists not of the same length"
+      assertThat(i2.hasNext()).isFalse // "Lists not of the same length"
     }
 
     private fun putInt(key: String, bundle: Bundle) {

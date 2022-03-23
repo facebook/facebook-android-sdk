@@ -21,6 +21,7 @@
 package com.facebook
 
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -48,7 +49,7 @@ class ProgressNoopOutputStreamTest : FacebookPowerMockTestCase() {
   @Test
   fun testSetup() {
     Assert.assertEquals(0, stream.maxProgress)
-    Assert.assertTrue(stream.getProgressMap().isEmpty())
+    assertThat(stream.getProgressMap().isEmpty()).isTrue
   }
 
   @Test

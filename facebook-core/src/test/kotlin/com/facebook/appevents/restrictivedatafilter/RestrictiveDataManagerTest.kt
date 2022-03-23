@@ -31,6 +31,7 @@ import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -90,7 +91,7 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("fb_test_event", rule.eventName)
     Assert.assertEquals(expectedParam, rule.restrictiveParams)
     Assert.assertEquals(1, restrictedEvents.size.toLong())
-    Assert.assertTrue(restrictedEvents.contains("manual_initiated_checkout"))
+    assertThat(restrictedEvents).contains("manual_initiated_checkout")
   }
 
   @Test
@@ -105,9 +106,9 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(eventParam, mockEventParam)
     mockEventParam = eventParam
     processParameters(mockEventParam, "fb_restrictive_event")
-    Assert.assertTrue(mockEventParam.containsKey("key1"))
-    Assert.assertTrue(mockEventParam.containsKey("key2"))
-    Assert.assertTrue(mockEventParam.containsKey("_restrictedParams"))
+    assertThat(mockEventParam.containsKey("key1")).isTrue
+    assertThat(mockEventParam.containsKey("key2")).isTrue
+    assertThat(mockEventParam.containsKey("_restrictedParams")).isTrue
     Assert.assertFalse(mockEventParam.containsKey("last_name"))
     Assert.assertFalse(mockEventParam.containsKey("first_name"))
   }

@@ -153,6 +153,6 @@ class InstagramAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(result.token).isNull()
     val errorMessage = checkNotNull(result.errorMessage)
     assertThat(errorMessage).isNotNull
-    assertThat(errorMessage.contains(ERROR_MESSAGE)).isTrue
+    assertThat(errorMessage).contains(ERROR_MESSAGE)
   }
 }

@@ -10,9 +10,9 @@ import java.io.File
 import java.net.URL
 import java.net.URLConnection
 import java.nio.file.Files
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -57,7 +57,7 @@ class FileDownloadTaskTest : FacebookPowerMockTestCase() {
     whenever(task.doInBackground()).thenCallRealMethod()
     WhiteboxImpl.setInternalState(task, "uriStr", uriStr)
     WhiteboxImpl.setInternalState(task, "destFile", tempFile)
-    assertTrue(task.doInBackground())
+    assertThat(task.doInBackground()).isTrue
 
     val lines = Files.readAllLines(tempFile.toPath())
     assertEquals(1, lines.size)

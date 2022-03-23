@@ -14,6 +14,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.util.UUID
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -80,7 +81,7 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
     CrashHandler.enable()
     val handler = Thread.getDefaultUncaughtExceptionHandler()
     Assert.assertNotNull(handler)
-    Assert.assertTrue(handler is CrashHandler)
+    assertThat(handler is CrashHandler).isTrue
   }
 
   @Test

@@ -162,7 +162,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(accessToken).isNotNull
     assertThat(accessToken.token).isEqualTo(token)
     assertThat(accessToken.source).isEqualTo(AccessTokenSource.WEB_VIEW)
-    assertThat(!accessToken.isExpired).isTrue
+    assertThat(accessToken.isExpired).isFalse
   }
 
   @Test
@@ -185,7 +185,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(accessToken).isNotNull
     assertThat(accessToken.token).isEqualTo(token)
     assertThat(accessToken.source).isEqualTo(AccessTokenSource.FACEBOOK_APPLICATION_WEB)
-    assertThat(!accessToken.isExpired).isTrue
+    assertThat(accessToken.isExpired).isFalse
   }
 
   @Test
@@ -208,7 +208,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(accessToken).isNotNull
     assertThat(accessToken.token).isEqualTo(token)
     assertThat(accessToken.source).isEqualTo(AccessTokenSource.FACEBOOK_APPLICATION_WEB)
-    assertThat(!accessToken.isExpired).isTrue
+    assertThat(accessToken.isExpired).isFalse
   }
 
   fun mockTryAuthorize() {
