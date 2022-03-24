@@ -27,7 +27,6 @@ import com.facebook.AuthenticationToken
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getApplicationId
 import com.facebook.FacebookSdk.getAutoLogAppEventsEnabled
-import com.facebook.TestUtils
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.login.AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest
 import com.nhaarman.mockitokotlin2.any
@@ -114,7 +113,7 @@ class KatanaProxyLoginMethodHandlerTest : LoginHandlerTestCase() {
     checkNotNull(token)
     assertThat(ACCESS_TOKEN).isEqualTo(token.token)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -204,7 +203,7 @@ class KatanaProxyLoginMethodHandlerTest : LoginHandlerTestCase() {
     checkNotNull(token)
     assertThat(ACCESS_TOKEN).isEqualTo(token.token)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
     return result
   }
 

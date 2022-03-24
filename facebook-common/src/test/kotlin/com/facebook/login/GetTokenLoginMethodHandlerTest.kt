@@ -28,7 +28,6 @@ import com.facebook.AuthenticationToken
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getApplicationId
 import com.facebook.FacebookSdk.getAutoLogAppEventsEnabled
-import com.facebook.TestUtils
 import com.facebook.internal.NativeProtocol
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.login.AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest
@@ -87,7 +86,7 @@ class GetTokenLoginMethodHandlerTest : LoginHandlerTestCase() {
     checkNotNull(token)
     assertThat(ACCESS_TOKEN).isEqualTo(token.token)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -134,7 +133,7 @@ class GetTokenLoginMethodHandlerTest : LoginHandlerTestCase() {
         LoginMethodHandler.createAccessTokenFromNativeLogin(
             extras, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE, "1234")
     checkNotNull(accessToken)
-    TestUtils.assertSamePermissions(permissions, accessToken)
+    assertThat(permissions.toSet()).isEqualTo(accessToken.permissions)
     assertThat(token).isEqualTo(accessToken.token)
     assertThat(AccessTokenSource.FACEBOOK_APPLICATION_NATIVE).isEqualTo(accessToken.source)
     assertThat(accessToken.isExpired).isFalse
@@ -167,7 +166,7 @@ class GetTokenLoginMethodHandlerTest : LoginHandlerTestCase() {
     checkNotNull(token)
     assertThat(ACCESS_TOKEN).isEqualTo(token.token)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
 
     // when no id_token string is returned from fb4a, we expect no authentication Token is created
     // but Get Token should still works even id_token is null
