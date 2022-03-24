@@ -22,13 +22,10 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import android.text.TextUtils;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Arrays;
 import java.util.List;
 
 /** Describes the content that will be displayed by the GameRequestDialog */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class GameRequestContent implements ShareModel {
   public enum ActionType {
     SEND,
@@ -76,7 +73,6 @@ public final class GameRequestContent implements ShareModel {
     this.objectId = parcel.readString();
     this.filters = (Filters) parcel.readSerializable();
     this.suggestions = parcel.createStringArrayList();
-    parcel.readStringList(this.suggestions);
   }
 
   /** Gets the message that users receiving the request will see. */
