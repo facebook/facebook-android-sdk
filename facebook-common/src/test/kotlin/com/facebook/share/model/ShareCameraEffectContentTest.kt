@@ -86,8 +86,8 @@ class ShareCameraEffectContentTest : FacebookTestCase() {
         parcel.readParcelable(ShareCameraEffectContent::class.java.classLoader)
     checkNotNull(recoveredContent)
     assertThat(recoveredContent.effectId).isEqualTo(effectId)
-    assertThat(recoveredContent.arguments.keySet()).isEqualTo(cameraEffectArguments.keySet())
-    assertThat(recoveredContent.textures.keySet()).isEqualTo(cameraEffectTextures.keySet())
+    assertThat(recoveredContent.arguments?.keySet()).isEqualTo(cameraEffectArguments.keySet())
+    assertThat(recoveredContent.textures?.keySet()).isEqualTo(cameraEffectTextures.keySet())
     parcel.recycle()
   }
 
