@@ -72,8 +72,7 @@ class ShareHashtag : ShareModel {
     }
 
     internal fun readFrom(parcel: Parcel): Builder {
-      return this.readFrom(
-          parcel.readParcelable(ShareHashtag::class.java.classLoader) as ShareHashtag?)
+      return this.readFrom(parcel.readParcelable(ShareHashtag::class.java.classLoader))
     }
 
     override fun build(): ShareHashtag {

@@ -125,9 +125,7 @@ class CameraEffectArguments : ShareModel {
 
     /** This method is for internal use only. */
     fun readFrom(parcel: Parcel): Builder {
-      return this.readFrom(
-          parcel.readParcelable(CameraEffectArguments::class.java.classLoader) as
-              CameraEffectArguments?)
+      return this.readFrom(parcel.readParcelable(CameraEffectArguments::class.java.classLoader))
     }
 
     /**

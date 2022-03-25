@@ -46,9 +46,7 @@ class ShareOpenGraphObject :
     }
 
     internal fun readFrom(parcel: Parcel): Builder? {
-      return this.readFrom(
-          parcel.readParcelable(ShareOpenGraphObject::class.java.classLoader) as
-              ShareOpenGraphObject?)
+      return this.readFrom(parcel.readParcelable(ShareOpenGraphObject::class.java.classLoader))
     }
 
     init {
