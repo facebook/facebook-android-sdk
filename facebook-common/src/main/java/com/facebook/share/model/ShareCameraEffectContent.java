@@ -21,8 +21,6 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * Describes the Camera Effect to be shared.
@@ -32,7 +30,6 @@ import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
  * <p>See documentation for <a
  * href="https://developers.facebook.com/docs/sharing/best-practices">best practices</a>.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ShareCameraEffectContent
     extends ShareContent<ShareCameraEffectContent, ShareCameraEffectContent.Builder> {
 
@@ -165,7 +162,10 @@ public class ShareCameraEffectContent
         return this;
       }
 
-      return super.readFrom(model).setEffectId(effectId).setArguments(arguments);
+      return super.readFrom(model)
+          .setEffectId(model.effectId)
+          .setArguments(model.arguments)
+          .setTextures(model.textures);
     }
   }
 }
