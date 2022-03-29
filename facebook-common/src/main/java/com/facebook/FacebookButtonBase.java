@@ -40,12 +40,9 @@ import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.common.R;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** A base class for a facebook button. */
 @AutoHandleExceptions
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public abstract class FacebookButtonBase extends Button {
   private String analyticsButtonCreatedEventName;
   private String analyticsButtonTappedEventName;
@@ -249,12 +246,12 @@ public abstract class FacebookButtonBase extends Button {
   }
 
   protected void logButtonCreated(final Context context) {
-    InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+    InternalAppEventsLogger logger = InternalAppEventsLogger.createInstance(context, null);
     logger.logEventImplicitly(analyticsButtonCreatedEventName);
   }
 
   protected void logButtonTapped(final Context context) {
-    InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+    InternalAppEventsLogger logger = InternalAppEventsLogger.createInstance(context, null);
     logger.logEventImplicitly(analyticsButtonTappedEventName);
   }
 
