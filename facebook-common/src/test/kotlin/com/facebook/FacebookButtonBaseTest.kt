@@ -41,8 +41,12 @@ class FacebookButtonBaseTest : FacebookPowerMockTestCase() {
   class TestButton(context: Context, attrs: AttributeSet) :
       FacebookButtonBase(
           context, attrs, 0, 0, BUTTON_CREATED_EVENT_NAME, BUTTON_TAPPED_EVENT_NAME) {
-    override fun getDefaultRequestCode(): Int = DEFAULT_REQUEST_CODE
-    public override fun getActivity(): Activity = super.getActivity()
+    override val defaultRequestCode: Int = DEFAULT_REQUEST_CODE
+    public override val activity: Activity = super.activity
+
+    public override fun setInternalOnClickListener(listener: OnClickListener?) {
+      super.setInternalOnClickListener(listener)
+    }
   }
 
   private lateinit var activityController: ActivityController<Activity>
