@@ -29,11 +29,10 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.util.Arrays
 import java.util.Date
 import java.util.concurrent.Executor
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
@@ -84,7 +83,7 @@ class AccessTokenTrackerTest : FacebookPowerMockTestCase() {
   @Test
   fun testDefaultsToTracking() {
     accessTokenTracker = TestAccessTokenTracker()
-    assertTrue(accessTokenTracker?.isTracking == true)
+    assertThat(accessTokenTracker?.isTracking).isTrue
   }
 
   @Test
@@ -92,7 +91,7 @@ class AccessTokenTrackerTest : FacebookPowerMockTestCase() {
     accessTokenTracker = TestAccessTokenTracker()
     accessTokenTracker?.let {
       it.stopTracking()
-      Assert.assertFalse(it.isTracking)
+      assertThat(it.isTracking).isFalse
     }
   }
 
@@ -102,7 +101,7 @@ class AccessTokenTrackerTest : FacebookPowerMockTestCase() {
     accessTokenTracker?.let {
       it.stopTracking()
       it.startTracking()
-      assertTrue(it.isTracking)
+      assertThat(it.isTracking).isTrue
     }
   }
 

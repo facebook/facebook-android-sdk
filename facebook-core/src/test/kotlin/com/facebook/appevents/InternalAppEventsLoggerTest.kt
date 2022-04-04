@@ -48,6 +48,7 @@ class InternalAppEventsLoggerTest : FacebookPowerMockTestCase() {
   @Before
   fun setupTest() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken("abcdefg")
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", serialExecutor)
   }

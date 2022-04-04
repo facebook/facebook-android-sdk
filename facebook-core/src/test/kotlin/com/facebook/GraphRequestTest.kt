@@ -104,13 +104,13 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val urlPost = singlePostRequest.urlForSingleRequest
     val urlBatch = singlePostRequest.relativeUrlForBatchedRequest
     var args = Uri.parse(urlGet).queryParameterNames
-    assertThat(args.contains("sample_key")).isTrue
+    assertThat(args).contains("sample_key")
     args = Uri.parse(urlPost).queryParameterNames
     assertThat(args.isEmpty()).isTrue
 
     // Batch URL should contain parameters
     args = Uri.parse(urlBatch).queryParameterNames
-    assertThat(args.contains("sample_key")).isTrue
+    assertThat(args).contains("sample_key")
   }
 
   @Test
@@ -122,8 +122,8 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     val batchRequestUrl = igGraphRequest.relativeUrlForBatchedRequest
 
     assertThat(singleRequestUrl).contains("graph.instagram.com")
-    assertThat(singleRequestUrl.contains(FacebookSdk.getGraphApiVersion())).isTrue
-    assertThat(batchRequestUrl.contains(FacebookSdk.getGraphApiVersion())).isTrue
+    assertThat(singleRequestUrl).contains(FacebookSdk.getGraphApiVersion())
+    assertThat(batchRequestUrl).contains(FacebookSdk.getGraphApiVersion())
   }
 
   @Test
@@ -277,7 +277,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
 
     val requestUrl = request.urlForSingleRequest
     assertThat(requestUrl).contains("graph.instagram.com")
-    assertThat(requestUrl.contains(FacebookSdk.getGraphApiVersion())).isTrue
+    assertThat(requestUrl).contains(FacebookSdk.getGraphApiVersion())
   }
 
   @Test

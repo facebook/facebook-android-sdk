@@ -26,7 +26,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.CallbackManagerImpl.Companion.registerStaticCallback
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
@@ -62,7 +62,7 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
           }
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
-    Assert.assertTrue(capturedResult)
+    assertThat(capturedResult).isTrue
   }
 
   @Test
@@ -83,7 +83,7 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
           override fun onActivityResult(resultCode: Int, data: Intent?): Boolean = false
         })
     callbackManagerImpl.onActivityResult(123, 1, Intent())
-    Assert.assertTrue(capturedResult)
+    assertThat(capturedResult).isTrue
   }
 
   @Test
@@ -99,7 +99,7 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
           }
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
-    Assert.assertTrue(capturedResult)
+    assertThat(capturedResult).isTrue
   }
 
   @Test
@@ -124,7 +124,7 @@ class CallbackManagerImplTest : FacebookPowerMockTestCase() {
           }
         })
     callbackManagerImpl.onActivityResult(FacebookSdk.getCallbackRequestCodeOffset(), 1, Intent())
-    Assert.assertTrue(capturedResult)
-    Assert.assertFalse(capturedResultStatic)
+    assertThat(capturedResult).isTrue
+    assertThat(capturedResultStatic).isFalse
   }
 }

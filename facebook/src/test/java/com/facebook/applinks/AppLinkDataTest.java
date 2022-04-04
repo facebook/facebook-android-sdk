@@ -178,6 +178,7 @@ public class AppLinkDataTest extends FacebookTestCase {
   @Before
   public void setupSdk() {
     FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.setClientToken("abcdefg");
     FacebookSdk.sdkInitialize(ApplicationProvider.getApplicationContext());
   }
 

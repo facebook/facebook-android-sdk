@@ -7,10 +7,10 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.AttributionIdentifiers
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -57,7 +57,7 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
   @Test
   fun `test functions addEvent and getters functions`() {
     // Before add any event, the collection should be empty
-    assertTrue(appEventCollection.keySet().isEmpty())
+    assertThat(appEventCollection.keySet().isEmpty()).isTrue
     assertNull(appEventCollection.get(accessTokenAppIdPair))
     assertEquals(0, appEventCollection.eventCount)
 
@@ -74,7 +74,7 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
     val map = hashMapOf(accessTokenAppIdPair2 to mutableListOf(appEvent2))
     val persistedEvents = PersistedEvents(map)
     // Before add the persisted event, the collection should be empty
-    assertTrue(appEventCollection.keySet().isEmpty())
+    assertThat(appEventCollection.keySet().isEmpty()).isTrue
     assertEquals(0, appEventCollection.eventCount)
 
     // Add the first persisted event to the collection

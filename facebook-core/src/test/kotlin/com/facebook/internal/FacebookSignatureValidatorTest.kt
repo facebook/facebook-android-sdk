@@ -28,8 +28,7 @@ import android.content.pm.Signature
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -60,19 +59,19 @@ class FacebookSignatureValidatorTest : FacebookPowerMockTestCase() {
   @Test
   fun testInvalidWhenAppNotInstalled() {
     setupPackageManagerForApp(isInstalled = false, hasValidSignature = false)
-    assertFalse(validateSignature(mockActivity, PACKAGE_NAME))
+    assertThat(validateSignature(mockActivity, PACKAGE_NAME)).isFalse
   }
 
   @Test
   fun testInvalidWhenInstalledWithIncorrectSignature() {
     setupPackageManagerForApp(isInstalled = true, hasValidSignature = false)
-    assertFalse(validateSignature(mockActivity, PACKAGE_NAME))
+    assertThat(validateSignature(mockActivity, PACKAGE_NAME)).isFalse
   }
 
   @Test
   fun testValidWhenInstalledWithCorrectSignature() {
     setupPackageManagerForApp(isInstalled = true, hasValidSignature = true)
-    assertTrue(validateSignature(mockActivity, PACKAGE_NAME))
+    assertThat(validateSignature(mockActivity, PACKAGE_NAME)).isTrue
   }
 
   /**

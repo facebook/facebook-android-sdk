@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -59,7 +59,7 @@ class ImageDownloaderTest : FacebookPowerMockTestCase() {
   fun `test remove before and after test adding request`() {
     // remove request without adding request
     var isCancelled = ImageDownloader.cancelRequest(mockRequest)
-    assertFalse(isCancelled)
+    assertThat(isCancelled).isFalse
     var pendingRequest = ImageDownloader.getPendingRequests()
     assertEquals(0, pendingRequest.size)
 

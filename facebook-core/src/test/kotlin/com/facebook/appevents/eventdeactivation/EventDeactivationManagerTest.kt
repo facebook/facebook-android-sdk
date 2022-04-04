@@ -41,11 +41,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(
-    EventDeactivationManager::class,
-    FacebookSdk::class,
-    FetchedAppSettings::class,
-    FetchedAppSettingsManager::class)
+@PrepareForTest(FacebookSdk::class, FetchedAppSettings::class, FetchedAppSettingsManager::class)
 class EventDeactivationManagerTest : FacebookPowerMockTestCase() {
   companion object {
     private const val MOCK_APP_ID = "123"

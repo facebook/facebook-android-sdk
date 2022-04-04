@@ -30,6 +30,7 @@ import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile
 import com.facebook.util.common.mockLocalBroadcastManager
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Matchers
@@ -53,18 +54,18 @@ class ProfileTrackerTest : FacebookPowerMockTestCase() {
         .thenReturn(ApplicationProvider.getApplicationContext())
     val testProfileTracker = TestProfileTracker()
     // Starts tracking
-    Assert.assertTrue(testProfileTracker.isTracking)
+    assertThat(testProfileTracker.isTracking).isTrue
     testProfileTracker.stopTracking()
-    Assert.assertFalse(testProfileTracker.isTracking)
+    assertThat(testProfileTracker.isTracking).isFalse
     sendBroadcast(localBroadcastManager, null, createDefaultProfile())
-    Assert.assertFalse(testProfileTracker.isCallbackCalled)
+    assertThat(testProfileTracker.isCallbackCalled).isFalse
     testProfileTracker.startTracking()
-    Assert.assertTrue(testProfileTracker.isTracking)
+    assertThat(testProfileTracker.isTracking).isTrue
     val profile = createDefaultProfile()
     sendBroadcast(localBroadcastManager, null, profile)
     Assert.assertNull(testProfileTracker.oldProfile)
     Assert.assertEquals(profile, testProfileTracker.currentProfile)
-    Assert.assertTrue(testProfileTracker.isCallbackCalled)
+    assertThat(testProfileTracker.isCallbackCalled).isTrue
     val profile1 = createMostlyNullsProfile()
     val profile2 = createDefaultProfile()
     sendBroadcast(localBroadcastManager, profile1, profile2)

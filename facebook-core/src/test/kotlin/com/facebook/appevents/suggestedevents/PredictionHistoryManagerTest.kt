@@ -23,8 +23,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(
-    FacebookSdk::class, PredictionHistoryManager::class, Utility::class, ViewHierarchy::class)
+@PrepareForTest(FacebookSdk::class, Utility::class, ViewHierarchy::class)
 class PredictionHistoryManagerTest : FacebookPowerMockTestCase() {
   companion object {
     private const val PATH_ID = "path123"

@@ -41,7 +41,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -132,7 +131,7 @@ class OnDeviceProcessingManagerTest : FacebookPowerMockTestCase() {
 
     // Assert : RemoteServiceWrapper.sendInstallEvent(...) never invoked
     assertThat(captor.allValues.size).isEqualTo(0)
-    Assert.assertFalse(completed)
+    assertThat(completed).isFalse
   }
 
   private fun createEvent(eventName: String, isImplicitlyLogged: Boolean): AppEvent {

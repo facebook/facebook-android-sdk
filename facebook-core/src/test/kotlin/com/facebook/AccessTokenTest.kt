@@ -29,6 +29,7 @@ import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Date
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -169,7 +170,7 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     FacebookTestUtility.assertSameCollectionContents(permissions, accessToken.permissions)
     Assert.assertEquals(token, accessToken.token)
     Assert.assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.source)
-    Assert.assertTrue(!accessToken.isExpired)
+    assertThat(accessToken.isExpired).isFalse
     val cache = AccessTokenTestHelper.toLegacyCacheBundle(accessToken)
     FacebookTestUtility.assertEqualContentsWithoutOrder(bundle, cache)
   }
@@ -405,7 +406,7 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(userId, accessToken.userId)
     // Allow slight variation for test execution time
     val delta = accessToken.lastRefresh.time - Date().time
-    Assert.assertTrue(delta < 1_000)
+    assertThat(delta).isLessThan(1_000)
   }
 
   @Test
@@ -500,9 +501,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
             "facebok")
 
     AccessToken.setCurrentAccessToken(instagramAccessToken)
-    Assert.assertTrue(AccessToken.isLoggedInWithInstagram())
+    assertThat(AccessToken.isLoggedInWithInstagram()).isTrue
     AccessToken.setCurrentAccessToken(facebookAccessToken)
-    Assert.assertFalse(AccessToken.isLoggedInWithInstagram())
+    assertThat(AccessToken.isLoggedInWithInstagram()).isFalse
   }
 
   @Test

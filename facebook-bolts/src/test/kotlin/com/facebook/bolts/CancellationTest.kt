@@ -21,6 +21,7 @@
 package com.facebook.bolts
 
 import java.util.concurrent.CancellationException
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Test
 
@@ -29,48 +30,48 @@ class CancellationTest {
   fun testTokenIsCancelled() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
     cts.cancel()
-    Assert.assertTrue(token.isCancellationRequested)
-    Assert.assertTrue(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isTrue
+    assertThat(cts.isCancellationRequested).isTrue
   }
 
   @Test
   fun testTokenIsCancelledAfterNoDelay() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(0)
-    Assert.assertTrue(token.isCancellationRequested)
-    Assert.assertTrue(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isTrue
+    assertThat(cts.isCancellationRequested).isTrue
   }
 
   @Test
   fun testTokenIsCancelledAfterDelay() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(100)
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
     Thread.sleep(150)
-    Assert.assertTrue(token.isCancellationRequested)
-    Assert.assertTrue(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isTrue
+    assertThat(cts.isCancellationRequested).isTrue
   }
 
   @Test
   fun testTokenCancelAfterDelayCancellation() {
     val cts = CancellationTokenSource()
     val token = cts.token
-    Assert.assertFalse(token.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
     cts.cancelAfter(100)
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
     cts.cancelAfter(-1)
     Thread.sleep(150)
-    Assert.assertFalse(token.isCancellationRequested)
-    Assert.assertFalse(cts.isCancellationRequested)
+    assertThat(token.isCancellationRequested).isFalse
+    assertThat(cts.isCancellationRequested).isFalse
   }
 
   @Test

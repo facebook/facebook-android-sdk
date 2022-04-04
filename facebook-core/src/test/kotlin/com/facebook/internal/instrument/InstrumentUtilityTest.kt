@@ -6,12 +6,11 @@ import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.util.UUID
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
@@ -76,7 +75,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
     var trace =
         arrayOf(StackTraceElement("com.cfsample.coffeeshop.AnrActivity", "onClick", "file", 10))
     whenever(thread.stackTrace).thenReturn(trace)
-    assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
+    assertThat(InstrumentUtility.isSDKRelatedThread(thread)).isFalse
 
     // Exclude onClick(), onItemClick() or onTouch() when they are calling app itself's click
     // listeners
@@ -100,7 +99,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 10),
         )
     whenever(thread.stackTrace).thenReturn(trace)
-    assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
+    assertThat(InstrumentUtility.isSDKRelatedThread(thread)).isFalse
 
     // If onClick() calls process() and there is an ANR in process(), it's SDK related
     trace =
@@ -119,7 +118,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 "com.nhaarman.mockitokotlin2.any", "onClick", "ViewOnClickListener.java", 10),
         )
     whenever(thread.stackTrace).thenReturn(trace)
-    assertTrue(InstrumentUtility.isSDKRelatedThread(thread))
+    assertThat(InstrumentUtility.isSDKRelatedThread(thread)).isTrue
   }
 
   @Test

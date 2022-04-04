@@ -5,12 +5,11 @@ import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.lang.RuntimeException
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
@@ -46,7 +45,7 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     val cause = "test_cause"
     val stacktrace = "test_st"
     val data = InstrumentData.Builder.build(cause, stacktrace)
-    assertTrue(data.isValid)
+    assertThat(data.isValid).isTrue
     val parameterString = data.toString()
     assertNotNull(parameterString)
     val parameters = JSONObject(parameterString)
@@ -59,7 +58,7 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
   fun `test creating instrument data with an exception`() {
     val ex = NotImplementedError()
     val data = InstrumentData.Builder.build(ex, InstrumentData.Type.CrashReport)
-    assertTrue(data.isValid)
+    assertThat(data.isValid).isTrue
     val parameterString = data.toString()
     assertNotNull(parameterString)
     val parameters = JSONObject(parameterString)
@@ -72,7 +71,7 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
   fun `test creating instrument data with file`() {
     val testFile = File("thread_check_log_001.json")
     val data = InstrumentData.Builder.load(testFile)
-    assertTrue(data.isValid)
+    assertThat(data.isValid).isTrue
     val parameterString = data.toString()
     assertNotNull(parameterString)
     val parameters = JSONObject(parameterString)
@@ -88,7 +87,7 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     val featureArray = arrayOf("a", "b", "c")
     val features = JSONArray(featureArray)
     val data = InstrumentData.Builder.build(features)
-    assertTrue(data.isValid)
+    assertThat(data.isValid).isTrue
     val parameterString = data.toString()
     assertNotNull(parameterString)
     val parameters = JSONObject(parameterString)
@@ -99,7 +98,7 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
   fun `test invalid instrument analysis data`() {
     val testFile = File("analysis_log_1.json")
     val data = InstrumentData.Builder.load(testFile)
-    assertFalse(data.isValid)
+    assertThat(data.isValid).isFalse
   }
 
   @Test
@@ -110,6 +109,6 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
       return@then Unit
     }
     InstrumentData.Builder.build(RuntimeException(), InstrumentData.Type.CrashShield).save()
-    assertTrue(didWriteFile)
+    assertThat(didWriteFile).isTrue
   }
 }

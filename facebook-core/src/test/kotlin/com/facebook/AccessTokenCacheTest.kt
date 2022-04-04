@@ -33,6 +33,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Date
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -145,7 +146,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
         .thenReturn(AccessTokenTestHelper.toLegacyCacheBundle(accessToken))
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.load()
-    Assert.assertTrue(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY))
+    assertThat(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY)).isTrue
     val savedAccessToken =
         AccessToken.createFromJSONObject(
             JSONObject(
@@ -171,7 +172,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.save(accessToken)
     verify(cachingStrategy, never()).save(any())
-    Assert.assertTrue(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY))
+    assertThat(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY)).isTrue
     val savedAccessToken =
         AccessToken.createFromJSONObject(
             JSONObject(
@@ -186,7 +187,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.save(accessToken)
     cache.clear()
-    Assert.assertFalse(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY))
+    assertThat(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY)).isFalse
     verify(cachingStrategy, never()).clear()
   }
 
@@ -197,7 +198,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
     cache.save(accessToken)
     cache.clear()
-    Assert.assertFalse(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY))
+    assertThat(sharedPreferences.contains(AccessTokenCache.CACHED_ACCESS_TOKEN_KEY)).isFalse
     verify(cachingStrategy, times(1)).clear()
   }
 

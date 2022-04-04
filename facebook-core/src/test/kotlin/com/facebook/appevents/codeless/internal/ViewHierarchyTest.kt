@@ -31,7 +31,7 @@ import com.facebook.appevents.codeless.internal.ViewHierarchy.getDictionaryOfVie
 import com.facebook.internal.Utility.sha256hash
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -57,14 +57,14 @@ class ViewHierarchyTest : CodelessTestBase() {
   fun testGetDictionaryOfView() {
     val dict = getDictionaryOfView(root)
     val outerText = dict.getJSONArray("childviews").getJSONObject(0).getString("text")
-    Assert.assertTrue(outerText.equals(sha256hash("Outer Label"), ignoreCase = true))
+    assertThat(outerText.equals(sha256hash("Outer Label"), ignoreCase = true)).isTrue
     val innerText =
         dict.getJSONArray("childviews")
             .getJSONObject(1)
             .getJSONArray("childviews")
             .getJSONObject(0)
             .getString("text")
-    Assert.assertTrue(innerText.equals(sha256hash("Inner Label"), ignoreCase = true))
+    assertThat(innerText.equals(sha256hash("Inner Label"), ignoreCase = true)).isTrue
   }
 
   abstract class TestAdapterView(context: Context?) : AdapterView<Adapter>(context), ViewParent
@@ -79,14 +79,14 @@ class ViewHierarchyTest : CodelessTestBase() {
 
     // mock NestedScrollingChild -> true
     whenever(mockView.parent).thenReturn(mockTestNestedScrollingChild)
-    Assert.assertTrue(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
+    assertThat(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean).isTrue
 
     // mock AdapterView -> true
     whenever(mockView.parent).thenReturn(mockTestAdapterView)
-    Assert.assertTrue(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
+    assertThat(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean).isTrue
 
     // mock other cases -> false
     whenever(mockView.parent).thenReturn(mockViewParent)
-    Assert.assertFalse(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean)
+    assertThat(isAdapterViewItem.invoke(ViewHierarchy::class.java, mockView) as Boolean).isFalse
   }
 }

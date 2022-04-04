@@ -31,6 +31,7 @@ import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -39,11 +40,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(
-    RestrictiveDataManager::class,
-    FacebookSdk::class,
-    FetchedAppSettings::class,
-    FetchedAppSettingsManager::class)
+@PrepareForTest(FacebookSdk::class, FetchedAppSettings::class, FetchedAppSettingsManager::class)
 class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
 
   companion object {
@@ -55,7 +52,6 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
   @Before
   override fun setup() {
     super.setup()
-    PowerMockito.spy(RestrictiveDataManager::class.java)
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID)
     Whitebox.setInternalState(RestrictiveDataManager::class.java, "enabled", true)
@@ -95,7 +91,7 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("fb_test_event", rule.eventName)
     Assert.assertEquals(expectedParam, rule.restrictiveParams)
     Assert.assertEquals(1, restrictedEvents.size.toLong())
-    Assert.assertTrue(restrictedEvents.contains("manual_initiated_checkout"))
+    assertThat(restrictedEvents).contains("manual_initiated_checkout")
   }
 
   @Test
@@ -110,11 +106,11 @@ class RestrictiveDataManagerTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(eventParam, mockEventParam)
     mockEventParam = eventParam
     processParameters(mockEventParam, "fb_restrictive_event")
-    Assert.assertTrue(mockEventParam.containsKey("key1"))
-    Assert.assertTrue(mockEventParam.containsKey("key2"))
-    Assert.assertTrue(mockEventParam.containsKey("_restrictedParams"))
-    Assert.assertFalse(mockEventParam.containsKey("last_name"))
-    Assert.assertFalse(mockEventParam.containsKey("first_name"))
+    assertThat(mockEventParam.containsKey("key1")).isTrue
+    assertThat(mockEventParam.containsKey("key2")).isTrue
+    assertThat(mockEventParam.containsKey("_restrictedParams")).isTrue
+    assertThat(mockEventParam.containsKey("last_name")).isFalse
+    assertThat(mockEventParam.containsKey("first_name")).isFalse
   }
 
   @Test

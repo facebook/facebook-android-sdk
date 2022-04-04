@@ -24,7 +24,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import com.facebook.FacebookSdk
-import com.facebook.TestUtils
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -83,7 +82,7 @@ class InstagramAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(token).isNotNull
     assertThat(token.token).isEqualTo(ACCESS_TOKEN)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -153,6 +152,6 @@ class InstagramAppLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(result.token).isNull()
     val errorMessage = checkNotNull(result.errorMessage)
     assertThat(errorMessage).isNotNull
-    assertThat(errorMessage.contains(ERROR_MESSAGE)).isTrue
+    assertThat(errorMessage).contains(ERROR_MESSAGE)
   }
 }

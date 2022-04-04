@@ -162,7 +162,7 @@ class SharePhoto : ShareMedia<SharePhoto, SharePhoto.Builder> {
     }
 
     internal fun readFrom(parcel: Parcel): Builder {
-      return this.readFrom(parcel.readParcelable<SharePhoto>(SharePhoto::class.java.classLoader))
+      return this.readFrom(parcel.readParcelable(SharePhoto::class.java.classLoader))
     }
 
     companion object {

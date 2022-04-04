@@ -3,6 +3,7 @@ package com.facebook
 import android.os.Bundle
 import com.facebook.internal.Utility
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -50,7 +51,7 @@ class LegacyTokenHelperTest : FacebookPowerMockTestCase() {
     FacebookTestUtility.assertSameCollectionContents(permissions, accessToken.permissions)
     Assert.assertEquals(token, accessToken.token)
     Assert.assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.source)
-    Assert.assertTrue(!accessToken.isExpired)
+    assertThat(accessToken.isExpired).isFalse
 
     val cache = AccessTokenTestHelper.toLegacyCacheBundle(accessToken)
     FacebookTestUtility.assertEqualContentsWithoutOrder(bundle, cache)

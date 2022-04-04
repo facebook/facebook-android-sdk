@@ -3,8 +3,7 @@ package com.facebook.internal.gatekeeper
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -27,16 +26,16 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
 
     val dumpMap = HashMap<String, Boolean>()
     cache.dumpGateKeepers(APPLICATION_ID)?.forEach { dumpMap[it.name] = it.value }
-    assertTrue(dumpMap.getValue(GK1))
-    assertFalse(dumpMap.getValue(GK2))
+    assertThat(dumpMap.getValue(GK1)).isTrue
+    assertThat(dumpMap.getValue(GK2)).isFalse
   }
 
   @Test
   fun `test empty gate keeper`() {
     val cache = GateKeeperRuntimeCache()
 
-    assertTrue(cache.getGateKeeperValue(APPLICATION_ID, GK1, true))
-    assertFalse(cache.getGateKeeperValue(APPLICATION_ID, GK1, false))
+    assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, true)).isTrue
+    assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, false)).isFalse
   }
 
   @Test
@@ -44,8 +43,8 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     val cache = GateKeeperRuntimeCache()
     cache.setGateKeeperValue(APPLICATION_ID, GK1, true)
     cache.setGateKeeperValue(APPLICATION_ID2, GK1, false)
-    assertTrue(cache.getGateKeeperValue(APPLICATION_ID, GK1, false))
-    assertFalse(cache.getGateKeeperValue(APPLICATION_ID2, GK1, true))
+    assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, false)).isTrue
+    assertThat(cache.getGateKeeperValue(APPLICATION_ID2, GK1, true)).isFalse
   }
 
   @Test
@@ -55,7 +54,8 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_ID2)
     val cache = GateKeeperRuntimeCache()
     cache.setGateKeeperValue(name = GK1, value = true)
-    assertTrue(cache.getGateKeeperValue(name = GK1, defaultValue = false))
-    assertFalse(cache.getGateKeeperValue(appId = APPLICATION_ID, name = GK1, defaultValue = false))
+    assertThat(cache.getGateKeeperValue(name = GK1, defaultValue = false)).isTrue
+    assertThat(cache.getGateKeeperValue(appId = APPLICATION_ID, name = GK1, defaultValue = false))
+        .isFalse
   }
 }

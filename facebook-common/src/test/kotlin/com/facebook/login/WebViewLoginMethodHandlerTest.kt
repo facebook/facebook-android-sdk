@@ -26,7 +26,6 @@ import com.facebook.AccessTokenSource
 import com.facebook.FacebookException
 import com.facebook.FacebookOperationCanceledException
 import com.facebook.FacebookSdk
-import com.facebook.TestUtils
 import com.facebook.internal.FacebookDialogFragment
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
@@ -75,7 +74,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(token).isNotNull
     assertThat(token.token).isEqualTo(ACCESS_TOKEN)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -105,7 +104,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(token.userId).isEqualTo(USER_ID)
     assertThat(token.graphDomain).isEqualTo("instagram")
     assertThat(token.source).isEqualTo(AccessTokenSource.INSTAGRAM_WEB_VIEW)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -158,11 +157,11 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
             LoginMethodHandler.createAccessTokenFromWebBundle(
                 permissions, bundle, AccessTokenSource.WEB_VIEW, "1234"))
 
-    TestUtils.assertSamePermissions(permissions, accessToken)
+    assertThat(permissions.toSet()).isEqualTo(accessToken.permissions)
     assertThat(accessToken).isNotNull
     assertThat(accessToken.token).isEqualTo(token)
     assertThat(accessToken.source).isEqualTo(AccessTokenSource.WEB_VIEW)
-    assertThat(!accessToken.isExpired).isTrue
+    assertThat(accessToken.isExpired).isFalse
   }
 
   @Test
@@ -181,11 +180,11 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
             LoginMethodHandler.createAccessTokenFromWebBundle(
                 permissions, bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB, "1234"))
 
-    TestUtils.assertSamePermissions(permissions, accessToken)
+    assertThat(permissions.toSet()).isEqualTo(accessToken.permissions)
     assertThat(accessToken).isNotNull
     assertThat(accessToken.token).isEqualTo(token)
     assertThat(accessToken.source).isEqualTo(AccessTokenSource.FACEBOOK_APPLICATION_WEB)
-    assertThat(!accessToken.isExpired).isTrue
+    assertThat(accessToken.isExpired).isFalse
   }
 
   @Test
@@ -204,11 +203,11 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
             LoginMethodHandler.createAccessTokenFromWebBundle(
                 permissions, bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB, "1234"))
 
-    TestUtils.assertSamePermissions(permissions, accessToken)
+    assertThat(permissions.toSet()).isEqualTo(accessToken.permissions)
     assertThat(accessToken).isNotNull
     assertThat(accessToken.token).isEqualTo(token)
     assertThat(accessToken.source).isEqualTo(AccessTokenSource.FACEBOOK_APPLICATION_WEB)
-    assertThat(!accessToken.isExpired).isTrue
+    assertThat(accessToken.isExpired).isFalse
   }
 
   fun mockTryAuthorize() {

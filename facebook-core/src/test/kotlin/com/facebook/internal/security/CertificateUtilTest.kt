@@ -6,10 +6,9 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import com.facebook.FacebookPowerMockTestCase
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
@@ -70,8 +69,8 @@ class CertificateUtilTest : FacebookPowerMockTestCase() {
     val certificateHash1 = CertificateUtil.getCertificateHash(mockContext)
     mockPackageInfo.signatures = arrayOf(mockSignature1, mockSignature2)
     val certificateHash = CertificateUtil.getCertificateHash(mockContext)
-    assertTrue(certificateHash.contains(certificateHash1))
-    assertTrue(certificateHash.contains(CertificateUtil.DELIMITER))
-    assertFalse(certificateHash.endsWith(CertificateUtil.DELIMITER))
+    assertThat(certificateHash).contains(certificateHash1)
+    assertThat(certificateHash).contains(CertificateUtil.DELIMITER)
+    assertThat(certificateHash.endsWith(CertificateUtil.DELIMITER)).isFalse
   }
 }

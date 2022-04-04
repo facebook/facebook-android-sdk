@@ -27,6 +27,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -57,7 +58,7 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
     ThreadCheckHandler.uiThreadViolationDetected(this.javaClass, "testMethod", "testMethod()")
     verify(mockInstrumentData, times(1)).save()
     Assert.assertNotNull(logMessage)
-    Assert.assertTrue(logMessage.contains("@UiThread"))
+    assertThat(logMessage).contains("@UiThread")
   }
 
   @Test
@@ -71,6 +72,6 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
     ThreadCheckHandler.workerThreadViolationDetected(this.javaClass, "testMethod", "testMethod()")
     verify(mockInstrumentData, times(1)).save()
     Assert.assertNotNull(logMessage)
-    Assert.assertTrue(logMessage.contains("@WorkerThread"))
+    assertThat(logMessage).contains("@WorkerThread")
   }
 }

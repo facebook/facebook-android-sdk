@@ -32,7 +32,7 @@ import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -119,7 +119,7 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
   fun `test start with auto logging events disable`() {
     isLogAppEventsEnable = false
     InstrumentManager.start()
-    Assert.assertTrue(listOfCallbacks.isEmpty())
+    assertThat(listOfCallbacks.isEmpty()).isTrue
   }
 
   @Test
@@ -128,11 +128,11 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
     whenever(FeatureManager.isEnabled(any())).thenReturn(true)
     InstrumentManager.start()
     listOfCallbacks.forEach { it.onCompleted(true) }
-    Assert.assertTrue(isCrashHandlerEnable)
-    Assert.assertTrue(isExceptionAnalyzerEnable)
-    Assert.assertTrue(isErrorReportHandlerEnable)
-    Assert.assertTrue(isThreadCheckHandlerEnable)
-    Assert.assertTrue(isCrashShieldHandlerEnable)
-    Assert.assertTrue(isAnrHandlerEnable)
+    assertThat(isCrashHandlerEnable).isTrue
+    assertThat(isExceptionAnalyzerEnable).isTrue
+    assertThat(isErrorReportHandlerEnable).isTrue
+    assertThat(isThreadCheckHandlerEnable).isTrue
+    assertThat(isCrashShieldHandlerEnable).isTrue
+    assertThat(isAnrHandlerEnable).isTrue
   }
 }

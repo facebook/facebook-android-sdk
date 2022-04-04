@@ -21,6 +21,7 @@
 package com.facebook
 
 import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
@@ -72,7 +73,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("Unknown path components: /unknown", error?.errorMessage)
     Assert.assertEquals("OAuthException", error?.errorType)
     Assert.assertEquals(2_500, error?.errorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
@@ -89,7 +90,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         error?.errorMessage)
     Assert.assertEquals("OAuthException", error?.errorType)
     Assert.assertEquals(2_500, error?.errorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONArray)
+    assertThat(error?.batchRequestResult is JSONArray).isTrue
     Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
@@ -107,7 +108,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("Application request limit reached", error?.errorMessage)
     Assert.assertNull(error?.errorType)
     Assert.assertEquals(4, error?.errorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.TRANSIENT, error?.category)
   }
 
@@ -125,7 +126,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("Some Server Error", error?.errorMessage)
     Assert.assertNull(error?.errorType)
     Assert.assertEquals(2, error?.errorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.TRANSIENT, error?.category)
   }
 
@@ -144,7 +145,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("OAuthException", error?.errorType)
     Assert.assertEquals(200, error?.errorCode)
     Assert.assertEquals(FacebookRequestError.INVALID_ERROR_CODE, error?.subErrorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
@@ -163,7 +164,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("OAuthException", error?.errorType)
     Assert.assertEquals(102, error?.errorCode)
     Assert.assertEquals(459, error?.subErrorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error?.category)
   }
 
@@ -182,7 +183,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("OAuthException", error?.errorType)
     Assert.assertEquals(102, error?.errorCode)
     Assert.assertEquals(FacebookRequestError.INVALID_ERROR_CODE, error?.subErrorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error?.category)
   }
 
@@ -201,7 +202,7 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     Assert.assertEquals("OAuthException", error?.errorType)
     Assert.assertEquals(190, error?.errorCode)
     Assert.assertEquals(458, error?.subErrorCode)
-    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    assertThat(error?.batchRequestResult is JSONObject).isTrue
     Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error?.category)
   }
 

@@ -121,6 +121,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testRequestCodeOffsetAfterInit() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken(TEST_CLIENT_TOKEN)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
     assertThatThrownBy { FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1_000) }
         .isInstanceOf(FacebookException::class.java)
@@ -130,6 +131,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testRequestCodeOffsetNegative() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken(TEST_CLIENT_TOKEN)
     assertThatThrownBy {
           // last bit set, so negative
           FacebookSdk.sdkInitialize(RuntimeEnvironment.application, -0x5314ff4)
@@ -141,6 +143,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testRequestCodeOffset() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken(TEST_CLIENT_TOKEN)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1_000)
     assertThat(FacebookSdk.getCallbackRequestCodeOffset()).isEqualTo(1_000)
   }
@@ -148,6 +151,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testRequestCodeRange() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken(TEST_CLIENT_TOKEN)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1_000)
     assertThat(FacebookSdk.isFacebookRequestCode(1_000)).isTrue
     assertThat(FacebookSdk.isFacebookRequestCode(1_099)).isTrue
@@ -159,6 +163,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testFullyInitialize() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken(TEST_CLIENT_TOKEN)
     MemberModifier.stub<Any>(MemberMatcher.method(FacebookSdk::class.java, "getAutoInitEnabled"))
         .toReturn(true)
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
@@ -168,6 +173,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
   @Test
   fun testNotFullyInitialize() {
     FacebookSdk.setApplicationId("123456789")
+    FacebookSdk.setClientToken(TEST_CLIENT_TOKEN)
     val field = FacebookSdk::class.java.getDeclaredField("isFullyInitialized")
     field.isAccessible = true
     field[null] = false
@@ -245,6 +251,14 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
         .thenThrow(PackageManager.NameNotFoundException())
 
     assertThat(FacebookSdk.getApplicationSignature(mockContext)).isNull()
+  }
+
+  @Test(expected = FacebookException::class)
+  fun `test sdk initialization will throw an exception if client token is null`() {
+    Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(false))
+    FacebookSdk.setApplicationId(TEST_APPLICATION_ID)
+    FacebookSdk.setClientToken(null)
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application)
   }
 
   companion object {

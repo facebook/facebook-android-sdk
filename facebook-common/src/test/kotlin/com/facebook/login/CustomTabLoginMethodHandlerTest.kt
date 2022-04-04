@@ -35,7 +35,6 @@ import com.facebook.FacebookActivity
 import com.facebook.FacebookException
 import com.facebook.FacebookOperationCanceledException
 import com.facebook.FacebookSdk
-import com.facebook.TestUtils
 import com.facebook.internal.Validate
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.login.AuthenticationTokenTestUtil.getEncodedAuthTokenStringForTest
@@ -119,7 +118,7 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
     val token = checkNotNull(result.token)
     assertThat(token.token).isEqualTo(ACCESS_TOKEN)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -142,7 +141,7 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
     assertThat(token.userId).isEqualTo(USER_ID)
     assertThat(token.graphDomain).isEqualTo("instagram")
     assertThat(token.source).isEqualTo(AccessTokenSource.INSTAGRAM_CUSTOM_CHROME_TAB)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
   }
 
   @Test
@@ -246,7 +245,7 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
     val token = checkNotNull(result.token)
     assertThat(token.token).isEqualTo(ACCESS_TOKEN)
     assertDateDiffersWithinDelta(Date(), token.expires, EXPIRES_IN_DELTA * 1000, 1000)
-    TestUtils.assertSamePermissions(PERMISSIONS, token.permissions)
+    assertThat(PERMISSIONS).isEqualTo(token.permissions)
     return result
   }
 

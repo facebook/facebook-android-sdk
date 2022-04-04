@@ -425,13 +425,19 @@ object FacebookSdk {
     loadDefaultsFromMetadata(FacebookSdk.applicationContext)
 
     // We should have an application id by now if not throw
-    if (Utility.isNullOrEmpty(applicationId)) {
+    if (applicationId.isNullOrEmpty()) {
       throw FacebookException(
           "A valid Facebook app id must be set in the " +
               "AndroidManifest.xml or set by calling FacebookSdk.setApplicationId " +
               "before initializing the sdk.")
     }
-
+    // We should have an client token by now if not throw
+    if (appClientToken.isNullOrEmpty()) {
+      throw FacebookException(
+          "A valid Facebook app client token must be set in the " +
+              "AndroidManifest.xml or set by calling FacebookSdk.setClientToken " +
+              "before initializing the sdk.")
+    }
     // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
     // exceptions.
     sdkInitialized.set(true)

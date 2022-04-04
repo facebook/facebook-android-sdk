@@ -78,7 +78,7 @@ class ShareVideo : ShareMedia<ShareVideo, ShareVideo.Builder> {
     }
 
     internal fun readFrom(parcel: Parcel): Builder {
-      return this.readFrom(parcel.readParcelable(ShareVideo::class.java.classLoader) as ShareVideo?)
+      return this.readFrom(parcel.readParcelable(ShareVideo::class.java.classLoader))
     }
   }
 

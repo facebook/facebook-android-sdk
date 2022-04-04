@@ -31,6 +31,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.UUID
 import kotlin.collections.ArrayList
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -63,7 +64,7 @@ class FacebookContentProviderTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testOnCreate() {
-    Assert.assertTrue(providerUnderTest.onCreate())
+    assertThat(providerUnderTest.onCreate()).isTrue
   }
 
   @Test

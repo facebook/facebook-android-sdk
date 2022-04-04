@@ -46,6 +46,7 @@ import java.util.Currency
 import java.util.Locale
 import java.util.concurrent.Executor
 import java.util.concurrent.ScheduledThreadPoolExecutor
+import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
@@ -174,7 +175,7 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
             "{\"ln\":\"e545c2c24e6463d7c4fe3829940627b226c0b9be7a8c7dbe964768da48f1ab9d\",\"ph\":\"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\",\"em\":\"5f341666fb1ce60d716e4afc302c8658f09412290aa2ca8bc623861f452f9d33\",\"fn\":\"0f1e18bb4143dc4be22e61ea4deb0491c2bf7018c6504ad631038aed5ca4a0ca\"}")
     FacebookTestUtility.assertEquals(expectedUserData, actualUserData)
     AppEventsLogger.clearUserData()
-    Assert.assertTrue(AppEventsLogger.getUserData().isEmpty())
+    assertThat(AppEventsLogger.getUserData().isEmpty()).isTrue
   }
 
   @Test

@@ -60,8 +60,7 @@ import com.facebook.internal.FragmentWrapper
 import com.facebook.internal.NativeProtocol
 import com.facebook.internal.PlatformServiceClient
 import com.facebook.internal.ServerProtocol
-import com.facebook.internal.Utility.getBundleLongAsDate
-import com.facebook.internal.Utility.isNullOrEmpty
+import com.facebook.internal.Utility
 import com.facebook.internal.Validate.sdkInitialized
 import com.facebook.login.LoginMethodHandler.Companion.getUserIDFromSignedRequest
 import com.facebook.login.PKCEUtil.generateCodeChallenge
@@ -1070,7 +1069,7 @@ open class LoginManager internal constructor() {
       return
     }
     val client =
-        LoginStatusClient(
+        LoginStatusClient.newInstance(
             context,
             applicationId,
             loggerRef,
@@ -1088,24 +1087,21 @@ open class LoginManager internal constructor() {
             } else {
               val token = result.getString(NativeProtocol.EXTRA_ACCESS_TOKEN)
               val expires =
-                  getBundleLongAsDate(
+                  Utility.getBundleLongAsDate(
                       result, NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, Date(0))
               val permissions = result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS)
               val signedRequest = result.getString(NativeProtocol.RESULT_ARGS_SIGNED_REQUEST)
               val graphDomain = result.getString(NativeProtocol.RESULT_ARGS_GRAPH_DOMAIN)
               val dataAccessExpirationTime =
-                  getBundleLongAsDate(
+                  Utility.getBundleLongAsDate(
                       result, NativeProtocol.EXTRA_DATA_ACCESS_EXPIRATION_TIME, Date(0))
               var userId: String? = null
-              if (!isNullOrEmpty(signedRequest)) {
+              if (!signedRequest.isNullOrEmpty()) {
                 userId = getUserIDFromSignedRequest(signedRequest)
               }
-              if (token != null &&
-                  token.isNotEmpty() &&
-                  permissions != null &&
-                  permissions.isNotEmpty() &&
-                  userId != null &&
-                  userId.isNotEmpty()) {
+              if (!token.isNullOrEmpty() &&
+                  !permissions.isNullOrEmpty() &&
+                  !userId.isNullOrEmpty()) {
                 val accessToken =
                     AccessToken(
                         token,

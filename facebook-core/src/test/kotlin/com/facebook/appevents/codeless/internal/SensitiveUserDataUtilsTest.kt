@@ -26,7 +26,7 @@ import com.facebook.appevents.codeless.CodelessTestBase
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils.isSensitiveUserData
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
@@ -45,27 +45,27 @@ class SensitiveUserDataUtilsTest : CodelessTestBase() {
 
     // input type == Password
     whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PASSWORD)
-    Assert.assertTrue(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isTrue
 
     // input type == Text
     whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
-    Assert.assertFalse(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isFalse
 
     // input type == Person Name
     whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_PERSON_NAME)
-    Assert.assertTrue(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isTrue
 
     // input type == Postal Address
     whenever(textView.inputType).thenReturn(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS)
-    Assert.assertTrue(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isTrue
 
     // input type == Phone
     whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_PHONE)
-    Assert.assertTrue(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isTrue
 
     // Credit Card
     whenever(textView.inputType).thenReturn(InputType.TYPE_CLASS_TEXT)
     whenever(textView.text).thenReturn("4030122707427751")
-    Assert.assertTrue(isSensitiveUserData(textView))
+    assertThat(isSensitiveUserData(textView)).isTrue
   }
 }

@@ -106,9 +106,7 @@ class CameraEffectTextures : ShareModel {
 
     /** This method is for internal use only. */
     fun readFrom(parcel: Parcel): Builder {
-      return this.readFrom(
-          parcel.readParcelable(CameraEffectTextures::class.java.classLoader) as
-              CameraEffectTextures?)
+      return this.readFrom(parcel.readParcelable(CameraEffectTextures::class.java.classLoader))
     }
 
     override fun build(): CameraEffectTextures {
