@@ -135,15 +135,13 @@ class FetchedAppSettings(
         actionName: String,
         featureName: String
     ): DialogFeatureConfig? {
-      if (Utility.isNullOrEmpty(actionName) || Utility.isNullOrEmpty(featureName)) {
+      if (actionName.isEmpty() || featureName.isEmpty()) {
         return null
       }
       val settings = getAppSettingsWithoutQuery(applicationId)
-      if (settings != null) {
-        val featureMap = settings.dialogConfigurations[actionName]
-        if (featureMap != null) {
-          return featureMap[featureName]
-        }
+      val featureMap = settings?.dialogConfigurations?.get(actionName)
+      if (featureMap != null) {
+        return featureMap[featureName]
       }
       return null
     }
