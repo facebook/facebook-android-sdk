@@ -13,7 +13,7 @@
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">%1$s ஆக உள்நுழைந்துள்ளீர்கள்</string>
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook ஐப் பயன்படுத்தி உள்நுழைந்துள்ளீர்கள்</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">வெளியேறு</string>
-    <string name="com_facebook_loginview_cancel_action" gender="unknown">ரத்துசெய்</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">ரத்துசெய்க</string>
     <string name="com_facebook_loading" gender="unknown">ஏற்றுகிறது…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest பிழை</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView உள்நுழைவுக்கு இணைய அனுமதித் தேவை</string>
