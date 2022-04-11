@@ -34,8 +34,6 @@ import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -52,7 +50,6 @@ import org.json.JSONObject;
  * modified or removed without warning at any time.
  */
 @AutoHandleExceptions
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class DeviceRequestsHelper {
 
   private static final String TAG = DeviceRequestsHelper.class.getCanonicalName();
