@@ -147,7 +147,7 @@ open class DeviceAuthDialog : DialogFragment() {
     parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken)
     parameters.putString(
         DeviceRequestsHelper.DEVICE_INFO_PARAM,
-        DeviceRequestsHelper.getDeviceInfo(additionalDeviceInfo()))
+        DeviceRequestsHelper.getDeviceInfo(additionalDeviceInfo()?.toMutableMap()))
     val graphRequest =
         GraphRequest.newPostRequestWithBundle(
             null,

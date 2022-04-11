@@ -134,6 +134,7 @@ class DeviceRequestsHelperTest : FacebookPowerMockTestCase() {
     val encodedURL = "https://facebook.com/test"
     val image = DeviceRequestsHelper.generateQRCode(encodedURL)
     val pixels = IntArray(200 * 200)
+    checkNotNull(image)
     image.getPixels(pixels, 0, 200, 0, 0, 200, 200)
     assertThat(pixels).containsOnly(Color.BLACK, Color.WHITE)
   }
