@@ -5,17 +5,18 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyVararg
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
-import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(InAppPurchaseEventManager::class, FacebookSdk::class)
+@PrepareForTest(FacebookSdk::class, InAppPurchaseUtils::class)
 class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
   private lateinit var mockContext: Context
   private val nowSec = System.currentTimeMillis() / 1_000L
@@ -30,14 +31,21 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
     private const val VAL2 = "234"
   }
 
+  public fun dummyMethod() {}
+
   @Before
   fun init() {
     mockContext = mock()
     whenever(mockContext.packageName).thenReturn("com.facebook.appevents.iap")
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
+    PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
+    whenever(InAppPurchaseUtils.getClassFromContext(any(), any()))
+        .thenReturn(InAppPurchaseEventManagerTest::class.java)
+    whenever(InAppPurchaseUtils.getDeclaredMethod(any(), any(), anyVararg()))
+        .thenReturn(InAppPurchaseEventManagerTest::class.java.getMethod("dummyMethod"))
   }
 
   @Test
@@ -48,11 +56,8 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
     val result = Bundle()
     result.putInt("RESPONSE_CODE", 0)
     result.putStringArrayList("DETAILS_LIST", arrayListOf(VAL1, VAL2))
-    MemberModifier.stub<Object>(
-            PowerMockito.method(InAppPurchaseEventManager::class.java, "invokeMethod"))
-        .toReturn(result as Object)
+    whenever(InAppPurchaseUtils.invokeMethod(any(), any(), any(), anyVararg())).thenReturn(result)
     val billingObj = Bundle()
-
     val skuDetails =
         InAppPurchaseEventManager.getSkuDetails(
             mockContext, arrayListOf<String>(KEY1, KEY2), billingObj, false)
@@ -73,9 +78,7 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
     val result = Bundle()
     result.putInt("RESPONSE_CODE", 0)
     result.putStringArrayList("DETAILS_LIST", arrayListOf(VAL2))
-    MemberModifier.stub<Object>(
-            PowerMockito.method(InAppPurchaseEventManager::class.java, "invokeMethod"))
-        .toReturn(result as Object)
+    whenever(InAppPurchaseUtils.invokeMethod(any(), any(), any(), anyVararg())).thenReturn(result)
     val billingObj = Bundle()
 
     val skuDetails =
