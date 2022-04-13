@@ -19,6 +19,7 @@
     <string name="com_facebook_internet_permission_error_message" gender="unknown">התחברות WebView דורשת הרשאת אינטרנט</string>
     <string name="com_facebook_tooltip_default" gender="unknown">את/ה בשליטה - בחר/י אילו פרטים ברצונך לשתף עם אפליקציות.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">שגיאה לא צפויה במהלך הורדת תמונה.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">שיתוף</string>
     <string name="com_facebook_send_button_text" gender="unknown">שלח/י</string>
     <string name="com_facebook_device_auth_instructions" gender="unknown">יש לבקר ב-&lt;b&gt;facebook.com/device&lt;/b&gt; ולהזין את הקוד המוצג למעלה.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">כדי לחבר את חשבונך, יש לפתוח את אפליקציית פייסבוק במכשיר הנייד ולבדוק אם יש התראות.</string>
