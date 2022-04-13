@@ -50,4 +50,7 @@ fun interface CallbackManager {
       return CallbackManagerImpl()
     }
   }
+
+  /** A type to contains all the parameters for the legacy activity result. */
+  data class ActivityResultParameters(val requestCode: Int, val resultCode: Int, val data: Intent?)
 }
