@@ -37,7 +37,7 @@
     <string name="com_facebook_internet_permission_error_message">WebView login requires INTERNET permission</string>
     <string name="com_facebook_tooltip_default">You\'re in control - choose what info you want to share with apps.</string>
     <string name="com_facebook_image_download_unknown_error">Unexpected error while downloading an image.</string>
-    <string name="com_facebook_share_button_text">Share</string>
+    <string name="com_facebook_share_button_text" description="This is a button. It is located on the home page for all games. Tapping this allows the user to share this game as a post on their timeline.">Share</string>
     <string name="com_facebook_send_button_text">Send</string>
     <string name="com_facebook_device_auth_instructions">Visit &lt;b&gt;facebook.com/device&lt;/b&gt; and enter the code shown above.</string>
     <string name="com_facebook_smart_device_instructions">To connect your account, open the Facebook app on your mobile device and check for notifications.</string>

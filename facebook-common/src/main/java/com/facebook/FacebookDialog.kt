@@ -20,6 +20,8 @@
 
 package com.facebook
 
+import androidx.activity.result.contract.ActivityResultContract
+
 /** Represents dialogs provided by Facebook */
 interface FacebookDialog<CONTENT, RESULT> {
   /**
@@ -62,4 +64,13 @@ interface FacebookDialog<CONTENT, RESULT> {
       callback: FacebookCallback<RESULT>,
       requestCode: Int
   )
+  /**
+   * Creates the ActivityResultContract instance for showing the dialog with Androidx activities and
+   * fragments.
+   *
+   * @param callbackManager CallbackManager instance that will handle the onActivityResult
+   */
+  fun createActivityResultContractForShowingDialog(
+      callbackManager: CallbackManager?
+  ): ActivityResultContract<CONTENT, CallbackManager.ActivityResultParameters>
 }

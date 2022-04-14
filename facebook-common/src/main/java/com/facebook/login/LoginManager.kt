@@ -826,6 +826,83 @@ open class LoginManager internal constructor() {
     logIn(activityResultRegistryOwner, callbackManager, loginConfig)
   }
 
+  /**
+   * The ActivityResultContract object for login. This contract can be used as the parameter for
+   * `registerForActivityResult`.
+   *
+   * @param callbackManager the callback manager to register login callbacks.
+   * @param loggerID the logger Id for the login request.
+   */
+  inner class FacebookLoginActivityResultContract(
+      var callbackManager: CallbackManager? = null,
+      var loggerID: String? = null
+  ) : ActivityResultContract<Collection<String>, CallbackManager.ActivityResultParameters>() {
+    override fun createIntent(context: Context, permissions: Collection<String>): Intent {
+      val loginConfig = LoginConfiguration(permissions)
+      val loginRequest = createLoginRequestWithConfig(loginConfig)
+      loggerID?.let { loginRequest.authId = it }
+      logStartLogin(context, loginRequest)
+      val intent = getFacebookActivityIntent(loginRequest)
+      if (!resolveIntent(intent)) {
+        val exception =
+            FacebookException(
+                "Log in attempt failed: FacebookActivity could not be started." +
+                    " Please make sure you added FacebookActivity to the AndroidManifest.")
+        logCompleteLogin(
+            context, LoginClient.Result.Code.ERROR, null, exception, false, loginRequest)
+        throw exception
+      }
+      return intent
+    }
+
+    override fun parseResult(
+        resultCode: Int,
+        intent: Intent?
+    ): CallbackManager.ActivityResultParameters {
+      this@LoginManager.onActivityResult(resultCode, intent)
+      val requestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
+      callbackManager?.onActivityResult(
+          requestCode,
+          resultCode,
+          intent,
+      )
+      return CallbackManager.ActivityResultParameters(requestCode, resultCode, intent)
+    }
+  }
+
+  /**
+   * Create the ActivityResultContract object for login. This contract can be used as the parameter
+   * for `registerForActivityResult`.
+   *
+   * For example, in an AndroidX activity/fragment:
+   * ```
+   *   // onCreate
+   *   val launcher = registerForActivityResult(
+   *     loginManager.createLogInActivityResultContract(callbackManager)) {...}
+   *   // when user click the login button
+   *   launcher.launch(permissions)
+   * ```
+   *
+   * In Jetpack Compose, we can use
+   * ```
+   * rememberLauncherForActivityResult(
+   *   contract = loginManager.createLogInActivityResultContract(callbackManager, null),
+   *   onResult = {...}
+   * )
+   * ```
+   * to create the launcher
+   *
+   * @param callbackManager the callback manager to register login callbacks.
+   * @param loggerID the logger Id for the login request.
+   */
+  @JvmOverloads
+  fun createLogInActivityResultContract(
+      callbackManager: CallbackManager? = null,
+      loggerID: String? = null
+  ): FacebookLoginActivityResultContract {
+    return FacebookLoginActivityResultContract(callbackManager, loggerID)
+  }
+
   private fun validateReadPermissions(permissions: Collection<String>?) {
     if (permissions == null) {
       return

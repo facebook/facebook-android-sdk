@@ -36,6 +36,9 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistryOwner;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -61,6 +64,7 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.LoginTargetApp;
 import com.facebook.login.R;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -139,6 +143,7 @@ public class LoginButton extends FacebookButtonBase {
   private int customButtonTransparency = MAX_BUTTON_TRANSPARENCY;
   private final String loggerID = UUID.randomUUID().toString();
   private @Nullable CallbackManager callbackManager = null;
+  private @Nullable ActivityResultLauncher<Collection<? extends String>> androidXLoginCaller = null;
 
   static class LoginButtonProperties {
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
@@ -667,6 +672,21 @@ public class LoginButton extends FacebookButtonBase {
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
+    if (getContext() instanceof ActivityResultRegistryOwner) {
+      ActivityResultRegistryOwner context = (ActivityResultRegistryOwner) getContext();
+      androidXLoginCaller =
+          context
+              .getActivityResultRegistry()
+              .register(
+                  "facebook-login",
+                  getLoginManager().createLogInActivityResultContract(callbackManager, loggerID),
+                  new ActivityResultCallback<CallbackManager.ActivityResultParameters>() {
+                    @Override
+                    public void onActivityResult(CallbackManager.ActivityResultParameters result) {
+                      // do nothing
+                    }
+                  });
+    }
     if (accessTokenTracker != null && !accessTokenTracker.isTracking()) {
       accessTokenTracker.startTracking();
       setButtonText();
@@ -744,6 +764,9 @@ public class LoginButton extends FacebookButtonBase {
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
+    if (androidXLoginCaller != null) {
+      androidXLoginCaller.unregister();
+    }
     if (accessTokenTracker != null) {
       accessTokenTracker.stopTracking();
     }
@@ -1017,18 +1040,16 @@ public class LoginButton extends FacebookButtonBase {
 
     protected void performLogin() {
       final LoginManager loginManager = getLoginManager();
-      if (getAndroidxActivityResultRegistryOwner() != null) {
+      if (androidXLoginCaller != null) {
         // if no callback manager is registered with the button, an empty callback manager is
         // created for calling the static callbacks.
         CallbackManager callbackManager =
             LoginButton.this.callbackManager != null
                 ? LoginButton.this.callbackManager
                 : new CallbackManagerImpl();
-        loginManager.logIn(
-            getAndroidxActivityResultRegistryOwner(),
-            callbackManager,
-            properties.permissions,
-            getLoggerID());
+        ((LoginManager.FacebookLoginActivityResultContract) androidXLoginCaller.getContract())
+            .setCallbackManager(callbackManager);
+        androidXLoginCaller.launch(properties.permissions);
       } else if (LoginButton.this.getFragment() != null) {
         loginManager.logIn(LoginButton.this.getFragment(), properties.permissions, getLoggerID());
       } else if (LoginButton.this.getNativeFragment() != null) {

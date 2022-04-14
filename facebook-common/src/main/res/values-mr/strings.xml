@@ -19,7 +19,7 @@
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView लॉग इन ला इंटरनेट परवानगीची आवश्यकता आहे</string>
     <string name="com_facebook_tooltip_default" gender="unknown">तुमच्याकडे नियंत्रण आहे - तुम्ही अ‍ॅप्ससह कोणती माहिती शेअर करू इच्छिता ते निवडा.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">प्रतिमा डाउनलोड करत असताना अनपेक्षित त्रुटी आली.</string>
-    <string name="com_facebook_share_button_text" gender="unknown">सामायिक करा</string>
+    <string name="com_facebook_share_button_text" gender="unknown">शेअर करा</string>
     <string name="com_facebook_send_button_text" gender="unknown">पाठवा</string>
     <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; येथे जा आणि वर दाखवलेला कोड प्रविष्ट करा.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">तुमचे खाते कनेक्ट करण्यासाठी, तुमच्या मोबाईल डिव्हाइसवर Facebook अ‍ॅप उघडा आणि सूचना तपासा.</string>

@@ -21,9 +21,11 @@
 package com.facebook.internal
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -70,6 +72,12 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
     requireNotNull(fragmentWrapper.activity) {
       "Cannot use a fragment that is not attached to an activity"
     }
+  }
+
+  protected constructor(requestCode: Int) {
+    requestCodeField = requestCode
+    activity = null
+    fragmentWrapper = null
   }
 
   override fun registerCallback(
@@ -137,6 +145,38 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
 
   override fun show(content: CONTENT) {
     showImpl(content, BASE_AUTOMATIC_MODE)
+  }
+
+  protected fun createActivityResultContractForShowingDialog(
+      callbackManager: CallbackManager?,
+      mode: Any
+  ): ActivityResultContract<CONTENT, CallbackManager.ActivityResultParameters> {
+    return object : ActivityResultContract<CONTENT, CallbackManager.ActivityResultParameters>() {
+      override fun createIntent(context: Context, content: CONTENT): Intent {
+        val appCall = createAppCallForMode(content, mode)
+        val intent = appCall?.requestIntent
+        if (intent != null) {
+          appCall.setPending()
+          return intent
+        } else {
+          throw FacebookException("Content $content is not supported")
+        }
+      }
+
+      override fun parseResult(
+          resultCode: Int,
+          intent: Intent?
+      ): CallbackManager.ActivityResultParameters {
+        callbackManager?.onActivityResult(requestCode, resultCode, intent)
+        return CallbackManager.ActivityResultParameters(requestCode, resultCode, intent)
+      }
+    }
+  }
+
+  override fun createActivityResultContractForShowingDialog(
+      callbackManager: CallbackManager?
+  ): ActivityResultContract<CONTENT, CallbackManager.ActivityResultParameters> {
+    return createActivityResultContractForShowingDialog(callbackManager, BASE_AUTOMATIC_MODE)
   }
 
   // Pass in BASE_AUTOMATIC_MODE when Automatic mode choice is desired

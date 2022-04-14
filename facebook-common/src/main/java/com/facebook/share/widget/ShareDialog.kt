@@ -88,6 +88,14 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
   constructor(activity: Activity) : this(activity, DEFAULT_REQUEST_CODE)
 
   /**
+   * Constructs a new ShareDialog without any context. For androidx to create ActivityResultContract
+   * only.
+   */
+  constructor(requestCode: Int = DEFAULT_REQUEST_CODE) : super(requestCode) {
+    ShareInternalUtility.registerStaticShareCallback(requestCode)
+  }
+
+  /**
    * Constructs a new ShareDialog.
    *
    * @param fragment androidx.fragment.app.Fragment to use to share the provided content.

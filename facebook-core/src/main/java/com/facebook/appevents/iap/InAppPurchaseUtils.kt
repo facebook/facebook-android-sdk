@@ -20,6 +20,7 @@
 
 package com.facebook.appevents.iap
 
+import android.content.Context
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -50,6 +51,22 @@ object InAppPurchaseUtils {
   }
 
   /**
+   * Gets the declared method from class provided and returns the method to be use for invocation
+   */
+  @JvmStatic
+  internal fun getDeclaredMethod(
+      clazz: Class<*>,
+      methodName: String,
+      vararg args: Class<*>?
+  ): Method? {
+    return try {
+      clazz.getDeclaredMethod(methodName, *args)
+    } catch (e: NoSuchMethodException) {
+      null
+    }
+  }
+
+  /**
    * Invokes the underlying method represented by this Method object, on the specified object with
    * the specified parameters.
    */
@@ -67,5 +84,15 @@ object InAppPurchaseUtils {
       /* swallow */
     }
     return null
+  }
+
+  /** Gets class from the context class loader and returns null if class is not found. */
+  @JvmStatic
+  internal fun getClassFromContext(context: Context, className: String): Class<*>? {
+    try {
+      return context.classLoader.loadClass(className)
+    } catch (e: ClassNotFoundException) {
+      return null
+    }
   }
 }
