@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.2.0]
+### Added
+- Added `LoginManager.createLogInActivityResultContract()` and `FacebookDialog.createActivityResultContractForShowingDialog()` methods to expose the activity result contracts.
+- Support for CloudBridge for AppEvents. This feature is available for selected partners now.
+
+### Fixed
+- The client token is now mandatory. SDK initialization will have a check on it and throw out an exception if the client token is not available.
+
 ## [13.1.0]
 ### Added
 - All classes from the deprecated [Bolts](https://github.com/BoltsFramework/Bolts-Android) library are moved to an independent `facebook-bolts` kit. Now all kits depend on it to keep the back-compatibility, but we will gradually remove the dependency.
@@ -416,6 +424,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[13.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.1.0...sdk-version-13.2.0
 [13.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
 [13.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.3.0...sdk-version-13.0.0
 [12.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.2.0...sdk-version-12.3.0
