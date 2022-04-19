@@ -639,7 +639,7 @@ class GraphRequest {
         val udid =
             if (attributionIdentifiers.attributionId != null) attributionIdentifiers.attributionId
             else attributionIdentifiers.androidAdvertiserId
-        if (attributionIdentifiers.attributionId != null) {
+        if (udid != null) {
           parameters.putString("udid", udid)
         }
       }

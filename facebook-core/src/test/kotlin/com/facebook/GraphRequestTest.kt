@@ -456,6 +456,71 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
         expectedRequest.parameters, request.parameters)
   }
 
+  @Test(expected = FacebookException::class)
+  fun `test request for custom audience third party ID when the access token and attribution identifier are not available`() {
+    val mockAttributionIdentifiersCompanionObject = mock<AttributionIdentifiers.Companion>()
+    whenever(mockAttributionIdentifiersCompanionObject.getAttributionIdentifiers(any()))
+        .thenReturn(null)
+    Whitebox.setInternalState(
+        AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanionObject)
+    GraphRequest.newCustomAudienceThirdPartyIdRequest(
+        null, FacebookSdk.getApplicationContext(), "123456789", null)
+  }
+
+  @Test
+  fun `test request for custom audience third party ID when the access token is not available and attribution id is available`() {
+    val mockAttributionIdentifiersCompanionObject = mock<AttributionIdentifiers.Companion>()
+    val mockAttributionIdentifiers = mock<AttributionIdentifiers>()
+    whenever(mockAttributionIdentifiersCompanionObject.getAttributionIdentifiers(any()))
+        .thenReturn(mockAttributionIdentifiers)
+    Whitebox.setInternalState(
+        AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanionObject)
+    whenever(mockAttributionIdentifiers.attributionId).thenReturn("test_attribution_id")
+    val request =
+        GraphRequest.newCustomAudienceThirdPartyIdRequest(
+            null, FacebookSdk.getApplicationContext(), "123456789", null)
+    assertThat(request.graphPath).isEqualTo("123456789/custom_audience_third_party_id")
+    assertThat(request.parameters.getString("udid")).isEqualTo("test_attribution_id")
+  }
+
+  @Test
+  fun `test request for custom audience third party ID when the access token is not available and android adid is available`() {
+    val mockAttributionIdentifiersCompanionObject = mock<AttributionIdentifiers.Companion>()
+    val mockAttributionIdentifiers = mock<AttributionIdentifiers>()
+    whenever(mockAttributionIdentifiersCompanionObject.getAttributionIdentifiers(any()))
+        .thenReturn(mockAttributionIdentifiers)
+    Whitebox.setInternalState(
+        AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanionObject)
+    whenever(mockAttributionIdentifiers.androidAdvertiserId).thenReturn("test_android_adid")
+    val request =
+        GraphRequest.newCustomAudienceThirdPartyIdRequest(
+            null, FacebookSdk.getApplicationContext(), "123456789", null)
+    assertThat(request.graphPath).isEqualTo("123456789/custom_audience_third_party_id")
+    assertThat(request.parameters.getString("udid")).isEqualTo("test_android_adid")
+  }
+
+  @Test
+  fun `test request for custom audience third party id will get appid from the access token`() {
+    val mockAttributionIdentifiersCompanionObject = mock<AttributionIdentifiers.Companion>()
+    whenever(mockAttributionIdentifiersCompanionObject.getAttributionIdentifiers(any()))
+        .thenReturn(null)
+    Whitebox.setInternalState(
+        AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanionObject)
+    whenever(FacebookSdk.getLimitEventAndDataUsage(any<Context>())).thenReturn(false)
+    val mockAccessToken = mock<AccessToken>()
+    whenever(mockAccessToken.applicationId).thenReturn("111111111")
+    val expectedRequest =
+        GraphRequest(
+            null, "111111111/custom_audience_third_party_id", Bundle(), HttpMethod.GET, null)
+    val request =
+        GraphRequest.newCustomAudienceThirdPartyIdRequest(
+            mockAccessToken, FacebookSdk.getApplicationContext(), null)
+    assertThat(request.graphPath).isEqualTo(expectedRequest.graphPath)
+    assertThat(request.httpMethod).isEqualTo(expectedRequest.httpMethod)
+    FacebookTestUtility.assertEqualContentsWithoutOrder(
+        expectedRequest.parameters, request.parameters)
+  }
+
   @Test
   fun testRoutingNoTokenFacebookDomainApplicationRequest() {
     createTestCaseForDomainRoutingAndTokenType(
