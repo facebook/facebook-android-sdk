@@ -20,14 +20,12 @@
 
 package com.facebook.appevents.cloudbridge
 
-import android.content.SharedPreferences
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookRequestError
 import com.facebook.FacebookSdk
 import com.facebook.GraphResponse
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +34,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -45,10 +42,7 @@ import org.robolectric.annotation.Config
 
 @PowerMockIgnore("org.powermock.*", "org.mockito.*", "org.robolectric.*", "kotlin.*", "kotlinx.*")
 @RunWith(RobolectricTestRunner::class)
-@PrepareForTest(
-    FacebookSdk::class,
-    LocalBroadcastManager::class,
-)
+@PrepareForTest(FacebookSdk::class, LocalBroadcastManager::class)
 @Config(manifest = Config.NONE)
 class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
 
@@ -60,7 +54,6 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
 
   private val mockAppID = "1234"
   private val mockClientToken = "5678"
-  @Mock private lateinit var sharedPrefs: SharedPreferences
 
   private val correctJSONSettings =
       mapOf<String, Any>(
@@ -88,7 +81,6 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
 
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
-
     whenever(FacebookSdk.getClientToken()).thenReturn(mockClientToken)
     whenever(FacebookSdk.isDebugEnabled()).thenReturn(false)
     whenever(FacebookSdk.getApplicationContext())
@@ -96,10 +88,6 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getGraphDomain()).thenCallRealMethod()
     whenever(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
     whenever(FacebookSdk.getGraphApiVersion()).thenCallRealMethod()
-
-    PowerMockito.mockStatic(LocalBroadcastManager::class.java)
-    val mockLocalBroadcastManager = PowerMockito.mock(LocalBroadcastManager::class.java)
-    whenever(LocalBroadcastManager.getInstance(any())).thenReturn(mockLocalBroadcastManager)
 
     AppEventsCAPIManager.isEnabled = false
   }
@@ -110,11 +98,11 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun testEnableWithNetworkError() {
+  fun testEnableWithNetworkErrorAndSharedPrefsNotSet() {
+
     assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
 
     AppEventsCAPIManager.savedCloudBridgeCredentials = null
-
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(400, correctJSONSettings.toString()))
 
@@ -129,9 +117,7 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
     savedSettings[SettingsAPIFields.URL.rawValue] = Values.URL.rawValue
     savedSettings[SettingsAPIFields.DATASETID.rawValue] = Values.DATASETID.rawValue
     savedSettings[SettingsAPIFields.ACCESSKEY.rawValue] = Values.ACCESSKEY.rawValue
-
     AppEventsCAPIManager.savedCloudBridgeCredentials = savedSettings
-
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(400, correctJSONSettings.toString()))
 
@@ -143,7 +129,6 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
     assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
 
     AppEventsCAPIManager.savedCloudBridgeCredentials = null
-
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(200, incorrectJSONSettings.toString()))
 
@@ -155,7 +140,6 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
     assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
 
     AppEventsCAPIManager.savedCloudBridgeCredentials = null
-
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(200, correctJSONSettings.toString()))
 
@@ -169,14 +153,12 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
     val mockResponse = mock<GraphResponse>()
     if (responseCode == 200) {
       whenever(mockResponse.error).thenReturn(null)
-
       whenever(mockResponse.getJSONObject()).thenReturn(JSONObject(graphRespJsonObjStr))
     } else {
       val mockRequestError = mock<FacebookRequestError>()
       whenever(mockResponse.error).thenReturn(mockRequestError)
       whenever(mockRequestError.requestStatusCode).thenReturn(responseCode)
     }
-
     return mockResponse
   }
 }

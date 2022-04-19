@@ -96,6 +96,7 @@ object FeatureManager {
     }
     featureMapping[Feature.AAM] = arrayOf("com.facebook.appevents.aam.")
     featureMapping[Feature.CodelessEvents] = arrayOf("com.facebook.appevents.codeless.")
+    featureMapping[Feature.CloudBridge] = arrayOf("com.facebook.appevents.cloudbridge.")
     featureMapping[Feature.ErrorReport] = arrayOf("com.facebook.internal.instrument.errorreport.")
     featureMapping[Feature.AnrReport] = arrayOf("com.facebook.internal.instrument.anrreport.")
     featureMapping[Feature.PrivacyProtection] = arrayOf("com.facebook.appevents.ml.")
@@ -127,6 +128,7 @@ object FeatureManager {
       Feature.ErrorReport,
       Feature.AnrReport,
       Feature.AAM,
+      Feature.CloudBridge,
       Feature.PrivacyProtection,
       Feature.SuggestedEvents,
       Feature.IntelligentIntegrity,
@@ -158,6 +160,7 @@ object FeatureManager {
     Core(0x00000000),
     AppEvents(0x00010000),
     CodelessEvents(0x00010100),
+    CloudBridge(0x00010800),
     RestrictiveDataFiltering(0x00010200),
     AAM(0x00010300),
     PrivacyProtection(0x00010400),
@@ -202,6 +205,7 @@ object FeatureManager {
           ErrorReport -> "ErrorReport"
           AnrReport -> "AnrReport"
           AAM -> "AAM"
+          CloudBridge -> "AppEventsCloudbridge"
           PrivacyProtection -> "PrivacyProtection"
           SuggestedEvents -> "SuggestedEvents"
           IntelligentIntegrity -> "IntelligentIntegrity"

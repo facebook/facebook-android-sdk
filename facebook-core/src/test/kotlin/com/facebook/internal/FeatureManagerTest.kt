@@ -25,6 +25,14 @@ class FeatureManagerTest {
         FeatureManager.getFeature("com.facebook.appevents.codeless.DoesNotExistButStillShouldPass"))
 
     assertEquals(
+        Feature.CloudBridge,
+        FeatureManager.getFeature("com.facebook.appevents.cloudbridge.AppEventsCAPIManager"))
+    assertEquals(
+        Feature.CloudBridge,
+        FeatureManager.getFeature(
+            "com.facebook.appevents.cloudbridge.DoesNotExistButStillShouldPass"))
+
+    assertEquals(
         Feature.ErrorReport,
         FeatureManager.getFeature(
             "com.facebook.internal.instrument.errorreport.ErrorReportHandler"))
@@ -102,6 +110,7 @@ class FeatureManagerTest {
     assertEquals(Feature.Core, Feature.Core.parent)
     assertEquals(Feature.Core, Feature.AppEvents.parent)
     assertEquals(Feature.AppEvents, Feature.CodelessEvents.parent)
+    assertEquals(Feature.AppEvents, Feature.CloudBridge.parent)
     assertEquals(Feature.AppEvents, Feature.RestrictiveDataFiltering.parent)
     assertEquals(Feature.AppEvents, Feature.AAM.parent)
     assertEquals(Feature.AppEvents, Feature.PrivacyProtection.parent)

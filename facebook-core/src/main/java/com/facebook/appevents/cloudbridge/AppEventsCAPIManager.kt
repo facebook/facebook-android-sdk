@@ -159,6 +159,8 @@ object AppEventsCAPIManager {
           response.error.exception.toString())
 
       val cbCredentials = savedCloudBridgeCredentials
+
+      // load from cached behaviour
       if (cbCredentials != null) {
 
         val extractURL = URL(cbCredentials[SettingsAPIFields.URL.rawValue].toString())

@@ -22,6 +22,7 @@ package com.facebook.appevents
 
 import androidx.annotation.RestrictTo
 import com.facebook.appevents.aam.MetadataIndexer
+import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.ml.ModelManager
@@ -69,6 +70,11 @@ object AppEventsManager {
             checkFeature(FeatureManager.Feature.IapLogging) { enabled ->
               if (enabled) {
                 InAppPurchaseManager.enableAutoLogging()
+              }
+            }
+            checkFeature(FeatureManager.Feature.CloudBridge) { enabled ->
+              if (enabled) {
+                AppEventsCAPIManager.enable()
               }
             }
           }
