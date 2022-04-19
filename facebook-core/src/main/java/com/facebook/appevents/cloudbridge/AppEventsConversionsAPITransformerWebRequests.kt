@@ -67,7 +67,7 @@ object AppEventsConversionsAPITransformerWebRequests {
 
   @JvmStatic
   /**
-   * Set the CAPI G Endpoint. Can be used to override
+   * Set the CAPI G Endpoint. Overrides any existing settings.
    * @property datasetID CAPI G datasetID
    * @property url CAPI G server url
    * @property accessKey CAPI G secret access key
@@ -83,6 +83,20 @@ object AppEventsConversionsAPITransformerWebRequests {
 
     credentials = CloudBridgeCredentials(datasetID, url, accessKey)
     transformedEvents = mutableListOf()
+  }
+
+  @JvmStatic
+  /**
+   * Get the currently set credentials
+   * @return credentials
+   */
+  fun getCredentials(): String? {
+
+    return try {
+      credentials?.toString()
+    } catch (e: UninitializedPropertyAccessException) {
+      null
+    }
   }
 
   @JvmStatic
