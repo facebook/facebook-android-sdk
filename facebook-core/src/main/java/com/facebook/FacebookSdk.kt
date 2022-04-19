@@ -151,6 +151,10 @@ object FacebookSdk {
       GraphRequestCreator { accessToken, publishUrl, publishParams, callback ->
         GraphRequest.newPostRequest(accessToken, publishUrl, publishParams, callback)
       }
+
+  /** The key for the saved settings for cloudbridge. */
+  const val CLOUDBRIDGE_SAVED_CREDENTIALS = "com.facebook.sdk.CloudBridgeSavedCredentials"
+
   private var isFullyInitialized = false
 
   /**

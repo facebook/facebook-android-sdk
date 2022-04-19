@@ -20,6 +20,7 @@
 
 package com.facebook.appevents.cloudbridge
 
+import android.content.Context
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.GraphResponse
@@ -28,6 +29,8 @@ import com.facebook.LoggingBehavior
 import com.facebook.internal.Logger
 import com.facebook.internal.Utility.convertJSONArrayToList
 import com.facebook.internal.Utility.convertJSONObjectToHashMap
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.net.MalformedURLException
 import java.net.URL
 import org.json.JSONArray
 import org.json.JSONException
@@ -45,6 +48,77 @@ object AppEventsCAPIManager {
   private const val SETTINGS_PATH = "/cloudbridge_settings"
   private val TAG = AppEventsCAPIManager::class.java.canonicalName
   internal var isEnabled: Boolean = false
+
+  internal var savedCloudBridgeCredentials: Map<String, Any>?
+    @JvmStatic
+    @AutoHandleExceptions
+    get() {
+      val context = FacebookSdk.getApplicationContext()
+      val sharedPref =
+          context.getSharedPreferences(
+              FacebookSdk.CLOUDBRIDGE_SAVED_CREDENTIALS, Context.MODE_PRIVATE)
+              ?: return null
+
+      val datasetID = sharedPref.getString(SettingsAPIFields.DATASETID.rawValue, null)
+      val url = sharedPref.getString(SettingsAPIFields.URL.rawValue, null)
+      val accessKey = sharedPref.getString(SettingsAPIFields.ACCESSKEY.rawValue, null)
+
+      // individual cloud bridge settings should never be null
+      if (datasetID.isNullOrBlank() || url.isNullOrBlank() || accessKey.isNullOrBlank()) {
+        return null
+      }
+
+      val savedSettings: MutableMap<String, String> = mutableMapOf()
+      savedSettings[SettingsAPIFields.URL.rawValue] = url
+      savedSettings[SettingsAPIFields.DATASETID.rawValue] = datasetID
+      savedSettings[SettingsAPIFields.ACCESSKEY.rawValue] = accessKey
+
+      Logger.log(
+          LoggingBehavior.APP_EVENTS,
+          TAG.toString(),
+          " \n\nLoading Cloudbridge settings from saved Prefs: \n================\n DATASETID: %s\n URL: %s \n ACCESSKEY: %s \n\n ",
+          datasetID,
+          url,
+          accessKey)
+
+      return savedSettings
+    }
+    set(valuesToSave) {
+      val context = FacebookSdk.getApplicationContext()
+      val sharedPref =
+          context.getSharedPreferences(
+              FacebookSdk.CLOUDBRIDGE_SAVED_CREDENTIALS, Context.MODE_PRIVATE)
+              ?: return
+
+      if (valuesToSave == null) {
+        val editor = sharedPref.edit()
+        editor.clear()
+        editor.apply()
+        return
+      }
+      val datasetID = valuesToSave[SettingsAPIFields.DATASETID.rawValue]
+      val url = valuesToSave[SettingsAPIFields.URL.rawValue]
+      val accessKey = valuesToSave[SettingsAPIFields.ACCESSKEY.rawValue]
+
+      // individual cloud bridge settings should never be null
+      if (datasetID == null || url == null || accessKey == null) {
+        return
+      }
+
+      val editor = sharedPref.edit()
+      editor.putString(SettingsAPIFields.DATASETID.rawValue, datasetID.toString())
+      editor.putString(SettingsAPIFields.URL.rawValue, url.toString())
+      editor.putString(SettingsAPIFields.ACCESSKEY.rawValue, accessKey.toString())
+      editor.apply()
+
+      Logger.log(
+          LoggingBehavior.APP_EVENTS,
+          TAG.toString(),
+          " \n\nSaving Cloudbridge settings from saved Prefs: \n================\n DATASETID: %s\n URL: %s \n ACCESSKEY: %s \n\n ",
+          datasetID,
+          url,
+          accessKey)
+    }
 
   /** Run this to pull the CAPIG initialization settings from FB Backend. */
   @JvmStatic
@@ -83,6 +157,19 @@ object AppEventsCAPIManager {
           " \n\nGraph Response Error: \n================\nResponse Error: %s\nResponse Error Exception: %s\n\n ",
           response.error.toString(),
           response.error.exception.toString())
+
+      val cbCredentials = savedCloudBridgeCredentials
+      if (cbCredentials != null) {
+
+        val extractURL = URL(cbCredentials[SettingsAPIFields.URL.rawValue].toString())
+
+        AppEventsConversionsAPITransformerWebRequests.configure(
+            cbCredentials[SettingsAPIFields.DATASETID.rawValue].toString(),
+            extractURL.protocol + "://" + extractURL.host,
+            cbCredentials[SettingsAPIFields.ACCESSKEY.rawValue].toString())
+
+        this.isEnabled = true
+      }
 
       return
     }
@@ -130,9 +217,22 @@ object AppEventsCAPIManager {
       return
     }
 
-    val extractURL = URL(url)
-    AppEventsConversionsAPITransformerWebRequests.configure(
-        datasetID, extractURL.protocol + "://" + extractURL.host, accessKey)
+    try {
+      val extractURL = URL(url)
+
+      AppEventsConversionsAPITransformerWebRequests.configure(
+          datasetID, extractURL.protocol + "://" + extractURL.host, accessKey)
+
+      savedCloudBridgeCredentials = config
+    } catch (e: MalformedURLException) {
+      Logger.log(
+          LoggingBehavior.APP_EVENTS,
+          TAG,
+          "CloudBridge Settings API response doesn't have valid url\n %s ",
+          e.stackTraceToString())
+
+      return
+    }
 
     this.isEnabled =
         if (config[SettingsAPIFields.ENABLED.rawValue] != null)

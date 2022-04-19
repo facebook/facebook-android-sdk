@@ -20,13 +20,12 @@
 
 package com.facebook.appevents.cloudbridge
 
+import android.content.SharedPreferences
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookRequestError
 import com.facebook.FacebookSdk
-import com.facebook.GraphRequest
-import com.facebook.GraphRequestBatch
 import com.facebook.GraphResponse
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
@@ -37,6 +36,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -47,8 +47,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @PrepareForTest(
     FacebookSdk::class,
-    GraphRequest::class,
-    GraphRequestBatch::class,
     LocalBroadcastManager::class,
 )
 @Config(manifest = Config.NONE)
@@ -57,35 +55,38 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
   enum class Values(val rawValue: String) {
     DATASETID("id123"),
     ACCESSKEY("key123"),
-    CLOUDBRIDGEURL("https://www.123.com")
+    URL("https://www.123.com")
   }
 
   private val mockAppID = "1234"
   private val mockClientToken = "5678"
+  @Mock private lateinit var sharedPrefs: SharedPreferences
 
   private val correctJSONSettings =
       mapOf<String, Any>(
           "data" to
               listOf(
                   mapOf<String, Any>(
-                      "is_enabled" to true,
-                      "access_key" to "\"" + Values.ACCESSKEY.rawValue + "\"",
-                      "dataset_id" to "\"" + Values.DATASETID.rawValue + "\"",
-                      "endpoint" to "\"" + Values.CLOUDBRIDGEURL.rawValue + "\"")))
+                      SettingsAPIFields.ENABLED.rawValue to true,
+                      SettingsAPIFields.ACCESSKEY.rawValue to
+                          "\"" + Values.ACCESSKEY.rawValue + "\"",
+                      SettingsAPIFields.DATASETID.rawValue to
+                          "\"" + Values.DATASETID.rawValue + "\"",
+                      SettingsAPIFields.URL.rawValue to "\"" + Values.URL.rawValue + "\"")))
 
   private val incorrectJSONSettings =
       mapOf<String, Any>(
           "data" to
               listOf(
                   mapOf<String, Any>(
-                      "is_enabled" to true,
+                      SettingsAPIFields.ENABLED.rawValue to true,
                   )))
 
   @Before
   override fun setup() {
     super.setup()
-
     PowerMockito.mockStatic(FacebookSdk::class.java)
+
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
 
     whenever(FacebookSdk.getClientToken()).thenReturn(mockClientToken)
@@ -112,6 +113,8 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
   fun testEnableWithNetworkError() {
     assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
 
+    AppEventsCAPIManager.savedCloudBridgeCredentials = null
+
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(400, correctJSONSettings.toString()))
 
@@ -119,8 +122,27 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun testEnableWithNetworkErrorAndSharedPrefsSet() {
+    assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
+
+    val savedSettings: MutableMap<String, String> = mutableMapOf()
+    savedSettings[SettingsAPIFields.URL.rawValue] = Values.URL.rawValue
+    savedSettings[SettingsAPIFields.DATASETID.rawValue] = Values.DATASETID.rawValue
+    savedSettings[SettingsAPIFields.ACCESSKEY.rawValue] = Values.ACCESSKEY.rawValue
+
+    AppEventsCAPIManager.savedCloudBridgeCredentials = savedSettings
+
+    AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
+        mockGraphResponses(400, correctJSONSettings.toString()))
+
+    assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(true)
+  }
+
+  @Test
   fun testEnableWithoutNetworkErrorWrongJSON() {
     assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
+
+    AppEventsCAPIManager.savedCloudBridgeCredentials = null
 
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(200, incorrectJSONSettings.toString()))
@@ -131,6 +153,8 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun testEnableWithoutNetworkErrorRightJSON() {
     assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
+
+    AppEventsCAPIManager.savedCloudBridgeCredentials = null
 
     AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
         mockGraphResponses(200, correctJSONSettings.toString()))
