@@ -58,6 +58,8 @@ dependencies {
     testImplementation "org.powermock:powermock-classloading-xstream:$powerMockVersion"
     testImplementation 'org.assertj:assertj-core:3.15.0'
 
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.0'
+
     testImplementation "com.android.installreferrer:installreferrer:1.0"
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"

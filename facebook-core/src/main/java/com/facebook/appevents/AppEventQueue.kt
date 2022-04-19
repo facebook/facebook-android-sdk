@@ -33,6 +33,8 @@ import com.facebook.LoggingBehavior
 import com.facebook.appevents.AppEventStore.persistEvents
 import com.facebook.appevents.AppEventStore.readAndClearStore
 import com.facebook.appevents.InternalAppEventsLogger.Companion.getPushNotificationsRegistrationId
+import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
+import com.facebook.appevents.cloudbridge.AppEventsConversionsAPITransformerWebRequests
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.facebook.internal.Logger.Companion.log
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
@@ -163,6 +165,10 @@ internal object AppEventQueue {
 
       if (request != null) {
         requestsToExecute.add(request)
+        if (AppEventsCAPIManager.isEnabled) {
+          AppEventsConversionsAPITransformerWebRequests.transformGraphRequestAndSendToCAPIGEndPoint(
+              request)
+        }
       }
     }
     return requestsToExecute
