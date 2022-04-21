@@ -44,7 +44,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 abstract class FacebookButtonBase
 protected constructor(
     context: Context,
-    attrs: AttributeSet,
+    attrs: AttributeSet?,
     defStyleAttr: Int,
     defStyleRes: Int,
     analyticsButtonCreatedEventName: String,
@@ -181,7 +181,7 @@ protected constructor(
 
   protected open fun configureButton(
       context: Context,
-      attrs: AttributeSet,
+      attrs: AttributeSet?,
       defStyleAttr: Int,
       defStyleRes: Int
   ) {
@@ -212,7 +212,7 @@ protected constructor(
 
   private fun parseBackgroundAttributes(
       context: Context,
-      attrs: AttributeSet,
+      attrs: AttributeSet?,
       defStyleAttr: Int,
       defStyleRes: Int
   ) {
@@ -243,7 +243,7 @@ protected constructor(
   @SuppressLint("ResourceType")
   private fun parseCompoundDrawableAttributes(
       context: Context,
-      attrs: AttributeSet,
+      attrs: AttributeSet?,
       defStyleAttr: Int,
       defStyleRes: Int
   ) {
@@ -270,7 +270,7 @@ protected constructor(
 
   private fun parseContentAttributes(
       context: Context,
-      attrs: AttributeSet,
+      attrs: AttributeSet?,
       defStyleAttr: Int,
       defStyleRes: Int
   ) {
@@ -294,7 +294,7 @@ protected constructor(
 
   private fun parseTextAttributes(
       context: Context,
-      attrs: AttributeSet,
+      attrs: AttributeSet?,
       defStyleAttr: Int,
       defStyleRes: Int
   ) {
