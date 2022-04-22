@@ -150,7 +150,7 @@ open class LoginClient : Parcelable {
     return false
   }
 
-  protected open fun getHandlersToTry(request: Request): Array<LoginMethodHandler>? {
+  open fun getHandlersToTry(request: Request): Array<LoginMethodHandler>? {
     val handlers = ArrayList<LoginMethodHandler>()
     val behavior = request.loginBehavior
     if (request.isInstagramLogin) {
