@@ -28,8 +28,6 @@ import com.facebook.share.internal.ShareContentValidation.validateForApiShare
 import com.facebook.share.internal.ShareContentValidation.validateForMessage
 import com.facebook.share.internal.ShareContentValidation.validateForNativeShare
 import com.facebook.share.internal.ShareContentValidation.validateForWebShare
-import com.facebook.share.model.ShareOpenGraphAction
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareVideoContent
@@ -82,29 +80,6 @@ class ShareContentValidationTest : FacebookPowerMockTestCase() {
     validateForMessage(sharePhoto)
   }
 
-  // -ShareOpenGraphContent
-  @Test(expected = FacebookException::class)
-  fun testItValidatesShareOpenGraphWithNoActionByMessage() {
-    val shareOpenGraphContent = ShareOpenGraphContent.Builder().setAction(null).build()
-    validateForMessage(shareOpenGraphContent)
-  }
-
-  @Test(expected = FacebookException::class)
-  fun testItValidateShareOpenGraphWithNoTypeByMessage() {
-    val shareOpenGraphAction = ShareOpenGraphAction.Builder().setActionType(null).build()
-    val shareOpenGraphContent =
-        ShareOpenGraphContent.Builder().setAction(shareOpenGraphAction).build()
-    validateForMessage(shareOpenGraphContent)
-  }
-
-  @Test(expected = FacebookException::class)
-  fun testItValidatesShareOpenGraphWithPreviewPropertyNameByMessage() {
-    val shareOpenGraphAction = ShareOpenGraphAction.Builder().setActionType("foo").build()
-    val shareOpenGraphContent =
-        ShareOpenGraphContent.Builder().setAction(shareOpenGraphAction).build()
-    validateForMessage(shareOpenGraphContent)
-  }
-
   // Share by Native (Is the same as Message)
   @Test(expected = FacebookException::class)
   fun testItValidatesNullContentForNativeShare() {
@@ -143,26 +118,6 @@ class ShareContentValidationTest : FacebookPowerMockTestCase() {
     val sharePhoto = SharePhoto.Builder().setImageUrl(null).build()
     val sharePhotoContent = spcBuilder.addPhoto(sharePhoto).build()
     validateForApiShare(sharePhotoContent)
-  }
-
-  @Test
-  fun testItAcceptsShareOpenGraphContent() {
-    val actionKey = "foo"
-    val actionValue = "fooValue"
-    val shareOpenGraphAction =
-        ShareOpenGraphAction.Builder()
-            .putString(actionKey, actionValue)
-            .setActionType(actionKey)
-            .build()
-    val shareOpenGraphContent =
-        ShareOpenGraphContent.Builder()
-            .setPreviewPropertyName(actionKey)
-            .setAction(shareOpenGraphAction)
-            .build()
-    validateForMessage(shareOpenGraphContent)
-    validateForNativeShare(shareOpenGraphContent)
-    validateForApiShare(shareOpenGraphContent)
-    validateForWebShare(shareOpenGraphContent)
   }
 
   private fun buildSharePhoto(url: String): SharePhoto {

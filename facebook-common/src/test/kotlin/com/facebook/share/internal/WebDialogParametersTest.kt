@@ -26,8 +26,6 @@ import com.facebook.share.model.AppGroupCreationContent
 import com.facebook.share.model.GameRequestContent
 import com.facebook.share.model.ShareHashtag
 import com.facebook.share.model.ShareLinkContent
-import com.facebook.share.model.ShareOpenGraphAction
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import org.assertj.core.api.Assertions.assertThat
@@ -92,22 +90,6 @@ class WebDialogParametersTest : FacebookTestCase() {
     assertThat(bundle.getString(ShareConstants.WEB_DIALOG_PARAM_HREF))
         .isEqualTo("www.facebook.com/content_url")
     assertThat(bundle.getString(ShareConstants.WEB_DIALOG_PARAM_QUOTE)).isEqualTo("quote")
-    assertThat(bundle.getString(ShareConstants.WEB_DIALOG_PARAM_HASHTAG)).isEqualTo("#hashtag")
-  }
-
-  @Test
-  fun `test create with ShareOpenGraphContent`() {
-    val shareOpenGraphContent =
-        ShareOpenGraphContent.Builder()
-            .setAction(ShareOpenGraphAction.Builder().setActionType("actionType").build())
-            .setShareHashtag(ShareHashtag.Builder().setHashtag("#hashtag").build())
-            .build()
-
-    val bundle = WebDialogParameters.create(shareOpenGraphContent)
-    assertThat(bundle.getString(ShareConstants.WEB_DIALOG_PARAM_ACTION_TYPE))
-        .isEqualTo("actionType")
-    assertThat(bundle.getString(ShareConstants.WEB_DIALOG_PARAM_ACTION_PROPERTIES))
-        .isEqualTo("{\"type\":\"actionType\"}")
     assertThat(bundle.getString(ShareConstants.WEB_DIALOG_PARAM_HASHTAG)).isEqualTo("#hashtag")
   }
 

@@ -54,16 +54,12 @@ import com.facebook.internal.NativeProtocol.getSuccessResultsFromIntent
 import com.facebook.internal.Utility.isContentUri
 import com.facebook.internal.Utility.isFileUri
 import com.facebook.internal.Utility.isNullOrEmpty
-import com.facebook.internal.Utility.isWebUri
-import com.facebook.internal.Utility.jsonArrayToSet
 import com.facebook.internal.Utility.putNonEmptyString
 import com.facebook.share.Sharer
-import com.facebook.share.internal.OpenGraphJSONUtility.toJSONObject
 import com.facebook.share.model.CameraEffectTextures
 import com.facebook.share.model.ShareCameraEffectContent
 import com.facebook.share.model.ShareMedia
 import com.facebook.share.model.ShareMediaContent
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
@@ -291,74 +287,6 @@ object ShareInternalUtility {
     }
     addAttachments(attachments)
     return attachmentUrlsBundle
-  }
-
-  @Throws(JSONException::class)
-  @JvmStatic
-  fun toJSONObjectForCall(callId: UUID, content: ShareOpenGraphContent): JSONObject? {
-    val action = content.action
-    val attachments = ArrayList<NativeAppCallAttachmentStore.Attachment>()
-    val actionJSON =
-        toJSONObject(
-            action,
-            OpenGraphJSONUtility.PhotoJSONProcessor { photo ->
-              val attachment = getAttachment(callId, photo) ?: return@PhotoJSONProcessor null
-              attachments.add(attachment)
-              val photoJSONObject = JSONObject()
-              try {
-                photoJSONObject.put(NativeProtocol.IMAGE_URL_KEY, attachment.attachmentUrl)
-                if (photo.userGenerated) {
-                  photoJSONObject.put(NativeProtocol.IMAGE_USER_GENERATED_KEY, true)
-                }
-              } catch (e: JSONException) {
-                throw FacebookException("Unable to attach images", e)
-              }
-              photoJSONObject
-            })
-            ?: return null
-    addAttachments(attachments)
-    // People and place tags must be moved from the share content to the open graph action
-    if (content.placeId != null) {
-      val placeTag = actionJSON.optString("place")
-
-      // Only if the place tag is already empty or null replace with the id from the
-      // share content
-      if (isNullOrEmpty(placeTag)) {
-        actionJSON.put("place", content.placeId)
-      }
-    }
-    if (content.peopleIds != null) {
-      val peopleTags = actionJSON.optJSONArray("tags")
-      val peopleIdSet: MutableSet<String> = hashSetOf()
-      if (peopleTags != null) {
-        peopleIdSet.addAll(jsonArrayToSet(peopleTags))
-      }
-      for (peopleId in content.peopleIds) {
-        peopleIdSet.add(peopleId)
-      }
-      actionJSON.put("tags", JSONArray(peopleIdSet))
-    }
-    return actionJSON
-  }
-
-  @Throws(JSONException::class)
-  @JvmStatic
-  fun toJSONObjectForWeb(shareOpenGraphContent: ShareOpenGraphContent): JSONObject? {
-    val action = shareOpenGraphContent.action
-    return toJSONObject(action) { photo ->
-      val photoUri = photo.imageUrl
-      if (!isWebUri(photoUri)) {
-        throw FacebookException(
-            "Only web images may be used in OG" + " objects shared via the web dialog")
-      }
-      val photoJSONObject = JSONObject()
-      try {
-        photoJSONObject.put(NativeProtocol.IMAGE_URL_KEY, photoUri.toString())
-      } catch (e: JSONException) {
-        throw FacebookException("Unable to attach images", e)
-      }
-      photoJSONObject
-    }
   }
 
   @Throws(JSONException::class)

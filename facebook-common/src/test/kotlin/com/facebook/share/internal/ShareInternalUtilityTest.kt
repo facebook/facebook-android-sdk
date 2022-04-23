@@ -36,13 +36,10 @@ import com.facebook.HttpMethod
 import com.facebook.internal.AppCall
 import com.facebook.internal.CallbackManagerImpl
 import com.facebook.internal.NativeProtocol
-import com.facebook.internal.Utility.jsonArrayToStringList
 import com.facebook.share.Sharer
 import com.facebook.share.model.CameraEffectTextures
 import com.facebook.share.model.ShareCameraEffectContent
 import com.facebook.share.model.ShareMediaContent
-import com.facebook.share.model.ShareOpenGraphAction
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
@@ -109,51 +106,6 @@ class ShareInternalUtilityTest : FacebookPowerMockTestCase() {
     } catch (ex: JSONException) {
       // Fail
       assertThat(ex).isNotNull
-    }
-  }
-
-  @Test
-  fun testJsonSerializationOfOpenGraph() {
-    val placeId = "1"
-    val content =
-        ShareOpenGraphContent.Builder()
-            .setAction(
-                ShareOpenGraphAction.Builder()
-                    .putStringArrayList("tags", arrayListOf("2", "4"))
-                    .build())
-            .setPeopleIds(arrayListOf("1", "1", "2", "3"))
-            .setPlaceId(placeId)
-            .build()
-    try {
-      val objectForCall =
-          checkNotNull(ShareInternalUtility.toJSONObjectForCall(UUID.randomUUID(), content))
-      val peopleIds = jsonArrayToStringList(objectForCall.getJSONArray("tags"))
-      assertThat(peopleIds.size.toLong()).isEqualTo(4)
-      for (i in 1..4) {
-        assertThat(peopleIds).contains(Integer.valueOf(i).toString())
-      }
-      assertThat(placeId).isEqualTo(objectForCall.getString("place"))
-    } catch (ex: JSONException) {
-      // Fail
-      assertThat(ex).isNotNull
-      return
-    }
-  }
-
-  @Test
-  fun testJsonSerializationOfOpenGraphExistingPlace() {
-    val content =
-        ShareOpenGraphContent.Builder()
-            .setAction(ShareOpenGraphAction.Builder().putString("place", "1").build())
-            .setPlaceId("2")
-            .build()
-    try {
-      val objectForCall = ShareInternalUtility.toJSONObjectForCall(UUID.randomUUID(), content)
-      assertThat(objectForCall?.getString("place")).isEqualTo("1")
-    } catch (ex: JSONException) {
-      // Fail
-      assertThat(ex).isNotNull
-      return
     }
   }
 

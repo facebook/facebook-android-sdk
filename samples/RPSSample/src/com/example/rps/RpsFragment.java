@@ -32,7 +32,6 @@ import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,8 +57,6 @@ import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.ShareOpenGraphAction;
-import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.MessageDialog;
@@ -372,35 +369,6 @@ public class RpsFragment extends Fragment {
     return CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[choice];
   }
 
-  private ShareOpenGraphAction getThrowAction() {
-    // The OG objects have their own bitmaps we could rely on, but in order to demonstrate
-    // attaching an in-memory bitmap (e.g., a game screencap) we'll send the bitmap explicitly
-    // ourselves.
-    ImageButton view = gestureImages[playerChoice];
-    BitmapDrawable drawable = (BitmapDrawable) view.getBackground();
-    final Bitmap bitmap = drawable.getBitmap();
-
-    return new ShareOpenGraphAction.Builder()
-        .setActionType(OpenGraphConsts.THROW_ACTION_TYPE)
-        .putString("fb_sample_rps:gesture", getBuiltInGesture(playerChoice))
-        .putString("fb_sample_rps:opposing_gesture", getBuiltInGesture(computerChoice))
-        .putPhotoArrayList(
-            "og:image",
-            new ArrayList<SharePhoto>() {
-              {
-                add(new SharePhoto.Builder().setBitmap(bitmap).build());
-              }
-            })
-        .build();
-  }
-
-  private ShareOpenGraphContent getThrowActionContent() {
-    return new ShareOpenGraphContent.Builder()
-        .setAction(getThrowAction())
-        .setPreviewPropertyName(OpenGraphConsts.THROW_ACTION_PREVIEW_PROPERTY_NAME)
-        .build();
-  }
-
   private ShareLinkContent getLinkContent() {
     return new ShareLinkContent.Builder().setContentUrl(Uri.parse(SHARE_GAME_LINK)).build();
   }
@@ -489,13 +457,7 @@ public class RpsFragment extends Fragment {
         showInstallMessengerAppInGooglePlay();
       }
     } else {
-      ShareContent content = getThrowActionContent();
-
-      if (messageDialog.canShow(content)) {
-        messageDialog.show(content);
-      } else {
-        showInstallMessengerAppInGooglePlay();
-      }
+      showInstallMessengerAppInGooglePlay();
     }
   }
 

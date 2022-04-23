@@ -22,7 +22,6 @@ package com.facebook.share.internal
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import com.facebook.FacebookException
 import com.facebook.internal.Utility.getUriString
 import com.facebook.internal.Utility.putCommaSeparatedStringList
 import com.facebook.internal.Utility.putNonEmptyString
@@ -31,10 +30,8 @@ import com.facebook.share.model.AppGroupCreationContent
 import com.facebook.share.model.GameRequestContent
 import com.facebook.share.model.ShareContent
 import com.facebook.share.model.ShareLinkContent
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhotoContent
 import java.util.Locale
-import org.json.JSONException
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -84,24 +81,6 @@ object WebDialogParameters {
     val params = createBaseParameters(shareLinkContent)
     putUri(params, ShareConstants.WEB_DIALOG_PARAM_HREF, shareLinkContent.contentUrl)
     putNonEmptyString(params, ShareConstants.WEB_DIALOG_PARAM_QUOTE, shareLinkContent.quote)
-    return params
-  }
-
-  @JvmStatic
-  fun create(shareOpenGraphContent: ShareOpenGraphContent): Bundle {
-    val params = createBaseParameters(shareOpenGraphContent)
-    putNonEmptyString(
-        params,
-        ShareConstants.WEB_DIALOG_PARAM_ACTION_TYPE,
-        shareOpenGraphContent.action?.actionType)
-    try {
-      var ogJSON = ShareInternalUtility.toJSONObjectForWeb(shareOpenGraphContent)
-      ogJSON = ShareInternalUtility.removeNamespacesFromOGJsonObject(ogJSON, false)
-      putNonEmptyString(
-          params, ShareConstants.WEB_DIALOG_PARAM_ACTION_PROPERTIES, ogJSON?.toString())
-    } catch (e: JSONException) {
-      throw FacebookException("Unable to serialize the ShareOpenGraphContent to JSON", e)
-    }
     return params
   }
 

@@ -21,16 +21,12 @@
 package com.facebook.share.internal
 
 import android.os.Bundle
-import com.facebook.FacebookException
 import com.facebook.internal.Utility
 import com.facebook.share.model.ShareContent
 import com.facebook.share.model.ShareLinkContent
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareVideoContent
 import java.util.UUID
-import org.json.JSONException
-import org.json.JSONObject
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -57,18 +53,6 @@ object LegacyNativeDialogParameters {
         // Not supported
         nativeParams = null
       }
-      is ShareOpenGraphContent -> {
-        nativeParams =
-            try {
-              val openGraphActionJSON =
-                  ShareInternalUtility.toJSONObjectForCall(callId, shareContent)
-              create(shareContent, openGraphActionJSON, shouldFailOnDataError)
-            } catch (e: JSONException) {
-              throw FacebookException(
-                  "Unable to create a JSON Object from the provided ShareOpenGraphContent: " +
-                      e.message)
-            }
-      }
     }
     return nativeParams
   }
@@ -84,20 +68,6 @@ object LegacyNativeDialogParameters {
   ): Bundle {
     val params = createBaseParameters(photoContent, dataErrorsFatal)
     params.putStringArrayList(ShareConstants.LEGACY_PHOTOS, ArrayList(imageUrls))
-    return params
-  }
-
-  private fun create(
-      openGraphContent: ShareOpenGraphContent,
-      openGraphActionJSON: JSONObject?,
-      dataErrorsFatal: Boolean
-  ): Bundle {
-    val params = createBaseParameters(openGraphContent, dataErrorsFatal)
-    Utility.putNonEmptyString(
-        params, ShareConstants.LEGACY_PREVIEW_PROPERTY_NAME, openGraphContent.previewPropertyName)
-    Utility.putNonEmptyString(
-        params, ShareConstants.LEGACY_ACTION_TYPE, openGraphContent.action?.actionType)
-    Utility.putNonEmptyString(params, ShareConstants.LEGACY_ACTION, openGraphActionJSON.toString())
     return params
   }
 

@@ -34,10 +34,6 @@ import com.facebook.share.model.ShareMedia
 import com.facebook.share.model.ShareMediaContent
 import com.facebook.share.model.ShareMessengerActionButton
 import com.facebook.share.model.ShareMessengerURLActionButton
-import com.facebook.share.model.ShareOpenGraphAction
-import com.facebook.share.model.ShareOpenGraphContent
-import com.facebook.share.model.ShareOpenGraphObject
-import com.facebook.share.model.ShareOpenGraphValueContainer
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
@@ -94,9 +90,6 @@ object ShareContentValidation {
         validator.validate(content)
       }
       is ShareVideoContent -> {
-        validator.validate(content)
-      }
-      is ShareOpenGraphContent -> {
         validator.validate(content)
       }
       is ShareMediaContent -> {
@@ -162,7 +155,7 @@ object ShareContentValidation {
     validatePhoto(photo)
     val photoBitmap = photo.bitmap
     val photoUri = photo.imageUrl
-    if (photoBitmap == null && isWebUri(photoUri) && !validator.isOpenGraphContent) {
+    if (photoBitmap == null && isWebUri(photoUri)) {
       throw FacebookException(
           "Cannot set the ImageUrl of a SharePhoto to the Uri of an image on the " +
               "web when sharing SharePhotoContent")
@@ -237,70 +230,6 @@ object ShareContentValidation {
     }
   }
 
-  private fun validateOpenGraphContent(
-      openGraphContent: ShareOpenGraphContent,
-      validator: Validator
-  ) {
-    validator.validate(openGraphContent.action)
-    val previewPropertyName = openGraphContent.previewPropertyName
-    if (isNullOrEmpty(previewPropertyName)) {
-      throw FacebookException("Must specify a previewPropertyName.")
-    }
-    val action = openGraphContent.action
-    if (action == null || action[previewPropertyName] == null) {
-      val message =
-          "Property \"$previewPropertyName\" was not found on the action. The name of the preview property must match the name of an action property."
-      throw FacebookException(message)
-    }
-  }
-
-  private fun validateOpenGraphAction(
-      openGraphAction: ShareOpenGraphAction?,
-      validator: Validator
-  ) {
-    if (openGraphAction == null) {
-      throw FacebookException("Must specify a non-null ShareOpenGraphAction")
-    }
-    if (isNullOrEmpty(openGraphAction.actionType)) {
-      throw FacebookException("ShareOpenGraphAction must have a non-empty actionType")
-    }
-    validator.validate(openGraphAction, false)
-  }
-
-  private fun validateOpenGraphObject(
-      openGraphObject: ShareOpenGraphObject?,
-      validator: Validator
-  ) {
-    if (openGraphObject == null) {
-      throw FacebookException("Cannot share a null ShareOpenGraphObject")
-    }
-    validator.validate(openGraphObject, true)
-  }
-
-  private fun validateOpenGraphValueContainer(
-      valueContainer: ShareOpenGraphValueContainer<*, *>,
-      validator: Validator,
-      requireNamespace: Boolean
-  ) {
-    val keySet = valueContainer.keySet()
-    for (key in keySet) {
-      validateOpenGraphKey(key, requireNamespace)
-      val o = valueContainer[key]
-      if (o is List<*>) {
-        for (objectInList in o) {
-          if (objectInList == null) {
-            throw FacebookException(
-                "Cannot put null objects in Lists in " +
-                    "ShareOpenGraphObjects and ShareOpenGraphActions")
-          }
-          validateOpenGraphValueContainerObject(objectInList, validator)
-        }
-      } else {
-        validateOpenGraphValueContainerObject(o, validator)
-      }
-    }
-  }
-
   private fun validateShareMessengerActionButton(button: ShareMessengerActionButton?) {
     if (button == null) {
       return
@@ -316,29 +245,6 @@ object ShareContentValidation {
   private fun validateShareMessengerURLActionButton(button: ShareMessengerURLActionButton) {
     if (button.url == null) {
       throw FacebookException("Must specify url for ShareMessengerURLActionButton")
-    }
-  }
-
-  private fun validateOpenGraphKey(key: String, requireNamespace: Boolean) {
-    if (!requireNamespace) {
-      return
-    }
-    val components = key.split(":").toTypedArray()
-    if (components.size < 2) {
-      throw FacebookException("Open Graph keys must be namespaced: %s", key)
-    }
-    for (component in components) {
-      if (component.isEmpty()) {
-        throw FacebookException("Invalid key found in Open Graph dictionary: %s", key)
-      }
-    }
-  }
-
-  private fun validateOpenGraphValueContainerObject(o: Any?, validator: Validator) {
-    if (o is ShareOpenGraphObject) {
-      validator.validate(o as ShareOpenGraphObject?)
-    } else if (o is SharePhoto) {
-      validator.validate(o)
     }
   }
 
@@ -391,8 +297,6 @@ object ShareContentValidation {
   }
 
   open class Validator {
-    var isOpenGraphContent = false
-      private set
 
     open fun validate(linkContent: ShareLinkContent) {
       validateLinkContent(linkContent, this)
@@ -412,26 +316,6 @@ object ShareContentValidation {
 
     open fun validate(cameraEffectContent: ShareCameraEffectContent) {
       validateCameraEffectContent(cameraEffectContent)
-    }
-
-    open fun validate(openGraphContent: ShareOpenGraphContent) {
-      isOpenGraphContent = true
-      validateOpenGraphContent(openGraphContent, this)
-    }
-
-    open fun validate(openGraphAction: ShareOpenGraphAction?) {
-      validateOpenGraphAction(openGraphAction, this)
-    }
-
-    open fun validate(openGraphObject: ShareOpenGraphObject?) {
-      validateOpenGraphObject(openGraphObject, this)
-    }
-
-    open fun validate(
-        openGraphValueContainer: ShareOpenGraphValueContainer<*, *>,
-        requireNamespace: Boolean
-    ) {
-      validateOpenGraphValueContainer(openGraphValueContainer, this, requireNamespace)
     }
 
     open fun validate(photo: SharePhoto) {

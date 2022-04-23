@@ -48,8 +48,8 @@ import java.util.List;
  *
  * <p>SUPPORTED SHARE TYPES - ShareLinkContent - ShareCameraEffectContent
  *
- * <p>UNSUPPORTED SHARE TYPES (DEPRECATED AUGUST 2018) - ShareOpenGraphContent - SharePhotoContent -
- * ShareVideoContent - Any other types that are not one of the four supported types listed above
+ * <p>UNSUPPORTED SHARE TYPES (DEPRECATED AUGUST 2018) - SharePhotoContent - ShareVideoContent - Any
+ * other types that are not one of the four supported types listed above
  */
 public final class MessageDialog extends ShareDialog implements Sharer {
 
@@ -248,8 +248,6 @@ public final class MessageDialog extends ShareDialog implements Sharer {
       contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_GENERIC_TEMPLATE;
     } else if (dialogFeature == MessageDialogFeature.MESSENGER_MEDIA_TEMPLATE) {
       contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_MEDIA_TEMPLATE;
-    } else if (dialogFeature == MessageDialogFeature.MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE) {
-      contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE;
     } else {
       contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_UNKNOWN;
     }

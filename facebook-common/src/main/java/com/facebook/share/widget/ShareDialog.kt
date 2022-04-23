@@ -37,12 +37,10 @@ import com.facebook.internal.DialogPresenter
 import com.facebook.internal.FacebookDialogBase
 import com.facebook.internal.FragmentWrapper
 import com.facebook.internal.NativeAppCallAttachmentStore
-import com.facebook.internal.Utility
 import com.facebook.share.Sharer
 import com.facebook.share.internal.CameraEffectFeature
 import com.facebook.share.internal.LegacyNativeDialogParameters
 import com.facebook.share.internal.NativeDialogParameters
-import com.facebook.share.internal.OpenGraphActionDialogFeature
 import com.facebook.share.internal.ShareContentValidation
 import com.facebook.share.internal.ShareDialogFeature
 import com.facebook.share.internal.ShareFeedContent
@@ -53,12 +51,10 @@ import com.facebook.share.model.ShareCameraEffectContent
 import com.facebook.share.model.ShareContent
 import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.model.ShareMediaContent
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
 import com.facebook.share.model.ShareVideoContent
-import java.lang.Exception
 import java.util.UUID
 
 /** Provides functionality to share content via the Facebook Share Dialog */
@@ -242,9 +238,6 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
               val photoContent = createAndMapAttachments(content, appCall.callId)
               WebDialogParameters.create(photoContent)
             }
-            is ShareOpenGraphContent -> {
-              WebDialogParameters.create(content)
-            }
             else -> {
               return null
             }
@@ -256,7 +249,6 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
     private fun getActionName(shareContent: ShareContent<*, *>): String? {
       return when {
         (shareContent is ShareLinkContent || shareContent is SharePhotoContent) -> WEB_SHARE_DIALOG
-        shareContent is ShareOpenGraphContent -> WEB_OG_SHARE_DIALOG
         else -> null
       }
     }
@@ -395,9 +387,6 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
           dialogFeature === ShareDialogFeature.VIDEO -> {
             AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_VIDEO
           }
-          dialogFeature === OpenGraphActionDialogFeature.OG_ACTION_DIALOG -> {
-            AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_OPENGRAPH
-          }
           else -> {
             AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_UNKNOWN
           }
@@ -481,7 +470,6 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
       // SharePhotoContent currently requires the user staging endpoint, so we need a user access
       // token, so we need to see if we have one
       return (ShareLinkContent::class.java.isAssignableFrom(contentType) ||
-          ShareOpenGraphContent::class.java.isAssignableFrom(contentType) ||
           (SharePhotoContent::class.java.isAssignableFrom(contentType) &&
               AccessToken.isCurrentAccessTokenActive()))
     }
@@ -489,17 +477,6 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
     private fun canShowWebCheck(content: ShareContent<*, *>): Boolean {
       if (!canShowWebTypeCheck(content.javaClass)) {
         return false
-      }
-      if (content is ShareOpenGraphContent) {
-        try {
-          ShareInternalUtility.toJSONObjectForWeb(content)
-        } catch (e: Exception) {
-          Utility.logd(
-              TAG,
-              "canShow returned false because the content of the Open Graph object can't be shared via the web dialog",
-              e)
-          return false
-        }
       }
       return true
     }
@@ -514,9 +491,6 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
         }
         ShareVideoContent::class.java.isAssignableFrom(contentType) -> {
           ShareDialogFeature.VIDEO
-        }
-        ShareOpenGraphContent::class.java.isAssignableFrom(contentType) -> {
-          OpenGraphActionDialogFeature.OG_ACTION_DIALOG
         }
         ShareMediaContent::class.java.isAssignableFrom(contentType) -> {
           ShareDialogFeature.MULTIMEDIA

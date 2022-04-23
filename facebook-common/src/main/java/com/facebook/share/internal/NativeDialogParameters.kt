@@ -24,18 +24,15 @@ import android.os.Bundle
 import com.facebook.FacebookException
 import com.facebook.internal.Utility
 import com.facebook.share.internal.CameraEffectJSONUtility.convertToJSON
-import com.facebook.share.internal.ShareInternalUtility.getFieldNameAndNamespaceFromFullName
 import com.facebook.share.model.ShareCameraEffectContent
 import com.facebook.share.model.ShareContent
 import com.facebook.share.model.ShareLinkContent
 import com.facebook.share.model.ShareMediaContent
-import com.facebook.share.model.ShareOpenGraphContent
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
 import com.facebook.share.model.ShareVideoContent
 import java.util.UUID
 import org.json.JSONException
-import org.json.JSONObject
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
@@ -61,17 +58,6 @@ object NativeDialogParameters {
       is ShareVideoContent -> {
         val videoUrl = ShareInternalUtility.getVideoUrl(shareContent, callId)
         nativeParams = create(shareContent, videoUrl, shouldFailOnDataError)
-      }
-      is ShareOpenGraphContent -> {
-        try {
-          var openGraphActionJSON = ShareInternalUtility.toJSONObjectForCall(callId, shareContent)
-          openGraphActionJSON =
-              ShareInternalUtility.removeNamespacesFromOGJsonObject(openGraphActionJSON, false)
-          nativeParams = create(shareContent, openGraphActionJSON, shouldFailOnDataError)
-        } catch (e: JSONException) {
-          throw FacebookException(
-              "Unable to create a JSON Object from the provided ShareOpenGraphContent: ${e.message}")
-        }
       }
       is ShareMediaContent -> {
         val mediaInfos = ShareInternalUtility.getMediaInfos(shareContent, callId) ?: listOf()
@@ -150,25 +136,6 @@ object NativeDialogParameters {
   ): Bundle {
     val params = createBaseParameters(mediaContent, dataErrorsFatal)
     params.putParcelableArrayList(ShareConstants.MEDIA, ArrayList(mediaInfos))
-    return params
-  }
-
-  private fun create(
-      openGraphContent: ShareOpenGraphContent,
-      openGraphActionJSON: JSONObject?,
-      dataErrorsFatal: Boolean
-  ): Bundle {
-    val params = createBaseParameters(openGraphContent, dataErrorsFatal)
-
-    // Strip namespace from preview property name
-    val previewProperty =
-        openGraphContent.previewPropertyName?.let {
-          getFieldNameAndNamespaceFromFullName(it).second
-        }
-    Utility.putNonEmptyString(params, ShareConstants.PREVIEW_PROPERTY_NAME, previewProperty)
-    Utility.putNonEmptyString(
-        params, ShareConstants.ACTION_TYPE, openGraphContent.action?.actionType)
-    Utility.putNonEmptyString(params, ShareConstants.ACTION, openGraphActionJSON.toString())
     return params
   }
 
