@@ -90,12 +90,10 @@ abstract class AuthenticationTokenTracker {
         Utility.logd(TAG, "AuthenticationTokenChanged")
         val oldAuthenticationToken =
             intent.getParcelableExtra<Parcelable>(
-                AuthenticationTokenManager.EXTRA_OLD_AUTHENTICATION_TOKEN) as
-                AuthenticationToken?
+                AuthenticationTokenManager.EXTRA_OLD_AUTHENTICATION_TOKEN) as AuthenticationToken?
         val newAuthenticationToken =
             intent.getParcelableExtra<Parcelable>(
-                AuthenticationTokenManager.EXTRA_NEW_AUTHENTICATION_TOKEN) as
-                AuthenticationToken?
+                AuthenticationTokenManager.EXTRA_NEW_AUTHENTICATION_TOKEN) as AuthenticationToken?
         onCurrentAuthenticationTokenChanged(oldAuthenticationToken, newAuthenticationToken)
       }
     }

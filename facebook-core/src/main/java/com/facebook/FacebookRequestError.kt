@@ -369,8 +369,8 @@ private constructor(
                 null,
                 if (singleResult.has(BODY_KEY)) {
                   getStringPropertyAsJSON(
-                      singleResult, BODY_KEY, GraphResponse.NON_JSON_RESPONSE_PROPERTY) as
-                      JSONObject?
+                      singleResult, BODY_KEY, GraphResponse.NON_JSON_RESPONSE_PROPERTY)
+                      as JSONObject?
                 } else {
                   null
                 },

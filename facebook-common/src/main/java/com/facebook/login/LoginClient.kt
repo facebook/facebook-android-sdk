@@ -665,8 +665,7 @@ open class LoginClient : Parcelable {
     val o: Array<Parcelable> =
         source.readParcelableArray(LoginMethodHandler::class.java.classLoader) ?: emptyArray()
     handlersToTry =
-        o
-            .mapNotNull {
+        o.mapNotNull {
               val handler = it as? LoginMethodHandler
               handler?.loginClient = this@LoginClient
               handler

@@ -21,7 +21,8 @@ object CertificateUtil {
   fun getCertificateHash(ctx: Context): String {
     try {
       val signatures =
-          ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNATURES)
+          ctx.packageManager
+              .getPackageInfo(ctx.packageName, PackageManager.GET_SIGNATURES)
               .signatures
       val sb = StringBuilder()
       val md = MessageDigest.getInstance("SHA1")

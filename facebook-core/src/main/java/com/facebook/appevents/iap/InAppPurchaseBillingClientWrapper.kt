@@ -163,8 +163,8 @@ private constructor(
               invokeMethod(
                   purchaseHistoryRecordClazz,
                   getOriginalJsonPurchaseHistoryMethod,
-                  purchaseHistoryObject) as?
-                  String
+                  purchaseHistoryObject)
+                  as? String
                   ?: continue
           val purchaseHistoryJson = JSONObject(purchaseHistoryJsonRaw)
           val packageName = context.packageName

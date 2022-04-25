@@ -59,7 +59,8 @@ class ViewHierarchyTest : CodelessTestBase() {
     val outerText = dict.getJSONArray("childviews").getJSONObject(0).getString("text")
     assertThat(outerText.equals(sha256hash("Outer Label"), ignoreCase = true)).isTrue
     val innerText =
-        dict.getJSONArray("childviews")
+        dict
+            .getJSONArray("childviews")
             .getJSONObject(1)
             .getJSONArray("childviews")
             .getJSONObject(0)

@@ -63,12 +63,14 @@ fun ProfilePhoto(profile: Profile?) {
 @Composable
 fun ProfileCardEntries(pairs: List<Pair<String, String?>>) {
   Column {
-    pairs.filter { it.second != null }.map {
-      Row {
-        Text(it.first, modifier = Modifier.padding(end = 4.dp))
-        Text(it.second!!)
-      }
-    }
+    pairs
+        .filter { it.second != null }
+        .map {
+          Row {
+            Text(it.first, modifier = Modifier.padding(end = 4.dp))
+            Text(it.second!!)
+          }
+        }
   }
 }
 

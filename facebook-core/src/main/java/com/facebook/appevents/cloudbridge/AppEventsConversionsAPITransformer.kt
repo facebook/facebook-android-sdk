@@ -662,8 +662,8 @@ object AppEventsConversionsAPITransformer {
     val eventTypeStr = parameters[OtherEventConstants.EVENT.rawValue]
     val eventType =
         AppEventType(
-            eventTypeStr as
-                String) // eventTypeStr?.let { AppEventType(it as String) } as AppEventType
+            eventTypeStr
+                as String) // eventTypeStr?.let { AppEventType(it as String) } as AppEventType
 
     if (eventType == AppEventType.OTHER) {
       return eventType

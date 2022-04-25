@@ -226,9 +226,9 @@ class TaskTest {
   fun testBackgroundCall() {
     runTaskTest {
       Task.callInBackground {
-        Thread.sleep(100)
-        5
-      }
+            Thread.sleep(100)
+            5
+          }
           .continueWith { task ->
             assertThat(task.result).isEqualTo(5)
             null
@@ -368,21 +368,23 @@ class TaskTest {
   @Test
   fun testBackgroundError() {
     runTaskTest {
-      Task.callInBackground<Int> { throw IllegalStateException() }.continueWith { task ->
-        assertThat(task.isFaulted).isTrue
-        assertThat(task.error is IllegalStateException).isTrue
-        null
-      }
+      Task.callInBackground<Int> { throw IllegalStateException() }
+          .continueWith { task ->
+            assertThat(task.isFaulted).isTrue
+            assertThat(task.error is IllegalStateException).isTrue
+            null
+          }
     }
   }
 
   @Test
   fun testBackgroundCancellation() {
     runTaskTest {
-      Task.callInBackground<Void> { throw CancellationException() }.continueWith { task ->
-        assertThat(task.isCancelled).isTrue
-        null
-      }
+      Task.callInBackground<Void> { throw CancellationException() }
+          .continueWith { task ->
+            assertThat(task.isCancelled).isTrue
+            null
+          }
     }
   }
 
@@ -827,34 +829,39 @@ class TaskTest {
   @Test
   fun testCallWithBadExecutor() {
     val exception = RuntimeException("BAD EXECUTORS")
-    Task.call({ 1 }) { throw exception }.continueWith { task ->
-      assertThat(task.isFaulted).isTrue
-      assertThat(task.error is ExecutorException).isTrue
-      assertThat(task.error?.cause).isEqualTo(exception)
-      null
-    }
+    Task.call({ 1 }) { throw exception }
+        .continueWith { task ->
+          assertThat(task.isFaulted).isTrue
+          assertThat(task.error is ExecutorException).isTrue
+          assertThat(task.error?.cause).isEqualTo(exception)
+          null
+        }
   }
 
   @Test
   fun testContinueWithBadExecutor() {
     val exception = RuntimeException("BAD EXECUTORS")
-    Task.call { 1 }.continueWith({ task -> task.result }) { throw exception }.continueWith { task ->
-      assertThat(task.isFaulted).isTrue
-      assertThat(task.error is ExecutorException).isTrue
-      assertThat(task.error?.cause).isEqualTo(exception)
-      null
-    }
+    Task.call { 1 }
+        .continueWith({ task -> task.result }) { throw exception }
+        .continueWith { task ->
+          assertThat(task.isFaulted).isTrue
+          assertThat(task.error is ExecutorException).isTrue
+          assertThat(task.error?.cause).isEqualTo(exception)
+          null
+        }
   }
 
   @Test
   fun testContinueWithTaskAndBadExecutor() {
     val exception = RuntimeException("BAD EXECUTORS")
-    Task.call { 1 }.continueWithTask({ task -> task }) { throw exception }.continueWith { task ->
-      assertThat(task.isFaulted).isTrue
-      assertThat(task.error is ExecutorException).isTrue
-      assertThat(task.error?.cause).isEqualTo(exception)
-      null
-    }
+    Task.call { 1 }
+        .continueWithTask({ task -> task }) { throw exception }
+        .continueWith { task ->
+          assertThat(task.isFaulted).isTrue
+          assertThat(task.error is ExecutorException).isTrue
+          assertThat(task.error?.cause).isEqualTo(exception)
+          null
+        }
   }
 
   // region TaskCompletionSource

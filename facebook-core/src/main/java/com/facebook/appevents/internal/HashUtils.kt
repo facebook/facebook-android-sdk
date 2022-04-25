@@ -55,8 +55,7 @@ internal object HashUtils {
   fun computeChecksumWithPackageManager(context: Context, nanosTimeout: Long?): String? {
     val certFactory = CertificateFactory.getInstance("X.509")
     val trustedInstaller =
-        TRUSTED_CERTS
-            .map {
+        TRUSTED_CERTS.map {
               certFactory.generateCertificate(
                   ByteArrayInputStream(Base64.decode(it, Base64.DEFAULT)))
             }
@@ -110,13 +109,14 @@ internal object HashUtils {
                 }
               })
       val requestChecksumsMethod: Method =
-          PackageManager::class.java.getMethod(
-              "requestChecksums",
-              String::class.java,
-              Boolean::class.javaPrimitiveType,
-              Int::class.javaPrimitiveType,
-              MutableList::class.java,
-              checksumReadyListenerClass)
+          PackageManager::class
+              .java.getMethod(
+                  "requestChecksums",
+                  String::class.java,
+                  Boolean::class.javaPrimitiveType,
+                  Int::class.javaPrimitiveType,
+                  MutableList::class.java,
+                  checksumReadyListenerClass)
       requestChecksumsMethod.invoke(
           context.packageManager,
           context.packageName,

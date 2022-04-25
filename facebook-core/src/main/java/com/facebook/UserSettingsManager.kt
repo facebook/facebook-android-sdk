@@ -44,7 +44,8 @@ internal object UserSettingsManager {
   private const val EVENTS_CODELESS_SETUP_ENABLED = "auto_event_setup_enabled"
   private const val TIMEOUT_7D =
       (7 * 24 * 60 * 60 * 1000 // Millisecond
-          ).toLong()
+          )
+          .toLong()
   private const val ADVERTISER_ID_KEY = "advertiser_id"
   private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private val autoInitEnabled = UserSetting(true, FacebookSdk.AUTO_INIT_ENABLED_PROPERTY)

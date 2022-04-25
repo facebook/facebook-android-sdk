@@ -44,8 +44,8 @@ object ANRDetector {
   private val anrDetectorRunnable = Runnable {
     try {
       val am: ActivityManager? =
-          FacebookSdk.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE) as
-              ActivityManager
+          FacebookSdk.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE)
+              as ActivityManager
       checkProcessError(am)
     } catch (e: Exception) {
       /*no op*/

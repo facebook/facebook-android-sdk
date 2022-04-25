@@ -86,13 +86,11 @@ class AppEventsConversionsAPITransformerTest {
     assertThat(OtherEventConstants.APP.rawValue).isEqualTo(actionSource)
 
     val options =
-        parameters[
-            AppEventsConversionsAPITransformer.DataProcessingParameterName.OPTIONS.rawValue] as?
-            String
+        parameters[AppEventsConversionsAPITransformer.DataProcessingParameterName.OPTIONS.rawValue]
+            as? String
     val state =
-        parameters[
-            AppEventsConversionsAPITransformer.DataProcessingParameterName.STATE.rawValue] as?
-            Int
+        parameters[AppEventsConversionsAPITransformer.DataProcessingParameterName.STATE.rawValue]
+            as? Int
     assertThat(options).isEqualTo("[]")
     assertThat(state).isEqualTo(0)
   }
@@ -194,8 +192,8 @@ class AppEventsConversionsAPITransformerTest {
     val transformedValue =
         AppEventsConversionsAPITransformer.transformValue(
             CustomEventField.CONTENTS.rawValue,
-            "[{\"id\": \"1234\", \"quantity\": 1},{\"id\":\"5678\", \"quantity\": 2}]") as
-            ArrayList<*>
+            "[{\"id\": \"1234\", \"quantity\": 1},{\"id\":\"5678\", \"quantity\": 2}]")
+            as ArrayList<*>
 
     assertThat(transformedValue.size).isEqualTo(2)
 
@@ -212,8 +210,7 @@ class AppEventsConversionsAPITransformerTest {
   fun testTransformValueATE() {
     val ateTransformedValue =
         AppEventsConversionsAPITransformer.transformValue(
-            AppEventUserAndAppDataField.ADV_TE.rawValue, "1") as?
-            Boolean
+            AppEventUserAndAppDataField.ADV_TE.rawValue, "1") as? Boolean
 
     assertThat(ateTransformedValue).isEqualTo(true)
   }
@@ -222,8 +219,8 @@ class AppEventsConversionsAPITransformerTest {
   fun testTransformValueExtinfo() {
     val transformedValue =
         AppEventsConversionsAPITransformer.transformValue(
-            AppEventUserAndAppDataField.EXT_INFO.rawValue, "[\"i0\", [\"i1\"], [\"i2\"]]") as
-            ArrayList<*>
+            AppEventUserAndAppDataField.EXT_INFO.rawValue, "[\"i0\", [\"i1\"], [\"i2\"]]")
+            as ArrayList<*>
 
     assertThat(transformedValue.size).isEqualTo(3)
     assertThat(transformedValue[0] as? String).isEqualTo("i0")
@@ -237,8 +234,7 @@ class AppEventsConversionsAPITransformerTest {
     dataProviderInputToExpected.forEach { pair ->
       val actual =
           AppEventsConversionsAPITransformer.transformValue(
-              CustomEventField.EVENT_TIME.rawValue, pair.key) as?
-              Int
+              CustomEventField.EVENT_TIME.rawValue, pair.key) as? Int
       val expected = pair.value
 
       assertThat(actual).isEqualTo(expected)
