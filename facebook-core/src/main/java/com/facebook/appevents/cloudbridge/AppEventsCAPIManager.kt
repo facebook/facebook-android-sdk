@@ -220,10 +220,7 @@ object AppEventsCAPIManager {
     }
 
     try {
-      val extractURL = URL(url)
-
-      AppEventsConversionsAPITransformerWebRequests.configure(
-          datasetID, extractURL.protocol + "://" + extractURL.host, accessKey)
+      AppEventsConversionsAPITransformerWebRequests.configure(datasetID, url, accessKey)
 
       savedCloudBridgeCredentials = config
     } catch (e: MalformedURLException) {
