@@ -29,6 +29,7 @@ import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import android.os.RemoteException
+import androidx.annotation.VisibleForTesting
 import com.facebook.internal.NativeProtocol.createPlatformServiceIntent
 import com.facebook.internal.NativeProtocol.getLatestAvailableProtocolVersionForService
 import java.lang.IllegalArgumentException
@@ -88,7 +89,7 @@ abstract class PlatformServiceClient(
   }
 
   override fun onServiceConnected(name: ComponentName, service: IBinder) {
-    sender = Messenger(service)
+    sender = createSender(service)
     sendMessage()
   }
 
@@ -118,6 +119,11 @@ abstract class PlatformServiceClient(
     } catch (e: RemoteException) {
       callback(null)
     }
+  }
+
+  @VisibleForTesting
+  protected open fun createSender(service: IBinder): Messenger {
+    return Messenger(service)
   }
 
   protected abstract fun populateRequestBundle(data: Bundle)

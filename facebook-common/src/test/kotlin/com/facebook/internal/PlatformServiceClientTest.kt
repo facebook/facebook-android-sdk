@@ -23,6 +23,7 @@ package com.facebook.internal
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import com.facebook.FacebookPowerMockTestCase
@@ -35,7 +36,7 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(PlatformServiceClient::class, NativeProtocol::class)
+@PrepareForTest(NativeProtocol::class)
 class PlatformServiceClientTest : FacebookPowerMockTestCase() {
   private lateinit var mockContext: Context
   private lateinit var mockIntent: Intent
@@ -62,7 +63,6 @@ class PlatformServiceClientTest : FacebookPowerMockTestCase() {
         .thenReturn(PROTOCOL_VERSION)
     PowerMockito.`when`(NativeProtocol.createPlatformServiceIntent(mockContext))
         .thenReturn(mockIntent)
-    PowerMockito.whenNew(Messenger::class.java).withAnyArguments().thenReturn(mockMessenger)
 
     testClient =
         object :
@@ -75,6 +75,10 @@ class PlatformServiceClientTest : FacebookPowerMockTestCase() {
                 NONCE) {
           override fun populateRequestBundle(data: Bundle) {
             data.putString("TEST", "TEST_DATA")
+          }
+
+          override fun createSender(service: IBinder): Messenger {
+            return mockMessenger
           }
         }
   }
