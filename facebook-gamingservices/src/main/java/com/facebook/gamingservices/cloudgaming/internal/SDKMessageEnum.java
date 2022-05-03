@@ -61,7 +61,8 @@ public enum SDKMessageEnum {
   CONTEXT_CHOOSE("contextChoose"),
   CONTEXT_CREATE("contextCreate"),
   CONTEXT_GET_ID("contextGetID"),
-  DEBUG_PRINT("debugPrint");
+  DEBUG_PRINT("debugPrint"),
+  GET_COUNTRY_ISO("getCountryISO");
 
   private final String mStringValue;
 
