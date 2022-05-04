@@ -41,6 +41,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -130,6 +131,7 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profile1).isEqualTo(profile2)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T118080705
   @Test
   fun testParcelSerialization() {
     var profile1 = createDefaultProfile()
