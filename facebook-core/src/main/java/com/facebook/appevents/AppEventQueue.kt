@@ -30,8 +30,8 @@ import com.facebook.GraphRequest
 import com.facebook.GraphRequest.Companion.newPostRequest
 import com.facebook.GraphResponse
 import com.facebook.LoggingBehavior
+import com.facebook.appevents.AppEventDiskStore.readAndClearStore
 import com.facebook.appevents.AppEventStore.persistEvents
-import com.facebook.appevents.AppEventStore.readAndClearStore
 import com.facebook.appevents.InternalAppEventsLogger.Companion.getPushNotificationsRegistrationId
 import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.cloudbridge.AppEventsConversionsAPITransformerWebRequests

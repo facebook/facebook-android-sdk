@@ -14,7 +14,7 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(AppEventStore::class, AppEventUtility::class, PersistedEvents::class)
+@PrepareForTest(AppEventDiskStore::class, AppEventUtility::class, PersistedEvents::class)
 class AppEventStoreTest : FacebookPowerMockTestCase() {
 
   private lateinit var lastPersistedEvents: PersistedEvents
@@ -26,18 +26,16 @@ class AppEventStoreTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
-    PowerMockito.mockStatic(AppEventStore::class.java)
+    PowerMockito.mockStatic(AppEventDiskStore::class.java)
     PowerMockito.mockStatic(AppEventUtility::class.java)
 
-    whenever(AppEventStore.persistEvents(any(), any())).thenCallRealMethod()
-    whenever(AppEventStore.persistEvents(any())).thenCallRealMethod()
-    whenever(AppEventStore.saveEventsToDisk(any())).thenAnswer {
+    whenever(AppEventDiskStore.saveEventsToDisk(any())).thenAnswer {
       lastPersistedEvents = it.getArgument(0) as PersistedEvents
       null
     }
     val map = hashMapOf(accessTokenAppIdPair to mutableListOf(appevent))
     val persistedEvents = PersistedEvents(map)
-    whenever(AppEventStore.readAndClearStore()).thenReturn(persistedEvents)
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(persistedEvents)
     sessionEventsState.addEvent(appevent)
   }
 

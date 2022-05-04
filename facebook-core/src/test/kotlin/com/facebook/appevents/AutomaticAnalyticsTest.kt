@@ -51,7 +51,7 @@ import org.robolectric.RuntimeEnvironment
 
 @PrepareForTest(
     AppEventQueue::class,
-    AppEventStore::class,
+    AppEventDiskStore::class,
     AttributionIdentifiers::class,
     ActivityLifecycleTracker::class,
     FacebookSdk::class,
@@ -135,12 +135,12 @@ class AutomaticAnalyticsTest : FacebookPowerMockTestCase() {
         .thenReturn(mockIdentifiers)
 
     // Mock App Event Store
-    PowerMockito.mockStatic(AppEventStore::class.java)
+    PowerMockito.mockStatic(AppEventDiskStore::class.java)
     val accessTokenAppIdPair = AccessTokenAppIdPair(null, "1234")
     val appEvent = AppEvent("ctxName", "eventName2", 0.0, Bundle(), true, true, null)
     val map = hashMapOf(accessTokenAppIdPair to mutableListOf(appEvent))
     val persistedEvents: PersistedEvents = PersistedEvents(map)
-    whenever(AppEventStore.readAndClearStore()).thenReturn(persistedEvents)
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(persistedEvents)
 
     // Mock graph request
     val mockRequest: GraphRequest = mock()

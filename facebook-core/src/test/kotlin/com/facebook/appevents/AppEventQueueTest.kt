@@ -50,6 +50,7 @@ import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(
+    AppEventDiskStore::class,
     AppEventStore::class,
     FacebookSdk::class,
     FetchedAppSettingsManager::class,
@@ -79,6 +80,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
+    mockStatic(AppEventDiskStore::class.java)
     mockStatic(AppEventStore::class.java)
     mockStatic(FacebookSdk::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
@@ -125,7 +127,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
       lastAppEventCollection = it.getArgument(0) as AppEventCollection
       null
     }
-    whenever(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(mockPersistedEvents)
     mockScheduledExecutor = spy(FacebookSerialThreadPoolExecutor(1))
     Whitebox.setInternalState(
         AppEventQueue::class.java, "singleThreadExecutor", mockScheduledExecutor)
@@ -152,7 +154,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   @Test
   fun `flush and wait`() {
     val intentCaptor = argumentCaptor<Intent>()
-    whenever(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(mockPersistedEvents)
 
     AppEventQueue.flushAndWait(flushReason)
 
@@ -171,7 +173,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   fun `handle response if error is no connectivity`() {
     whenever(mockFacebookRequestError.errorCode).thenReturn(-1)
     whenever(mockGraphResponse.error).thenReturn(mockFacebookRequestError)
-    whenever(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(mockPersistedEvents)
     whenever(AppEventStore.persistEvents(accessTokenAppIdPair, mockSessionEventsState)).thenAnswer {
       lastSessionEventsState = it.getArgument(1) as SessionEventsState
       null
