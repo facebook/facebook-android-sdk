@@ -96,6 +96,7 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profile4.hashCode()).isNotEqualTo(profile3.hashCode())
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T118080702
   @Test
   fun testEquals() {
     val profile1 = createDefaultProfile()
@@ -176,6 +177,7 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(Profile.getCurrentProfile()).isEqualTo(profile1)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T118069508
   @Test
   fun testGetProfilePictureUri() {
     val testFacebookImageUri = Uri.parse("https://scontent.xx.fbcdn.net/")
@@ -195,6 +197,7 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(facebookProfile.getProfilePictureUri(100, 100)).isEqualTo(testFacebookImageUri)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T118080621
   @Test
   fun `test fetch profile for an expired access token`() {
     val mockAccessToken = mock<AccessToken>()

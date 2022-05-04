@@ -65,6 +65,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117949061
   @Test(expected = IllegalArgumentException::class)
   fun `test nonce does not match throws`() {
     claimsMap["nonce"] = "not_nonce"

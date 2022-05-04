@@ -4,6 +4,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -38,6 +39,7 @@ class GateKeeperRuntimeCacheTest : FacebookPowerMockTestCase() {
     assertThat(cache.getGateKeeperValue(APPLICATION_ID, GK1, false)).isFalse
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117690413
   @Test
   fun `test multiple applications`() {
     val cache = GateKeeperRuntimeCache()

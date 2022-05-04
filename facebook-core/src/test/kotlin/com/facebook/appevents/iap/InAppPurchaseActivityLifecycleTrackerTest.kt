@@ -75,6 +75,7 @@ class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         .`when`(InAppPurchaseUtils::class.java, "getClass", any<String>())
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117799089
   @Test
   fun `test startIapLogging will bind iap intent and lifecycle callback`() {
     val intentCaptor = argumentCaptor<Intent>()

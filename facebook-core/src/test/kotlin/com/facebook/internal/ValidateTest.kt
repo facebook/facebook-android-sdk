@@ -74,6 +74,7 @@ class ValidateTest : FacebookPowerMockTestCase() {
     notNull(null, "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117659923
   @Test
   fun testNotEmptyOnNonEmpty() {
     notEmpty(listOf("hi"), "name")
@@ -91,6 +92,7 @@ class ValidateTest : FacebookPowerMockTestCase() {
     notNullOrEmpty("hi", "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117651902
   @Test(expected = IllegalArgumentException::class)
   fun testNotNullOrEmptyOnEmpty() {
 
@@ -109,6 +111,7 @@ class ValidateTest : FacebookPowerMockTestCase() {
     oneOf("hi", "name", "hi", "there")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117651559
   @Test(expected = IllegalArgumentException::class)
   fun testOneOfOnInvalid() {
 
@@ -181,6 +184,7 @@ class ValidateTest : FacebookPowerMockTestCase() {
     assertThat(Validate.hasCustomTabRedirectActivity(mockContext, redirectUri)).isTrue
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117651669
   @Test
   fun `test hasCustomTabRedirectActivity returns false if CustomTabActivity is available in another package`() {
     val redirectUri = "http://facebook.com"
