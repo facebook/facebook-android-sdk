@@ -88,6 +88,7 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T103598609
   @Test
   fun testAppEventsLoggerLogFunctions() {
     val mockEventName = "fb_mock_event"

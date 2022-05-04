@@ -306,6 +306,7 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(result?.time).isEqualTo(Long.MAX_VALUE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T103598636
   @Test
   fun testConvertJSONObjectToStringMap() {
     val validJson = "{\"k1\": true, \"k2\": \"value\"}"

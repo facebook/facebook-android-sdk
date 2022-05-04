@@ -37,6 +37,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberModifier
@@ -126,6 +127,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(accessToken, loadedAccessToken)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114745141
   @Test
   fun `test load sets current token if no cached token but valid legacy token`() {
     whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)

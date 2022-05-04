@@ -5,6 +5,7 @@ import com.facebook.FacebookPowerMockTestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -35,6 +36,7 @@ class PersistedEventsTest : FacebookPowerMockTestCase() {
     assertEquals(mutableListOf(appEvent1, appEvent2), persistedEvents.get(accessTokenAppIdPair))
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T103601695
   @Test
   fun `test add an event with new token`() {
     val accessTokenAppIdPair2 = AccessTokenAppIdPair("anothertoken1337", "yoloapplication")
