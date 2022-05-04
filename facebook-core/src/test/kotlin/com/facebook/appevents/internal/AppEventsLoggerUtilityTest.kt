@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
@@ -30,6 +31,7 @@ class AppEventsLoggerUtilityTest : FacebookPowerMockTestCase() {
     WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99021617
   @Test
   fun `test with userid`() {
     whenever(mockCompanion.getUserID()).thenReturn("13379000")

@@ -5,6 +5,7 @@ import com.facebook.util.common.AuthenticationTokenTestUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
@@ -48,6 +49,7 @@ class AuthenticationTokenHeaderTest : FacebookPowerMockTestCase() {
     AuthenticationTokenHeader("")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T98889789
   @Test
   fun `test constructor with required encoded header`() {
     val authenticationHeader =

@@ -14,6 +14,7 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -41,6 +42,7 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
     ctx = ApplicationProvider.getApplicationContext() as Context
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106268965
   @Test
   fun `test on receive successful`() {
     val intent = Intent()
@@ -53,6 +55,7 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
     verify(receiver, never()).onFailedAppCall(eq("1337"), eq("action"), any())
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106268913
   @Test
   fun `test on receive failed app call`() {
     val intent = Intent()
@@ -65,6 +68,7 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
     verify(receiver, never()).onSuccessfulAppCall(eq("1337"), eq("action"), any())
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106267525
   @Test
   fun `test on receive never called`() {
     val intent = Intent()

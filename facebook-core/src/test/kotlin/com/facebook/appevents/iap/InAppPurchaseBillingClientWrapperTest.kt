@@ -33,6 +33,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -62,6 +63,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         inAppPurchaseBillingClientWrapper)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106275737
   @Test
   fun testHelperClassCanSuccessfullyCreateWrapper() {
     // Test InAppPurchaseBillingClientWrapper
@@ -78,6 +80,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     Assertions.assertThat(purchasesUpdatedListenerWrapper).isNotNull
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106060060
   @Test
   fun testBillingClientWrapper() {
     val runnable: Runnable = mock()
@@ -106,6 +109,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     Assertions.assertThat(purchaseDetailsMap).isNotEmpty
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106060391
   @Test
   fun testSkuDetailsResponseListenerWrapper() {
     // Test can successfully create skuDetailsResponseListenerWrapper

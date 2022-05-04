@@ -34,6 +34,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -115,6 +116,7 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
     }
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99092936
   @Test
   fun `test start with auto logging events disable`() {
     isLogAppEventsEnable = false
@@ -122,6 +124,7 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
     assertThat(listOfCallbacks.isEmpty()).isTrue
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99108085
   @Test
   fun `test start with all features enable`() {
     isLogAppEventsEnable = true
