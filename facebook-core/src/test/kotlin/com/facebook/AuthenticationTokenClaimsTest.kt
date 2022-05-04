@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -29,6 +30,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     claimsMap["iat"] = 1_516_239_022
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117918904
   @Test(expected = IllegalArgumentException::class)
   fun `test missing jti throws`() {
     claimsMap.remove("jti")
@@ -37,6 +39,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117952188
   @Test(expected = IllegalArgumentException::class)
   fun `test missing iss throws`() {
     claimsMap.remove("iss")
@@ -45,6 +48,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117916141
   @Test(expected = IllegalArgumentException::class)
   fun `test missing aud throws`() {
     claimsMap.remove("aud")
@@ -77,6 +81,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117945855
   @Test(expected = IllegalArgumentException::class)
   fun `test missing sub throws`() {
     claimsMap.remove("sub")
@@ -85,6 +90,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117952320
   @Test(expected = JSONException::class)
   fun `test throw - invalid json format`() {
     val invalidJson = "123"
@@ -92,6 +98,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117945881
   @Test(expected = IllegalArgumentException::class)
   fun `test empty encode claims string throws`() {
     AuthenticationTokenClaims("", AuthenticationTokenTestUtil.NONCE)
@@ -148,6 +155,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
         .isTrue
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117951645
   @Test
   fun `test roundtrip decode and encode`() {
     // test full claims
@@ -171,6 +179,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
         .isTrue
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117947182
   @Test
   fun `test parceling with all fields`() {
     val claims1 = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_FOR_TEST
@@ -187,6 +196,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     assertThat(claims1).isEqualTo(claims2)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117886388
   @Test
   fun `test parceling only required fields while other are null`() {
     val claims1 = AuthenticationTokenTestUtil.authenticationTokenClaimsWithRequiredFieldsOnly

@@ -35,6 +35,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -87,6 +88,7 @@ class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     assertThat(intentCaptor.firstValue.`package`).isEqualTo("com.android.vending")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117809460
   @Test
   fun `test startIapLogging will only register once`() {
     whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
@@ -95,6 +97,7 @@ class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     verify(applicationContext, times(1)).registerActivityLifecycleCallbacks(any())
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117802840
   @Test
   fun `test startIapLogging will not register if implicit purchase disabled`() {
     whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)

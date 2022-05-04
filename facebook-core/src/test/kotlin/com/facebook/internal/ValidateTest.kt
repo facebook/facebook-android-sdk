@@ -40,6 +40,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -61,11 +62,13 @@ class ValidateTest : FacebookPowerMockTestCase() {
     whenever(mockContext.packageName).thenReturn(packageName)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117691280
   @Test
   fun testNotNullOnNonNull() {
     notNull("A string", "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117651873
   @Test(expected = NullPointerException::class)
   fun testNotNullOnNull() {
     notNull(null, "name")
@@ -76,11 +79,13 @@ class ValidateTest : FacebookPowerMockTestCase() {
     notEmpty(listOf("hi"), "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117690100
   @Test(expected = IllegalArgumentException::class)
   fun testNotEmptylOnEmpty() {
     notEmpty(listOf<String>(), "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117656005
   @Test
   fun testNotNullOrEmptyOnNonEmpty() {
     notNullOrEmpty("hi", "name")
@@ -92,11 +97,13 @@ class ValidateTest : FacebookPowerMockTestCase() {
     notNullOrEmpty("", "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117651884
   @Test(expected = IllegalArgumentException::class)
   fun testNotNullOrEmptyOnNull() {
     notNullOrEmpty(null, "name")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117655985
   @Test
   fun testOneOfOnValid() {
     oneOf("hi", "name", "hi", "there")
@@ -125,24 +132,28 @@ class ValidateTest : FacebookPowerMockTestCase() {
     assertThat(hasAppID()).isEqualTo(appID)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117650576
   @Test(expected = IllegalStateException::class)
   fun testHasNoAppID() {
     whenever(FacebookSdk.getApplicationId()).thenReturn(null)
     hasAppID()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117650768
   @Test
   fun testHasClientToken() {
     whenever(FacebookSdk.getClientToken()).thenReturn(clientToken)
     assertThat(hasClientToken()).isEqualTo(clientToken)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117653651
   @Test(expected = IllegalStateException::class)
   fun testHasNotClientToken() {
     whenever(FacebookSdk.getClientToken()).thenReturn(null)
     hasClientToken()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117658622
   @Test
   fun `test hasCustomTabRedirectActivity will query activities for action view`() {
     val redirectUri = "http://facebook.com"
