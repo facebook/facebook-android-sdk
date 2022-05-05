@@ -29,6 +29,7 @@ import java.io.OutputStream
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -100,6 +101,7 @@ class ProgressOutputStreamTest : FacebookPowerMockTestCase() {
     }
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T113901597
   @Test
   fun `test close does all clean work`() {
     val mockProgress1 = mock<RequestProgress>()

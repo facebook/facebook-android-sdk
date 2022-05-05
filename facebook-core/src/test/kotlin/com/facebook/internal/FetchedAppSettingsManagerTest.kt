@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 
 class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
@@ -31,6 +32,7 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
           "  \"app_events_session_timeout\": 6.4\n" +
           "}"
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114071115
   @Test
   fun `parse valid json`() {
     val test = JSONObject(validJson)
@@ -52,6 +54,7 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
     assertEquals("", result.restrictiveDataSetting)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114081845
   @Test
   fun `parse invalid value types`() {
     val test = JSONObject(invalidValueTypesJson)

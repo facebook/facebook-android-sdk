@@ -104,6 +104,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     verifyZeroInteractions(cachingStrategy)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114022337
   @Test
   fun `test load returns false if no cached token and empty legacy token`() {
     whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
@@ -113,6 +114,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     Assert.assertNull(accessToken)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114022212
   @Test
   fun `test load valid cached token`() {
     val accessToken = createAccessToken()
@@ -140,6 +142,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(accessToken, loadedAccessToken)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114022375
   @Test
   fun `test load saves token when upgrading from legacy token`() {
     whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
@@ -157,6 +160,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     Assert.assertEquals(accessToken, savedAccessToken)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114021211
   @Test
   fun `test load clears legacy cache when upgrading from legacy token`() {
     whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)
@@ -193,6 +197,7 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     verify(cachingStrategy, never()).clear()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T114022397
   @Test
   fun `test clear cache clears legacy cache`() {
     whenever(FacebookSdk.isLegacyTokenUpgradeSupported()).thenReturn(true)

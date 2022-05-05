@@ -4,6 +4,7 @@ import com.facebook.FacebookPowerMockTestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.reflect.Whitebox
 
@@ -61,6 +62,7 @@ class SuggestedEventsManagerTest : FacebookPowerMockTestCase() {
     assertThat(SuggestedEventsManager.isProductionEvents("a")).isFalse
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T101209226
   @Test
   fun `parse invalid json`() {
     SuggestedEventsManager.populateEventsFromRawJsonString(invalidJson)

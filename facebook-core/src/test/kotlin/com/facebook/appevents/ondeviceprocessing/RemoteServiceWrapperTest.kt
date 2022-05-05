@@ -82,6 +82,7 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(RemoteServiceWrapper::class.java, "isServiceAvailable", value)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99266656
   @Test
   fun testSendCustomEvents_RemoteServiceNotAvailable() {
     // Arrange

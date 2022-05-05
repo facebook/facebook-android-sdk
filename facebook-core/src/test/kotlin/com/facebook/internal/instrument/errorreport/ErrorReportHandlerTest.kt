@@ -14,6 +14,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.powermock.api.mockito.PowerMockito.mock
@@ -74,12 +75,14 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
     rootDirectory.deleteRecursively()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99179193
   @Test
   fun `test error report files`() {
     val files = ErrorReportHandler.listErrorReportFiles()
     assertEquals(3, files.size)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99180664
   @Test
   fun `test send error log`() {
     var errorLogs: JSONArray? = null
