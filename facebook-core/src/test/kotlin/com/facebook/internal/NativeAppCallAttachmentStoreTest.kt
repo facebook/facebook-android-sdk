@@ -33,6 +33,7 @@ import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -68,6 +69,7 @@ class NativeAppCallAttachmentStoreTest : FacebookPowerMockTestCase() {
     testDirectory.deleteRecursively()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99917358
   @Test
   fun `test add attachments of bitmap`() {
     val attachment = NativeAppCallAttachmentStore.createAttachment(callId, createBitmap())
@@ -108,6 +110,7 @@ class NativeAppCallAttachmentStoreTest : FacebookPowerMockTestCase() {
     assertThat(dir.canonicalPath).contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99934063
   @Test
   fun `test get attachments directory for call`() {
     val dir = NativeAppCallAttachmentStore.getAttachmentsDirectoryForCall(callId, false)
@@ -116,6 +119,7 @@ class NativeAppCallAttachmentStoreTest : FacebookPowerMockTestCase() {
     assertThat(dir.canonicalPath).contains(callId.toString())
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99982179
   @Test
   fun `test get attachment file`() {
     val dir = NativeAppCallAttachmentStore.getAttachmentFile(callId, ATTACHMENT_NAME, false)

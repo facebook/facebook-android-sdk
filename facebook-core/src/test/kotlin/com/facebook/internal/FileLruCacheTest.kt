@@ -37,6 +37,7 @@ import kotlin.math.min
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -315,6 +316,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     }
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T101537342
   @Test
   fun testConcurrentWritesToSameKey() {
     val count = 5

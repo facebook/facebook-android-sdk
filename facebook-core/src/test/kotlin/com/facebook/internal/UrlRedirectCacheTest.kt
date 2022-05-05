@@ -92,6 +92,7 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertNull(fetchedResultForNull)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T102832953
   @Test
   fun `test write the cache twice`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, toUriLong)

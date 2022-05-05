@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -67,6 +68,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     assertArrayEquals(expected, actual)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T100417976
   @Test
   fun `test get ml dir create the path`() {
     val mlDir = Utils.getMlDir()
