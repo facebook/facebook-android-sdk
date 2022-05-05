@@ -129,6 +129,7 @@ class ValidateTest : FacebookPowerMockTestCase() {
     oneOf(null, "name", "hi", "there")
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117655606
   @Test
   fun testHasAppID() {
     whenever(FacebookSdk.getApplicationId()).thenReturn(appID)

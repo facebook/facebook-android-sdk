@@ -38,6 +38,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     utilsTestFileDir.deleteRecursively()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T107032287, T106952318
   @Test
   fun `test normalizeString`() {
     assertEquals("a b c", Utils.normalizeString(" a  b    c "))
@@ -47,6 +48,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     assertEquals("abcd b c", Utils.normalizeString("\n\n\n\nabcd\r\rb    c \t\t"))
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T107032333, T106955701
   @Test
   fun `test vectorize with larger maxLen`() {
     val actual = Utils.vectorize("Hello", 10)
@@ -54,6 +56,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     assertArrayEquals(expected, actual)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T106955717
   @Test
   fun `test vectorize with non-ascii characters`() {
     val actual = Utils.vectorize("αβγ㍻", 9)
@@ -61,6 +64,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     assertArrayEquals(expected, actual)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T107032355, T106955572
   @Test
   fun `test vectorize with smaller maxLen`() {
     val actual = Utils.vectorize("Hello", 3)
@@ -77,6 +81,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     mlDir.deleteRecursively()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T107032298, T106952430
   @Test
   fun `test parseModelWeights`() {
     val conv1Weights = createTestTensor(intArrayOf(32, 20))
@@ -92,6 +97,7 @@ class UtilsTest : FacebookPowerMockTestCase() {
     }
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T107032293, T106952405
   @Test
   fun `test parse illegal model weights`() {
     val modelFile = File(utilsTestFileDir, "testIllegalModelFile")

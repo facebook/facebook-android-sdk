@@ -73,6 +73,7 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     assertThat(CrashShieldHandler.isObjectCrashing(probe)).isFalse
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117690633
   @Test
   fun `test handler enable`() {
     val probe = Object()

@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -38,6 +39,7 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
     assertEquals(0, sessionEventsState.eventsToPersist.size)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99024739
   @Test
   fun `multiple adds`() {
     val appevent1 = AppEvent("ctxName", "eventName1", 0.0, Bundle(), true, true, null)
@@ -62,6 +64,7 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
     assertEquals(1, result)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T99024582
   @Test
   fun `populate request implicit event only`() {
     sessionEventsState.addEvent(appevent)

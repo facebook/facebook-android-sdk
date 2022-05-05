@@ -57,6 +57,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117949068
   @Test(expected = IllegalArgumentException::class)
   fun `test missing nonce throws`() {
     claimsMap.remove("nonce")
@@ -74,6 +75,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims(encodedClaimsString, AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117952215
   @Test(expected = IllegalArgumentException::class)
   fun `test empty nonce throws`() {
     claimsMap["nonce"] = ""
@@ -105,6 +107,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     AuthenticationTokenClaims("", AuthenticationTokenTestUtil.NONCE)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117931873
   @Test
   fun `test constructor with required encoded claims`() {
     val encodedClaims =
@@ -128,6 +131,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
         .isEqualTo(authenticationToken.iat)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117907834
   @Test
   fun `test roundtrip JSONObject`() {
     // test full claims
@@ -189,6 +193,7 @@ class AuthenticationTokenClaimsTest : FacebookPowerMockTestCase() {
     assertThat(claims1).isEqualTo(claims2)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T117951900
   @Test
   fun `test parceling with empty optional fields`() {
     val claims1 = AuthenticationTokenTestUtil.AUTH_TOKEN_CLAIMS_WITH_EMPTY_OPTIONAL_FIELDS

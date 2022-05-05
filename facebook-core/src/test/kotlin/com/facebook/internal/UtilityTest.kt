@@ -287,6 +287,7 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(result?.time).isEqualTo(100L * 1000 + 37)
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T118049432
   @Test
   fun `test getting invalid bundle value as date to get null`() {
     val baseDate = Date(37)
