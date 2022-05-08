@@ -162,7 +162,8 @@ internal class MetadataViewObserver private constructor(activity: Activity) :
                 } else {
                   "f"
                 }
-        "r4", "r5" -> value = value.replace("[^a-z]+".toRegex(), "") // lowercase already
+        "r4",
+        "r5" -> value = value.replace("[^a-z]+".toRegex(), "") // lowercase already
         "r6" ->
             if (value.contains("-")) {
               val splitArray = value.split("-".toRegex()).toTypedArray()
