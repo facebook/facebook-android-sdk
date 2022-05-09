@@ -230,7 +230,8 @@ object ImageDownloader {
       connection = url.openConnection() as HttpURLConnection
       connection.instanceFollowRedirects = false
       when (connection.responseCode) {
-        HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP -> {
+        HttpURLConnection.HTTP_MOVED_PERM,
+        HttpURLConnection.HTTP_MOVED_TEMP -> {
           // redirect. So we need to perform further requests
           issueResponse = false
           val redirectLocation = connection.getHeaderField("location")
