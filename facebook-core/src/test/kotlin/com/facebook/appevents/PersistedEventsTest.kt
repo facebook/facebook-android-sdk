@@ -7,9 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
-import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(PersistedEvents::class)
 class PersistedEventsTest : FacebookPowerMockTestCase() {
 
   private lateinit var persistedEvents: PersistedEvents

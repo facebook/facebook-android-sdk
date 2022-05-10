@@ -26,7 +26,6 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
 import java.lang.reflect.Method
 import java.util.concurrent.Executor
@@ -39,8 +38,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(
-    FacebookSdk::class, InAppPurchaseBillingClientWrapper::class, InAppPurchaseUtils::class)
+@PrepareForTest(FacebookSdk::class, InAppPurchaseUtils::class)
 class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   private lateinit var inAppPurchaseBillingClientWrapper: InAppPurchaseBillingClientWrapper

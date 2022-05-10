@@ -35,9 +35,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(ViewHierarchy::class)
 class ViewHierarchyTest : CodelessTestBase() {
   private lateinit var mockView: View
   private lateinit var mockTestNestedScrollingChild: TestNestedScrollingChild

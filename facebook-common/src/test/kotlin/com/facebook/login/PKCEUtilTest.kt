@@ -11,7 +11,7 @@ import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSdk::class, PKCEUtil::class)
+@PrepareForTest(FacebookSdk::class)
 class PKCEUtilTest : FacebookPowerMockTestCase() {
   // 128 characters valid code verifier
   val VALID_CODE_VERIFIER =

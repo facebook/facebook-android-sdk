@@ -18,9 +18,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 
-@PrepareForTest(AppEventCollection::class, FacebookSdk::class)
+@PrepareForTest(FacebookSdk::class)
 class AppEventCollectionTest : FacebookPowerMockTestCase() {
-
   private val mockExecutor = FacebookSerialExecutor()
 
   private lateinit var appEventCollection: AppEventCollection

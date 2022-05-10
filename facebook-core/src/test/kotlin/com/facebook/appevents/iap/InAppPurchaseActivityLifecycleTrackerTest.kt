@@ -45,7 +45,6 @@ import org.powermock.reflect.Whitebox
     FacebookSdk::class,
     AutomaticAnalyticsLogger::class,
     InternalAppEventsLogger::class,
-    InAppPurchaseActivityLifecycleTracker::class,
     InAppPurchaseEventManager::class,
     InAppPurchaseUtils::class)
 class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {

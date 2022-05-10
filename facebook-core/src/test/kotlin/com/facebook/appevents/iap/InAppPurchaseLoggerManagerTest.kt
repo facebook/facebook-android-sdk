@@ -35,7 +35,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, InAppPurchaseLoggerManager::class)
+@PrepareForTest(FacebookSdk::class)
 class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   private lateinit var mockPrefs: SharedPreferences
