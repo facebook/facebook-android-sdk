@@ -14,6 +14,7 @@ import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -48,12 +49,14 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     testFile.delete()
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T119975226
   @Test
   fun testEqual() {
     assertThat(pair1 == pair2).isTrue
     assertThat(pair1 == pair3).isFalse
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T119975604
   @Test
   fun testAsMapKey() {
     val map = hashMapOf<AccessTokenAppIdPair, String>()
@@ -78,6 +81,7 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     assertThat(pair == pair1).isTrue
   }
 
+  @Ignore // TODO: Re-enable when flakiness is fixed T120001220
   @Test
   fun testSerializable() {
     val fileOut = FileOutputStream(testFile)
