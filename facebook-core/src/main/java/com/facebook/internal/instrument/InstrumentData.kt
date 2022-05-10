@@ -135,8 +135,9 @@ class InstrumentData {
       return when (type) {
         Type.Analysis -> featureNames != null && timestamp != null
         Type.AnrReport -> stackTrace != null && cause != null && timestamp != null
-        Type.CrashReport, Type.CrashShield, Type.ThreadCheck ->
-            stackTrace != null && timestamp != null
+        Type.CrashReport,
+        Type.CrashShield,
+        Type.ThreadCheck -> stackTrace != null && timestamp != null
         else -> false
       }
     }
@@ -161,8 +162,10 @@ class InstrumentData {
     private get() {
       return when (type) {
         Type.Analysis -> analysisReportParameters
-        Type.AnrReport, Type.CrashReport, Type.CrashShield, Type.ThreadCheck ->
-            exceptionReportParameters
+        Type.AnrReport,
+        Type.CrashReport,
+        Type.CrashShield,
+        Type.ThreadCheck -> exceptionReportParameters
         else -> null
       }
     }
