@@ -43,6 +43,8 @@ open class LoginFragment : Fragment() {
     private set
   private var request: LoginClient.Request? = null
 
+  private lateinit var progressBar: View
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val restoredLoginClient = savedInstanceState?.getParcelable<LoginClient>(SAVED_LOGIN_CLIENT)
@@ -81,15 +83,15 @@ open class LoginFragment : Fragment() {
       savedInstanceState: Bundle?
   ): View? {
     val view = inflater.inflate(layoutResId, container, false)
-    val progressBar = view.findViewById<View>(R.id.com_facebook_login_fragment_progress_bar)
+    progressBar = view.findViewById<View>(R.id.com_facebook_login_fragment_progress_bar)
     loginClient.backgroundProcessingListener =
         object : LoginClient.BackgroundProcessingListener {
           override fun onBackgroundProcessingStarted() {
-            progressBar.visibility = View.VISIBLE
+            showSpinner()
           }
 
           override fun onBackgroundProcessingStopped() {
-            progressBar.visibility = View.GONE
+            hideSpinner()
           }
         }
     return view
@@ -148,6 +150,20 @@ open class LoginFragment : Fragment() {
     super.onSaveInstanceState(outState)
     outState.putParcelable(SAVED_LOGIN_CLIENT, loginClient)
   }
+
+  private fun showSpinner() {
+    progressBar.visibility = View.VISIBLE
+    onSpinnerShown()
+  }
+
+  private fun hideSpinner() {
+    progressBar.visibility = View.GONE
+    onSpinnerHidden()
+  }
+
+  protected open fun onSpinnerShown() {}
+
+  protected open fun onSpinnerHidden() {}
 
   private fun initializeCallingPackage(activity: Activity) {
     val componentName = activity.callingActivity ?: return
