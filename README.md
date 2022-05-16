@@ -7,6 +7,8 @@ This open-source library allows you to integrate Facebook into your Android app.
 
 Learn more about the provided samples, documentation, integrating the SDK into your app, accessing source code, and more at https://developers.facebook.com/docs/android
 
+:wave: The SDK team is eager to learn from you! Fill out [this survey](https://facebook.co1.qualtrics.com/jfe/form/SV_2hJ13Imkq1YF9Sm?TrackID=GitHub) to tell us what’s most important to you and how we can improve.
+
 TRY IT OUT
 ----------
 1. Check-out the tutorials available online at https://developers.facebook.com/docs/android/getting-started
