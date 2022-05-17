@@ -19,7 +19,6 @@
  */
 package com.facebook.gamingservices.cloudgaming;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -48,7 +47,6 @@ public class DaemonReceiver {
   private static SDKLogger mLogger;
 
   // private constructor restricted to this class itself
-  @SuppressLint("BadDependencyInjection")
   private DaemonReceiver(Context context) {
     final IntentFilter filter = new IntentFilter(SDKConstants.RECEIVER_INTENT);
     HandlerThread thread = new HandlerThread(SDKConstants.RECEIVER_HANDLER);
