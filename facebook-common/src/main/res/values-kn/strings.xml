@@ -13,7 +13,7 @@
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">%1$s ಎಂದು ಲಾಗಿನ್ ಮಾಡಲಾಗಿದೆ</string>
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook ಬಳಸಿ ಲಾಗಿನ್ ಮಾಡಲಾಗಿದೆ</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">ಲಾಗ್ ಔಟ್</string>
-    <string name="com_facebook_loginview_cancel_action" gender="unknown">ರದ್ದುಮಾಡು</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">ರದ್ದುಮಾಡಿ</string>
     <string name="com_facebook_loading" gender="unknown">ಲೋಡ್ ಆಗುತ್ತಿದೆ...</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Android ಮ್ಯಾನಿಫೆಸ್ಟ್ ದೋಷ</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">ವೆಬ್ ವೀಕ್ಷಣೆ ಲಾಗಿನ್‌ಗೆ ಇಂಟರ್ನೆಟ್ ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ</string>
