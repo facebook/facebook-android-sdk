@@ -239,6 +239,8 @@ open class DeviceAuthDialog : DialogFragment() {
     get() {
       val parameters = Bundle()
       parameters.putString("code", currentRequestState?.requestCode)
+      val accessToken = Validate.hasAppID() + "|" + Validate.hasClientToken()
+      parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken)
       return GraphRequest.newPostRequestWithBundle(
           null,
           DEVICE_LOGIN_STATUS_ENDPOINT,
