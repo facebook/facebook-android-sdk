@@ -143,8 +143,8 @@ open class DeviceAuthDialog : DialogFragment() {
     Utility.putNonEmptyString(parameters, "redirect_uri", request.deviceRedirectUriString)
     Utility.putNonEmptyString(
         parameters, DeviceRequestsHelper.DEVICE_TARGET_USER_ID, request.deviceAuthTargetUserId)
-    val accessToken = Validate.hasAppID() + "|" + Validate.hasClientToken()
-    parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken)
+    val appAccessToken = getApplicationAccessToken()
+    parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, appAccessToken)
     parameters.putString(
         DeviceRequestsHelper.DEVICE_INFO_PARAM,
         DeviceRequestsHelper.getDeviceInfo(additionalDeviceInfo()?.toMutableMap()))
@@ -178,6 +178,9 @@ open class DeviceAuthDialog : DialogFragment() {
 
   /** Additional device information for this device auth. It's only for internal use. */
   open fun additionalDeviceInfo(): Map<String, String>? = null
+
+  open fun getApplicationAccessToken(): String =
+      "${Validate.hasAppID()}|${Validate.hasClientToken()}"
 
   private fun setCurrentRequestState(currentRequestState: RequestState) {
     this.currentRequestState = currentRequestState
@@ -239,8 +242,8 @@ open class DeviceAuthDialog : DialogFragment() {
     get() {
       val parameters = Bundle()
       parameters.putString("code", currentRequestState?.requestCode)
-      val accessToken = Validate.hasAppID() + "|" + Validate.hasClientToken()
-      parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken)
+      val appAccessToken = getApplicationAccessToken()
+      parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, appAccessToken)
       return GraphRequest.newPostRequestWithBundle(
           null,
           DEVICE_LOGIN_STATUS_ENDPOINT,
