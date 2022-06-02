@@ -19,7 +19,11 @@
 package com.facebook.gamingservices.internal
 
 // The sort order for how scores are ranked in the tournament.
-enum class TournamentSortOrder() {
-  LowerIsBetter,
-  HigherIsBetter,
+enum class TournamentSortOrder(val rawValue: String) {
+  LowerIsBetter("LOWER_IS_BETTER"),
+  HigherIsBetter("HIGHER_IS_BETTER");
+
+  override fun toString(): String {
+    return rawValue
+  }
 }
