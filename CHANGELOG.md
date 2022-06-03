@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [14.0.0]
 ### Removed
 - Removed deprecated `ShareOpenGraphAction`, `ShareOpenGraphContent`, `ShareOpenGraphValueContainer` and `ShareOpenGraphObject` classes.
 
@@ -425,7 +427,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...HEAD
+[14.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.2.0...sdk-version-14.0.0
 [13.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.1.0...sdk-version-13.2.0
 [13.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
 [13.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.3.0...sdk-version-13.0.0
