@@ -2,6 +2,7 @@ package com.facebook.samples.kotlinsampleapp.login
 
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,41 +21,32 @@ import com.facebook.samples.kotlinsampleapp.common.MenuItem
 
 @Composable
 fun LoginMenuScreen() {
+  val callbackManager = CallbackManager.Factory.create()
+  val loginManager = LoginManager.getInstance()
   val context = LocalContext.current
+  loginManager.registerCallback(
+    callbackManager,object : FacebookCallback<LoginResult> {
+      override fun onCancel() {
+        Toast.makeText(context, "Login canceled!", Toast.LENGTH_LONG).show()
+      }
+
+      override fun onError(error: FacebookException) {
+        Log.e("Login", error.message ?: "Unknown error")
+        Toast.makeText(context, "Login failed with errors!", Toast.LENGTH_LONG).show()
+      }
+
+      override fun onSuccess(result: LoginResult) {
+        Toast.makeText(context, "Login succeed!", Toast.LENGTH_LONG).show()
+      }
+    })
+  val facebookLoginActivityResultContract = loginManager.createLogInActivityResultContract()
+  val loginLauncher = rememberLauncherForActivityResult(
+    contract = facebookLoginActivityResultContract,
+    onResult = {}
+  )
   Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(16.dp)) {
     Text("This screen shows how to implement login without the LoginButton")
-
-    MenuItem(
-        "Login",
-        onClick = {
-          if (context is ActivityResultRegistryOwner) {
-            val callbackManager = CallbackManager.Factory.create()
-            val loginManager = LoginManager.getInstance()
-            loginManager.registerCallback(
-                callbackManager,
-                object : FacebookCallback<LoginResult> {
-                  override fun onCancel() {
-                    Toast.makeText(context, "Login canceled!", Toast.LENGTH_LONG).show()
-                  }
-
-                  override fun onError(error: FacebookException) {
-                    Log.e("Login", error.message ?: "Unknown error")
-                    Toast.makeText(context, "Login failed with errors!", Toast.LENGTH_LONG).show()
-                  }
-
-                  override fun onSuccess(result: LoginResult) {
-                    Toast.makeText(context, "Login succeed!", Toast.LENGTH_LONG).show()
-                  }
-                })
-            LoginManager.getInstance().logIn(context, callbackManager, listOf("email"))
-          } else {
-            Toast.makeText(
-                    context,
-                    "This login should only happens with an AndroidX activity.",
-                    Toast.LENGTH_LONG)
-                .show()
-          }
-        })
-    MenuItem("Logout", onClick = { LoginManager.getInstance().logOut() })
+    MenuItem("Login", onClick = { loginLauncher.launch(listOf("email")) })
+    MenuItem("Logout", onClick = { loginManager.logOut() })
   }
 }
