@@ -31,10 +31,10 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class Tournament : ShareModel {
-  @SerializedName("id") val identifier: String
-  @SerializedName("tournament_title") val title: String?
-  @SerializedName("tournament_payload") val payload: String?
-  @SerializedName("tournament_end_time") internal var endTime: String? = null
+  @JvmField @SerializedName("id") val identifier: String
+  @JvmField @SerializedName("tournament_title") val title: String?
+  @JvmField @SerializedName("tournament_payload") val payload: String?
+  @JvmField @SerializedName("tournament_end_time") internal var endTime: String? = null
 
   var expiration: ZonedDateTime?
     get() {
