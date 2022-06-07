@@ -801,7 +801,8 @@ object Utility {
     return try {
       cursor =
           FacebookSdk.getApplicationContext()
-              .contentResolver.query(contentUri, null, null, null, null)
+              .contentResolver
+              .query(contentUri, null, null, null, null)
       if (cursor === null) {
         return 0L
       }

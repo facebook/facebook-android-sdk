@@ -110,7 +110,8 @@ internal object HashUtils {
               })
       val requestChecksumsMethod: Method =
           PackageManager::class
-              .java.getMethod(
+              .java
+              .getMethod(
                   "requestChecksums",
                   String::class.java,
                   Boolean::class.javaPrimitiveType,

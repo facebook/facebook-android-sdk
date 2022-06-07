@@ -374,7 +374,8 @@ open class DeviceAuthDialog : DialogFragment() {
               val requireConfirm =
                   FetchedAppSettingsManager.getAppSettingsWithoutQuery(
                           FacebookSdk.getApplicationId())
-                      ?.smartLoginOptions?.contains(SmartLoginOption.RequireConfirm)
+                      ?.smartLoginOptions
+                      ?.contains(SmartLoginOption.RequireConfirm)
               if (requireConfirm == true && !isRetry) {
                 isRetry = true
                 presentConfirmation(
