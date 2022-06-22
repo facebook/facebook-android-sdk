@@ -99,8 +99,9 @@ open class DeviceAuthDialog : DialogFragment() {
     val dialog: Dialog =
         object : Dialog(requireActivity(), R.style.com_facebook_auth_dialog) {
           override fun onBackPressed() {
-            onBackButtonPressed()
-            super.onBackPressed()
+            if (onBackButtonPressed()) {
+              super.onBackPressed()
+            }
           }
         }
     dialog.setContentView(initializeContentView(DeviceRequestsHelper.isAvailable() && !isRetry))
@@ -436,8 +437,8 @@ open class DeviceAuthDialog : DialogFragment() {
     dialog?.dismiss()
   }
 
-  protected open fun onBackButtonPressed() {
-    // no-op
+  protected open fun onBackButtonPressed(): Boolean {
+    return true
   }
 
   private class RequestState : Parcelable {
