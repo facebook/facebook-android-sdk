@@ -68,7 +68,6 @@ object ModelManager {
   }
 
   private val taskHandlers: MutableMap<String?, TaskHandler> = ConcurrentHashMap()
-  private const val SDK_MODEL_ASSET = "%s/model_asset"
   private const val MODEL_ASSERT_STORE = "com.facebook.internal.MODEL_STORE"
   private const val CACHE_KEY_MODELS = "models"
   private const val MTML_USE_CASE = "MTML"
@@ -77,8 +76,8 @@ object ModelManager {
   private const val ASSET_URI_KEY = "asset_uri"
   private const val RULES_URI_KEY = "rules_uri"
   private const val THRESHOLD_KEY = "thresholds"
-  private const val MODEL_REQUEST_INTERVAL_MILLISECONDS = 1000 * 60 * 60 * 24 * 3
   private const val CACHE_KEY_REQUEST_TIMESTAMP = "model_request_timestamp"
+  const val MODEL_REQUEST_INTERVAL_MILLISECONDS = 1000 * 60 * 60 * 24 * 3
 
   @SuppressWarnings("deprecation")
   private val MTML_SUGGESTED_EVENTS_PREDICTION =
@@ -297,7 +296,7 @@ object ModelManager {
         .toTypedArray()
   }
 
-  private class TaskHandler
+  class TaskHandler
   constructor(
       var useCase: String,
       var assetUri: String,
