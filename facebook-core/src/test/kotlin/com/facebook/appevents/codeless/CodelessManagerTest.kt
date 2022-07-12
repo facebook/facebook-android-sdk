@@ -46,7 +46,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -133,7 +132,6 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
         CodelessMatcher::class.java, "Companion", mockCodelessMatcherCompanion)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114048328
   @Test
   fun `test when codeless is disabled no listener is registered with sensor manager`() {
     whenever(mockAppSettings.codelessEventsEnabled).thenReturn(true)
@@ -146,7 +144,6 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     verify(mockCodelessMatcher, never()).add(mockActivity)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114044607
   @Test
   fun `test when codeless events enabled a shake will trigger checking codeless session`() {
     whenever(mockAppSettings.codelessEventsEnabled).thenReturn(true)
@@ -175,7 +172,6 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     assertThat(CodelessManager.getIsAppIndexingEnabled()).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114044584
   @Test
   fun `test activity will be destroyed from matcher when it is destroyed`() {
     whenever(mockAppSettings.codelessEventsEnabled).thenReturn(true)
@@ -188,7 +184,6 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
     verify(mockCodelessMatcher, atLeastOnce()).destroy(mockActivity)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114048104
   @Test
   fun `test activity will be removed from matcher when it pauses`() {
     whenever(mockAppSettings.codelessEventsEnabled).thenReturn(true)

@@ -28,7 +28,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Test
 
 class EventBindingTest : FacebookPowerMockTestCase() {
@@ -145,7 +144,6 @@ class EventBindingTest : FacebookPowerMockTestCase() {
     assertThrows<JSONException> { EventBinding.getInstanceFromJson(invalidSampleJson) }
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T109821606
   @Test
   fun `parseArray with valid input`() {
     val validSampleJson = JSONArray(validSampleArray)

@@ -36,7 +36,6 @@ import org.assertj.core.api.Assertions
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -62,7 +61,6 @@ class EventDeactivationManagerTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(EventDeactivationManager::class.java, "enabled", true)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118429260
   @Test
   fun testEnable() {
     val expectedParam = hashMapOf("last_name" to "0", "first_name" to "0")

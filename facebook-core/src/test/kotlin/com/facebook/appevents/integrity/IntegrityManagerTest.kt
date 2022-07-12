@@ -29,7 +29,6 @@ import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -68,7 +67,6 @@ class IntegrityManagerTest : FacebookPowerMockTestCase() {
     }
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117923632
   @Test
   fun testAddressDetection() {
     val mockParameters: MutableMap<String, String> =
