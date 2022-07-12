@@ -23,11 +23,9 @@ package com.facebook
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
 
 class FacebookGraphResponseExceptionTest : FacebookPowerMockTestCase() {
-  @Ignore // TODO: Re-enable when flakiness is fixed T117960751
   @Test
   fun `test exception to string`() {
     val mockResponse = mock<GraphResponse>()

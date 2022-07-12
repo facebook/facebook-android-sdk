@@ -41,7 +41,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -72,7 +71,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     whenever(mockProfileManagerCompanion.getInstance()).thenReturn(mockProfileManager)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118081293
   @Test
   fun testProfileCtorAndGetters() {
     var profile = createDefaultProfile()
@@ -81,7 +79,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertMostlyNullsObjectGetters(profile)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118080673
   @Test
   fun testHashCode() {
     val profile1 = createDefaultProfile()
@@ -96,7 +93,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profile4.hashCode()).isNotEqualTo(profile3.hashCode())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118080702
   @Test
   fun testEquals() {
     val profile1 = createDefaultProfile()
@@ -107,7 +103,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profile3).isNotEqualTo(profile2)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118078058
   @Test
   fun testJsonSerialization() {
     var profile1 = createDefaultProfile()
@@ -135,7 +130,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profile1).isEqualTo(profile2)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118080705
   @Test
   fun testParcelSerialization() {
     var profile1 = createDefaultProfile()
@@ -157,7 +151,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profile1).isEqualTo(profile2)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118078575
   @Test
   fun testSetCurrentProfile() {
     val profile1 = createDefaultProfile()
@@ -169,7 +162,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(profileCaptor.secondValue).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118080706
   @Test
   fun testGetCurrentProfile() {
     val profile1 = createDefaultProfile()
@@ -177,7 +169,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(Profile.getCurrentProfile()).isEqualTo(profile1)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118069508
   @Test
   fun testGetProfilePictureUri() {
     val testFacebookImageUri = Uri.parse("https://scontent.xx.fbcdn.net/")
@@ -197,7 +188,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(facebookProfile.getProfilePictureUri(100, 100)).isEqualTo(testFacebookImageUri)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118080621
   @Test
   fun `test fetch profile for an expired access token`() {
     val mockAccessToken = mock<AccessToken>()
@@ -213,7 +203,6 @@ class ProfileTest : FacebookPowerMockTestCase() {
     assertThat(getGraphMeRequestWithCacheAsyncIsCalled).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118079542
   @Test
   fun `test fetch profile for an valid access token`() {
     val mockAccessToken = mock<AccessToken>()

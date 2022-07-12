@@ -34,7 +34,6 @@ import kotlin.collections.ArrayList
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -73,7 +72,6 @@ class FacebookContentProviderTest : FacebookPowerMockTestCase() {
     Assert.assertNull(providerUnderTest.query(Uri.parse("/"), null, null, null, null))
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103601736
   @Test
   fun testGetType() {
     Assert.assertNull(providerUnderTest.getType(Uri.parse("/")))

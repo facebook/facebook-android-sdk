@@ -34,7 +34,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberModifier
@@ -56,7 +55,6 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
         .toReturn(JSONObject().put("id", "1000"))
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101842210
   @Test
   fun testAllTypes() {
     val originalBundle = Bundle()
@@ -130,7 +128,6 @@ class LegacyTokenCacheTest : FacebookPowerMockTestCase() {
         cachedBundle.getSerializable(SERIALIZABLE_KEY))
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101842381
   @Test
   fun testMultipleCaches() {
     val bundle1 = Bundle()
