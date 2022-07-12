@@ -8,7 +8,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -59,7 +58,6 @@ class ServerProtocolTest : FacebookPowerMockTestCase() {
     assertNotNull(params.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_ARGS))
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T112269220
   @Test
   fun `no valid bundle gives null`() {
     val b = Bundle()

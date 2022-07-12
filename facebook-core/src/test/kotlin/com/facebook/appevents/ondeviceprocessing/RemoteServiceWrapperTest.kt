@@ -48,7 +48,6 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.powermock.api.mockito.PowerMockito
@@ -82,7 +81,6 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(RemoteServiceWrapper::class.java, "isServiceAvailable", value)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T99266656
   @Test
   fun testSendCustomEvents_RemoteServiceNotAvailable() {
     // Arrange
@@ -96,7 +94,6 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     verify(mockRemoteService, never()).sendEvents(any())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T111857539
   @Test
   fun testSendCustomEvents_RemoteServiceAvailableButSignatureMismatch() {
     // Arrange
@@ -110,7 +107,6 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     verify(mockRemoteService, never()).sendEvents(any())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T111857527
   @Test
   fun testSendCustomEvents_RemoteServiceAvailableButFailedToBind() {
     // Arrange
@@ -124,7 +120,6 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     verify(mockRemoteService, never()).sendEvents(any())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T111857507
   @Test
   fun testSendCustomEvents_RemoteServiceAvailableButBinderIsNull() {
     // Arrange
@@ -170,7 +165,6 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
         .isEqualTo(RemoteServiceWrapper.EventType.CUSTOM_APP_EVENTS.toString())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T111857698
   @Test
   fun testSendInstallEvent_RemoteServiceAvailable() {
     // Arrange
@@ -200,7 +194,6 @@ class RemoteServiceWrapperTest : FacebookPowerMockTestCase() {
     assertThat(serviceAvailable).isFalse()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T111857790
   @Test
   fun testIsServiceAvailable_RemoteServiceAvailable() {
     // Arrange

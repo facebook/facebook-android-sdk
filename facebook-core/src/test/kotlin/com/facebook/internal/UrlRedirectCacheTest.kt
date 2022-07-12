@@ -10,7 +10,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
@@ -61,7 +60,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     testCacheFilePath.deleteRecursively()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102534662
   @Test
   fun `test read and write cache with normal input`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, toUri)
@@ -81,7 +79,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertNull(fetchedResultForURL)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102612114
   @Test
   fun `test read and write cache with null`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, null)
@@ -92,7 +89,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertNull(fetchedResultForNull)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102832953
   @Test
   fun `test write the cache twice`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, toUriLong)
@@ -101,7 +97,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertEquals(fetchedResultForURL.toString(), toUri.toString())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102649675
   @Test
   fun `test write the cache twice with same address`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, toUri)
@@ -110,7 +105,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertEquals(fetchedResultForURL.toString(), toUri.toString())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102633881
   @Test
   fun `test redirect to itself`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, fromUri)
@@ -118,7 +112,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertEquals(fetchedResultForURL.toString(), fetchedResultForURL.toString())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102751674
   @Test
   fun `test loop in redirect`() {
     UrlRedirectCache.cacheUriRedirect(fromUri, fromUri2)
@@ -136,7 +129,6 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     assertEquals(fetchedResultForURL.toString(), toUri.toString())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102649761
   @Test
   fun `test FileLRUCache is broken`() {
     val mockFileLruCache = mock(FileLruCache::class.java)

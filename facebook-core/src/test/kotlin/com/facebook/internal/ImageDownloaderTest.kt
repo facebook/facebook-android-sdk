@@ -8,7 +8,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.eq
 import org.powermock.api.mockito.PowerMockito.mock
@@ -56,7 +55,6 @@ class ImageDownloaderTest : FacebookPowerMockTestCase() {
     mockRequestKey.tag = tag
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T113909708
   @Test
   fun `test remove before and after test adding request`() {
     // remove request without adding request
