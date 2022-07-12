@@ -30,7 +30,6 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -69,7 +68,6 @@ class CrashShieldHandlerDebugTest : FacebookPowerMockTestCase() {
     PowerMockito.whenNew(Handler::class.java).withAnyArguments().thenReturn(mockHandler)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100076995
   @Test(expected = RuntimeException::class)
   fun `test throw exceptions in debug mode`() {
     val probe = Object()

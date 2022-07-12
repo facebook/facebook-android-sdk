@@ -31,7 +31,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -63,7 +62,6 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     whenever(CrashShieldHandler.isDebug()).thenReturn(false)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117690812
   @Test
   fun `test handler disabled by default`() {
     val probe = Object()
@@ -73,7 +71,6 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     assertThat(CrashShieldHandler.isObjectCrashing(probe)).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117690633
   @Test
   fun `test handler enable`() {
     val probe = Object()
@@ -84,7 +81,6 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     verify(mockInstrumentData, times(1)).save()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117670320
   @Test
   fun `test reset`() {
     val probe = Object()

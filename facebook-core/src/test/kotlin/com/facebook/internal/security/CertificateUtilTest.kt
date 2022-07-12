@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
@@ -64,7 +63,6 @@ class CertificateUtilTest : FacebookPowerMockTestCase() {
     assertNotEquals("", certificateHash)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114044921
   @Test
   fun `test with two sample signatures`() {
     mockPackageInfo.signatures = arrayOf(mockSignature1)

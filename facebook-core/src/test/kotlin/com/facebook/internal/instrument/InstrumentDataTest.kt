@@ -11,7 +11,6 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito.mockStatic
@@ -41,7 +40,6 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     whenever(Utility.getAppVersion()).thenReturn("0.0.1")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103532138
   @Test
   fun `test creating instrument data with an anr`() {
     val cause = "test_cause"
@@ -56,7 +54,6 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     assertEquals(parameters.get("callstack"), stacktrace)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102971110
   @Test
   fun `test creating instrument data with an exception`() {
     val ex = NotImplementedError()
@@ -70,7 +67,6 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     assertEquals(parameters.get("callstack"), InstrumentUtility.getStackTrace(ex))
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103437058
   @Test
   fun `test creating instrument data with file`() {
     val testFile = File("thread_check_log_001.json")
@@ -86,7 +82,6 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     assertEquals(parameters.get("callstack"), "placeholder")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103076303
   @Test
   fun `test creating instrument data with a features array`() {
     val featureArray = arrayOf("a", "b", "c")
@@ -99,7 +94,6 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     assertEquals(parameters.get("feature_names"), features)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103448266
   @Test
   fun `test invalid instrument analysis data`() {
     val testFile = File("analysis_log_1.json")
