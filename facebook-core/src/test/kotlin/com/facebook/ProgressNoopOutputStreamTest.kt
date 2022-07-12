@@ -25,7 +25,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -47,7 +46,6 @@ class ProgressNoopOutputStreamTest : FacebookPowerMockTestCase() {
     stream.close()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103598696
   @Test
   fun testSetup() {
     Assert.assertEquals(0, stream.maxProgress)

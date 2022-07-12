@@ -50,7 +50,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -88,7 +87,6 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103598609
   @Test
   fun testAppEventsLoggerLogFunctions() {
     val mockEventName = "fb_mock_event"
@@ -180,7 +178,6 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     assertThat(AppEventsLogger.getUserData().isEmpty()).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117848624
   @Test
   fun testSetAndClearUserID() {
     val userID = "12345678"

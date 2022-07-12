@@ -49,7 +49,6 @@ import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.powermock.api.mockito.PowerMockito
@@ -160,7 +159,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     assertJsonHasParams(jsonObject, parameters)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101573847
   @Test
   fun testLogProductItemWithGtinMpnBrand() {
     var appEventCapture: AppEvent? = null

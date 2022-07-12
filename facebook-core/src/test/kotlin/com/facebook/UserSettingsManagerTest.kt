@@ -39,7 +39,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -81,7 +80,6 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
         .thenReturn(mockLogger)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100334470
   @Test
   fun testAutoInitEnabled() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
@@ -104,7 +102,6 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(setAutoInitEnabledValue).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100334391
   @Test
   fun testAutoLogEnabled() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
@@ -126,7 +123,6 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(setAutoLogAppEventsEnabledbledValue).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100333278
   @Test
   fun testAdvertiserIDCollectionEnabled() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
@@ -148,7 +144,6 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(setAdvertiserIDCollectionEnabledValue).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100334574
   @Test
   fun testCodelessSetupEnabled() {
     PowerMockito.mockStatic(UserSettingsManager::class.java)
@@ -163,7 +158,6 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(getCodelessSetupEnabledTimes).isEqualTo(1)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100332276
   @Test
   fun testLogIfSDKSettingsChanged() {
     setAdvertiserIDCollectionEnabled(false)
