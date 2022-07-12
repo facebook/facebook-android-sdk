@@ -45,7 +45,6 @@ import java.util.Date
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.json.JSONObject
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberMatcher
@@ -182,14 +181,12 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(anotherAccessToken.token).isEqualTo(newAccessToken.token)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102261761
   @Test
   fun testLoadReturnsFalseIfNoCachedToken() {
     val accessTokenManager = createAccessTokenManager()
     assertThat(accessTokenManager.loadCurrentAccessToken()).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102290141
   @Test
   fun testLoadReturnsTrueIfCachedToken() {
     val accessToken = createAccessToken()
@@ -207,7 +204,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(accessToken).isEqualTo(accessTokenManager.currentAccessToken)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102262376
   @Test
   fun testSaveWritesToCacheIfToken() {
     val accessToken = createAccessToken()
@@ -223,7 +219,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     verify(accessTokenCache, times(1)).clear()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102288480
   @Test
   fun testLoadDoesNotSave() {
     val accessToken = createAccessToken()
@@ -285,7 +280,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(currentAccessToken.declinedPermissions).containsExactlyInAnyOrder("chew gum")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102288536
   @Test
   fun testRefreshingAccessTokenBlocksSecondAttempt() {
     val accessTokenManager = createAccessTokenManager()
@@ -333,7 +327,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(capturedGrantType).contains("fb_extend_sso_token")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102268776
   @Test
   fun testExtendIGAccessToken() {
     val accessToken = createAccessToken(TOKEN_STRING, USER_ID, "instagram")
@@ -359,7 +352,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(capturedGrantType).contains("ig_refresh_token")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103533345
   @Test
   fun `test current access token changed will broadcast`() {
     val accessTokenManager = createAccessTokenManager()
@@ -385,14 +377,12 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
         .isEqualTo(accessToken)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103523406
   @Test
   fun `test getInstance`() {
     val instance = AccessTokenManager.getInstance()
     assertThat(instance).isNotNull
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103525191
   @Test
   fun `test extendAccessTokenIfNeeded when it should extend`() {
     val mockAccessToken = mock<AccessToken>()
@@ -407,7 +397,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     verify(mockGraphRequestCompanionObject).executeBatchAsync(any<GraphRequestBatch>())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103527918
   @Test
   fun `test extendAccessTokenIfNeeded when the token cannot be extended`() {
     val mockAccessToken = mock<AccessToken>()
