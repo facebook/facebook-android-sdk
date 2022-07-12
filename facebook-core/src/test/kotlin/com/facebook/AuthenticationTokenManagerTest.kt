@@ -39,7 +39,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.security.PublicKey
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -73,14 +72,12 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     localBroadcastManager = mockLocalBroadcastManager(ApplicationProvider.getApplicationContext())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107014577
   @Test
   fun testDefaultsToNoCurrentAuthenticationToken() {
     val authenticationTokenManager = createAuthenticationTokenManager()
     assertThat(authenticationTokenManager.currentAuthenticationToken).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107020255
   @Test
   fun testCanSetCurrentAuthenticationToken() {
     val authenticationTokenManager = createAuthenticationTokenManager()
@@ -89,7 +86,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(authenticationTokenManager.currentAuthenticationToken).isEqualTo(authenticationToken)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107034731, T106984355
   @Test
   fun testLoadReturnsFalseIfNoCachedToken() {
     val authenticationTokenManager = createAuthenticationTokenManager()
@@ -97,7 +93,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(result).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107014726
   @Test
   fun testLoadReturnsTrueIfCachedToken() {
     val authenticationToken = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
@@ -107,7 +102,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(result).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107020350
   @Test
   fun testLoadSetsCurrentTokenIfCached() {
     val authenticationToken = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
@@ -117,7 +111,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     assertThat(authenticationTokenManager.currentAuthenticationToken).isEqualTo(authenticationToken)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107011064
   @Test
   fun testSaveWritesToCacheIfToken() {
     val authenticationToken = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
@@ -126,7 +119,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     verify(authenticationTokenCache, times(1)).save(any())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107013115
   @Test
   fun testSetEmptyTokenClearsCache() {
     val authenticationTokenManager = createAuthenticationTokenManager()
@@ -134,7 +126,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     verify(authenticationTokenCache, times(1)).clear()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107014675
   @Test
   fun testLoadDoesNotSave() {
     val authenticationToken = AuthenticationTokenTestUtil.getAuthenticationTokenForTest()
@@ -144,7 +135,6 @@ class AuthenticationTokenManagerTest : FacebookPowerMockTestCase() {
     verify(authenticationTokenCache, never()).save(any())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T107020148
   @Test
   fun testChangingAuthenticationTokenSendsBroadcast() {
     val authenticationTokenManager = createAuthenticationTokenManager()
