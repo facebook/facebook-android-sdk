@@ -41,6 +41,7 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.ScheduledFuture
+import kotlin.test.assertNotNull
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -152,6 +153,37 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `flush with explicit reason`() {
+    val intentCaptor = argumentCaptor<Intent>()
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(mockPersistedEvents)
+
+    AppEventQueue.flush(FlushReason.EXPLICIT)
+
+    verify(mockAppEventCollection).addPersistedEvents(mockPersistedEvents)
+    verify(mockLocalBroadcastManager).sendBroadcast(intentCaptor.capture())
+    assertEquals(intentCaptor.firstValue.action, AppEventsLogger.ACTION_APP_EVENTS_FLUSHED)
+  }
+
+  @Test
+  fun `flush with eager flushing event reason`() {
+    val intentCaptor = argumentCaptor<Intent>()
+    whenever(AppEventDiskStore.readAndClearStore()).thenReturn(mockPersistedEvents)
+
+    AppEventQueue.flush(FlushReason.EAGER_FLUSHING_EVENT)
+
+    verify(mockAppEventCollection).addPersistedEvents(mockPersistedEvents)
+    verify(mockLocalBroadcastManager).sendBroadcast(intentCaptor.capture())
+    assertEquals(intentCaptor.firstValue.action, AppEventsLogger.ACTION_APP_EVENTS_FLUSHED)
+  }
+
+  @Test
+  fun `get key set`() {
+    assertEquals(mockAppEventCollection.keySet(), AppEventQueue.getKeySet())
+    AppEventQueue.persistToDisk()
+    assertEquals(emptySet<AccessTokenAppIdPair>(), AppEventQueue.getKeySet())
+  }
+
+  @Test
   fun `flush and wait`() {
     val intentCaptor = argumentCaptor<Intent>()
     whenever(AppEventDiskStore.readAndClearStore()).thenReturn(mockPersistedEvents)
@@ -164,9 +196,32 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `send events to server`() {
+    val flushStatistics =
+        AppEventQueue.sendEventsToServer(FlushReason.EXPLICIT, mockAppEventCollection)
+    assertEquals(FlushResult.NO_CONNECTIVITY, flushStatistics?.result)
+    assertEquals(1, flushStatistics?.numEvents)
+  }
+
+  @Test
   fun `build requests`() {
     val requestsList = AppEventQueue.buildRequests(mockAppEventCollection, flushStatistics)
     assertEquals(1, requestsList.size)
+  }
+
+  @Test
+  fun `build request for session`() {
+    val accessTokenAppId = mockAppEventCollection.keySet().first()
+    val flushStatistics = FlushStatistics()
+    val request =
+        AppEventQueue.buildRequestForSession(
+            accessTokenAppId,
+            checkNotNull(mockAppEventCollection[accessTokenAppId]),
+            limitEventUsage = false,
+            flushStatistics)
+    assertNotNull(request)
+    assertEquals("yoloapplication/activities", request.graphPath)
+    assertEquals("swagtoken", request.parameters["access_token"])
   }
 
   @Test
