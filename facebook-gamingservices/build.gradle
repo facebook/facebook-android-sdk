@@ -65,6 +65,10 @@ dependencies {
 android {
     compileSdkVersion project.ext.compileSdk
     buildToolsVersion project.ext.buildTools
+    // The version of Jacoco used by the android gradle plugin
+    jacoco {
+        version "0.8.7"
+    }
 
     defaultConfig {
         minSdkVersion project.ext.minSdk
@@ -89,6 +93,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            testCoverageEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -101,6 +106,12 @@ android {
         unitTests.all {
             jvmArgs '-XX:MaxPermSize=1024m'
             maxHeapSize = "4096m"
+            jacoco {
+                enabled = true
+                includes = []
+                excludes = []
+            }
+
             // CrashShieldHandlerDebugTest is only available on Sandcastle and Github Actions
             // Because local compiling environment may recompile CrashShieldHandler multiple times
             // and generate false signals
@@ -122,6 +133,7 @@ android {
     }
 }
 
+apply from: "${rootDir}/jacoco.gradle"
 apply from: "${rootDir}/maven.gradle"
 repositories {
     mavenCentral()

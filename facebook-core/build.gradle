@@ -20,7 +20,6 @@
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'jacoco'
 
 project.group = 'com.facebook.android'
 
@@ -140,56 +139,13 @@ android {
     }
 }
 
-// The version of Jacoco used by the task of type JacocoReport
-jacoco {
-    toolVersion = "0.8.7"
-}
-
-def debugCoverage = tasks.register("debugCoverage", JacocoReport) {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports for the debug build."
-    dependsOn('testDebugUnitTest')
-
-    def excludes = [
-            '**/R.class',
-            '**/R$*.class',
-            '**/BuildConfig.*',
-            '**/Manifest*.*',
-            '**/*Test*.*',
-            'android/**/*.*',
-            'androidx/**/*.*',
-            '**/*$ViewInjector*.*',
-            '**/*Dagger*.*',
-            '**/*MembersInjector*.*',
-            '**/*_Factory.*',
-            '**/*_Provide*Factory*.*',
-            '**/*_ViewBinding*.*',
-            '**/AutoValue_*.*',
-            '**/R2.class',
-            '**/R2$*.class',
-            '**/*Directions$*',
-            '**/*Directions.*',
-            '**/*Binding.*'
-    ]
-
-    def jClasses = "${project.buildDir}/intermediates/javac/debug/classes/com/facebook/core"
-    def kClasses = "${project.buildDir}/tmp/kotlin-classes/debug/com/facebook"
-
-    def javaClasses = fileTree(dir: jClasses, excludes: excludes)
-    def kotlinClasses = fileTree(dir: kClasses, excludes: excludes)
-
-    classDirectories.from(files([javaClasses, kotlinClasses]))
-    def sourceDirs = ["${project.projectDir}/src/main/java"]
-    sourceDirectories.from(files(sourceDirs))
-
-    executionData.from(files(["${project.buildDir}/jacoco/testDebugUnitTest.exec"]))
-}
-
 if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
     project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
+apply from: "${rootDir}/jacoco.gradle"
 apply from: "${rootDir}/maven.gradle"
+
 repositories {
     mavenCentral()
 }

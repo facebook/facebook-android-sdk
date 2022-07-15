@@ -70,6 +70,10 @@ dependencies {
 android {
     compileSdkVersion project.ext.compileSdk
     buildToolsVersion project.ext.buildTools
+    // The version of Jacoco used by the android gradle plugin
+    jacoco {
+        version "0.8.7"
+    }
 
     defaultConfig {
         minSdkVersion project.ext.minSdk
@@ -104,6 +108,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -117,6 +124,11 @@ android {
                 systemProperty 'robolectric.dependency.repo.id', 'central'
                 systemProperty "java.net.preferIPv6Addresses", "true"
                 systemProperty "java.net.preferIPv4Stack", "false"
+                jacoco {
+                    enabled = true
+                    includes = []
+                    excludes = []
+                }
             }
         }
     }
@@ -126,4 +138,5 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
     project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
+apply from: "${rootDir}/jacoco.gradle"
 apply from: "${rootDir}/maven.gradle"

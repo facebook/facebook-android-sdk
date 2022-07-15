@@ -61,6 +61,10 @@ dependencies {
 android {
     compileSdkVersion project.ext.compileSdk
     buildToolsVersion project.ext.buildTools
+    // The version of Jacoco used by the android gradle plugin
+    jacoco {
+        version "0.8.7"
+    }
 
     defaultConfig {
         minSdkVersion project.ext.minSdk
@@ -71,6 +75,7 @@ android {
     buildTypes {
         debug {
             debuggable true
+            testCoverageEnabled true
         }
     }
 
@@ -91,6 +96,11 @@ android {
         unitTests.all {
             jvmArgs '-XX:MaxPermSize=1024m'
             maxHeapSize = "4096m"
+            jacoco {
+                enabled = true
+                includes = []
+                excludes = []
+            }
         }
     }
 
@@ -106,6 +116,7 @@ android {
     }
 }
 
+apply from: "${rootDir}/jacoco.gradle"
 apply from: "${rootDir}/maven.gradle"
 repositories {
     mavenCentral()
