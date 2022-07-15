@@ -33,6 +33,7 @@ buildscript {
         classpath "com.android.tools.build:gradle:${project.ext.gradleVersion}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${project.ext.kotlinVersion}"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${project.ext.dokkaVersion}"
+        classpath 'org.jacoco:org.jacoco.core:0.8.7'
     }
 }
 

@@ -20,6 +20,7 @@
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'jacoco'
 
 project.group = 'com.facebook.android'
 
@@ -70,16 +71,22 @@ dependencies {
 android {
     compileSdkVersion project.ext.compileSdk
     buildToolsVersion project.ext.buildTools
+    // The version of Jacoco used by the android gradle plugin
+    jacoco {
+        version "0.8.7"
+    }
 
     defaultConfig {
         minSdkVersion project.ext.minSdk
         targetSdkVersion project.ext.targetSdk
         consumerProguardFiles 'proguard-rules.pro'
+        multiDexEnabled true
     }
 
     buildTypes {
         debug {
             debuggable true
+            testCoverageEnabled true
         }
     }
 
@@ -90,6 +97,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     sourceSets {
@@ -109,6 +120,11 @@ android {
             if (System.getenv("GITHUB_ACTIONS") == "1") {
                 exclude "com/facebook/appevents/ondeviceprocessing/OnDeviceProcessingManagerTest.class"
             }
+            jacoco {
+                enabled = true
+                includes = []
+                excludes = []
+            }
         }
     }
 
@@ -122,6 +138,51 @@ android {
             }
         }
     }
+}
+
+// The version of Jacoco used by the task of type JacocoReport
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+def debugCoverage = tasks.register("debugCoverage", JacocoReport) {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports for the debug build."
+    dependsOn('testDebugUnitTest')
+
+    def excludes = [
+            '**/R.class',
+            '**/R$*.class',
+            '**/BuildConfig.*',
+            '**/Manifest*.*',
+            '**/*Test*.*',
+            'android/**/*.*',
+            'androidx/**/*.*',
+            '**/*$ViewInjector*.*',
+            '**/*Dagger*.*',
+            '**/*MembersInjector*.*',
+            '**/*_Factory.*',
+            '**/*_Provide*Factory*.*',
+            '**/*_ViewBinding*.*',
+            '**/AutoValue_*.*',
+            '**/R2.class',
+            '**/R2$*.class',
+            '**/*Directions$*',
+            '**/*Directions.*',
+            '**/*Binding.*'
+    ]
+
+    def jClasses = "${project.buildDir}/intermediates/javac/debug/classes/com/facebook/core"
+    def kClasses = "${project.buildDir}/tmp/kotlin-classes/debug/com/facebook"
+
+    def javaClasses = fileTree(dir: jClasses, excludes: excludes)
+    def kotlinClasses = fileTree(dir: kClasses, excludes: excludes)
+
+    classDirectories.from(files([javaClasses, kotlinClasses]))
+    def sourceDirs = ["${project.projectDir}/src/main/java"]
+    sourceDirectories.from(files(sourceDirs))
+
+    executionData.from(files(["${project.buildDir}/jacoco/testDebugUnitTest.exec"]))
 }
 
 if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
