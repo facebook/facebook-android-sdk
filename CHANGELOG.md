@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+We now use jacoco to gather code coverage on debug builds. If you are building from source instead of using releases from maven,
+you may run into an issue where debug builds crash on launch.
+The issue and solution are well-documented in https://github.com/jacoco/jacoco/issues/968
+
 ## [14.1.0]
 
 ## [14.0.0]
@@ -483,4 +489,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
