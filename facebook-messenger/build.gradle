@@ -35,7 +35,6 @@ dependencies {
 
 android {
     compileSdkVersion project.ext.compileSdk
-    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
         minSdkVersion project.ext.minSdk

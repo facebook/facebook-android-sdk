@@ -30,7 +30,6 @@ dependencies {
 
 android {
     compileSdkVersion project.ext.compileSdk
-    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
         applicationId 'com.example.rps'

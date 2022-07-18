@@ -22,7 +22,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion project.ext.compileSdk
-    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
         applicationId "com.facebook.samples.messenger.send"

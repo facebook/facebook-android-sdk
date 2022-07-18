@@ -32,7 +32,6 @@ project.ext {
     // Android gradle plugin version
     gradleVersion = "4.2.0"
     dokkaVersion = "1.4.30"
-    buildTools = "29.0.2"
     minSdk = 15
     compileSdk = 29
     targetSdk = 29
