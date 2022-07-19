@@ -39,9 +39,12 @@ import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
 import com.facebook.gamingservices.model.ContextChooseContent;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.CustomTabUtils;
+import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.ServerProtocol;
 import com.facebook.share.internal.ResultProcessor;
 import com.facebook.share.internal.ShareInternalUtility;
 import java.util.ArrayList;
@@ -56,6 +59,7 @@ public class ContextChooseDialog
   private static final int DEFAULT_REQUEST_CODE =
       CallbackManagerImpl.RequestCodeOffset.GamingContextChoose.toRequestCode();
   private @Nullable FacebookCallback mCallback;
+  private static final String CONTEXT_CHOOSE_DIALOG = "context_choose";
 
   /**
    * Constructs a new ContextChooseDialog.
@@ -97,8 +101,10 @@ public class ContextChooseDialog
   public boolean canShow(ContextChooseContent content) {
     if (CloudGameLoginHandler.isRunningInCloud()) {
       return true;
+    } else if (new FacebookAppHandler().canShow(content, true)) {
+      return true;
     } else {
-      return new FacebookAppHandler().canShow(content, true);
+      return (new ChromeCustomTabHandler().canShow(content, true));
     }
   }
 
@@ -201,6 +207,7 @@ public class ContextChooseDialog
   protected List<ModeHandler> getOrderedModeHandlers() {
     ArrayList<ModeHandler> handlers = new ArrayList<>();
     handlers.add(new FacebookAppHandler());
+    handlers.add(new ChromeCustomTabHandler());
 
     return handlers;
   }
@@ -291,6 +298,45 @@ public class ContextChooseDialog
       NativeProtocol.setupProtocolRequestIntent(
           intent, appCall.getCallId().toString(), "", NativeProtocol.getLatestKnownVersion(), args);
       appCall.setRequestIntent(intent);
+      return appCall;
+    }
+  }
+
+  private class ChromeCustomTabHandler extends ModeHandler {
+    @Override
+    public boolean canShow(ContextChooseContent content, boolean isBestEffort) {
+      String chromePackage = CustomTabUtils.getChromePackage();
+      return chromePackage != null;
+    }
+
+    @Override
+    public AppCall createAppCall(ContextChooseContent content) {
+      AppCall appCall = createBaseAppCall();
+      AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+      Bundle params = new Bundle();
+      params.putString("deeplink", "CONTEXT_CHOOSE");
+
+      params.putString(
+          ServerProtocol.DIALOG_PARAM_APP_ID,
+          accessToken != null ? accessToken.getApplicationId() : FacebookSdk.getApplicationId());
+
+      if (content.getMinSize() != null) {
+        params.putString("min_thread_size", String.valueOf(content.getMinSize()));
+      }
+      if (content.getMaxSize() != null) {
+        params.putString("max_thread_size", String.valueOf(content.getMaxSize()));
+      }
+      if (content.getFilters() != null) {
+        JSONArray jsonList = new JSONArray(content.getFilters());
+        params.putString("filters", jsonList.toString());
+      }
+
+      params.putString(
+          ServerProtocol.DIALOG_PARAM_REDIRECT_URI, CustomTabUtils.getDefaultRedirectURI());
+
+      DialogPresenter.setupAppCallForCustomTabDialog(appCall, CONTEXT_CHOOSE_DIALOG, params);
+
       return appCall;
     }
   }
