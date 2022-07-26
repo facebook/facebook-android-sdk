@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: ml_IN -->
+
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">ലൈക്കുചെയ്യുക</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">ലൈക്കുചെയ്തു</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">ലോഗൗട്ട് ചെയ്യുക</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">ലോഗിന് ചെയ്യുക</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Facebook ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Facebook ഉപയോഗിച്ച് തുടരുക</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">എന്നയാളായി ലോഗ് ഇൻ ചെയ്‌തു: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook ഉപയോഗിച്ച് ലോഗിൻ ചെയ്‌തു</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">ലോഗൗട്ട് ചെയ്യുക</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">റദ്ദാക്കുക</string>
+    <string name="com_facebook_loading" gender="unknown">ലോഡ് ചെയ്യുന്നു…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest പിശക്</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView ലോഗിൻ ചെയ്യാൻ ഇന്റർനെറ്റ് അനുമതി ആവശ്യമാണ്</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">നിങ്ങൾ നിയന്ത്രണത്തിലാണ് - ആപ്പുകൾ ഉപയോഗിച്ച് നിങ്ങൾക്ക് എന്ത് വിവരമാണ് പങ്കിടേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">ഒരു ചിത്രം ഡൗൺലോഡുചെയ്യുമ്പോൾ അജ്ഞാതമായ പിശക് സംഭവിച്ചു.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">പങ്കിടുക</string>
+    <string name="com_facebook_send_button_text" gender="unknown">അയയ്ക്കുക</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; സന്ദർശിച്ച് മുകളിൽ കാണിച്ചിരിക്കുന്ന കോഡ് നൽകുക.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">നിങ്ങളുടെ അക്കൗണ്ട് കണക്‌റ്റ്ചെയ്യാൻ, നിങ്ങളുടെ മൊബൈൽ ഉപകരണത്തിലെ Facebook ആപ്പ് തുറന്ന് അറിയിപ്പുകൾ പരിശോധിക്കുക.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- അല്ലെങ്കിൽ -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ലോഗിൻ സ്ഥിരീകരിക്കുക</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$s എന്നയാളായി തുടരുക</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">നിങ്ങള്‍ അല്ലേ?</string>
+</resources>
