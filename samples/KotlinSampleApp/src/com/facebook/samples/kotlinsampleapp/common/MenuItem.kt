@@ -27,7 +27,9 @@ fun MenuItem(text: String, onClick: () -> Unit = {}) {
                     indication = rememberRipple(),
                     role = Role.Button,
                     onClick = onClick)
-                .fillMaxWidth(1.0f)) { Text(text, fontSize = 24.sp) }
+                .fillMaxWidth(1.0f)) {
+          Text(text, fontSize = 24.sp)
+        }
     Divider(modifier = Modifier.padding(vertical = 4.dp))
   }
 }
