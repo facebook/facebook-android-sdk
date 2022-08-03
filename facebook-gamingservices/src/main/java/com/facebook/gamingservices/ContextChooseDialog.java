@@ -314,28 +314,37 @@ public class ContextChooseDialog
       AppCall appCall = createBaseAppCall();
       AccessToken accessToken = AccessToken.getCurrentAccessToken();
 
-      Bundle params = new Bundle();
-      params.putString("deeplink", "CONTEXT_CHOOSE");
+      Bundle contextChooseParams = new Bundle();
+      Bundle payload = new Bundle();
+      Bundle filters = new Bundle();
 
-      params.putString(
+      contextChooseParams.putString(
           ServerProtocol.DIALOG_PARAM_APP_ID,
           accessToken != null ? accessToken.getApplicationId() : FacebookSdk.getApplicationId());
 
       if (content.getMinSize() != null) {
-        params.putString("min_thread_size", String.valueOf(content.getMinSize()));
+        filters.putString("min_size", String.valueOf(content.getMinSize()));
       }
       if (content.getMaxSize() != null) {
-        params.putString("max_thread_size", String.valueOf(content.getMaxSize()));
+        filters.putString("max_size", String.valueOf(content.getMaxSize()));
       }
       if (content.getFilters() != null) {
-        JSONArray jsonList = new JSONArray(content.getFilters());
-        params.putString("filters", jsonList.toString());
+        JSONArray filterArray = new JSONArray(content.getFilters());
+        filters.putString("filters", filterArray.toString());
+      }
+      if (filters != null) {
+        payload.putString("filters", filters.toString());
       }
 
-      params.putString(
+      if (payload != null) {
+        contextChooseParams.putString("payload", payload.toString());
+      }
+
+      contextChooseParams.putString(
           ServerProtocol.DIALOG_PARAM_REDIRECT_URI, CustomTabUtils.getDefaultRedirectURI());
 
-      DialogPresenter.setupAppCallForCustomTabDialog(appCall, CONTEXT_CHOOSE_DIALOG, params);
+      DialogPresenter.setupAppCallForCustomTabDialog(
+          appCall, CONTEXT_CHOOSE_DIALOG, contextChooseParams);
 
       return appCall;
     }

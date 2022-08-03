@@ -27,6 +27,7 @@ import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsIntent
 import com.facebook.FacebookSdk.getGraphApiVersion
 import com.facebook.internal.ServerProtocol.getDialogAuthority
+import com.facebook.internal.ServerProtocol.getGamingDialogAuthority
 import com.facebook.internal.Utility.buildUri
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import com.facebook.login.CustomTabPrefetchHelper
@@ -61,6 +62,12 @@ open class CustomTab(action: String, parameters: Bundle?) {
     if (parameters == null) {
       parameters = Bundle()
     }
-    uri = getURIForAction(action, parameters)
+    uri =
+        if (action == "context_choose") {
+          buildUri(
+              getGamingDialogAuthority(), "/" + ServerProtocol.DIALOG_PATH + action, parameters)
+        } else {
+          getURIForAction(action, parameters)
+        }
   }
 }

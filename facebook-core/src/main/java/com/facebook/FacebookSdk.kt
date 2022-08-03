@@ -286,6 +286,16 @@ object FacebookSdk {
   @JvmStatic fun getFacebookDomain(): String = facebookDomain
 
   /**
+   * Gets the base Facebook gaming domain to use when making Web Requests; in production code this
+   * will always be "fb.gg".
+   *
+   * This is required for Custom Update Dialogs which always need to use fb.gg
+   *
+   * @return the Facebook Gaming Domain
+   */
+  @JvmStatic fun getFacebookGamingDomain(): String = FB_GG
+
+  /**
    * Gets the base Instagram domain to use when making Web Requests; in production code this will
    * always be "instagram.com".
    *
