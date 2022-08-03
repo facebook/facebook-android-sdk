@@ -75,3 +75,7 @@ lint/tmp/
 
 # MacOS
 .DS_Store
+
+# Keystore files
+*.jks
+*.keystore
