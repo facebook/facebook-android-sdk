@@ -35,7 +35,6 @@ include ':samples:Iconicus'
 include ':samples:RPSSample'
 include ':samples:MessengerSendSample'
 include ':samples:Scrumptious'
-include ':samples:SwitchUserSample'
 include ':samples:ShareIt'
 include ':samples:FBLoginSample'
 
