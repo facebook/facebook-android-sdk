@@ -33,7 +33,6 @@ include ':samples:Iconicus'
 // @fb-only: include ':samples:LoginSample'
 include ':samples:RPSSample'
 include ':samples:Scrumptious'
-include ':samples:ShareIt'
 include ':samples:FBLoginSample'
 
 if (file('internal/internal-settings.gradle').exists()) {
