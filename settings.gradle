@@ -29,7 +29,6 @@ include ':facebook-gamingservices'
 include ':facebook'
 
 // Samples
-include ':samples:HelloFacebookSample'
 include ':samples:Iconicus'
 // @fb-only: include ':samples:LoginSample'
 include ':samples:RPSSample'
