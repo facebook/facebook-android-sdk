@@ -2,7 +2,8 @@
 <!-- See fburl.com/140690840 for information about i18n on Android -->
 <!-- @generated -->
 <!-- FB Locale: gu_IN -->
-<resources exclude-from-buck-resource-map="true">
+
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">લાઇક કરો</string>
     <string name="com_facebook_like_button_liked" gender="unknown">લાઇક કર્યું</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">લોગ આઉટ કરો</string>

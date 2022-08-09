@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: ro_RO -->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked" gender="unknown">Îmi place</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">Apreciat</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">Deconectare</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">Conectare</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Conectare cu Facebook</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Continuă cu Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">Te-ai conectat ca: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Te-ai conectat folosind Facebook</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">Deconectare</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">Anulează</string>
+    <string name="com_facebook_loading" gender="unknown">Se încarcă…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">Eroare AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">Conectarea la WebView necesită permisiuni de tip INTERNET</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Tu deţii controlul: alege ce informaţii doreşti să le oferi aplicaţiilor.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">Eroare neaşteptată la descărcarea unei imagini.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">Distribuie</string>
+    <string name="com_facebook_send_button_text" gender="unknown">Trimite</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Vizitează &lt;b&gt;facebook.com/device&lt;/b&gt; şi introdu codul afişat mai sus.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">Pentru a te conecta la contul tău, deschide aplicaţia Facebook de pe dispozitivul mobil şi verifică notificările.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- SAU -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Confirmă conectarea</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Continuă ca %1$s</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Nu este vorba despre tine?</string>
+</resources>

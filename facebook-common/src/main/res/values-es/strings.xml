@@ -2,11 +2,12 @@
 <!-- See fburl.com/140690840 for information about i18n on Android -->
 <!-- @generated -->
 <!-- FB Locale: es_LA -->
-<resources exclude-from-buck-resource-map="true">
+
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Me gusta</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Te gusta</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Salir</string>
-    <string name="com_facebook_loginview_log_in_button" gender="unknown">Iniciar sesión</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">Entrar</string>
     <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Iniciar sesión con Facebook</string>
     <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Continuar con Facebook</string>
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">Sesión iniciada como: %1$s</string>

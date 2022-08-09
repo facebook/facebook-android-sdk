@@ -2,7 +2,8 @@
 <!-- See fburl.com/140690840 for information about i18n on Android -->
 <!-- @generated -->
 <!-- FB Locale: ja_JP -->
-<resources exclude-from-buck-resource-map="true">
+
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">いいね！</string>
     <string name="com_facebook_like_button_liked" gender="unknown">「いいね！」しました</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">ログアウト</string>
