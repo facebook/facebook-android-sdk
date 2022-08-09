@@ -2,6 +2,7 @@
 <!-- See fburl.com/140690840 for information about i18n on Android -->
 <!-- @generated -->
 <!-- FB Locale: ta_IN -->
+
 <resources exclude-from-buck-resource-map="true">
     <string name="com_facebook_like_button_not_liked" gender="unknown">பிடித்திருக்கிறது</string>
     <string name="com_facebook_like_button_liked" gender="unknown">விரும்பியவை</string>
