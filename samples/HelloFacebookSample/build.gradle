@@ -18,29 +18,53 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Facebook SDK
-include ':facebook-testutil'
-include ':facebook-core'
-include ':facebook-bolts'
-include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-applinks', ':facebook-messenger'
-// @fb-only: include ':facebook-livestreaming'
-// @fb-only: include ':facebook-beta'
-include ':facebook-gamingservices'
-include ':facebook'
+apply plugin: 'com.android.application'
 
-// Samples
-include ':samples:HelloFacebookSample'
-include ':samples:Iconicus'
-// @fb-only: include ':samples:LoginSample'
-include ':samples:RPSSample'
-include ':samples:Scrumptious'
-include ':samples:FBLoginSample'
-
-if (file('internal/internal-settings.gradle').exists()) {
-    apply from: 'internal/internal-settings.gradle'
+dependencies {
+    // Facebook Dependencies
+    implementation project(':facebook-login')
+    implementation project(':facebook-share')
 }
 
-if (file('local.gradle').exists()) {
-    apply from: 'local.gradle'
+android {
+    compileSdkVersion project.ext.compileSdk
+
+    defaultConfig {
+        applicationId 'com.example.hellofacebook'
+        minSdkVersion project.ext.minSdk
+        targetSdkVersion project.ext.targetSdk
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi', 'armeabi-v7a', 'x86'
+            universalApk true
+        }
+    }
 }
-// @fb-only: project(':facebook-beta').projectDir = new File('internal/facebook-beta')
+
+repositories {
+    maven {
+        url 'https://maven.google.com/'
+        name 'Google'
+    }
+}

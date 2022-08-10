@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -18,29 +18,27 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Facebook SDK
-include ':facebook-testutil'
-include ':facebook-core'
-include ':facebook-bolts'
-include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-applinks', ':facebook-messenger'
-// @fb-only: include ':facebook-livestreaming'
-// @fb-only: include ':facebook-beta'
-include ':facebook-gamingservices'
-include ':facebook'
+package com.example.hellofacebook;
 
-// Samples
-include ':samples:HelloFacebookSample'
-include ':samples:Iconicus'
-// @fb-only: include ':samples:LoginSample'
-include ':samples:RPSSample'
-include ':samples:Scrumptious'
-include ':samples:FBLoginSample'
+import android.os.Bundle;
+import android.util.Log;
+import com.facebook.FacebookBroadcastReceiver;
 
-if (file('internal/internal-settings.gradle').exists()) {
-    apply from: 'internal/internal-settings.gradle'
+/**
+ * This is a simple example to demonstrate how an app could extend FacebookBroadcastReceiver to
+ * handle notifications that long-running operations such as photo uploads have finished.
+ */
+public class HelloFacebookBroadcastReceiver extends FacebookBroadcastReceiver {
+
+  @Override
+  protected void onSuccessfulAppCall(String appCallId, String action, Bundle extras) {
+    // A real app could update UI or notify the user that their photo was uploaded.
+    Log.d("HelloFacebook", String.format("Photo uploaded by call " + appCallId + " succeeded."));
+  }
+
+  @Override
+  protected void onFailedAppCall(String appCallId, String action, Bundle extras) {
+    // A real app could update UI or notify the user that their photo was not uploaded.
+    Log.d("HelloFacebook", String.format("Photo uploaded by call " + appCallId + " failed."));
+  }
 }
-
-if (file('local.gradle').exists()) {
-    apply from: 'local.gradle'
-}
-// @fb-only: project(':facebook-beta').projectDir = new File('internal/facebook-beta')
