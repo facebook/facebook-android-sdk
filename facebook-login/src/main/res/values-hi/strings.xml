@@ -6,7 +6,7 @@
     <string name="com_facebook_like_button_not_liked" gender="unknown">लाइक करें</string>
     <string name="com_facebook_like_button_liked" gender="unknown">पसंद किया</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">लॉग आउट करें</string>
-    <string name="com_facebook_loginview_log_in_button" gender="unknown">लॉग इन</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">लॉग इन करें</string>
     <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Facebook से लॉग इन करें</string>
     <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Facebook के साथ जारी रखें</string>
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">इस रूप में लॉग इन हैं: %1$s</string>
