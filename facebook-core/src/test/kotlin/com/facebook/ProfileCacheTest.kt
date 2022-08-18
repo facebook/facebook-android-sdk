@@ -26,10 +26,10 @@ import com.facebook.util.common.ProfileTestHelper.assertDefaultObjectGetters
 import com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters
 import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 

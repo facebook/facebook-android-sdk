@@ -2,7 +2,6 @@ package com.facebook.internal.instrument
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.Utility
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.lang.RuntimeException
 import org.assertj.core.api.Assertions.assertThat
@@ -13,6 +12,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 

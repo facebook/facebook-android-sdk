@@ -22,11 +22,11 @@ package com.facebook.internal
 
 import android.content.Intent
 import com.facebook.FacebookPowerMockTestCase
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class FragmentWrapperTest : FacebookPowerMockTestCase() {
   @Test

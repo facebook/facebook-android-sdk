@@ -6,11 +6,11 @@ import com.facebook.GraphRequest
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.internal.AttributionIdentifiers
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox

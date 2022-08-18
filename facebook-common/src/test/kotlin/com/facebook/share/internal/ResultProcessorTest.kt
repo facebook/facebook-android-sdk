@@ -25,10 +25,10 @@ import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.AppCall
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 class ResultProcessorTest : FacebookPowerMockTestCase() {
   private lateinit var mockCallback: FacebookCallback<Void>

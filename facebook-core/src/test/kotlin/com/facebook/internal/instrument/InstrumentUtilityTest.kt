@@ -3,7 +3,6 @@ package com.facebook.internal.instrument
 import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
@@ -13,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -114,8 +114,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 "onClick",
                 "ViewOnClickListener.java",
                 10),
-            StackTraceElement(
-                "com.nhaarman.mockitokotlin2.any", "onClick", "ViewOnClickListener.java", 10),
+            StackTraceElement("org.mockito.kotlin.any", "onClick", "ViewOnClickListener.java", 10),
         )
     whenever(thread.stackTrace).thenReturn(trace)
     assertThat(InstrumentUtility.isSDKRelatedThread(thread)).isTrue

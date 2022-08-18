@@ -24,11 +24,11 @@ import android.text.InputType
 import android.widget.TextView
 import com.facebook.appevents.codeless.CodelessTestBase
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils.isSensitiveUserData
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class SensitiveUserDataUtilsTest : CodelessTestBase() {
   private lateinit var textView: TextView

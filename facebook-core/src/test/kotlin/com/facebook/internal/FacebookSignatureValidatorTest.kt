@@ -27,11 +27,11 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest

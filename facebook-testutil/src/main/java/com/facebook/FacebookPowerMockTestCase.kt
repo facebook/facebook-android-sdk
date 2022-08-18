@@ -49,7 +49,7 @@ import org.robolectric.shadows.ShadowLog
     "org.w3c.dom.*",
     "org.springframework.context.*",
     "org.apache.log4j.*",
-    "kotlin.test.*")
+    "kotlin.*")
 /**
  * Base class for PowerMock tests. Important: the classes that derive from this should end with Test
  * (i.e. not Tests) otherwise the gradle task "test" doesn't pick them up.

@@ -25,7 +25,6 @@ import com.facebook.FacebookTestUtility.assertEqualContentsWithoutOrder
 import com.facebook.FacebookTestUtility.assertSameCollectionContents
 import com.facebook.FacebookTestUtility.nowPlusSeconds
 import com.facebook.internal.Utility
-import com.nhaarman.mockitokotlin2.whenever
 import java.lang.reflect.Array
 import java.util.ArrayList
 import java.util.Date
@@ -35,6 +34,7 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest

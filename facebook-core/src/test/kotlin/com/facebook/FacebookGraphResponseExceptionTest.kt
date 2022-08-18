@@ -20,10 +20,10 @@
 
 package com.facebook
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class FacebookGraphResponseExceptionTest : FacebookPowerMockTestCase() {
   @Test

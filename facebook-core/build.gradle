@@ -48,7 +48,7 @@ dependencies {
     testImplementation 'androidx.test:core:1.0.0'
 
     testImplementation "org.mockito:mockito-inline:2.26.0"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:2.2.11"
 
     def powerMockVersion = '2.0.2'
     testImplementation "org.powermock:powermock-core:$powerMockVersion"

@@ -23,12 +23,12 @@ package com.facebook.internal
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.util.common.CaptureExecutor
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.Callable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 

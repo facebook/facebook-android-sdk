@@ -34,11 +34,6 @@ import com.facebook.GraphResponse
 import com.facebook.internal.NativeProtocol
 import com.facebook.internal.ServerProtocol
 import com.facebook.internal.security.OidcSecurityUtil
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.security.PublicKey
 import java.util.HashSet
 import org.assertj.core.api.Assertions.assertThat
@@ -46,6 +41,11 @@ import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito.times
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
