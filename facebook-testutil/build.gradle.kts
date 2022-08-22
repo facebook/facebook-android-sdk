@@ -18,15 +18,17 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+}
 
-project.group 'com.facebook.android'
+group = "com.facebook.android"
 
-project.ext.name = 'Facebook-Android-SDK-testutil'
-project.ext.artifactId = "facebook-testutil"
-project.ext.description = 'Facebook Android SDK Testutil'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
+extra["name"] = "Facebook-Android-SDK-testutil"
+extra["artifactId"] = "facebook-testutil"
+extra["description"] = "Facebook Android SDK Testutil"
+extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
     implementation(Libs.kotlin_stdlib)
@@ -63,21 +65,21 @@ android {
     }
 
     aaptOptions {
-        additionalParameters "--no-version-vectors"
+        additionalParameters("--no-version-vectors")
     }
 
     lintOptions {
-        abortOnError false
+        isAbortOnError = false
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
     }
 }
 
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
-apply from: "${rootDir}/maven.gradle"
+apply(from = "${rootDir}/maven.gradle")
