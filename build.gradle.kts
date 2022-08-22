@@ -21,8 +21,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    apply(from = "${rootDir}/constants.gradle")
-
     repositories {
         maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
         mavenCentral()
@@ -33,7 +31,7 @@ buildscript {
         classpath(Plugins.android_gradle)
         classpath(Plugins.kotlin_gradle)
         classpath(Plugins.dokka)
-        classpath(Libs.jacoco_core)
+        classpath(Plugins.jacoco)
     }
 }
 
@@ -44,6 +42,4 @@ allprojects {
         maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
         maven { url = uri("https://jitpack.io") }
     }
-
-    apply(from = "${rootDir}/constants.gradle")
 }

@@ -18,22 +18,28 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-project.ext {
-    androidxVersion = "1.1.0"
-    androidxActivityVersion = "1.2.0"
-    androidxFragmentVersion = "1.3.0"
-    androidxAnnotationVersion = "1.1.0"
-    androidxCardviewVersion = "1.0.0"
-    androidxBrowserVersion = "1.0.0"
-    androidxLegacyVersion = "1.0.0"
-    junitVersion = "4.13"
+// Facebook SDK
+include(":facebook-testutil")
+include(":facebook-core")
+include(":facebook-bolts")
+include(":facebook-common", ":facebook-login", ":facebook-share", ":facebook-applinks", ":facebook-messenger")
+include(":facebook-livestreaming") // @fb-only
+include(":facebook-beta") // @fb-only
+include(":facebook-gamingservices")
+include(":facebook")
 
-    kotlinVersion = "1.5.10"
-    // Android gradle plugin version
-    gradleVersion = "4.2.0"
-    dokkaVersion = "1.4.30"
-    minSdk = 15
-    compileSdk = 29
-    targetSdk = 29
+// Samples
+include(":samples:HelloFacebookSample")
+include(":samples:Iconicus")
+include(":samples:LoginSample") // @fb-only
+include(":samples:Scrumptious")
+include(":samples:FBLoginSample")
 
+if (file("internal/internal-settings.gradle").exists()) {
+    apply("internal/internal-settings.gradle")
 }
+
+if (file("local.gradle").exists()) {
+    apply("local.gradle")
+}
+project(":facebook-beta").projectDir = File("internal/facebook-beta") // @fb-only

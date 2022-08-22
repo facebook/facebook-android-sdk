@@ -56,6 +56,7 @@ object Plugins {
   const val kotlin_gradle = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
   const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:${Versions.dokka}"
   const val google_services = "com.google.gms:google-services:${Versions.googleServices}"
+  const val jacoco = "org.jacoco:org.jacoco.core:${Versions.jacoco}"
 }
 
 object Libs {
@@ -100,7 +101,6 @@ object Libs {
   const val assertj_core = "org.assertj:assertj-core:${Versions.assertj}"
   const val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
   const val glide_compiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
-  const val jacoco_core = "org.jacoco:org.jacoco.core:${Versions.jacoco}"
   const val json = "org.json:json:${Versions.json}"
   const val junit = "junit:junit:${Versions.junit}"
   const val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"

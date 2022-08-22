@@ -134,5 +134,5 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
     project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
-apply from: "${rootDir}/jacoco.gradle"
+apply from: "${rootDir}/jacoco.gradle.kts"
 apply from: "${rootDir}/maven.gradle"
