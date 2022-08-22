@@ -24,23 +24,23 @@ plugins {
     id("org.jetbrains.dokka")
 }
 
-project.group 'com.facebook.android'
+group = "com.facebook.android"
 
-project.ext.name = 'Facebook-Android-SDK'
-project.ext.artifactId = "facebook-android-sdk"
-project.ext.description = 'Facebook Android SDK'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
+extra["name"] = "Facebook-Android-SDK"
+extra["artifactId"] = "facebook-android-sdk"
+extra["description"] = "Facebook Android SDK"
+extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
-    // Facebook Dependencies
-    api project(':facebook-core')
-    api project(':facebook-common')
-    api project(':facebook-login')
-    api project(":facebook-share")
-    api project(":facebook-applinks")
-    api project(":facebook-messenger")
-    api project(":facebook-gamingservices")
-    testImplementation project(":facebook-testutil")
+  // Facebook Dependencies
+    api(project(":facebook-core"))
+    api(project(":facebook-common"))
+    api(project(":facebook-login"))
+    api(project(":facebook-share"))
+    api(project(":facebook-applinks"))
+    api(project(":facebook-messenger"))
+    api(project(":facebook-gamingservices"))
+    testImplementation(project(":facebook-testutil"))
 
     implementation(Libs.kotlin_stdlib)
 
@@ -73,59 +73,47 @@ android {
     defaultConfig {
         minSdkVersion(Config.minSdk)
         targetSdkVersion(Config.targetSdk)
-        consumerProguardFiles 'proguard-project.txt'
+        consumerProguardFiles("proguard-project.txt")
         vectorDrawables.useSupportLibrary = true
     }
 
     aaptOptions {
-        additionalParameters "--no-version-vectors"
+        additionalParameters("--no-version-vectors")
     }
 
     lintOptions {
-        abortOnError false
+        isAbortOnError = false
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    sourceSets {
-        test.java.srcDirs += 'src/test/kotlin'
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
     testOptions {
         unitTests.all {
-            jvmArgs '-XX:MaxPermSize=1024m'
-            maxHeapSize = "1024m"
+            it.jvmArgs("-XX:MaxPermSize=1024m")
+            it.maxHeapSize = "1024m"
         }
     }
 
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {
             unitTests.all {
-                systemProperty 'robolectric.dependency.repo.url', 'https://maven.thefacebook.com/nexus/content/repositories/central/'
-                systemProperty 'robolectric.dependency.repo.id', 'central'
-                systemProperty "java.net.preferIPv6Addresses", "true"
-                systemProperty "java.net.preferIPv4Stack", "false"
+                it.systemProperty("robolectric.dependency.repo.url", "https://maven.thefacebook.com/nexus/content/repositories/central/")
+                it.systemProperty("robolectric.dependency.repo.id", "central")
+                it.systemProperty("java.net.preferIPv6Addresses", "true")
+                it.systemProperty("java.net.preferIPv4Stack", "false")
             }
         }
     }
 }
 
-//to be 100% sure, make sure no kotlin code in src for production use
-afterEvaluate {
-    android.sourceSets.all { sourceSet ->
-        if (!sourceSet.name.startsWith('test') || !sourceSet.name.startsWith('androidTest')) {
-            sourceSet.kotlin.setSrcDirs([])
-        }
-    }
-}
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
-tasks.named("dokkaJavadoc").configure {
+tasks.dokkaJavadoc.configure {
     dokkaSourceSets {
         named("main").configure {
             sourceRoots.from(file("../facebook-bolts/src/main"))
@@ -141,4 +129,4 @@ tasks.named("dokkaJavadoc").configure {
     }
 }
 
-apply from: "${rootDir}/maven.gradle"
+apply(from = "${rootDir}/maven.gradle")
