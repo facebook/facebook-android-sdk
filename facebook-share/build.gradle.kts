@@ -18,20 +18,22 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+}
 
-project.group 'com.facebook.android'
+group = "com.facebook.android"
 
-project.ext.name = 'Facebook-Share-Android-SDK'
-project.ext.artifactId = "facebook-share"
-project.ext.description = 'Facebook Share Android SDK'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
+extra["name"] = "Facebook-Share-Android-SDK"
+extra["artifactId"] = "facebook-share"
+extra["description"] = "Facebook Share Android SDK"
+extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
     // Facebook Dependencies
-    api project(':facebook-core')
-    api project(':facebook-common')
+    api(project(":facebook-core"))
+    api(project(":facebook-common"))
     implementation(Libs.androidx_appcompat)
 }
 
@@ -41,33 +43,33 @@ android {
     defaultConfig {
         minSdkVersion(Config.minSdk)
         targetSdkVersion(Config.targetSdk)
-        consumerProguardFiles 'proguard-rules.pro'
+        consumerProguardFiles("proguard-rules.pro")
         vectorDrawables.useSupportLibrary = true
     }
 
     aaptOptions {
-        additionalParameters "--no-version-vectors"
+        additionalParameters("--no-version-vectors")
     }
 
     lintOptions {
-        abortOnError false
+        isAbortOnError = false
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
 }
 
 if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
-    project.apply from: "${rootDir}/internal/safekit-build.gradle"
+    project.apply(from = "${rootDir}/internal/safekit-build.gradle")
 }
 
-apply from: "${rootDir}/maven.gradle"
+apply(from = "${rootDir}/maven.gradle")
