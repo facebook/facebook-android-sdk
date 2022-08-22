@@ -18,15 +18,17 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+}
 
-project.group = 'com.facebook.android'
+group = "com.facebook.android"
 
-project.ext.name = 'Facebook-Bolts-Android-SDK'
-project.ext.artifactId = "facebook-bolts"
-project.ext.description = 'Facebook Android SDK Bolts support library'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
+extra["name"] = "Facebook-Bolts-Android-SDK"
+extra["artifactId"] = "facebook-bolts"
+extra["description"] = "Facebook Android SDK Bolts support library"
+extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
     implementation(Libs.androidx_annotation)
@@ -34,7 +36,7 @@ dependencies {
     implementation(Libs.kotlin_stdlib)
 
     // Unit Tests
-    testImplementation project(":facebook-testutil")
+    testImplementation(project(":facebook-testutil"))
     testImplementation(Libs.junit)
     testImplementation(Libs.robolectric)
     testImplementation(Libs.androidx_test_core)
@@ -57,61 +59,52 @@ android {
     compileSdkVersion(Config.compileSdk)
     // The version of Jacoco used by the android gradle plugin
     jacoco {
-        version "0.8.7"
+        version = "0.8.7"
     }
 
     defaultConfig {
         minSdkVersion(Config.minSdk)
         targetSdkVersion(Config.targetSdk)
-        consumerProguardFiles 'proguard-rules.pro'
+        consumerProguardFiles("proguard-rules.pro")
     }
 
     buildTypes {
-        debug {
-            debuggable true
-            testCoverageEnabled true
+        getByName("debug") {
+            isDebuggable = true
+            isTestCoverageEnabled = true
         }
     }
 
     lintOptions {
-        abortOnError false
+        isAbortOnError = false
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    sourceSets {
-        test.java.srcDirs += 'src/test/kotlin'
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
     testOptions {
         unitTests.all {
-            jvmArgs '-XX:MaxPermSize=1024m'
-            maxHeapSize = "4096m"
-            jacoco {
-                enabled = true
-                includes = []
-                excludes = []
-            }
+            it.jvmArgs("-XX:MaxPermSize=1024m")
+            it.maxHeapSize = "4096m"
         }
     }
 
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {
             unitTests.all {
-                systemProperty 'robolectric.dependency.repo.url', 'https://maven.thefacebook.com/nexus/content/repositories/central/'
-                systemProperty 'robolectric.dependency.repo.id', 'central'
-                systemProperty "java.net.preferIPv6Addresses", "true"
-                systemProperty "java.net.preferIPv4Stack", "false"
+                it.systemProperty("robolectric.dependency.repo.url", "https://maven.thefacebook.com/nexus/content/repositories/central/")
+                it.systemProperty("robolectric.dependency.repo.id", "central")
+                it.systemProperty("java.net.preferIPv6Addresses", "true")
+                it.systemProperty("java.net.preferIPv4Stack", "false")
             }
         }
     }
 }
 
-apply from: "${rootDir}/jacoco.gradle.kts"
-apply from: "${rootDir}/maven.gradle"
+apply(from = "${rootDir}/jacoco.gradle.kts")
+apply(from = "${rootDir}/maven.gradle")
 repositories {
     mavenCentral()
 }
