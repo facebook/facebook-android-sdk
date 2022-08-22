@@ -29,22 +29,21 @@ project.ext.description = 'Facebook Login Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
-    def kotlin_ver = project.ext.kotlinVersion
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
     // Support Dependencies
-    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
+    implementation(Libs.androidx_appcompat)
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
+    implementation(Libs.kotlin_stdlib)
 }
 
 android {
-    compileSdkVersion project.ext.compileSdk
+    compileSdkVersion(Config.compileSdk)
 
     defaultConfig {
-        minSdkVersion project.ext.minSdk
-        targetSdkVersion project.ext.targetSdk
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
         consumerProguardFiles 'proguard-rules.pro'
         vectorDrawables.useSupportLibrary = true
     }

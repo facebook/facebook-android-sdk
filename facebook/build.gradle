@@ -18,9 +18,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'org.jetbrains.dokka'
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+    id("org.jetbrains.dokka")
+}
 
 project.group 'com.facebook.android'
 
@@ -30,8 +32,6 @@ project.ext.description = 'Facebook Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
-    def kotlin_ver = project.ext.kotlinVersion
-
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
@@ -42,38 +42,37 @@ dependencies {
     api project(":facebook-gamingservices")
     testImplementation project(":facebook-testutil")
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
+    implementation(Libs.kotlin_stdlib)
+
     // Unit Tests
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation 'org.robolectric:robolectric:4.4'
-    testImplementation 'androidx.test:core:1.0.0'
+    testImplementation(Libs.junit)
+    testImplementation(Libs.robolectric)
+    testImplementation(Libs.androidx_test_core)
 
-    testImplementation "org.mockito:mockito-inline:2.26.0"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:2.2.11"
+    testImplementation(Libs.mockito_inline)
+    testImplementation(Libs.mockito_kotlin)
 
-    def powerMockVersion = '2.0.2'
-    testImplementation "org.powermock:powermock-core:$powerMockVersion"
-    testImplementation "org.powermock:powermock-api-mockito2:$powerMockVersion"
-    testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"
-    testImplementation "org.powermock:powermock-module-junit4-rule:$powerMockVersion"
-    testImplementation "org.powermock:powermock-classloading-xstream:$powerMockVersion"
-    testImplementation 'org.assertj:assertj-core:3.15.0'
+    testImplementation(Libs.powermock_core)
+    testImplementation(Libs.powermock_api_mockito2)
+    testImplementation(Libs.powermock_junit4)
+    testImplementation(Libs.powermock_junit4_rule)
+    testImplementation(Libs.powermock_classloading_xstream)
+    testImplementation(Libs.assertj_core)
 
     // Connected Tests
-    androidTestImplementation 'org.mockito:mockito-core:3.2.4'
-    androidTestImplementation 'com.google.dexmaker:dexmaker:1.2'
-    androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.2'
+    androidTestImplementation(Libs.dexmaker)
+    androidTestImplementation(Libs.dexmaker_mockito)
 
-    testImplementation "com.android.installreferrer:installreferrer:1.0"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
+    testImplementation(Libs.android_installreferrer)
+    testImplementation(Libs.kotlin_test_junit)
 }
 
 android {
-    compileSdkVersion project.ext.compileSdk
+    compileSdkVersion(Config.compileSdk)
 
     defaultConfig {
-        minSdkVersion project.ext.minSdk
-        targetSdkVersion project.ext.targetSdk
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
         consumerProguardFiles 'proguard-project.txt'
         vectorDrawables.useSupportLibrary = true
     }

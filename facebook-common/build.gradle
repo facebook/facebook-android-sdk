@@ -29,56 +29,53 @@ project.ext.description = 'Facebook Common Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
-    def kotlin_ver = project.ext.kotlinVersion
     // Facebook Dependencies
     api project(':facebook-core')
     // Support Dependencies
-    api "androidx.legacy:legacy-support-v4:${project.ext.androidxLegacyVersion}"
-    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
-    implementation "androidx.cardview:cardview:${project.ext.androidxCardviewVersion}"
-    implementation "androidx.browser:browser:${project.ext.androidxBrowserVersion}"
-    implementation("androidx.activity:activity:${project.ext.androidxActivityVersion}")
-    implementation("androidx.fragment:fragment:${project.ext.androidxFragmentVersion}")
+    api(Libs.androidx_legacy_support_v4)
+    implementation(Libs.androidx_appcompat)
+    implementation(Libs.androidx_cardview)
+    implementation(Libs.androidx_browser)
+    implementation(Libs.androidx_activity)
+    implementation(Libs.androidx_fragment)
 
     // Third-party Dependencies
-    implementation 'com.google.zxing:core:3.3.3'
+    implementation(Libs.zxing)
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
+    implementation(Libs.kotlin_stdlib)
 
     // Unit Tests
     testImplementation project(":facebook-testutil")
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation 'org.robolectric:robolectric:4.4'
-    testImplementation 'androidx.test:core:1.0.0'
+    testImplementation(Libs.junit)
+    testImplementation(Libs.robolectric)
+    testImplementation(Libs.androidx_test_core)
+    testImplementation(Libs.mockito_inline)
+    testImplementation(Libs.mockito_kotlin)
 
-    testImplementation "org.mockito:mockito-inline:2.26.0"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:2.2.11"
+    testImplementation(Libs.powermock_core)
+    testImplementation(Libs.powermock_api_mockito2)
+    testImplementation(Libs.powermock_junit4)
+    testImplementation(Libs.powermock_junit4_rule)
+    testImplementation(Libs.powermock_classloading_xstream)
+    testImplementation(Libs.assertj_core)
 
-    def powerMockVersion = '2.0.2'
-    testImplementation "org.powermock:powermock-core:$powerMockVersion"
-    testImplementation "org.powermock:powermock-api-mockito2:$powerMockVersion"
-    testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"
-    testImplementation "org.powermock:powermock-module-junit4-rule:$powerMockVersion"
-    testImplementation "org.powermock:powermock-classloading-xstream:$powerMockVersion"
-    testImplementation 'org.assertj:assertj-core:3.15.0'
-
-
-    testImplementation "com.android.installreferrer:installreferrer:1.0"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
+    testImplementation(Libs.android_installreferrer)
+    testImplementation(Libs.kotlin_test_junit)
 }
 
 android {
-    compileSdkVersion project.ext.compileSdk
+    compileSdkVersion(Config.compileSdk)
     // The version of Jacoco used by the android gradle plugin
     jacoco {
         version "0.8.7"
     }
 
     defaultConfig {
-        minSdkVersion project.ext.minSdk
-        targetSdkVersion project.ext.targetSdk
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
         consumerProguardFiles 'proguard-rules.pro'
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled = true
     }
 
     aaptOptions {
