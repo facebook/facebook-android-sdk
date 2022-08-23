@@ -60,6 +60,12 @@ android {
         targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
+    sourceSets {
+        named("test") {
+            java.srcDir("src/test/kotlin")
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false

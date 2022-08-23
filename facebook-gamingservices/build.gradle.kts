@@ -110,6 +110,12 @@ android {
         }
     }
 
+    sourceSets {
+        named("test") {
+            java.srcDir("src/test/kotlin")
+        }
+    }
+
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {
             unitTests.all {

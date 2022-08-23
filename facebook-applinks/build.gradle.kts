@@ -47,6 +47,12 @@ android {
         consumerProguardFiles("proguard-rules.pro")
     }
 
+    sourceSets {
+        named("test") {
+            java.srcDir("src/test/kotlin")
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false

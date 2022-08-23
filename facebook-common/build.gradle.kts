@@ -101,6 +101,12 @@ android {
         unitTests.isIncludeAndroidResources = true
     }
 
+    sourceSets {
+        named("test") {
+            java.srcDir("src/test/kotlin")
+        }
+    }
+
     buildTypes {
         getByName("debug") {
             isTestCoverageEnabled = true
