@@ -22,11 +22,14 @@ package com.facebook.login
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Bundle
 import android.os.Parcel
 import androidx.annotation.VisibleForTesting
 import com.facebook.AccessTokenSource
 import com.facebook.FacebookException
+import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getExecutor
 import com.facebook.FacebookServiceException
 import com.facebook.internal.NativeProtocol
@@ -34,7 +37,6 @@ import com.facebook.internal.ServerProtocol.getErrorConnectionFailure
 import com.facebook.internal.ServerProtocol.getErrorsProxyAuthDisabled
 import com.facebook.internal.ServerProtocol.getErrorsUserCanceled
 import com.facebook.internal.Utility.isNullOrEmpty
-import java.lang.Exception
 
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
 abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
@@ -174,17 +176,21 @@ abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
   }
 
   protected open fun tryIntent(intent: Intent?, requestCode: Int): Boolean {
-    if (intent == null) {
+    if (intent == null || !isCallable(intent)) {
       return false
     }
-    try {
-      loginClient.fragment?.startActivityForResult(intent, requestCode)
-    } catch (e: Exception) {
-      // We do not know if we have the activity until we try starting it.
-      // FB is not installed if ActivityNotFoundException is thrown and this might fallback
-      // to other handlers
-      return false
-    }
+
+    val loginFragment = loginClient.fragment as? LoginFragment
+    loginFragment?.launcher?.launch(intent) ?: return false
+
     return true
+  }
+
+  private fun isCallable(intent: Intent): Boolean {
+    val list: List<ResolveInfo> =
+        FacebookSdk.getApplicationContext()
+            .packageManager
+            .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+    return list.isNotEmpty()
   }
 }
