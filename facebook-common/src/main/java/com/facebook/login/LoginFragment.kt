@@ -27,8 +27,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.facebook.common.R
 
 /**
@@ -39,9 +43,11 @@ import com.facebook.common.R
  */
 open class LoginFragment : Fragment() {
   private var callingPackage: String? = null
+  private var request: LoginClient.Request? = null
   lateinit var loginClient: LoginClient
     private set
-  private var request: LoginClient.Request? = null
+  lateinit var launcher: ActivityResultLauncher<Intent>
+    private set
 
   private lateinit var progressBar: View
 
@@ -66,7 +72,22 @@ open class LoginFragment : Fragment() {
         request = bundle.getParcelable(EXTRA_REQUEST)
       }
     }
+
+    launcher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            getLoginMethodHandlerCallback(activity))
   }
+
+  private fun getLoginMethodHandlerCallback(activity: FragmentActivity): (ActivityResult) -> Unit =
+      { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+          loginClient.onActivityResult(
+              LoginClient.getLoginRequestCode(), result.resultCode, result.data)
+        } else {
+          activity.finish()
+        }
+      }
 
   protected open fun createLoginClient(): LoginClient {
     return LoginClient(this)
