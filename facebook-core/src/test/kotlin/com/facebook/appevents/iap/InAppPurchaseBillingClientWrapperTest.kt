@@ -23,17 +23,16 @@ import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import java.lang.reflect.Method
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -61,7 +60,6 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         inAppPurchaseBillingClientWrapper)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T106275737
   @Test
   fun testHelperClassCanSuccessfullyCreateWrapper() {
     // Test InAppPurchaseBillingClientWrapper
@@ -78,7 +76,6 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     Assertions.assertThat(purchasesUpdatedListenerWrapper).isNotNull
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T106060060
   @Test
   fun testBillingClientWrapper() {
     val runnable: Runnable = mock()
@@ -107,7 +104,6 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     Assertions.assertThat(purchaseDetailsMap).isNotEmpty
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T106060391
   @Test
   fun testSkuDetailsResponseListenerWrapper() {
     // Test can successfully create skuDetailsResponseListenerWrapper

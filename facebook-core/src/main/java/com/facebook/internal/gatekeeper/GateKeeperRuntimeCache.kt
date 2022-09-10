@@ -63,7 +63,7 @@ class GateKeeperRuntimeCache {
    * Get GateKeeper value with the name
    *
    * @param name the name of the GateKeeper
-   * @defaultValue return it if the GateKeeper doesn't exists
+   * @param defaultValue return it if the GateKeeper doesn't exists
    * @return the GateKeeper value
    */
   fun getGateKeeperValue(

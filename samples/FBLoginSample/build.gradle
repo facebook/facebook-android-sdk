@@ -21,15 +21,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion project.ext.compileSdk
-    buildToolsVersion project.ext.buildTools
+    compileSdkVersion(Config.compileSdk)
     defaultConfig {
         applicationId "com.facebook.fbloginsample"
-        minSdkVersion project.ext.minSdk
-        targetSdkVersion project.ext.targetSdk
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
         versionCode 1
         versionName "0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -60,13 +60,13 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':facebook')
-    implementation 'com.facebook.fresco:fresco:2.6.0'
-    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
-    implementation "androidx.annotation:annotation:${project.ext.androidxVersion}"
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation(Libs.fresco)
+    implementation(Libs.androidx_appcompat)
+    implementation(Libs.androidx_annotation)
+    implementation("com.google.android.material:material:1.4.0")
 
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+    androidTestImplementation(Libs.androidx_espresso_core, {
         exclude group: 'androidx.annotation', module: 'annotation'
     })
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation(Libs.junit)
 }

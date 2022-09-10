@@ -4,13 +4,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.util.common.AuthenticationTokenTestUtil
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import java.security.PublicKey
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -94,7 +93,6 @@ class AuthenticationTokenTest : FacebookPowerMockTestCase() {
     assertThat(idToken1).isEqualTo(idToken2)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114084096
   @Test
   fun `test setting and getting the current AuthenticationToken to or from cache`() {
     // bypass signature check, since this is not testing for signature

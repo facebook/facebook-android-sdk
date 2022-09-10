@@ -34,16 +34,16 @@ fun NavHost(navController: NavHostController, modifier: Modifier = Modifier) {
       navController = navController,
       startDestination = Screen.MainScreen.name,
       modifier = modifier) {
-    composable(Screen.MainScreen.name) {
-      val homeViewModel: HomeViewModel = viewModel()
-      HomeScreen(
-          homeViewModel,
-          { navController.navigate(Screen.LoginScreen.name) },
-          { navController.navigate(Screen.SharingScreen.name) },
-          { navController.navigate(Screen.AppEventsScreen.name) })
-    }
-    composable(Screen.LoginScreen.name) { LoginMenuScreen() }
-    composable(Screen.SharingScreen.name) { SharingScreen() }
-    composable(Screen.AppEventsScreen.name) { AppEventScreen() }
-  }
+        composable(Screen.MainScreen.name) {
+          val homeViewModel: HomeViewModel = viewModel()
+          HomeScreen(
+              homeViewModel,
+              { navController.navigate(Screen.LoginScreen.name) },
+              { navController.navigate(Screen.SharingScreen.name) },
+              { navController.navigate(Screen.AppEventsScreen.name) })
+        }
+        composable(Screen.LoginScreen.name) { LoginMenuScreen() }
+        composable(Screen.SharingScreen.name) { SharingScreen() }
+        composable(Screen.AppEventsScreen.name) { AppEventScreen() }
+      }
 }

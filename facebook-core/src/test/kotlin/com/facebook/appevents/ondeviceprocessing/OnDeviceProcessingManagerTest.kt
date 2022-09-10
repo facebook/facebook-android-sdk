@@ -34,15 +34,15 @@ import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper.ServiceRes
 import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper.isServiceAvailable
 import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper.sendCustomEvents
 import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper.sendInstallEvent
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 

@@ -35,6 +35,7 @@ import org.json.JSONException
 object ServerProtocol {
   private val TAG = ServerProtocol::class.java.name
   private const val DIALOG_AUTHORITY_FORMAT = "m.%s"
+  private const val GAMING_DIALOG_AUTHORITY_FORMAT = "%s"
   const val DIALOG_PATH = "dialog/"
   const val DIALOG_PARAM_ACCESS_TOKEN = "access_token"
   const val DIALOG_PARAM_APP_ID = "app_id"
@@ -106,6 +107,9 @@ object ServerProtocol {
   @JvmStatic
   fun getDialogAuthority(): String =
       String.format(DIALOG_AUTHORITY_FORMAT, FacebookSdk.getFacebookDomain())
+  @JvmStatic
+  fun getGamingDialogAuthority(): String =
+      String.format(GAMING_DIALOG_AUTHORITY_FORMAT, FacebookSdk.getFacebookGamingDomain())
   @JvmStatic
   fun getInstagramDialogAuthority(): String =
       String.format(DIALOG_AUTHORITY_FORMAT, FacebookSdk.getInstagramDomain())

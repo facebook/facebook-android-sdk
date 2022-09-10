@@ -31,13 +31,6 @@ import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.Date
 import kotlin.collections.HashMap
 import org.assertj.core.api.Assertions.assertThat
@@ -47,8 +40,14 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -208,7 +207,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(parameters.getString("k3")).isEqualTo("test")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118049352
   @Test
   fun `test putting numbers and number arrays to bundle as JSON values`() {
     val doubleValue = 1.23
@@ -234,7 +232,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(bundle.getLongArray("la")).isEqualTo(longArray)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118048010
   @Test
   fun `test putting JSON array and object to bundle`() {
     val bundle = Bundle()
@@ -249,7 +246,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(bundle.getString("object")).isEqualTo(jsonObject.toString())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118065367
   @Test
   fun `test removing a JSON value from bundle`() {
     val bundle = Bundle()
@@ -258,7 +254,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(bundle.get("k1")).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118065822
   @Test
   fun `test inserting an invalid JSON value to bundle`() {
     val bundle = Bundle()
@@ -266,7 +261,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(bundle.get("k1")).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118033486
   @Test
   fun `test getting bundle long as date to have correct result`() {
     // a non-zero base date to test whether the computation is correct
@@ -277,7 +271,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(result?.time).isEqualTo(100L * 1000 + 37)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118047941
   @Test
   fun `test getting bundle string as date to have correct result`() {
     val baseDate = Date(37)
@@ -287,7 +280,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(result?.time).isEqualTo(100L * 1000 + 37)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118049432
   @Test
   fun `test getting invalid bundle value as date to get null`() {
     val baseDate = Date(37)
@@ -297,7 +289,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(Utility.getBundleLongAsDate(null, "k", baseDate)).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118050847
   @Test
   fun `test getting 0 from bundle as date to get largest value`() {
     val baseDate = Date(37)
@@ -307,7 +298,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertThat(result?.time).isEqualTo(Long.MAX_VALUE)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103598636
   @Test
   fun testConvertJSONObjectToStringMap() {
     val validJson = "{\"k1\": true, \"k2\": \"value\"}"
@@ -315,7 +305,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertEquals(mapOf("k1" to "true", "k2" to "value"), result)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118067882
   @Test
   fun testSetAppEventAttributionParametersWithoutServiceUpdateCompliance() {
     whenever(FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance))
@@ -333,7 +322,6 @@ class UtilityTest : FacebookPowerMockTestCase() {
     assertEquals(params["attribution"], mockAttributionID)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T118065812
   @Test
   fun testSetAppEventAttributionParametersWithServiceUpdateCompliance() {
     if (Build.VERSION.SDK_INT < 31) {

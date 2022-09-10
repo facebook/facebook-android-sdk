@@ -26,14 +26,14 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.security.OidcSecurityUtil
 import com.facebook.login.AuthenticationTokenTestUtil.getAuthenticationTokenForTest
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import java.security.PublicKey
 import java.util.HashSet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.core.classloader.annotations.PrepareForTest

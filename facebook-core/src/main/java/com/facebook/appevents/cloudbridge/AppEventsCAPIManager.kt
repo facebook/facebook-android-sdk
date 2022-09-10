@@ -189,7 +189,7 @@ object AppEventsCAPIManager {
     val config: Map<String, Any>?
     try {
       val data = convertJSONArrayToList(result?.get("data") as JSONArray)
-      config = convertJSONObjectToHashMap(JSONObject(data.first()))
+      config = convertJSONObjectToHashMap(JSONObject(data.firstOrNull()))
 
       url = config[SettingsAPIFields.URL.rawValue] as String?
       datasetID = config[SettingsAPIFields.DATASETID.rawValue] as String?

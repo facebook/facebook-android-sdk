@@ -19,7 +19,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.powermock.reflect.Whitebox
 
@@ -44,7 +43,6 @@ class FeatureExtractorTest : FacebookPowerMockTestCase() {
     dir.deleteRecursively()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103598626
   @Test
   fun testInitialize() {
     Whitebox.setInternalState(FeatureExtractor::class.java, "initialized", false)

@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: kn_IN -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">ಇಷ್ಟ</string>
     <string name="com_facebook_like_button_liked" gender="unknown">ಇಷ್ಟಪಟ್ಟಿದ್ದಾರೆ</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">ಲಾಗ್ ಔಟ್</string>

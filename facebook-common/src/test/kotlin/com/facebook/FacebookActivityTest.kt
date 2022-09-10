@@ -6,13 +6,13 @@ import android.os.Bundle
 import com.facebook.internal.FacebookDialogFragment
 import com.facebook.internal.NativeProtocol
 import com.facebook.login.LoginFragment
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.Robolectric

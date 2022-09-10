@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+
+- We now use jacoco to gather code coverage on debug builds. If you are building from source instead of using releases from maven,
+  you may run into an issue where debug builds crash on launch.
+  The issue and solution are well-documented in https://github.com/jacoco/jacoco/issues/968
+  
+## [14.1.1]
+### Fixed
+- Fixed the issue which caused AndroidX activity/fragment 1.5.0+ to break the Facebook Login Android SDK Flow if the Facebook app is not installed.
+
+## [14.1.0]
 
 ## [14.0.0]
 ### Removed
@@ -427,7 +438,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.1...HEAD
+[14.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.0...sdk-version-14.1.1
+[14.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...sdk-version-14.1.0
 [14.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.2.0...sdk-version-14.0.0
 [13.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.1.0...sdk-version-13.2.0
 [13.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
@@ -480,3 +493,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+

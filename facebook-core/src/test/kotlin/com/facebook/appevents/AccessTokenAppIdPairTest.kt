@@ -3,8 +3,6 @@ package com.facebook.appevents
 import com.facebook.AccessToken
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -14,8 +12,9 @@ import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -49,14 +48,12 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     testFile.delete()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T119975226
   @Test
   fun testEqual() {
     assertThat(pair1 == pair2).isTrue
     assertThat(pair1 == pair3).isFalse
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T119975604
   @Test
   fun testAsMapKey() {
     val map = hashMapOf<AccessTokenAppIdPair, String>()
@@ -81,7 +78,6 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     assertThat(pair == pair1).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T120001220
   @Test
   fun testSerializable() {
     val fileOut = FileOutputStream(testFile)

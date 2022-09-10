@@ -22,7 +22,6 @@ package com.facebook.appevents.aam
 
 import com.facebook.FacebookTestCase
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 
 class MetadataRuleTest : FacebookTestCase() {
@@ -33,7 +32,6 @@ class MetadataRuleTest : FacebookTestCase() {
     const val EMPTY_KEY_JSON = """{"r1":{"v":"val1"}, "r2":{"k":"key1"}}"""
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101830281
   @Test
   fun `test valid metadata rules`() {
     MetadataRule.updateRules(VALID_RULES_JSON)

@@ -28,15 +28,14 @@ import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.Utility
 import com.facebook.util.common.mockLocalBroadcastManager
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import java.net.HttpURLConnection
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberMatcher
 import org.powermock.api.support.membermodification.MemberModifier
@@ -75,7 +74,6 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
         AccessTokenManager::class.java, "Companion", mockAccessTokenManagerCompanion)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100281767
   @Test
   fun testAccessTokenNotResetOnTokenExpirationError() {
     val accessToken = PowerMockito.mock(AccessToken::class.java)
@@ -103,7 +101,6 @@ class GraphErrorTest : FacebookPowerMockTestCase() {
     Assert.assertNotNull(getCurrentAccessToken())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T100297220
   @Test
   fun testAccessTokenResetOnTokenInstallError() {
     val accessToken = PowerMockito.mock(AccessToken::class.java)

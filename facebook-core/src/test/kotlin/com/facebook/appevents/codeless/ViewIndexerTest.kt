@@ -24,15 +24,14 @@ import android.app.Activity
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.GraphRequest
 import com.facebook.GraphResponse
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -76,7 +75,6 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     assertThat(previousDigest).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101726339
   @Test
   fun `processRequest when success is true`() {
     val jsonObject = JSONObject("{'success': 'true'}")
@@ -95,7 +93,6 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     assertThat(previousDigest).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101795973
   @Test
   fun `processRequest when there is no success in json object`() {
     val jsonObject = JSONObject("{'error': 'user error'}")
@@ -105,7 +102,6 @@ class ViewIndexerTest : FacebookPowerMockTestCase() {
     assertThat(previousDigest).isNull()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101762559
   @Test
   fun `processRequest when is_app_indexing_enabled is true`() {
     val jsonObject = JSONObject("{'is_app_indexing_enabled': true}")

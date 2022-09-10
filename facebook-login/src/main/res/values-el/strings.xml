@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: el_GR -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Μου αρέσει!</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Σας αρέσει</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Αποσύνδεση</string>

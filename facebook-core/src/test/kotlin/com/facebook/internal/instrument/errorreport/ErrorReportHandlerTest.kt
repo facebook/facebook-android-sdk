@@ -6,7 +6,6 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.InstrumentUtility
 import com.facebook.util.common.anyObject
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import java.util.UUID
 import org.json.JSONArray
@@ -14,9 +13,9 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -75,14 +74,12 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
     rootDirectory.deleteRecursively()
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T99179193
   @Test
   fun `test error report files`() {
     val files = ErrorReportHandler.listErrorReportFiles()
     assertEquals(3, files.size)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T99180664
   @Test
   fun `test send error log`() {
     var errorLogs: JSONArray? = null

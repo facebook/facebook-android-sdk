@@ -25,7 +25,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.FacebookSdk.isInitialized
 import com.facebook.util.common.mockLocalBroadcastManager
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.Arrays
 import java.util.Date
 import java.util.concurrent.Executor
@@ -35,6 +34,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox

@@ -32,10 +32,10 @@ import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.model.ShareStoryContent
 import com.facebook.share.model.ShareVideo
 import com.facebook.share.model.ShareVideoContent
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 

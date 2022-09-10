@@ -36,18 +36,18 @@ fun ProfileView(
     Column(
         modifier = Modifier.padding(4.dp).height(96.dp).fillMaxSize().background(Color.White),
         verticalArrangement = Arrangement.Center) {
-      if (profile != null) {
+          if (profile != null) {
 
-        ProfileCardEntries(
-            listOf(
-                Pair("ID:", profile.id),
-                Pair("First name:", profile.firstName),
-                Pair("Last name:", profile.lastName)))
-        LogoutButton(logout)
-      } else {
-        SignIn(loginBehavior, availableLoginBehaviors, selectLoginBehavior)
-      }
-    }
+            ProfileCardEntries(
+                listOf(
+                    Pair("ID:", profile.id),
+                    Pair("First name:", profile.firstName),
+                    Pair("Last name:", profile.lastName)))
+            LogoutButton(logout)
+          } else {
+            SignIn(loginBehavior, availableLoginBehaviors, selectLoginBehavior)
+          }
+        }
   }
 }
 
@@ -100,10 +100,11 @@ fun LoginBehaviorRadio(
                   selected = loginBehavior == currentBehavior,
                   onClick = { onSelected(loginBehavior) })
               .padding(horizontal = 16.dp)) {
-        RadioButton(
-            selected = loginBehavior == currentBehavior, onClick = { onSelected(loginBehavior) })
-        Text(loginBehavior.toString())
-      }
+            RadioButton(
+                selected = loginBehavior == currentBehavior,
+                onClick = { onSelected(loginBehavior) })
+            Text(loginBehavior.toString())
+          }
     }
   }
 }

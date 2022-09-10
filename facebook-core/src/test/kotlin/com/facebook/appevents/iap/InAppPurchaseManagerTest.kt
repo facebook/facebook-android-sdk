@@ -7,13 +7,12 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.FeatureManager
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -39,7 +38,6 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114038283
   @Test
   fun `test start iap logging when billing lib 2+ is not available`() {
     MemberModifier.stub<Boolean>(
@@ -54,7 +52,6 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     assertThat(isStartIapLoggingCalled).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114048296
   @Test
   fun `test start iap logging when billing lib 2+ is available but feature is off`() {
     MemberModifier.stub<Boolean>(
@@ -70,7 +67,6 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     assertThat(isStartIapLoggingCalled).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T114044697
   @Test
   fun `test start iap logging when billing lib 2+ is available and feature is on`() {
     whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2)).thenReturn(true)

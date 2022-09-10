@@ -2,13 +2,13 @@ package com.facebook.internal.instrument.errorreport
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.instrument.InstrumentUtility
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.File
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 

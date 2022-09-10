@@ -23,7 +23,6 @@ package com.facebook.internal
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
@@ -37,8 +36,8 @@ import kotlin.math.min
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -316,7 +315,6 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     }
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101537342
   @Test
   fun testConcurrentWritesToSameKey() {
     val count = 5

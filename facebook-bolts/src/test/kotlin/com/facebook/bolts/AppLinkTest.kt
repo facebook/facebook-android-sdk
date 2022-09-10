@@ -21,9 +21,9 @@
 package com.facebook.bolts
 
 import com.facebook.FacebookPowerMockTestCase
-import com.nhaarman.mockitokotlin2.mock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class AppLinkTest : FacebookPowerMockTestCase() {
   @Test

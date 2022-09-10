@@ -29,11 +29,11 @@ import com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters
 import com.facebook.util.common.ProfileTestHelper.createDefaultProfile
 import com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile
 import com.facebook.util.common.mockLocalBroadcastManager
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Matchers
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.annotation.LooperMode

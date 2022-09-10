@@ -20,11 +20,11 @@
 
 package com.facebook
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import java.net.HttpURLConnection
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.powermock.reflect.Whitebox
 
 class GraphRequestAsyncTaskTest : FacebookPowerMockTestCase() {

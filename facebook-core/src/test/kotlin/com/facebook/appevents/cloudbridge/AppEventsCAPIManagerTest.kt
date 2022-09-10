@@ -26,14 +26,14 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookRequestError
 import com.facebook.FacebookSdk
 import com.facebook.GraphResponse
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -68,12 +68,15 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
                       SettingsAPIFields.URL.rawValue to "\"" + Values.URL.rawValue + "\"")))
 
   private val incorrectJSONSettings =
-      mapOf<String, Any>(
-          "data" to
-              listOf(
-                  mapOf<String, Any>(
-                      SettingsAPIFields.ENABLED.rawValue to true,
-                  )))
+      listOf(
+          mapOf<String, Any>(
+              "data" to
+                  listOf(
+                      mapOf<String, Any>(
+                          SettingsAPIFields.ENABLED.rawValue to true,
+                      ))),
+          mapOf<String, Any>("data" to emptyList<String>()),
+          mapOf<String, Any>("data" to listOf(null)))
 
   @Before
   override fun setup() {
@@ -126,13 +129,17 @@ class AppEventsCAPIManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testEnableWithoutNetworkErrorWrongJSON() {
-    assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
 
-    AppEventsCAPIManager.savedCloudBridgeCredentials = null
-    AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
-        mockGraphResponses(200, incorrectJSONSettings.toString()))
+    for (settings in incorrectJSONSettings) {
 
-    assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
+      assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
+
+      AppEventsCAPIManager.savedCloudBridgeCredentials = null
+      AppEventsCAPIManager.getCAPIGSettingsFromGraphResponse(
+          mockGraphResponses(200, settings.toString()))
+
+      assertThat(AppEventsCAPIManager.isEnabled).isEqualTo(false)
+    }
   }
 
   @Test

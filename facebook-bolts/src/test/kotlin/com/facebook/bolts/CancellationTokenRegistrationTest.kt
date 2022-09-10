@@ -21,10 +21,10 @@
 package com.facebook.bolts
 
 import com.facebook.FacebookPowerMockTestCase
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 
 class CancellationTokenRegistrationTest : FacebookPowerMockTestCase() {
   private lateinit var mockTokenSource: CancellationTokenSource

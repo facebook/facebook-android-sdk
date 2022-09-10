@@ -34,14 +34,6 @@ import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FetchedAppGateKeepersManager
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.math.BigDecimal
 import java.util.Currency
 import java.util.Locale
@@ -49,9 +41,16 @@ import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -160,7 +159,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     assertJsonHasParams(jsonObject, parameters)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T101573847
   @Test
   fun testLogProductItemWithGtinMpnBrand() {
     var appEventCapture: AppEvent? = null

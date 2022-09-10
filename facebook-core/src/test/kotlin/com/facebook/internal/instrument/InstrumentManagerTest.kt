@@ -29,13 +29,12 @@ import com.facebook.internal.instrument.crashreport.CrashHandler
 import com.facebook.internal.instrument.crashshield.CrashShieldHandler
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler
 import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -116,7 +115,6 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
     }
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T99092936
   @Test
   fun `test start with auto logging events disable`() {
     isLogAppEventsEnable = false
@@ -124,7 +122,6 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
     assertThat(listOfCallbacks.isEmpty()).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T99108085
   @Test
   fun `test start with all features enable`() {
     isLogAppEventsEnable = true

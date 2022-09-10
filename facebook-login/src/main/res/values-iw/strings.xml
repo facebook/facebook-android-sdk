@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: he_IL -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">לייק</string>
     <string name="com_facebook_like_button_liked" gender="unknown">סימנת בלייק</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">התנתק/י</string>

@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: cs_CZ -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">To se mi líbí</string>
     <string name="com_facebook_like_button_liked" gender="unknown">To se mi už líbí</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Odhlásit se</string>

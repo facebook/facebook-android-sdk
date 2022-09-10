@@ -2,8 +2,6 @@ package com.facebook.internal.security
 
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -12,6 +10,8 @@ import java.security.spec.InvalidKeySpecException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 

@@ -86,15 +86,15 @@ object ExceptionAnalyzer {
                   null,
                   String.format("%s" + "/instruments", FacebookSdk.getApplicationId()),
                   params) { response ->
-                try {
-                  if (response.error == null &&
-                      response.jsonObject?.getBoolean("success") == true) {
-                    instrumentData.clear()
+                    try {
+                      if (response.error == null &&
+                          response.jsonObject?.getBoolean("success") == true) {
+                        instrumentData.clear()
+                      }
+                    } catch (e: JSONException) {
+                      /* no op */
+                    }
                   }
-                } catch (e: JSONException) {
-                  /* no op */
-                }
-              }
           requests.add(request)
         } catch (e: JSONException) {
           /* no op */

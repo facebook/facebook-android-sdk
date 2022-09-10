@@ -26,17 +26,16 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -74,7 +73,6 @@ class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         .`when`(InAppPurchaseUtils::class.java, "getClass", any<String>())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117799089
   @Test
   fun `test startIapLogging will bind iap intent and lifecycle callback`() {
     val intentCaptor = argumentCaptor<Intent>()
@@ -88,7 +86,6 @@ class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     assertThat(intentCaptor.firstValue.`package`).isEqualTo("com.android.vending")
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117809460
   @Test
   fun `test startIapLogging will only register once`() {
     whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
@@ -97,7 +94,6 @@ class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     verify(applicationContext, times(1)).registerActivityLifecycleCallbacks(any())
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117802840
   @Test
   fun `test startIapLogging will not register if implicit purchase disabled`() {
     whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)

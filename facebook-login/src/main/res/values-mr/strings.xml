@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: mr_IN -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">लाईक</string>
     <string name="com_facebook_like_button_liked" gender="unknown">लाइक केले</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">लॉग आउट करा</string>

@@ -31,16 +31,6 @@ import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.appevents.internal.AppEventsLoggerUtility.getJSONObjectForGraphAPICall
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.internal.FetchedAppSettingsManager
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argThat
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import java.math.BigDecimal
 import java.util.Currency
 import java.util.Locale
@@ -50,8 +40,17 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -88,7 +87,6 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T103598609
   @Test
   fun testAppEventsLoggerLogFunctions() {
     val mockEventName = "fb_mock_event"
@@ -180,7 +178,6 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     assertThat(AppEventsLogger.getUserData().isEmpty()).isTrue
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T117848624
   @Test
   fun testSetAndClearUserID() {
     val userID = "12345678"

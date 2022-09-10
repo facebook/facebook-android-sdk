@@ -23,10 +23,10 @@ package com.facebook.share.model
 import android.net.Uri
 import android.os.Parcel
 import com.facebook.FacebookTestCase
-import com.nhaarman.mockitokotlin2.mock
 import java.lang.IllegalArgumentException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class ShareMediaContentTest : FacebookTestCase() {
   private lateinit var testPhoto: SharePhoto

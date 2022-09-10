@@ -5,14 +5,13 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyVararg
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyVararg
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -49,7 +48,6 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
         .thenReturn(InAppPurchaseEventManagerTest::class.java.getMethod("dummyMethod"))
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102136620
   @Test
   fun testGetSkuDetailsWhenCacheIsEmpty() {
     val mockSharedPreferences = MockSharedPreference()
@@ -71,7 +69,6 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
     assertThat(mockSharedPreferences.getString(KEY2, "")).contains(VAL2)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102007681
   @Test
   fun testGetSkuDetailsWhenCacheIsNotEmpty() {
     val mockSharedPreferences = MockSharedPreference()
@@ -95,7 +92,6 @@ class InAppPurchaseEventManagerTest : FacebookPowerMockTestCase() {
     assertThat(mockSharedPreferences.getString(KEY2, "")).contains(VAL2)
   }
 
-  @Ignore // TODO: Re-enable when flakiness is fixed T102143363
   @Test
   fun testClearSkuDetailsCache() {
     val mockSharedPreferences = MockSharedPreference()

@@ -105,4 +105,64 @@ public class InAppPurchaseLibrary {
       SDKLogger.logInternalError(context, SDKMessageEnum.CONSUME_PURCHASE, e);
     }
   }
+
+  /**
+   * Fetches the game's catalog for subscribable products.
+   *
+   * @param context the application context
+   * @param callback callback for success and error
+   */
+  public static void getSubscribableCatalog(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.GET_SUBSCRIBABLE_CATALOG);
+  }
+
+  /**
+   * Begins the purchase flow for a specific subscribable product.
+   *
+   * @param context the application context
+   * @param productID the productID of the item to be purchased, obtained from the catalog
+   * @param callback callback for success and error
+   */
+  public static void purchaseSubscription(
+      Context context, String productID, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_PRODUCT_ID, productID);
+      DaemonRequest.executeAsync(
+          context, parameters, callback, SDKMessageEnum.PURCHASE_SUBSCRIPTION);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.PURCHASE_SUBSCRIPTION, e);
+    }
+  }
+
+  /**
+   * Fetches all of the player's subscriptions.
+   *
+   * @param context the application context
+   * @param callback callback for success and error
+   */
+  public static void getSubscriptions(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.GET_SUBSCRIPTIONS);
+  }
+
+  /**
+   * Starts the asynchronous process of cancelling an existing subscription. This operation will
+   * only work if the subscription entitlement is active. If the promise is resolved, this is only
+   * an indication that the cancellation has been kicked off and NOT that it has necessarily
+   * succeeded. The subscription's deactivationTime and isEntitlementActive properties should be
+   * queried for the latest status.
+   *
+   * @param context the application context
+   * @param purchaseToken the purchase token associated with a transaction
+   * @param callback callback for success and error
+   */
+  public static void cancelSubscription(
+      Context context, String purchaseToken, DaemonRequest.Callback callback) {
+    try {
+      JSONObject parameters =
+          (new JSONObject()).put(SDKConstants.PARAM_PURCHASE_TOKEN, purchaseToken);
+      DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.CANCEL_SUBSCRIPTION);
+    } catch (JSONException e) {
+      SDKLogger.logInternalError(context, SDKMessageEnum.CANCEL_SUBSCRIPTION, e);
+    }
+  }
 }
