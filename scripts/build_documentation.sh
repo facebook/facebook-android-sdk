@@ -54,7 +54,6 @@ FB_SRC_FOLDERS=(
   'facebook-common'
   'facebook-login'
   'facebook-share'
-  'facebook-places'
   'facebook-messenger'
   'facebook-applinks'
   'facebook-gamingservices'
@@ -96,7 +95,7 @@ do
   KIT_SRC=${KIT_SRC_FOLDERS[$i]}
   KIT_DOC=${KIT_DOC_FOLDERS[$i]}
 
-  SRC_FOLDER=$FB_SDK_ROOT/$KIT_SRC/$PATH_TO_SRC 
+  SRC_FOLDER=$FB_SDK_ROOT/$KIT_SRC/$PATH_TO_SRC
   DOC_FOLDER=$FB_SDK_ROOT/out/docs/$KIT_DOC
   LOG_FILE=$FB_SDK_ROOT/out/docs/$KIT_DOC.log
 
@@ -117,4 +116,3 @@ done
 
 # Clean up tmp directory
 rm -rf ${FB_SDK_ROOT:?}/$DOCS_TMP_DIR
-

@@ -1,0 +1,81 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.2.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
+    }
+}
+
+repositories {
+    google()
+    jcenter()
+}
+
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+
+def activityVersion = "1.3.1"
+def appcompatVersion = "1.3.1"
+def composeVersion = "1.0.4"
+def kotlinVersion = "1.5.31"
+def ktxVersion = "1.6.0"
+def fbSdkVersion = "latest.release"
+def navigationVersion = "2.4.0-alpha10"
+
+dependencies {
+    implementation "androidx.activity:activity-compose:$activityVersion"
+    implementation "androidx.activity:activity-ktx:$activityVersion"
+    implementation "androidx.appcompat:appcompat:$appcompatVersion"
+    implementation "androidx.compose.material:material:$composeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "androidx.core:core-ktx:$ktxVersion"
+    implementation "androidx.navigation:navigation-compose:$navigationVersion"
+    implementation "com.facebook.android:facebook-android-sdk:$fbSdkVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+}
+
+android {
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.facebook.samples.kotlinsampleapp"
+        minSdkVersion 21
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion composeVersion
+        kotlinCompilerVersion kotlinVersion
+    }
+}

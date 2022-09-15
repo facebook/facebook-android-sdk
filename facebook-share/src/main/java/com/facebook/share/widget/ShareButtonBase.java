@@ -22,12 +22,12 @@ package com.facebook.share.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookButtonBase;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.FacebookDialogBase;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.model.ShareContent;
@@ -37,6 +37,7 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
   private ShareContent shareContent;
   private int requestCode = 0;
   private boolean enabledExplicitlySet = false;
+  private CallbackManager callbackManager;
 
   protected ShareButtonBase(
       final Context context,
@@ -122,6 +123,7 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
    */
   public void registerCallback(
       final CallbackManager callbackManager, final FacebookCallback<Sharer.Result> callback) {
+    memorizeCallbackManager(callbackManager);
     ShareInternalUtility.registerSharerCallback(getRequestCode(), callbackManager, callback);
   }
 
@@ -169,10 +171,26 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
     };
   }
 
-  protected abstract FacebookDialogBase<ShareContent, Sharer.Result> getDialog();
+  protected abstract ShareDialog getDialog();
 
   private void internalSetEnabled(boolean enabled) {
     setEnabled(enabled);
     enabledExplicitlySet = false;
+  }
+
+  private void memorizeCallbackManager(CallbackManager callbackManager) {
+    if (this.callbackManager == null) {
+      this.callbackManager = callbackManager;
+    } else if (this.callbackManager != callbackManager) {
+      Log.w(
+          ShareButtonBase.class.toString(),
+          "You're registering a callback on a Facebook Share Button with two different callback managers. "
+              + "It's almost wrong and may cause unexpected results. "
+              + "Only the first callback manager will be used for handling activity result with androidx.");
+    }
+  }
+
+  protected CallbackManager getCallbackManager() {
+    return callbackManager;
   }
 }

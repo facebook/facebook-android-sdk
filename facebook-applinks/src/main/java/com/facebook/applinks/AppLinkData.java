@@ -156,7 +156,8 @@ public class AppLinkData {
           deferredApplinkParams,
           AttributionIdentifiers.getAttributionIdentifiers(context),
           AppEventsLogger.getAnonymousAppDeviceGUID(context),
-          FacebookSdk.getLimitEventAndDataUsage(context));
+          FacebookSdk.getLimitEventAndDataUsage(context),
+          context);
       Utility.setAppEventExtendedDeviceInfoParameters(
           deferredApplinkParams, FacebookSdk.getApplicationContext());
       deferredApplinkParams.put("application_package_name", context.getPackageName());

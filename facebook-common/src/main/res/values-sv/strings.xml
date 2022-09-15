@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: sv_SE -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Gilla</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Gillat</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Logga ut</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Ett oväntat fel inträffade när en bild skulle laddas ned.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Dela</string>
     <string name="com_facebook_send_button_text" gender="unknown">Skicka</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Gå till &lt;b&gt;facebook.com/device&lt;/b&gt; och skriv in koden som visas ovan.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Besök &lt;b&gt;facebook.com/device&lt;/b&gt; och ange koden som visas ovan.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Anslut ditt konto genom att öppna Facebook-appen på din mobila enhet och leta efter aviseringar.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ELLER -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Bekräfta inloggning</string>

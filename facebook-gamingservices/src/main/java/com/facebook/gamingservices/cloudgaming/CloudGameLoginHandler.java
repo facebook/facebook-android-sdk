@@ -113,6 +113,15 @@ public class CloudGameLoginHandler {
     return response.getError() == null;
   }
 
+  /**
+   * Mark game loading progress finishes and players can start to play
+   *
+   * @param context application context
+   */
+  public static void gameLoadComplete(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.MARK_GAME_LOADED);
+  }
+
   private static void setPackageName(JSONObject jsonObject, Context context) {
     String daemonPackageName = jsonObject.optString(SDKConstants.PARAM_DAEMON_PACKAGE_NAME);
 

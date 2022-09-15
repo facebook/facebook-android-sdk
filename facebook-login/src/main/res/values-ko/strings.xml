@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: ko_KR -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">좋아요</string>
     <string name="com_facebook_like_button_liked" gender="unknown">좋아요</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">로그아웃</string>
@@ -19,9 +19,9 @@
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView 로그인에 인터넷 권한이 필요합니다</string>
     <string name="com_facebook_tooltip_default" gender="unknown">앱과 공유할 정보를 자유롭게 선택할 수 있습니다.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">이미지를 다운로드하는 중 예기치 않은 오류가 발생했습니다.</string>
-    <string name="com_facebook_share_button_text" gender="unknown">공유하기</string>
+    <string name="com_facebook_share_button_text" gender="unknown">공유</string>
     <string name="com_facebook_send_button_text" gender="unknown">보내기</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt;에 방문하여 위 코드를 입력하세요.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt;를 방문하여 위 코드를 입력하세요.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">계정에 연결하려면 모바일 기기에서 Facebook 앱을 열고 알림을 확인하세요.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- 또는 -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">로그인 확인</string>

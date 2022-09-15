@@ -19,7 +19,6 @@
  */
 package com.facebook.gamingservices.cloudgaming;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +27,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import androidx.annotation.Nullable;
 import com.facebook.FacebookRequestError;
+import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
 import com.facebook.gamingservices.cloudgaming.internal.SDKLogger;
@@ -47,7 +47,6 @@ public class DaemonReceiver {
   private static SDKLogger mLogger;
 
   // private constructor restricted to this class itself
-  @SuppressLint("BadDependencyInjection")
   private DaemonReceiver(Context context) {
     final IntentFilter filter = new IntentFilter(SDKConstants.RECEIVER_INTENT);
     HandlerThread thread = new HandlerThread(SDKConstants.RECEIVER_HANDLER);
@@ -89,12 +88,12 @@ public class DaemonReceiver {
       mLogger.logSendingSuccessResponse(requestID);
       // if the response is a JSONObject
       // passing dummy parameters; only the payload is critical
-      return (new GraphResponse(null, null, null, response.optJSONObject("success")));
+      return (new GraphResponse(new GraphRequest(), null, "", response.optJSONObject("success")));
     } else if (response.optJSONArray("success") != null) {
       mLogger.logSendingSuccessResponse(requestID);
       // if the response is a JSONArray
       // passing dummy parameters; only the payload is critical
-      return (new GraphResponse(null, null, null, response.optJSONArray("success")));
+      return (new GraphResponse(new GraphRequest(), null, "", response.optJSONArray("success")));
     }
 
     // response is malformed
@@ -104,7 +103,7 @@ public class DaemonReceiver {
   static GraphResponse createErrorResponse(FacebookRequestError error, @Nullable String requestID) {
     // passing dummy parameters; only the payload is critical
     mLogger.logSendingErrorResponse(error, requestID);
-    return (new GraphResponse(null, null, error));
+    return (new GraphResponse(new GraphRequest(), null, error));
   }
 
   private static GraphResponse createErrorResponse(JSONObject response, String requestID) {

@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: el_GR -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Μου αρέσει!</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Σας αρέσει</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Αποσύνδεση</string>
@@ -19,9 +19,9 @@
     <string name="com_facebook_internet_permission_error_message" gender="unknown">Για σύνδεση στην εφαρμογή WebView απαιτείται άδεια INTERNET</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Εσείς έχετε τον έλεγχο - επιλέξτε ποιες πληροφορίες θέλετε να κοινοποιείτε στις εφαρμογές.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Παρουσιάστηκε μη αναμενόμενο σφάλμα κατά τη λήψη μιας εικόνας.</string>
-    <string name="com_facebook_share_button_text" gender="unknown">Κοινοποιήστε</string>
+    <string name="com_facebook_share_button_text" gender="unknown">Κοινοποίηση</string>
     <string name="com_facebook_send_button_text" gender="unknown">Αποστολή</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Πηγαίνετε στη διεύθυνση &lt;b&gt;facebook.com/device&lt;/b&gt; και εισαγάγετε τον παραπάνω κωδικό.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Πηγαίνετε στο &lt;b&gt;facebook.com/device&lt;/b&gt; και πληκτρολογήστε τον κωδικό που φαίνεται παραπάνω.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Για να συνδέσετε το λογαριασμό σας, ανοίξτε την εφαρμογή Facebook στη φορητή συσκευή σας και ελέγξτε για ειδοποιήσεις.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- Ή -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Επιβεβαίωση σύνδεσης</string>

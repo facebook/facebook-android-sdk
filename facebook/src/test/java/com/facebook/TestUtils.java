@@ -26,12 +26,10 @@ import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.facebook.internal.FileLruCache;
 import com.facebook.internal.Utility;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,7 +37,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import junit.framework.Assert;
@@ -47,7 +44,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class TestUtils {
-  private static long CACHE_CLEAR_TIMEOUT = 100;
   public static final double DOUBLE_EQUALS_DELTA = 0.00001;
 
   public static <T extends Serializable> T serializeAndUnserialize(final T t) {
@@ -80,10 +76,6 @@ public class TestUtils {
       writeParcel.recycle();
       readParcel.recycle();
     }
-  }
-
-  public static Date nowPlusSeconds(final long offset) {
-    return new Date(new Date().getTime() + (offset * 1000L));
   }
 
   public static void assertSamePermissions(
@@ -238,38 +230,6 @@ public class TestUtils {
       return areEqual((JSONArray) expected, (JSONArray) actual);
     }
     return expected.equals(actual);
-  }
-
-  public static void clearFileLruCache(final FileLruCache cache) throws InterruptedException {
-    // since the cache clearing happens in a separate thread, we need to wait until
-    // the clear is complete before we can check for the existence of the old files
-    synchronized (cache) {
-      cache.clearCache();
-      FacebookSdk.getExecutor()
-          .execute(
-              new Runnable() {
-                @Override
-                public void run() {
-                  synchronized (cache) {
-                    cache.notifyAll();
-                  }
-                }
-              });
-      cache.wait(CACHE_CLEAR_TIMEOUT);
-    }
-    // sleep a little more just to make sure all the files are deleted.
-    Thread.sleep(CACHE_CLEAR_TIMEOUT);
-  }
-
-  public static void deleteLruCacheDirectory(final FileLruCache cache) {
-    File directory = new File(cache.getLocation());
-    directory.delete();
-  }
-
-  public static void clearAndDeleteLruCacheDirectory(final FileLruCache cache)
-      throws InterruptedException {
-    clearFileLruCache(cache);
-    deleteLruCacheDirectory(cache);
   }
 
   public static String getAssetFileStringContents(final Context context, final String assetPath)

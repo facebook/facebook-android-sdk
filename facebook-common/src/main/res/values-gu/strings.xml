@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: gu_IN -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">લાઇક કરો</string>
     <string name="com_facebook_like_button_liked" gender="unknown">લાઇક કર્યું</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">લોગ આઉટ કરો</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">ફોટો ડાઉનલોડ કરતી વખતે એક અનપેક્ષિત ભૂલ આવી.</string>
     <string name="com_facebook_share_button_text" gender="unknown">શેર કરો</string>
     <string name="com_facebook_send_button_text" gender="unknown">મોકલો</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&amp;gt પર જાઓ અને ઉપર બતાવેલો કોડ દાખલ કરો.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt;ની મુલાકાત લો અને ઉપર બતાવેલો કોડ લખો.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">તમારા એકાઉન્ટને કનેક્ટ કરવા માટે, તમારા મોબાઇલ ડિવાઇસ પર Facebook ઍપ ખોલો અને નોટિફિકેશન જુઓ.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- અથવા -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">લોગ ઇનને કન્ફર્મ કરો</string>

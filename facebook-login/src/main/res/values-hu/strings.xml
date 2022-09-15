@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: hu_HU -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Tetszik</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Kedvelt</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Kijelentkezés</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Váratlan hiba történt a kép letöltésekor.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Megosztás</string>
     <string name="com_facebook_send_button_text" gender="unknown">Küldés</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Keresd fel a &lt;b&gt;facebook.com/device&lt;/b&gt; címet, és írd be a fent megjelenített kódot.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Nyisd meg a &lt;b&gt;facebook.com/device&lt;/b&gt; oldalt, és add meg a fent látható kódot.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">A fiók hozzákapcsolásához nyisd meg a mobilkészülékeden a Facebook alkalmazást, és nézd meg az értesítéseket.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- VAGY -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Bejelentkezés megerősítése</string>

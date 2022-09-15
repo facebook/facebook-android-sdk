@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: sk_SK -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Páči sa mi to</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Páčilo sa mi to</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Odhlásiť sa</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Pri sťahovaní obrázka sa vyskytla neočakávaná chyba.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Zdieľať</string>
     <string name="com_facebook_send_button_text" gender="unknown">Poslať</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Navštívte stránku &lt;b&gt;facebook.com/device&lt;/b&gt; a zadajte kód zobrazený vyššie.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Prejdite na stránku &lt;b&gt;facebook.com/device&lt;/b&gt; a zadajte kód, ktorý je zobrazený vyššie.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Ak si chcete pripojiť účet, vo svojom mobilnom zariadení otvorte aplikáciu Facebook a pozrite si upozornenia.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">– ALEBO –</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potvrdiť prihlásenie</string>

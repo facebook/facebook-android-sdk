@@ -17,6 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.facebook.internal
 
 import android.content.Context
@@ -38,7 +39,7 @@ private constructor(
     val allowCachedRedirects: Boolean,
     val callerTag: Any
 ) {
-  interface Callback {
+  fun interface Callback {
     /**
      * This method should always be called on the UI thread. ImageDownloader makes sure to do this
      * when it is responsible for issuing the ImageResponse

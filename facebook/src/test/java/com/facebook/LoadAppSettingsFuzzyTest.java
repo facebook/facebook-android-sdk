@@ -59,6 +59,7 @@ public class LoadAppSettingsFuzzyTest extends FacebookFuzzyInputPowerMockTestCas
     Whitebox.setInternalState(UserSettingsManager.class, "userSettingPref", mockPreference);
     FacebookSdk.setAutoLogAppEventsEnabled(false);
     FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.setClientToken("abcdefg");
   }
 
   @Override

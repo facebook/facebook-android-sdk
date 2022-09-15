@@ -125,7 +125,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
 
     appLinkRequestParameters.putString("ids", graphRequestFields.toString());
     appLinkRequestParameters.putString(
-        "fields",
+        GraphRequest.FIELDS_PARAM,
         String.format(
             "%s.fields(%s,%s)",
             APP_LINK_KEY, APP_LINK_ANDROID_TARGET_KEY, APP_LINK_WEB_TARGET_KEY));

@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: it_IT -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Mi piace</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Ti piace</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Esci</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Errore imprevisto durante il download dell\'immagine.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Condividi</string>
     <string name="com_facebook_send_button_text" gender="unknown">Invia</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">Visita &lt;b&gt;facebook.com/device&lt;/b&gt; e inserisci il codice mostrato qui sotto.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Consulta &lt;b&gt;facebook.com/device&lt;/b&gt; e inserisci il codice mostrato sopra.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Per connettere il tuo account, apri l\'app Facebook dal tuo dispositivo mobile e controlla le notifiche.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- oppure -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Conferma accesso</string>

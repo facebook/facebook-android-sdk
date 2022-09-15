@@ -27,13 +27,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion project.ext.compileSdk
-    buildToolsVersion project.ext.buildTools
+    compileSdkVersion(Config.compileSdk)
 
     defaultConfig {
         applicationId 'com.example.hellofacebook'
-        minSdkVersion project.ext.minSdk
-        targetSdkVersion project.ext.targetSdk
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
     }
 
     lintOptions {
@@ -46,6 +45,11 @@ android {
             java.srcDirs = ['src']
             res.srcDirs = ['res']
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     splits {

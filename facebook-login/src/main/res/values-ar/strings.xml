@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: ar_AR -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">أعجبني</string>
     <string name="com_facebook_like_button_liked" gender="unknown">أعجبك</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">تسجيل الخروج</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">حدث خطأ غير متوقع أثناء تنزيل صورة.</string>
     <string name="com_facebook_share_button_text" gender="unknown">مشاركة</string>
     <string name="com_facebook_send_button_text" gender="unknown">إرسال</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">تفضل بزيارة &lt;b&gt;facebook.com/device&lt;/b&gt; وإدخال الرمز الموضح أعلاه.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">يمكنك زيارة &lt;b&gt;facebook.com/device&lt;/b&gt; وإدخال الرمز المعروض أعلاه.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">لربط حسابك، افتح تطبيق فيسبوك على جهازك المحمول وراجع الإشعارات.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- أو -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">تأكيد تسجيل الدخول</string>

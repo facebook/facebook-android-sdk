@@ -17,6 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.facebook.internal
 
 object InternalSettings {
@@ -28,10 +29,7 @@ object InternalSettings {
 
   @Volatile private var customUserAgent: String? = null
 
-  @JvmStatic
-  fun getCustomUserAgent(): String? {
-    return customUserAgent
-  }
+  @JvmStatic fun getCustomUserAgent(): String? = customUserAgent
   @JvmStatic
   fun setCustomUserAgent(value: String) {
     customUserAgent = value

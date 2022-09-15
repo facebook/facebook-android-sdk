@@ -3,7 +3,7 @@
 <!-- @generated -->
 <!-- FB Locale: tr_TR -->
 
-<resources exclude-from-buck-resource-map="true">
+<resources>
     <string name="com_facebook_like_button_not_liked" gender="unknown">Beğen</string>
     <string name="com_facebook_like_button_liked" gender="unknown">Beğendin</string>
     <string name="com_facebook_loginview_log_out_button" gender="unknown">Çıkış Yap</string>
@@ -21,7 +21,7 @@
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Görüntü indirilirken beklenmedik bir hata oluştu.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Paylaş</string>
     <string name="com_facebook_send_button_text" gender="unknown">Gönder</string>
-    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; adresine git ve yukarıda gösterilen kodu gir.</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; adresini ziyaret et ve yukarıda gösterilen kodu gir.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Hesabını bağlamak için, mobil cihazında Facebook uygulamasını aç ve bildirimleri kontrol et.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- VEYA -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Girişi Onayla</string>

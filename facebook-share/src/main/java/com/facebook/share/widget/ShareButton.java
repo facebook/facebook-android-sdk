@@ -25,10 +25,7 @@ import android.util.AttributeSet;
 import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
-import com.facebook.internal.FacebookDialogBase;
 import com.facebook.share.R;
-import com.facebook.share.Sharer;
-import com.facebook.share.model.ShareContent;
 
 /**
  * A button to share content on Facebook. Tapping the receiver will invoke the {@link
@@ -74,7 +71,7 @@ public final class ShareButton extends ShareButtonBase {
   }
 
   @Override
-  protected FacebookDialogBase<ShareContent, Sharer.Result> getDialog() {
+  protected ShareDialog getDialog() {
     final ShareDialog dialog;
     if (ShareButton.this.getFragment() != null) {
       dialog = new ShareDialog(ShareButton.this.getFragment(), getRequestCode());
@@ -83,6 +80,7 @@ public final class ShareButton extends ShareButtonBase {
     } else {
       dialog = new ShareDialog(getActivity(), getRequestCode());
     }
+    dialog.setCallbackManager(getCallbackManager());
     return dialog;
   }
 

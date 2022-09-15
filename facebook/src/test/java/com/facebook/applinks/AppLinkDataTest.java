@@ -26,12 +26,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import androidx.test.core.app.ApplicationProvider;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
 
@@ -171,6 +173,13 @@ public class AppLinkDataTest extends FacebookTestCase {
       intent.putExtra(BUNDLE_APPLINK_ARGS_KEY, jsonString);
       return intent;
     }
+  }
+
+  @Before
+  public void setupSdk() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.setClientToken("abcdefg");
+    FacebookSdk.sdkInitialize(ApplicationProvider.getApplicationContext());
   }
 
   @Test

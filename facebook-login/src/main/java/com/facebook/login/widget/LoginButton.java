@@ -20,6 +20,7 @@
 
 package com.facebook.login.widget;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,9 +28,19 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.ActivityResultRegistryOwner;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -50,10 +61,13 @@ import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.facebook.login.LoginTargetApp;
 import com.facebook.login.R;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A Log In/Log Out button that maintains login state and logs in/out for the app.
@@ -111,10 +125,12 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   private static final String TAG = LoginButton.class.getName();
+  private static final int MAX_BUTTON_TRANSPARENCY = 255;
+  private static final int MIN_BUTTON_TRANSPARENCY = 0;
   private boolean confirmLogout;
   private String loginText;
   private String logoutText;
-  private LoginButtonProperties properties = new LoginButtonProperties();
+  protected LoginButtonProperties properties = new LoginButtonProperties();
   private String loginLogoutEventName = AnalyticsEvents.EVENT_LOGIN_VIEW_USAGE;
   private boolean toolTipChecked;
   private ToolTipPopup.Style toolTipStyle = ToolTipPopup.Style.BLUE;
@@ -123,12 +139,21 @@ public class LoginButton extends FacebookButtonBase {
   private ToolTipPopup toolTipPopup;
   private AccessTokenTracker accessTokenTracker;
   private LoginManager loginManager;
+  private Float customButtonRadius;
+  private int customButtonTransparency = MAX_BUTTON_TRANSPARENCY;
+  private final String loggerID = UUID.randomUUID().toString();
+  private @Nullable CallbackManager callbackManager = null;
+  private @Nullable ActivityResultLauncher<Collection<? extends String>> androidXLoginCaller = null;
 
   static class LoginButtonProperties {
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
     private List<String> permissions = Collections.emptyList();
     private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
     private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
+    private LoginTargetApp targetApp = LoginTargetApp.FACEBOOK;
+    private boolean shouldSkipAccountDeduplication = false;
+    @Nullable private String messengerPageId;
+    private boolean resetMessengerState;
 
     public void setDefaultAudience(DefaultAudience defaultAudience) {
       this.defaultAudience = defaultAudience;
@@ -158,12 +183,44 @@ public class LoginButton extends FacebookButtonBase {
       return loginBehavior;
     }
 
+    public void setLoginTargetApp(LoginTargetApp targetApp) {
+      this.targetApp = targetApp;
+    }
+
+    public LoginTargetApp getLoginTargetApp() {
+      return targetApp;
+    }
+
     public String getAuthType() {
       return authType;
     }
 
     public void setAuthType(final String authType) {
       this.authType = authType;
+    }
+
+    protected void setShouldSkipAccountDeduplication(boolean shouldSkip) {
+      this.shouldSkipAccountDeduplication = shouldSkip;
+    }
+
+    public boolean getShouldSkipAccountDeduplication() {
+      return shouldSkipAccountDeduplication;
+    }
+
+    public @Nullable String getMessengerPageId() {
+      return messengerPageId;
+    }
+
+    public void setMessengerPageId(@Nullable final String pageId) {
+      this.messengerPageId = pageId;
+    }
+
+    public boolean getResetMessengerState() {
+      return resetMessengerState;
+    }
+
+    public void setResetMessengerState(final boolean resetMessengerState) {
+      this.resetMessengerState = resetMessengerState;
     }
   }
 
@@ -173,7 +230,7 @@ public class LoginButton extends FacebookButtonBase {
    * @see View#View(Context, AttributeSet)
    */
   public LoginButton(Context context) {
-    super(
+    this(
         context,
         null,
         0,
@@ -188,7 +245,7 @@ public class LoginButton extends FacebookButtonBase {
    * @see View#View(Context, AttributeSet)
    */
   public LoginButton(Context context, AttributeSet attrs) {
-    super(
+    this(
         context,
         attrs,
         0,
@@ -203,13 +260,29 @@ public class LoginButton extends FacebookButtonBase {
    * @see View#View(Context, AttributeSet, int)
    */
   public LoginButton(Context context, AttributeSet attrs, int defStyle) {
-    super(
+    this(
         context,
         attrs,
         defStyle,
         0,
         AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE,
         AnalyticsEvents.EVENT_LOGIN_BUTTON_DID_TAP);
+  }
+
+  protected LoginButton(
+      final Context context,
+      final AttributeSet attrs,
+      int defStyleAttr,
+      int defStyleRes,
+      final String analyticsButtonCreatedEventName,
+      final String analyticsButtonTappedEventName) {
+    super(
+        context,
+        attrs,
+        defStyleAttr,
+        defStyleRes,
+        analyticsButtonCreatedEventName,
+        analyticsButtonTappedEventName);
   }
 
   public void setLoginText(String loginText) {
@@ -404,6 +477,28 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   /**
+   * Sets the login target app for authorization. If null is specified, the default {@link
+   * com.facebook.login.LoginTargetApp LoginTargetApp.FACEBOOK} will be used.
+   *
+   * @param targetApp The {@link com.facebook.login.LoginTargetApp LoginTargetApp} that specifies
+   *     what app in the Facebook Family of Apps will be used for authorization.
+   */
+  public void setLoginTargetApp(LoginTargetApp targetApp) {
+    properties.setLoginTargetApp(targetApp);
+  }
+
+  /**
+   * Gets the login target app for authorization. If null is returned, the default ({@link
+   * com.facebook.login.LoginTargetApp LoginTargetApp.FACEBOOK} will be used.
+   *
+   * @return targetApp The {@link com.facebook.login.LoginTargetApp LoginTargetApp} that specifies
+   *     what app in the Facebook Family of Apps will be used for authorization.
+   */
+  public LoginTargetApp getLoginTargetApp() {
+    return properties.getLoginTargetApp();
+  }
+
+  /**
    * Gets the authType being used.
    *
    * @return the authType
@@ -413,12 +508,48 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   /**
+   * Gets the messengerPageId being used.
+   *
+   * @return the messengerPageId
+   */
+  public @Nullable String getMessengerPageId() {
+    return properties.getMessengerPageId();
+  }
+
+  /**
+   * Gets the resetMessengerState being used.
+   *
+   * @return the resetMessengerState
+   */
+  public boolean getResetMessengerState() {
+    return properties.getResetMessengerState();
+  }
+
+  /**
    * Sets the authType to be used.
    *
    * @param authType the authType
    */
   public void setAuthType(final String authType) {
     properties.setAuthType(authType);
+  }
+
+  /**
+   * Sets the messengerPageId to be used in the login request.
+   *
+   * @param messengerPageId the messengerPageId
+   */
+  public void setMessengerPageId(final String messengerPageId) {
+    properties.setMessengerPageId(messengerPageId);
+  }
+
+  /**
+   * Test param for developers of the app to reset their Messenger state.
+   *
+   * @param resetMessengerState the resetMessengerState
+   */
+  public void setResetMessengerState(final boolean resetMessengerState) {
+    properties.setResetMessengerState(resetMessengerState);
   }
 
   /**
@@ -463,12 +594,32 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   /**
+   * Gets the value on if we should skip account deduplication. The setter is only available in
+   * FamilyLoginButton as this is an x-FoA specific feature.
+   *
+   * @return boolean indicating if we opted out account deduplication flow in Family of Apps login.
+   *     default is false(not skipping).
+   */
+  public boolean getShouldSkipAccountDeduplication() {
+    return properties.getShouldSkipAccountDeduplication();
+  }
+
+  /**
    * Gets the current amount of time (in ms) that the tool tip will be displayed to the user.
    *
    * @return The current amount of time (in ms) that the tool tip will be displayed.
    */
   public long getToolTipDisplayTime() {
     return toolTipDisplayTime;
+  }
+
+  /**
+   * The logger ID associated with the LoginButton
+   *
+   * @return a logger ID string
+   */
+  public String getLoggerID() {
+    return loggerID;
   }
 
   /** Dismisses the Tooltip if it is currently visible */
@@ -488,6 +639,15 @@ public class LoginButton extends FacebookButtonBase {
   public void registerCallback(
       final CallbackManager callbackManager, final FacebookCallback<LoginResult> callback) {
     getLoginManager().registerCallback(callbackManager, callback);
+    if (this.callbackManager == null) {
+      this.callbackManager = callbackManager;
+    } else if (this.callbackManager != callbackManager) {
+      Log.w(
+          TAG,
+          "You're registering a callback on the one Facebook login button with two different callback managers. "
+              + "It's almost wrong and may cause unexpected results. "
+              + "Only the first callback manager will be used for handling activity result with androidx.");
+    }
   }
 
   /**
@@ -499,10 +659,34 @@ public class LoginButton extends FacebookButtonBase {
     getLoginManager().unregisterCallback(callbackManager);
   }
 
+  /** Returns the callback manager registered to the login button. */
+  public @Nullable CallbackManager getCallbackManager() {
+    return this.callbackManager;
+  }
+
+  protected @StringRes int getLoginButtonContinueLabel() {
+    return R.string.com_facebook_loginview_log_in_button_continue;
+  }
+
   @AutoHandleExceptions
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
+    if (getContext() instanceof ActivityResultRegistryOwner) {
+      ActivityResultRegistryOwner context = (ActivityResultRegistryOwner) getContext();
+      androidXLoginCaller =
+          context
+              .getActivityResultRegistry()
+              .register(
+                  "facebook-login",
+                  getLoginManager().createLogInActivityResultContract(callbackManager, loggerID),
+                  new ActivityResultCallback<CallbackManager.ActivityResultParameters>() {
+                    @Override
+                    public void onActivityResult(CallbackManager.ActivityResultParameters result) {
+                      // do nothing
+                    }
+                  });
+    }
     if (accessTokenTracker != null && !accessTokenTracker.isTracking()) {
       accessTokenTracker.startTracking();
       setButtonText();
@@ -580,6 +764,9 @@ public class LoginButton extends FacebookButtonBase {
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
+    if (androidXLoginCaller != null) {
+      androidXLoginCaller.unregister();
+    }
     if (accessTokenTracker != null) {
       accessTokenTracker.stopTracking();
     }
@@ -631,18 +818,15 @@ public class LoginButton extends FacebookButtonBase {
             protected void onCurrentAccessTokenChanged(
                 AccessToken oldAccessToken, AccessToken currentAccessToken) {
               setButtonText();
+              setButtonIcon();
             }
           };
     }
 
     setButtonText();
-
-    this.setCompoundDrawablesWithIntrinsicBounds(
-        AppCompatResources.getDrawable(
-            getContext(), com.facebook.common.R.drawable.com_facebook_button_icon),
-        null,
-        null,
-        null);
+    setButtonRadius();
+    setButtonTransparency();
+    setButtonIcon();
   }
 
   protected LoginClickListener getNewLoginClickListener() {
@@ -655,7 +839,7 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   @AutoHandleExceptions
-  private void parseLoginButtonAttributes(
+  protected void parseLoginButtonAttributes(
       final Context context,
       final AttributeSet attrs,
       final int defStyleAttr,
@@ -676,6 +860,22 @@ public class LoginButton extends FacebookButtonBase {
               a.getInt(
                   R.styleable.com_facebook_login_view_com_facebook_tooltip_mode,
                   ToolTipMode.DEFAULT.getValue()));
+      // If no button radius specified, defaults to 'com_facebook_button_corner_radius'
+      if (a.hasValue(R.styleable.com_facebook_login_view_com_facebook_login_button_radius)) {
+        customButtonRadius =
+            a.getDimension(
+                R.styleable.com_facebook_login_view_com_facebook_login_button_radius, 0.0f);
+      }
+      customButtonTransparency =
+          a.getInteger(
+              R.styleable.com_facebook_login_view_com_facebook_login_button_transparency,
+              MAX_BUTTON_TRANSPARENCY);
+      if (customButtonTransparency < MIN_BUTTON_TRANSPARENCY) {
+        customButtonTransparency = MIN_BUTTON_TRANSPARENCY;
+      }
+      if (customButtonTransparency > MAX_BUTTON_TRANSPARENCY) {
+        customButtonTransparency = MAX_BUTTON_TRANSPARENCY;
+      }
     } finally {
       a.recycle();
     }
@@ -691,6 +891,21 @@ public class LoginButton extends FacebookButtonBase {
             + getCompoundPaddingBottom());
 
     final Resources resources = getResources();
+    int logInWidth = getLoginButtonWidth(widthMeasureSpec);
+
+    String text = logoutText;
+    if (text == null) {
+      text = resources.getString(R.string.com_facebook_loginview_log_out_button);
+    }
+    int logOutWidth = measureButtonWidth(text);
+
+    int width = resolveSize(Math.max(logInWidth, logOutWidth), widthMeasureSpec);
+    setMeasuredDimension(width, height);
+  }
+
+  @AutoHandleExceptions
+  protected int getLoginButtonWidth(int widthMeasureSpec) {
+    final Resources resources = getResources();
     String text = loginText;
     int logInWidth;
     int width;
@@ -703,15 +918,7 @@ public class LoginButton extends FacebookButtonBase {
       }
     }
     logInWidth = measureButtonWidth(text);
-
-    text = logoutText;
-    if (text == null) {
-      text = resources.getString(R.string.com_facebook_loginview_log_out_button);
-    }
-    int logOutWidth = measureButtonWidth(text);
-
-    width = resolveSize(Math.max(logInWidth, logOutWidth), widthMeasureSpec);
-    setMeasuredDimension(width, height);
+    return logInWidth;
   }
 
   @AutoHandleExceptions
@@ -724,7 +931,7 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   @AutoHandleExceptions
-  private void setButtonText() {
+  protected void setButtonText() {
     final Resources resources = getResources();
     if (!isInEditMode() && AccessToken.isCurrentAccessTokenActive()) {
       setText(
@@ -735,7 +942,7 @@ public class LoginButton extends FacebookButtonBase {
       if (loginText != null) {
         setText(loginText);
       } else {
-        String text = resources.getString(R.string.com_facebook_loginview_log_in_button_continue);
+        String text = resources.getString(getLoginButtonContinueLabel());
         int width = getWidth();
         // if the width is 0, we are going to measure size, so use the long text
         if (width != 0) {
@@ -749,6 +956,46 @@ public class LoginButton extends FacebookButtonBase {
         setText(text);
       }
     }
+  }
+
+  @AutoHandleExceptions
+  protected void setButtonIcon() {
+    this.setCompoundDrawablesWithIntrinsicBounds(
+        AppCompatResources.getDrawable(
+            getContext(), com.facebook.common.R.drawable.com_facebook_button_icon),
+        null,
+        null,
+        null);
+  }
+
+  @TargetApi(29)
+  @AutoHandleExceptions
+  protected void setButtonRadius() {
+    if (customButtonRadius == null) {
+      return;
+    }
+    Drawable buttonDrawable = this.getBackground();
+    // Only configure corner radius for GradientDrawables or wrappers
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        && buttonDrawable instanceof StateListDrawable) {
+      StateListDrawable parentDrawable = (StateListDrawable) buttonDrawable;
+      for (int i = 0; i < parentDrawable.getStateCount(); i++) {
+        GradientDrawable childDrawable = (GradientDrawable) parentDrawable.getStateDrawable(i);
+        if (childDrawable != null) {
+          childDrawable.setCornerRadius(customButtonRadius);
+        }
+      }
+    }
+    if (buttonDrawable instanceof GradientDrawable) {
+      GradientDrawable gradientDrawable = (GradientDrawable) buttonDrawable;
+      gradientDrawable.setCornerRadius(customButtonRadius);
+    }
+  }
+
+  @AutoHandleExceptions
+  protected void setButtonTransparency() {
+    Drawable drawable = this.getBackground();
+    drawable.setAlpha(customButtonTransparency);
   }
 
   @AutoHandleExceptions
@@ -793,12 +1040,23 @@ public class LoginButton extends FacebookButtonBase {
 
     protected void performLogin() {
       final LoginManager loginManager = getLoginManager();
-      if (LoginButton.this.getFragment() != null) {
-        loginManager.logIn(LoginButton.this.getFragment(), properties.permissions);
+      if (androidXLoginCaller != null) {
+        // if no callback manager is registered with the button, an empty callback manager is
+        // created for calling the static callbacks.
+        CallbackManager callbackManager =
+            LoginButton.this.callbackManager != null
+                ? LoginButton.this.callbackManager
+                : new CallbackManagerImpl();
+        ((LoginManager.FacebookLoginActivityResultContract) androidXLoginCaller.getContract())
+            .setCallbackManager(callbackManager);
+        androidXLoginCaller.launch(properties.permissions);
+      } else if (LoginButton.this.getFragment() != null) {
+        loginManager.logIn(LoginButton.this.getFragment(), properties.permissions, getLoggerID());
       } else if (LoginButton.this.getNativeFragment() != null) {
-        loginManager.logIn(LoginButton.this.getNativeFragment(), properties.permissions);
+        loginManager.logIn(
+            LoginButton.this.getNativeFragment(), properties.permissions, getLoggerID());
       } else {
-        loginManager.logIn(LoginButton.this.getActivity(), properties.permissions);
+        loginManager.logIn(LoginButton.this.getActivity(), properties.permissions, getLoggerID());
       }
     }
 
@@ -841,8 +1099,21 @@ public class LoginButton extends FacebookButtonBase {
       LoginManager manager = LoginManager.getInstance();
       manager.setDefaultAudience(getDefaultAudience());
       manager.setLoginBehavior(getLoginBehavior());
+      manager.setLoginTargetApp(getLoginTargetApp());
       manager.setAuthType(getAuthType());
+      manager.setFamilyLogin(isFamilyLogin());
+      manager.setShouldSkipAccountDeduplication(getShouldSkipAccountDeduplication());
+      manager.setMessengerPageId(getMessengerPageId());
+      manager.setResetMessengerState(getResetMessengerState());
       return manager;
+    }
+
+    protected LoginTargetApp getLoginTargetApp() {
+      return LoginTargetApp.FACEBOOK;
+    }
+
+    protected boolean isFamilyLogin() {
+      return false;
     }
   }
 }
