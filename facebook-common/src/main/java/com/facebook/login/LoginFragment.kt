@@ -181,8 +181,8 @@ open class LoginFragment : Fragment() {
 
   companion object {
     internal const val RESULT_KEY = "com.facebook.LoginFragment:Result"
-    internal const val REQUEST_KEY = "com.facebook.LoginFragment:Request"
-    internal const val EXTRA_REQUEST = "request"
+    const val REQUEST_KEY = "com.facebook.LoginFragment:Request"
+    const val EXTRA_REQUEST = "request"
     private const val TAG = "LoginFragment"
     private const val NULL_CALLING_PKG_ERROR_MSG =
         "Cannot call LoginFragment with a null calling package. This can occur if the launchMode of the caller is singleInstance."

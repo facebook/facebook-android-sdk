@@ -59,7 +59,7 @@ import kotlin.jvm.JvmOverloads
 import kotlin.jvm.Volatile
 
 /** This class manages login and permissions for Facebook. */
-open class LoginManager internal constructor() {
+open class LoginManager() {
   /** The login behavior. */
   var loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK
     private set
