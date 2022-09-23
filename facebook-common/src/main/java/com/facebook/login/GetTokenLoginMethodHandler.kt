@@ -23,7 +23,7 @@ import java.util.HashSet
 import org.json.JSONException
 import org.json.JSONObject
 
-internal class GetTokenLoginMethodHandler : LoginMethodHandler {
+class GetTokenLoginMethodHandler : LoginMethodHandler {
   private var getTokenClient: GetTokenClient? = null
 
   constructor(loginClient: LoginClient) : super(loginClient)

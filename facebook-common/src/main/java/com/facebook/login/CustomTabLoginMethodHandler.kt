@@ -41,7 +41,7 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
   private var expectedChallenge: String?
   private var validRedirectURI: String
 
-  internal constructor(loginClient: LoginClient) : super(loginClient) {
+  constructor(loginClient: LoginClient) : super(loginClient) {
     expectedChallenge = generateRandomString(CHALLENGE_LENGTH)
     calledThroughLoggedOutAppSwitch = false
     validRedirectURI = getValidRedirectURI(developerDefinedRedirectURI)
