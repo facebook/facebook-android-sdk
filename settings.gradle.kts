@@ -8,26 +8,43 @@
 
 // Facebook SDK
 include(":facebook-testutil")
+
 include(":facebook-core")
+
 include(":facebook-bolts")
-include(":facebook-common", ":facebook-login", ":facebook-share", ":facebook-applinks", ":facebook-messenger")
+
+include(
+    ":facebook-common",
+    ":facebook-login",
+    ":facebook-share",
+    ":facebook-applinks",
+    ":facebook-messenger")
+
 include(":facebook-livestreaming") // @fb-only
+
 include(":facebook-beta") // @fb-only
+
 include(":facebook-gamingservices")
+
 include(":facebook")
 
 // Samples
 include(":samples:HelloFacebookSample")
+
 include(":samples:Iconicus")
+
 include(":samples:LoginSample") // @fb-only
+
 include(":samples:Scrumptious")
+
 include(":samples:FBLoginSample")
 
 if (file("internal/internal-settings.gradle").exists()) {
-    apply("internal/internal-settings.gradle")
+  apply("internal/internal-settings.gradle")
 }
 
 if (file("local.gradle").exists()) {
-    apply("local.gradle")
+  apply("local.gradle")
 }
+
 project(":facebook-beta").projectDir = File("internal/facebook-beta") // @fb-only

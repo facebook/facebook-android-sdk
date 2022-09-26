@@ -9,25 +9,25 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    repositories {
-        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
-        mavenCentral()
-        google()
-    }
+  repositories {
+    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
+    mavenCentral()
+    google()
+  }
 
-    dependencies {
-        classpath(Plugins.android_gradle)
-        classpath(Plugins.kotlin_gradle)
-        classpath(Plugins.dokka)
-        classpath(Plugins.jacoco)
-    }
+  dependencies {
+    classpath(Plugins.android_gradle)
+    classpath(Plugins.kotlin_gradle)
+    classpath(Plugins.dokka)
+    classpath(Plugins.jacoco)
+  }
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-        google()
-        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
-        maven { url = uri("https://jitpack.io") }
-    }
+  repositories {
+    mavenCentral()
+    google()
+    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
+    maven { url = uri("https://jitpack.io") }
+  }
 }

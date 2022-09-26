@@ -8,7 +8,8 @@ object Versions {
   const val acra = "5.5.0"
   const val analytics = "4.+"
   const val android_billingclient = "3.0.0"
-  const val android_installreferrer = "1.0" // there are issues with 1.1 regarding permissions, asks for unnecessary permissions
+  const val android_installreferrer =
+      "1.0" // there are issues with 1.1 regarding permissions, asks for unnecessary permissions
   const val androidx = "1.1.0"
   const val androidxActivity = "1.2.0"
   const val androidxAnnotation = "1.1.0"
@@ -62,20 +63,26 @@ object Plugins {
 object Libs {
 
   // android
-  const val android_billingclient = "com.android.billingclient:billing:${Versions.android_billingclient}"
-  const val android_installreferrer = "com.android.installreferrer:installreferrer:${Versions.android_installreferrer}" //https://developer.android.com/google/play/installreferrer/library.html#java
+  const val android_billingclient =
+      "com.android.billingclient:billing:${Versions.android_billingclient}"
+  const val android_installreferrer =
+      "com.android.installreferrer:installreferrer:${Versions.android_installreferrer}" // https://developer.android.com/google/play/installreferrer/library.html#java
   const val androidx_activity = "androidx.activity:activity:${Versions.androidxActivity}"
   const val androidx_annotation = "androidx.annotation:annotation:${Versions.androidxAnnotation}"
   const val androidx_appcompat = "androidx.appcompat:appcompat:${Versions.androidx}"
   const val androidx_browser = "androidx.browser:browser:${Versions.androidxBrowser}"
   const val androidx_cardview = "androidx.cardview:cardview:${Versions.androidxCardview}"
-  const val androidx_constraintlayout = "androidx.constraintlayout:constraintlayout:${Versions.androidxConstraintLayout}"
+  const val androidx_constraintlayout =
+      "androidx.constraintlayout:constraintlayout:${Versions.androidxConstraintLayout}"
   const val androidx_core = "androidx.core:core:${Versions.androidxCore}"
   const val androidx_core_ktx = "androidx.core:core-ktx:${Versions.androidxCoreKtx}"
-  const val androidx_espresso_core = "androidx.test.espresso:espresso-core:${Versions.androidxEspressoCore}"
+  const val androidx_espresso_core =
+      "androidx.test.espresso:espresso-core:${Versions.androidxEspressoCore}"
   const val androidx_fragment = "androidx.fragment:fragment:${Versions.androidxFragment}"
-  const val androidx_legacy_support_v4 = "androidx.legacy:legacy-support-v4:${Versions.androidxLegacy}"
-  const val androidx_legacy_support_core_utils = "androidx.legacy:legacy-support-core-utils:${Versions.androidxLegacy}"
+  const val androidx_legacy_support_v4 =
+      "androidx.legacy:legacy-support-v4:${Versions.androidxLegacy}"
+  const val androidx_legacy_support_core_utils =
+      "androidx.legacy:legacy-support-core-utils:${Versions.androidxLegacy}"
   const val androidx_recyclerview = "androidx.recyclerview:recyclerview:${Versions.androidx}"
   const val androidx_test_core = "androidx.test:core:${Versions.androidxTest}"
 
@@ -84,12 +91,15 @@ object Libs {
   const val dexmaker_mockito = "com.google.dexmaker:dexmaker-mockito:${Versions.dexmaker}"
   const val firebase_bom = "com.google.firebase:firebase-bom:${Versions.firebaseBom}"
   const val firebase_analytics = "com.google.firebase:firebase-analytics"
-  const val firebase_messaging = "com.google.firebase:firebase-messaging:${Versions.firebaseMessaging}"
+  const val firebase_messaging =
+      "com.google.firebase:firebase-messaging:${Versions.firebaseMessaging}"
   const val gson = "com.google.code.gson:gson:${Versions.gson}"
   const val guava = "com.google.guava:guava:${Versions.guava}"
   const val material = "com.google.android.material:material:${Versions.material}"
-  const val play_services_auth = "com.google.android.gms:play-services-auth:${Versions.playServicesAuth}"
-  const val play_services_gcm = "com.google.android.gms:play-services-gcm:${Versions.playServicesGcm}"
+  const val play_services_auth =
+      "com.google.android.gms:play-services-auth:${Versions.playServicesAuth}"
+  const val play_services_gcm =
+      "com.google.android.gms:play-services-gcm:${Versions.playServicesGcm}"
   const val zxing = "com.google.zxing:core:${Versions.zxing}"
 
   // 1st-party
@@ -106,7 +116,8 @@ object Libs {
   const val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
   const val kotlin_stdlib_jdk7 = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${Versions.kotlin}"
   const val kotlin_test_junit = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.kotlin}"
-  const val leakcanary_android = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanaryAndroid}"
+  const val leakcanary_android =
+      "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanaryAndroid}"
   const val liquidcore = "com.github.LiquidPlayer:LiquidCore:${Versions.liquidcore}"
   const val mockito_inline = "org.mockito:mockito-inline:${Versions.mockitoInline}"
   const val mockito_kotlin = "org.mockito.kotlin:mockito-kotlin:${Versions.mockitoKotlin}"
@@ -114,8 +125,10 @@ object Libs {
   const val powermock_core = "org.powermock:powermock-core:${Versions.powerMock}"
   const val powermock_api_mockito2 = "org.powermock:powermock-api-mockito2:${Versions.powerMock}"
   const val powermock_junit4 = "org.powermock:powermock-module-junit4:${Versions.powerMock}"
-  const val powermock_junit4_rule = "org.powermock:powermock-module-junit4-rule:${Versions.powerMock}"
-  const val powermock_classloading_xstream = "org.powermock:powermock-classloading-xstream:${Versions.powerMock}"
+  const val powermock_junit4_rule =
+      "org.powermock:powermock-module-junit4-rule:${Versions.powerMock}"
+  const val powermock_classloading_xstream =
+      "org.powermock:powermock-classloading-xstream:${Versions.powerMock}"
   const val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
   const val testng = "org.testng:testng:${Versions.testng}"
 }
