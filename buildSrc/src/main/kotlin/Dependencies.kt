@@ -20,7 +20,7 @@ object Versions {
   const val androidxEspressoCore = "3.1.0"
   const val androidxFragment = "1.3.0"
   const val androidxLegacy = "1.0.0"
-  const val androidxTest = "1.0.0"
+  const val androidxTest = "1.4.0"
   const val assertj = "3.15.0"
   const val dexmaker = "1.2"
   const val dokka = "1.4.30"
