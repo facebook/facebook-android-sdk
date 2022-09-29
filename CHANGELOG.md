@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [15.0.1]
+### Fixed
+- Fixed the issue causing apps targeting Android 12 or higher to fail due to a component with an intent-filter not explicitly defining the attribute `android:exported`.
+
 ## [15.0.0]
 ### Changed
 - We now use jacoco to gather code coverage on debug builds. If you are building from source instead of using releases from maven,
@@ -441,6 +445,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...HEAD
+[15.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...sdk-version-15.0.1
 [15.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.1...sdk-version-15.0.0
 [14.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.0...sdk-version-14.1.1
 [14.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...sdk-version-14.1.0
@@ -496,5 +501,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
-
