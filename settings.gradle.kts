@@ -39,6 +39,8 @@ include(":samples:Scrumptious")
 
 include(":samples:FBLoginSample")
 
+include(":samples:KotlinSampleApp")
+
 if (file("internal/internal-settings.gradle").exists()) {
   apply("internal/internal-settings.gradle")
 }
