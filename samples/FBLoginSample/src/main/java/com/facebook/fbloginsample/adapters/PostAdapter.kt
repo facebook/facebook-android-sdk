@@ -42,7 +42,7 @@ class PostAdapter(private val _context: Context, private val posts: List<Post>) 
 
     val viewHolder = rowView.tag as ViewHolder
     viewHolder.profilePhoto.profileId = post.fromId
-    viewHolder.postDate.text = Util.MakePrettyDate(post.createdTime)
+    viewHolder.postDate.text = Util.makePrettyDate(post.createdTime)
     viewHolder.username.text = post.fromName
     viewHolder.message.text = post.message
     viewHolder.postPicture.setImageURI(post.picture)
