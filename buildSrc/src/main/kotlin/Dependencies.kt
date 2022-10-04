@@ -118,6 +118,8 @@ object Libs {
   const val kotlin_test_junit = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.kotlin}"
   const val leakcanary_android =
       "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanaryAndroid}"
+  const val leakcanary_object_watcher =
+      "com.squareup.leakcanary:leakcanary-object-watcher-android:${Versions.leakcanaryAndroid}"
   const val liquidcore = "com.github.LiquidPlayer:LiquidCore:${Versions.liquidcore}"
   const val mockito_inline = "org.mockito:mockito-inline:${Versions.mockitoInline}"
   const val mockito_kotlin = "org.mockito.kotlin:mockito-kotlin:${Versions.mockitoKotlin}"
