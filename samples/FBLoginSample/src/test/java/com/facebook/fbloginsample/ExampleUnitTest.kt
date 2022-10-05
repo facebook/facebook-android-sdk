@@ -6,20 +6,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.fbloginsample;
+package com.facebook.fbloginsample
 
-import static junit.framework.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ * See [testing documentation](http://d.android.com/tools/testing).
  */
-public class ExampleUnitTest {
+class ExampleUnitTest {
   @Test
-  public void addition_isCorrect() throws Exception {
-    assertEquals(4, 2 + 2);
+  fun addition_isCorrect() {
+    assertEquals(4, 2 + 2)
   }
 }
