@@ -13,6 +13,7 @@ import android.content.ActivityNotFoundException
 import android.net.Uri
 import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsIntent
+import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getGraphApiVersion
 import com.facebook.internal.ServerProtocol.getDialogAuthority
 import com.facebook.internal.ServerProtocol.getGamingDialogAuthority
@@ -46,12 +47,9 @@ open class CustomTab(action: String, parameters: Bundle?) {
   }
 
   init {
-    var parameters = parameters
-    if (parameters == null) {
-      parameters = Bundle()
-    }
+    var parameters = parameters ?: Bundle()
     uri =
-        if (action == "context_choose") {
+        if (GamingAction.values().map { it.rawValue }.contains(action)) {
           buildUri(
               getGamingDialogAuthority(), "/" + ServerProtocol.DIALOG_PATH + action, parameters)
         } else {
