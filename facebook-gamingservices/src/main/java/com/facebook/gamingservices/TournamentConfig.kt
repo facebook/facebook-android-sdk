@@ -49,7 +49,9 @@ class TournamentConfig : ShareModel {
     scoreType = TournamentScoreType.values().find { it.name == parcel.readString() }
     endTime =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          Instant.from(DateFormatter.format(parcel.readString()))
+          parcel.readString()?.let {
+            Instant.from(DateFormatter.format(it))
+          }
         } else {
           null
         }

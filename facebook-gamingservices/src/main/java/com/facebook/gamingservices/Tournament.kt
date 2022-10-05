@@ -26,7 +26,9 @@ class Tournament : ShareModel {
 
   var expiration: ZonedDateTime?
     get() {
-      return DateFormatter.format(this.endTime)
+      return this.endTime?.let {
+        DateFormatter.format(it)
+      }
     }
     private set(newValue) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -47,7 +49,7 @@ class Tournament : ShareModel {
     this.endTime = endTime
     this.title = title
     this.payload = payload
-    this.expiration = DateFormatter.format(this.endTime)
+    this.expiration = this.endTime?.let { DateFormatter.format(it) }
   }
 
   constructor(
