@@ -6,6 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.all;
+package com.facebook.all
 
-public class All {}
+class All
