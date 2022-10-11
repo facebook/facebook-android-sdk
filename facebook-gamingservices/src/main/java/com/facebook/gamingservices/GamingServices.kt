@@ -6,6 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.share;
+package com.facebook.gamingservices
 
-public class Share {}
+class GamingServices

@@ -6,6 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.login;
+package com.facebook.login
 
-public class Login {}
+class Login
