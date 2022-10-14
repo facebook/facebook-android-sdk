@@ -18,8 +18,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook
+package com.facebook;
 
-internal object FacebookSdkVersion {
-  const val BUILD = "14.1.1"
+final class FacebookSdkVersion {
+    public static final String BUILD = "4.42.0";
 }
