@@ -92,7 +92,7 @@ object ServerProtocol {
   // URL components
   private const val GRAPH_VIDEO_URL_FORMAT = "https://graph-video.%s"
   private const val GRAPH_URL_FORMAT = "https://graph.%s"
-  @JvmStatic fun getDefaultAPIVersion() = "v15.0"
+  @JvmStatic fun getDefaultAPIVersion() = "v14.0"
 
   @JvmStatic
   fun getErrorsProxyAuthDisabled(): Collection<String> =
