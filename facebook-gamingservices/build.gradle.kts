@@ -33,12 +33,12 @@ dependencies {
 
   // Unit Tests
   testImplementation(project(":facebook-testutil"))
-  implementation(Libs.junit)
-  implementation(Libs.robolectric)
-  implementation(Libs.androidx_test_core)
+  testImplementation(Libs.junit)
+  testImplementation(Libs.robolectric)
+  testImplementation(Libs.androidx_test_core)
 
-  implementation(Libs.mockito_inline)
-  implementation(Libs.mockito_kotlin)
+  testImplementation(Libs.mockito_inline)
+  testImplementation(Libs.mockito_kotlin)
 
   testImplementation(Libs.powermock_core)
   testImplementation(Libs.powermock_api_mockito2)
