@@ -126,8 +126,6 @@ object FeatureManager {
       Feature.OnDevicePostInstallEventProcessing,
       Feature.IapLogging,
       Feature.IapLoggingLib2,
-      Feature.MetaIAP,
-      Feature.MetaPayments,
       Feature.ChromeCustomTabsPrefetching,
       Feature.Monitoring,
       Feature.IgnoreAppSwitchToLoggedOut,
@@ -162,8 +160,6 @@ object FeatureManager {
     OnDevicePostInstallEventProcessing(0x00010601),
     IapLogging(0x00010700),
     IapLoggingLib2(0x00010701),
-    MetaIAP(0x00010702),
-    MetaPayments(0x00010800),
     Instrument(0x00020000),
     CrashReport(0x00020100),
     CrashShield(0x00020101),
@@ -207,8 +203,6 @@ object FeatureManager {
           OnDevicePostInstallEventProcessing -> "OnDevicePostInstallEventProcessing"
           IapLogging -> "IAPLogging"
           IapLoggingLib2 -> "IAPLoggingLib2"
-          MetaIAP -> "MetaIAP"
-          MetaPayments -> "MetaPayments"
           Monitoring -> "Monitoring"
           ServiceUpdateCompliance -> "ServiceUpdateCompliance"
           Login -> "LoginKit"
