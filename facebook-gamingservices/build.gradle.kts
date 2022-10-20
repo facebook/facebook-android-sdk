@@ -31,33 +31,33 @@ extra["description"] = "Facebook Gaming Services Android SDK"
 extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
-    // Facebook Dependencies
-    api(project(":facebook-core"))
-    api(project(":facebook-common"))
-    api(project(":facebook-share"))
+  // Facebook Dependencies
+  api(project(":facebook-core"))
+  api(project(":facebook-common"))
+  api(project(":facebook-share"))
 
-    implementation(Libs.androidx_core_ktx)
-    implementation(Libs.kotlin_stdlib)
-    implementation(Libs.gson)
+  implementation(Libs.androidx_core_ktx)
+  implementation(Libs.kotlin_stdlib)
+  implementation(Libs.gson)
 
-    // Unit Tests
-    testImplementation(project(":facebook-testutil"))
-    implementation(Libs.junit)
-    implementation(Libs.robolectric)
-    implementation(Libs.androidx_test_core)
+  // Unit Tests
+  testImplementation(project(":facebook-testutil"))
+  testImplementation(Libs.junit)
+  testImplementation(Libs.robolectric)
+  testImplementation(Libs.androidx_test_core)
 
-    implementation(Libs.mockito_inline)
-    implementation(Libs.mockito_kotlin)
+  testImplementation(Libs.mockito_inline)
+  testImplementation(Libs.mockito_kotlin)
 
-    testImplementation(Libs.powermock_core)
-    testImplementation(Libs.powermock_api_mockito2)
-    testImplementation(Libs.powermock_junit4)
-    testImplementation(Libs.powermock_junit4_rule)
-    testImplementation(Libs.powermock_classloading_xstream)
-    testImplementation(Libs.assertj_core)
+  testImplementation(Libs.powermock_core)
+  testImplementation(Libs.powermock_api_mockito2)
+  testImplementation(Libs.powermock_junit4)
+  testImplementation(Libs.powermock_junit4_rule)
+  testImplementation(Libs.powermock_classloading_xstream)
+  testImplementation(Libs.assertj_core)
 
-    testImplementation(Libs.android_installreferrer)
-    testImplementation(Libs.kotlin_test_junit)
+  testImplementation(Libs.android_installreferrer)
+  testImplementation(Libs.kotlin_test_junit)
 }
 
 
