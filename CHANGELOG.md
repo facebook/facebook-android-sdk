@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [15.0.2]
+### Fixed
+- Fixed the issue with robolectric and other dependencies not being correctly specified as test implementation.
+
 ## [15.0.1]
 ### Fixed
 - Fixed the issue causing apps targeting Android 12 or higher to fail due to a component with an intent-filter not explicitly defining the attribute `android:exported`.
@@ -444,7 +448,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.2...HEAD
+[15.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.1...sdk-version-15.0.2
 [15.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...sdk-version-15.0.1
 [15.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.1...sdk-version-15.0.0
 [14.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.0...sdk-version-14.1.1
