@@ -1,4 +1,4 @@
-name: Run testsuite with gradle
+rname: Run testsuite with gradle
 # https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
 on: [push, pull_request]
 
