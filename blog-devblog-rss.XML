@@ -1,0 +1,80 @@
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+<channel>
+<title>ข่าวสารของผู้พัฒนา</title>
+<description> Get the latest news from Facebook for Developers </description>
+<lastBuildDate>Tue, 25 Oct 2022 06:00:00 -0700</lastBuildDate>
+<link>https://developers.facebook.com/blog/</link>
+<item>
+<title>Introducing Intellectual Property Reporting API: empowering rights holders to streamline reporting</title>
+<description>We know that rights holders of copyrights and trademarks are always seeking new ways to efficiently combat intellectual property infringement. So today we’re announcing the Intellectual Property (IP) Reporting API, a solution that allows rights holders and their agents to build custom systems for reporting content that violates their intellectual property rights.</description>
+<link>https://developers.facebook.com/blog/post/2022/10/25/introducing-intellectual-property-reporting-api/</link>
+<pubDate>Tue, 25 Oct 2022 06:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">We know that rights holders of copyrights and trademarks are always seeking new ways to efficiently combat intellectual property infringement. So today we’re <a href="https://www.facebook.com/business/news/ip-reporting-api-brand-rights-protection-new-features">announcing</a> the <a href="https://www.facebook.com/business/help/1785616748438429">Intellectual Property (IP) Reporting API</a>, a solution that allows rights holders and their agents to build custom systems for reporting content that violates their intellectual...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>Sending Messages with WhatsApp in Your Python Applications</title>
+<description>WhatsApp Business Platform enables businesses to communicate more closely with their audiences, offering tools that allow you to automate the sending, receiving, and handling of incoming messages. For example, automated messaging allows you to welcome new customers or notify them when they contact you outside business hours.</description>
+<link>https://developers.facebook.com/blog/post/2022/10/24/sending-messages-with-whatsapp-in-your-python-applications/</link>
+<pubDate>Mon, 24 Oct 2022 09:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">WhatsApp Business Platform enables businesses to communicate more closely with their audiences, offering tools that allow you to automate the sending, receiving, and handling of incoming messages. For example, automated messaging allows you to welcome new customers or notify them when they contact you outside business hours.</p><p class="">This article describes...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>What’s New With Data Portability and our Transfer Your Information Tool</title>
+<description>Today we have an interview with William Morland, a software engineer who works on data portability at Meta. Below, he talks about the work he does on our Transfer Your Information tool, a key control that allows people to transfer their data from Meta-owned apps to other platforms.</description>
+<link>https://developers.facebook.com/blog/post/2022/10/18/data-portability-and-our-transfer-your-information-tool/</link>
+<pubDate>Tue, 18 Oct 2022 09:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">Today we have an interview with William Morland, a software engineer who works on data portability at Meta. Below, he talks about the work he does on our Transfer Your Information tool, a key control that allows people to transfer their data from Meta-owned apps to other platforms.</p><div class=""></div><h2 class="">To begin with, could you tell us a bit about yourself?</h2><p class="">I work out of...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>Meet the Developers: Linux Kernel Team (Song Liu)</title>
+<description>For today’s interview, we have Song Liu, a software engineer on the Kernel team at Meta. Song Liu recently presented at the Linux Plumbers Conference (LPC) on Kernel Live Patching at Scale.</description>
+<link>https://developers.facebook.com/blog/post/2022/10/13/meet-the-developers-linux-kernel-team-song-liu/</link>
+<pubDate>Thu, 13 Oct 2022 09:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">For today’s interview, we have Song Liu, a software engineer on the Kernel team at Meta. Song Liu recently presented at the Linux Plumbers Conference (LPC) on <a href="https://l.facebook.com/l.php?u=https%3A%2F%2Flpc.events%2Fevent%2F16%2Fcontributions%2F1199%2F%3Ffbclid%3DIwAR1YDMwMp5847zb-5WU-P7BOr4w8HSBAiY5LPKCJmGvAr3v2wDCYJpuGr0s&amp;h=AT0TE9dpIyaQuW7aSoHwFSHHWse-SlxjZ6sf4xDX71rsmC2piVFdR90K6jZx-dfVs7NyJ-1i2T362YeKQvBSraytf1FR3rGoO0ei02kOu52jUIscQL_F0_jvaQ378nzz6jcQEIHzQxZpEEKG3g_VhQ" target="_blank" rel="noopener nofollow" data-lynx-mode="asynclazy">Kernel Live Patching at Scale</a>.</p><p class="">This series highlights Meta Software Engineers who contribute to the Linux kernel. The Meta Linux Kernel team works with the broader Linux community to add new...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>Recap the Meta Avatars announcements from Meta Connect 2022</title>
+<description>เรียนรู้เกี่ยวกับข้อมูลไฮไลท์ ประกาศ และแผนแม่บทด้านฟีเจอร์ทั้งหมดสำหรับ Meta Avatars จากงาน Meta Connect ประจำปี 2022</description>
+<link>https://developers.facebook.com/blog/post/2022/10/11/recap-the-meta-avatars-announcements-from-meta-connect-2022/</link>
+<pubDate>Tue, 11 Oct 2022 12:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">ในวันนี้ เราได้แพร่ภาพงาน Meta Connect ประจำปี 2022 ซึ่งจัดขึ้นทุกปี และครั้งนี้ก็เป็นครั้งที่ 9 แล้ว โดยในงานนี้ ผู้พัฒนา ครีเอเตอร์ และผู้ชื่นชอบเทคโนโลยีได้มาร่วมสำรวจความก้าวหน้าและนวัตกรรมล่าสุดต่างๆ ของ Augmented Reality และ Virtual Reality รวมถึงการพัฒนาสู่เมตาเวิร์ส ทั้งนี้ นอกเหนือจากประกาศที่น่าสนใจมากมายแล้ว...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>Introducing an important update to Instagram Sharing to Stories</title>
+<description>ในตอนนี้ Instagram กำหนดให้ผู้พัฒนาทุกรายต้องมีสิทธิ์การเข้าถึงแอพ Facebook ที่ลงทะเบียนแล้วโดยกำหนดค่าการตั้งค่าพื้นฐานไว้ จึงจะใช้ฟีเจอร์ Share to Stories ต่อไปได้</description>
+<link>https://developers.facebook.com/blog/post/2022/10/10/introducing-important-update-to-Instagram-sharing-to-stories/</link>
+<pubDate>Mon, 10 Oct 2022 14:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">Instagram ออกแบบมาเพื่อให้ผู้คนได้แชร์ช่วงเวลาสำคัญของตนเอง</p><p class=""><b><a href="https://developers.facebook.com/docs/instagram/">แพลตฟอร์ม Instagram</a></b> มีเครื่องมือต่างๆ ที่จะช่วยให้ธุรกิจของคุณโต้ตอบกับผู้ใช้ Instagram ได้ รวมถึงฟีเจอร์ Sharing to Stories ด้วย คุณสามารถอนุญาตให้ผู้ใช้แอพของคุณแชร์เนื้อหาของตนเป็นสตอรี่บน Instagram ได้ด้วย <a href="https://developers.facebook.com/docs/instagram/sharing-to-stories/"><b>Sharing to Stories</b></a></p>...</div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>Meet the Developers - Linux Kernel Team (Martin Lau)</title>
+<description>For today’s interview, we have Martin Lau, a software engineer on the Kernel team at Meta. He works on the BPF (Berkeley Packet Filter) and Kernel Networking development.</description>
+<link>https://developers.facebook.com/blog/post/2022/10/06/meet-the-developers-linux-kernel-team-martin-lau/</link>
+<pubDate>Thu, 06 Oct 2022 09:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">For today’s interview, we have Martin Lau, a software engineer on the Kernel team at Meta. He works on the <a href="https://l.facebook.com/l.php?u=https%3A%2F%2Fdocs.kernel.org%2Fbpf%2Findex.html%3Ffbclid%3DIwAR0q4tZinMhJYPKioZ2d0mLy2oer8x6Do9jLDUYwkKNJYIx9yGT7RWSBqt8&amp;h=AT2eJx5gmt-KZ3RwDAFpMAEIeOxvU6Ok1cBoqUQ1sMFGM0tu4sCeYhl8U3PmCvPYvDNMldRNuez_tkm85ItBuqfEYg04O5btZeGUi_s4bs5gyw4eNKSsCVQq2E8oJtXRDX1gdfDx0UQczRNxHOXTmQ" target="_blank" rel="noopener nofollow" data-lynx-mode="asynclazy">BPF</a> (Berkeley Packet Filter) and Kernel Networking development.</p><p class="">This series highlights Meta Software Engineers who contribute to the Linux kernel. The Meta Linux Kernel team works with the broader Linux community to add new features to the...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+<item>
+<title>Signals in prod: dangers and pitfalls</title>
+<description>In this blog post, Chris Down, a Kernel Engineer at Meta, discusses the pitfalls of using Linux signals in the Linux production environments and why developers should avoid using signals whenever possible.</description>
+<link>https://developers.facebook.com/blog/post/2022/09/27/signals-in-prod-dangers-and-pitfalls/</link>
+<pubDate>Tue, 27 Sep 2022 10:00:00 -0700</pubDate>
+<content:encoded>
+<![CDATA[ <div></div><div class=""><div class=""><div class=""><p class="">In this blog post, Chris Down, a Kernel Engineer at Meta, discusses the pitfalls of using Linux signals in Linux production environments and why developers should avoid using signals whenever possible.</p><div class=""></div><h3 class="">What are Linux Signals?</h3><p class="">A signal is an event that Linux systems generate in response to some condition. Signals can be sent by the kernel to a...</p></div></div></div> ]]>
+</content:encoded>
+</item>
+</channel>
+</rss>

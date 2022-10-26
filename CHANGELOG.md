@@ -6,31 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Changed
-- Increased minSdkVersion from 15 to 21
-
-## [15.1.0]
-
-## [15.0.2]
-### Fixed
-- Fixed the issue with robolectric and other dependencies not being correctly specified as test implementation.
-
-## [15.0.1]
-### Fixed
-- Fixed the issue causing apps targeting Android 12 or higher to fail due to a component with an intent-filter not explicitly defining the attribute `android:exported`.
-
-## [15.0.0]
-### Changed
-- We now use jacoco to gather code coverage on debug builds. If you are building from source instead of using releases from maven,
-  you may run into an issue where debug builds crash on launch.
-  The issue and solution are well-documented in https://github.com/jacoco/jacoco/issues/968
-- Migrated the gradle files (excluding `maven.gradle` and sample projects) from Groovy to Kotlin.
-
-## [14.1.1]
-### Fixed
-- Fixed the issue which caused AndroidX activity/fragment 1.5.0+ to break the Facebook Login Android SDK Flow if the Facebook app is not installed.
-
-## [14.1.0]
 
 ## [14.0.0]
 ### Removed
@@ -452,13 +427,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.1.0...HEAD
-[15.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.2...sdk-version-15.1.0
-[15.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.1...sdk-version-15.0.2
-[15.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...sdk-version-15.0.1
-[15.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.1...sdk-version-15.0.0
-[14.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.0...sdk-version-14.1.1
-[14.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...sdk-version-14.1.0
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...HEAD
 [14.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.2.0...sdk-version-14.0.0
 [13.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.1.0...sdk-version-13.2.0
 [13.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
