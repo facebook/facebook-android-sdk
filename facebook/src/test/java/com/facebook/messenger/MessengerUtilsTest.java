@@ -123,7 +123,7 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testGetMessengerThreadParamsForIntentWith20150314Protocol() throws Exception {
+  public void testGetMessengerThreadParamsForIntentWith20150314Protocol() {
     // Simulate an intent that Messenger would send.
     Intent intent = new Intent();
     intent.addCategory("com.facebook.orca.category.PLATFORM_THREAD_20150314");
@@ -135,10 +135,10 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
 
     // Check the parsing logic.
     MessengerThreadParams params = MessengerUtils.getMessengerThreadParamsForIntent(intent);
-    assertEquals(MessengerThreadParams.Origin.REPLY_FLOW, params.origin);
-    assertEquals("thread_token", params.threadToken);
-    assertEquals("{}", params.metadata);
-    assertEquals(Arrays.asList("100", "400", "500"), params.participants);
+    assertEquals(MessengerThreadParams.Origin.REPLY_FLOW, params.getOrigin());
+    assertEquals("thread_token", params.getThreadToken());
+    assertEquals("{}", params.getMetadata());
+    assertEquals(Arrays.asList("100", "400", "500"), params.getParticipants());
   }
 
   @Test
