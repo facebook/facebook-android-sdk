@@ -28,14 +28,6 @@ enum class LoginBehavior {
   /** Specifies that only the web dialog auth should be used. */
   WEB_ONLY(false, false, true, false, true, false, false),
 
-  /**
-   * Specifies that only the web view dialog auth should be used.
-   * @deprecated Web view login is deprecated. This value will be removed in a future release. More
-   * information at https://developers.facebook.com/docs/facebook-login/android/deprecating-webviews
-   */
-  @Deprecated("Webview is deprecated as of 11/5/2021")
-  WEB_VIEW_ONLY(false, false, true, false, false, false, false),
-
   /** Specifies that only the web dialog auth (from anywhere) should be used */
   DIALOG_ONLY(false, true, true, false, true, true, true),
 
