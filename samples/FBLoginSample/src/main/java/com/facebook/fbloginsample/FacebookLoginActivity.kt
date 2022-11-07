@@ -32,7 +32,7 @@ class FacebookLoginActivity : Activity() {
     val loginButton: LoginButton = findViewById(R.id.login_button)
 
     // Set the initial permissions to request from the user while logging in
-    loginButton.setPermissions(listOf(EMAIL, USER_POSTS))
+    loginButton.permissions = listOf(EMAIL, USER_POSTS)
     loginButton.authType = AUTH_TYPE
 
     // Register a callback to respond to the user
