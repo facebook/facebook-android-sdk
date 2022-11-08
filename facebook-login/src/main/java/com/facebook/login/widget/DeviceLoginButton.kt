@@ -57,7 +57,7 @@ class DeviceLoginButton : LoginButton {
   @AutoHandleExceptions
   private inner class DeviceLoginClickListener : LoginClickListener() {
     override fun getLoginManager(): LoginManager {
-      val manager = DeviceLoginManager.getInstance()
+      val manager = DeviceLoginManager.instance
       manager.setDefaultAudience(defaultAudience)
       manager.setLoginBehavior(LoginBehavior.DEVICE_AUTH)
       manager.deviceRedirectUri = deviceRedirectUri
