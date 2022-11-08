@@ -28,156 +28,156 @@ import java.lang.ref.WeakReference
  */
 @AutoHandleExceptions
 class ToolTipPopup(private val text: String, anchor: View) {
-    /** The values here describe the styles available for the tool tip class.  */
-    enum class Style {
-        /**
-         * The tool tip will be shown with a blue style; including a blue background and blue arrows.
-         */
-        BLUE,
-
-        /**
-         * The tool tip will be shown with a black style; including a black background and black arrows.
-         */
-        BLACK
-    }
-
-    private val anchorViewRef: WeakReference<View> = WeakReference(anchor)
-    private val context: Context = anchor.context
-    private var popupContent: PopupContentView? = null
-    private var popupWindow: PopupWindow? = null
-    private var style = Style.BLUE
-    private var nuxDisplayTime = DEFAULT_POPUP_DISPLAY_TIME
-    private val scrollListener = ViewTreeObserver.OnScrollChangedListener {
-        if (anchorViewRef.get() != null) {
-            popupWindow?.let {
-                if (it.isShowing) {
-                    if (it.isAboveAnchor) {
-                        popupContent?.showBottomArrow()
-                    } else {
-                        popupContent?.showTopArrow()
-                    }
-                }
-            }
-        }
-    }
+  /** The values here describe the styles available for the tool tip class.  */
+  enum class Style {
+    /**
+     * The tool tip will be shown with a blue style; including a blue background and blue arrows.
+     */
+    BLUE,
 
     /**
-     * Sets the [Style] of this tool tip.
-     *
-     * @param style the style for the tool tip
+     * The tool tip will be shown with a black style; including a black background and black arrows.
      */
-    fun setStyle(style: Style) {
-        this.style = style
-    }
+    BLACK
+  }
 
-    /** Display this tool tip to the user  */
-    fun show() {
-        if (anchorViewRef.get() != null) {
-            val popupContent = PopupContentView(context)
-            this.popupContent = popupContent
-            val body = popupContent.findViewById<View>(R.id.com_facebook_tooltip_bubble_view_text_body) as TextView
-            body.text = text
-            if (style == Style.BLUE) {
-                popupContent.bodyFrame.setBackgroundResource(R.drawable.com_facebook_tooltip_blue_background)
-                popupContent.bottomArrow.setImageResource(R.drawable.com_facebook_tooltip_blue_bottomnub)
-                popupContent.topArrow.setImageResource(R.drawable.com_facebook_tooltip_blue_topnub)
-                popupContent.xOut.setImageResource(R.drawable.com_facebook_tooltip_blue_xout)
-            } else {
-                popupContent.bodyFrame.setBackgroundResource(R.drawable.com_facebook_tooltip_black_background)
-                popupContent.bottomArrow.setImageResource(R.drawable.com_facebook_tooltip_black_bottomnub)
-                popupContent.topArrow.setImageResource(R.drawable.com_facebook_tooltip_black_topnub)
-                popupContent.xOut.setImageResource(R.drawable.com_facebook_tooltip_black_xout)
-            }
-            val window = (context as Activity).window
-            val decorView = window.decorView
-            val decorWidth = decorView.width
-            val decorHeight = decorView.height
-            registerObserver()
-            popupContent.measure(
-                View.MeasureSpec.makeMeasureSpec(decorWidth, View.MeasureSpec.AT_MOST),
-                View.MeasureSpec.makeMeasureSpec(decorHeight, View.MeasureSpec.AT_MOST),
-            )
-            val popupWindow = PopupWindow(
-                popupContent,
-                popupContent.measuredWidth,
-                popupContent.measuredHeight,
-            )
-            this.popupWindow = popupWindow
-            popupWindow.showAsDropDown(anchorViewRef.get())
-            updateArrows()
-            if (nuxDisplayTime > 0) {
-                popupContent.postDelayed({ dismiss() }, nuxDisplayTime)
-            }
-            popupWindow.isTouchable = true
-            popupContent.setOnClickListener { dismiss() }
+  private val anchorViewRef: WeakReference<View> = WeakReference(anchor)
+  private val context: Context = anchor.context
+  private var popupContent: PopupContentView? = null
+  private var popupWindow: PopupWindow? = null
+  private var style = Style.BLUE
+  private var nuxDisplayTime = DEFAULT_POPUP_DISPLAY_TIME
+  private val scrollListener = ViewTreeObserver.OnScrollChangedListener {
+    if (anchorViewRef.get() != null) {
+      popupWindow?.let {
+        if (it.isShowing) {
+          if (it.isAboveAnchor) {
+            popupContent?.showBottomArrow()
+          } else {
+            popupContent?.showTopArrow()
+          }
         }
+      }
     }
+  }
 
-    /**
-     * Set the time (in milliseconds) the tool tip will be displayed. Any number less than or equal to
-     * 0 will cause the tool tip to be displayed indefinitely
-     *
-     * @param displayTime The amount of time (in milliseconds) to display the tool tip
-     */
-    fun setNuxDisplayTime(displayTime: Long) {
-        nuxDisplayTime = displayTime
+  /**
+   * Sets the [Style] of this tool tip.
+   *
+   * @param style the style for the tool tip
+   */
+  fun setStyle(style: Style) {
+    this.style = style
+  }
+
+  /** Display this tool tip to the user  */
+  fun show() {
+    if (anchorViewRef.get() != null) {
+      val popupContent = PopupContentView(context)
+      this.popupContent = popupContent
+      val body = popupContent.findViewById<View>(R.id.com_facebook_tooltip_bubble_view_text_body) as TextView
+      body.text = text
+      if (style == Style.BLUE) {
+        popupContent.bodyFrame.setBackgroundResource(R.drawable.com_facebook_tooltip_blue_background)
+        popupContent.bottomArrow.setImageResource(R.drawable.com_facebook_tooltip_blue_bottomnub)
+        popupContent.topArrow.setImageResource(R.drawable.com_facebook_tooltip_blue_topnub)
+        popupContent.xOut.setImageResource(R.drawable.com_facebook_tooltip_blue_xout)
+      } else {
+        popupContent.bodyFrame.setBackgroundResource(R.drawable.com_facebook_tooltip_black_background)
+        popupContent.bottomArrow.setImageResource(R.drawable.com_facebook_tooltip_black_bottomnub)
+        popupContent.topArrow.setImageResource(R.drawable.com_facebook_tooltip_black_topnub)
+        popupContent.xOut.setImageResource(R.drawable.com_facebook_tooltip_black_xout)
+      }
+      val window = (context as Activity).window
+      val decorView = window.decorView
+      val decorWidth = decorView.width
+      val decorHeight = decorView.height
+      registerObserver()
+      popupContent.measure(
+          View.MeasureSpec.makeMeasureSpec(decorWidth, View.MeasureSpec.AT_MOST),
+          View.MeasureSpec.makeMeasureSpec(decorHeight, View.MeasureSpec.AT_MOST),
+      )
+      val popupWindow = PopupWindow(
+          popupContent,
+          popupContent.measuredWidth,
+          popupContent.measuredHeight,
+      )
+      this.popupWindow = popupWindow
+      popupWindow.showAsDropDown(anchorViewRef.get())
+      updateArrows()
+      if (nuxDisplayTime > 0) {
+        popupContent.postDelayed({ dismiss() }, nuxDisplayTime)
+      }
+      popupWindow.isTouchable = true
+      popupContent.setOnClickListener { dismiss() }
     }
+  }
 
-    private fun updateArrows() {
-        popupWindow?.let {
-            if (it.isShowing) {
-                if (it.isAboveAnchor) {
-                    popupContent?.showBottomArrow()
-                } else {
-                    popupContent?.showTopArrow()
-                }
-            }
+  /**
+   * Set the time (in milliseconds) the tool tip will be displayed. Any number less than or equal to
+   * 0 will cause the tool tip to be displayed indefinitely
+   *
+   * @param displayTime The amount of time (in milliseconds) to display the tool tip
+   */
+  fun setNuxDisplayTime(displayTime: Long) {
+    nuxDisplayTime = displayTime
+  }
+
+  private fun updateArrows() {
+    popupWindow?.let {
+      if (it.isShowing) {
+        if (it.isAboveAnchor) {
+          popupContent?.showBottomArrow()
+        } else {
+          popupContent?.showTopArrow()
         }
+      }
+    }
+  }
+
+  /** Dismiss the tool tip  */
+  fun dismiss() {
+    unregisterObserver()
+    popupWindow?.dismiss()
+  }
+
+  private fun registerObserver() {
+    unregisterObserver()
+    anchorViewRef.get()?.viewTreeObserver?.addOnScrollChangedListener(scrollListener)
+  }
+
+  private fun unregisterObserver() {
+    anchorViewRef.get()?.viewTreeObserver?.removeOnScrollChangedListener(scrollListener)
+  }
+
+  private inner class PopupContentView(context: Context) : FrameLayout(context) {
+    val topArrow: ImageView
+    val bottomArrow: ImageView
+    val bodyFrame: View
+    val xOut: ImageView
+
+    init {
+      val inflater = LayoutInflater.from(context)
+      inflater.inflate(R.layout.com_facebook_tooltip_bubble, this)
+      topArrow = findViewById<View>(R.id.com_facebook_tooltip_bubble_view_top_pointer) as ImageView
+      bottomArrow = findViewById<View>(R.id.com_facebook_tooltip_bubble_view_bottom_pointer) as ImageView
+      bodyFrame = findViewById(R.id.com_facebook_body_frame)
+      xOut = findViewById<View>(R.id.com_facebook_button_xout) as ImageView
     }
 
-    /** Dismiss the tool tip  */
-    fun dismiss() {
-        unregisterObserver()
-        popupWindow?.dismiss()
+    fun showTopArrow() {
+      topArrow.visibility = VISIBLE
+      bottomArrow.visibility = INVISIBLE
     }
 
-    private fun registerObserver() {
-        unregisterObserver()
-        anchorViewRef.get()?.viewTreeObserver?.addOnScrollChangedListener(scrollListener)
+    fun showBottomArrow() {
+      topArrow.visibility = INVISIBLE
+      bottomArrow.visibility = VISIBLE
     }
+  }
 
-    private fun unregisterObserver() {
-        anchorViewRef.get()?.viewTreeObserver?.removeOnScrollChangedListener(scrollListener)
-    }
-
-    private inner class PopupContentView(context: Context) : FrameLayout(context) {
-        val topArrow: ImageView
-        val bottomArrow: ImageView
-        val bodyFrame: View
-        val xOut: ImageView
-
-        init {
-            val inflater = LayoutInflater.from(context)
-            inflater.inflate(R.layout.com_facebook_tooltip_bubble, this)
-            topArrow = findViewById<View>(R.id.com_facebook_tooltip_bubble_view_top_pointer) as ImageView
-            bottomArrow = findViewById<View>(R.id.com_facebook_tooltip_bubble_view_bottom_pointer) as ImageView
-            bodyFrame = findViewById(R.id.com_facebook_body_frame)
-            xOut = findViewById<View>(R.id.com_facebook_button_xout) as ImageView
-        }
-
-        fun showTopArrow() {
-            topArrow.visibility = VISIBLE
-            bottomArrow.visibility = INVISIBLE
-        }
-
-        fun showBottomArrow() {
-            topArrow.visibility = INVISIBLE
-            bottomArrow.visibility = VISIBLE
-        }
-    }
-
-    companion object {
-        /** The default time that the tool tip will be displayed  */
-        const val DEFAULT_POPUP_DISPLAY_TIME: Long = 6000
-    }
+  companion object {
+    /** The default time that the tool tip will be displayed  */
+    const val DEFAULT_POPUP_DISPLAY_TIME: Long = 6000
+  }
 }
