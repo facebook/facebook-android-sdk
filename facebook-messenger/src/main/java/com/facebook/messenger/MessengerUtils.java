@@ -111,14 +111,14 @@ public class MessengerUtils {
       Intent shareIntent = new Intent(Intent.ACTION_SEND);
       shareIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
       shareIntent.setPackage(PACKAGE_NAME);
-      shareIntent.putExtra(Intent.EXTRA_STREAM, shareToMessengerParams.uri);
-      shareIntent.setType(shareToMessengerParams.mimeType);
+      shareIntent.putExtra(Intent.EXTRA_STREAM, shareToMessengerParams.getUri());
+      shareIntent.setType(shareToMessengerParams.getMimeType());
       String appId = FacebookSdk.getApplicationId();
       if (appId != null) {
         shareIntent.putExtra(EXTRA_PROTOCOL_VERSION, PROTOCOL_VERSION_20150314);
         shareIntent.putExtra(EXTRA_APP_ID, appId);
-        shareIntent.putExtra(EXTRA_METADATA, shareToMessengerParams.metaData);
-        shareIntent.putExtra(EXTRA_EXTERNAL_URI, shareToMessengerParams.externalUri);
+        shareIntent.putExtra(EXTRA_METADATA, shareToMessengerParams.getMetaData());
+        shareIntent.putExtra(EXTRA_EXTERNAL_URI, shareToMessengerParams.getExternalUri());
       }
 
       activity.startActivityForResult(shareIntent, requestCode);
@@ -191,11 +191,11 @@ public class MessengerUtils {
       } else {
         throw new RuntimeException(); // Can't happen.
       }
-      resultIntent.setDataAndType(shareToMessengerParams.uri, shareToMessengerParams.mimeType);
+      resultIntent.setDataAndType(shareToMessengerParams.getUri(), shareToMessengerParams.getMimeType());
       resultIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
       resultIntent.putExtra(EXTRA_APP_ID, FacebookSdk.getApplicationId());
-      resultIntent.putExtra(EXTRA_METADATA, shareToMessengerParams.metaData);
-      resultIntent.putExtra(EXTRA_EXTERNAL_URI, shareToMessengerParams.externalUri);
+      resultIntent.putExtra(EXTRA_METADATA, shareToMessengerParams.getMetaData());
+      resultIntent.putExtra(EXTRA_EXTERNAL_URI, shareToMessengerParams.getExternalUri());
       activity.setResult(Activity.RESULT_OK, resultIntent);
       activity.finish();
     } else {

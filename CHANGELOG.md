@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Increased minSdkVersion from 15 to 21
-- Instance variables in `MessengerThreadParams` are now not directly accessible from Java due to conversion to Kotlin. Use the corresponding getters to access them in Java, i.e. `params.getMetadata()` instead of `params.metadata`.
+- Instance variables in `MessengerThreadParams` and `ShareToMessengerParams` are now not directly accessible from Java due to conversion to Kotlin. Use the corresponding getters to access them in Java, i.e. `params.getMetadata()` instead of `params.metadata`.
 - Removed deprecated LoginBehavior.WEB_VIEW_ONLY setting.
 
 ## [15.1.0]
