@@ -6,11 +6,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package org.mockito.configuration;
+package org.mockito.configuration
 
-public class MockitoConfiguration extends DefaultMockitoConfiguration {
-  @Override
-  public boolean enableClassCache() {
-    return false;
+class MockitoConfiguration : DefaultMockitoConfiguration() {
+  override fun enableClassCache(): Boolean {
+    return false
   }
 }
