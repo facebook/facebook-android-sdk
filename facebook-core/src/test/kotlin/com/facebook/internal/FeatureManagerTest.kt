@@ -135,6 +135,8 @@ class FeatureManagerTest {
     assertEquals(Feature.AppEvents, Feature.OnDeviceEventProcessing.parent)
     assertEquals(Feature.OnDeviceEventProcessing, Feature.OnDevicePostInstallEventProcessing.parent)
     assertEquals(Feature.Core, Feature.Monitoring.parent)
+    assertEquals(Feature.Core, Feature.Megatron.parent)
+    assertEquals(Feature.Core, Feature.Elora.parent)
   }
 
   @Test

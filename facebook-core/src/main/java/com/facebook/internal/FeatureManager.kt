@@ -128,6 +128,8 @@ object FeatureManager {
       Feature.IapLoggingLib2,
       Feature.ChromeCustomTabsPrefetching,
       Feature.Monitoring,
+      Feature.Megatron,
+      Feature.Elora,
       Feature.IgnoreAppSwitchToLoggedOut,
       Feature.BypassAppSwitch -> false
       else -> true
@@ -168,6 +170,8 @@ object FeatureManager {
     AnrReport(0x00020300),
     Monitoring(0x00030000),
     ServiceUpdateCompliance(0x00030100),
+    Megatron(0x00040000),
+    Elora(0x00050000),
 
     // Features in LoginKit
     /** Essential of LoginKit */
@@ -205,6 +209,8 @@ object FeatureManager {
           IapLoggingLib2 -> "IAPLoggingLib2"
           Monitoring -> "Monitoring"
           ServiceUpdateCompliance -> "ServiceUpdateCompliance"
+          Megatron -> "Megatron"
+          Elora -> "Elora"
           Login -> "LoginKit"
           ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
           IgnoreAppSwitchToLoggedOut -> "IgnoreAppSwitchToLoggedOut"
