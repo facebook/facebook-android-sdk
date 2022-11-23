@@ -1,0 +1,14 @@
+GraphRequest request = GraphRequest.newGraphPathRequest(
+  accessToken,
+  "/...",
+  new GraphRequest.Callback() {
+    @Override
+    public void onCompleted(GraphResponse response) {
+      // Insert your code here
+    }
+});
+
+Bundle parameters = new Bundle();
+parameters.putString("fields", "{fieldname_of_type_ArchivedAd}");
+request.setParameters(parameters);
+request.executeAsync();
