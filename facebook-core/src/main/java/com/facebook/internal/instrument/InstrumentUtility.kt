@@ -30,6 +30,7 @@ object InstrumentUtility {
   const val THREAD_CHECK_PREFIX = "thread_check_log_"
   const val ERROR_REPORT_PREFIX = "error_log_"
   private const val FBSDK_PREFIX = "com.facebook"
+  private const val METASDK_PREFIX = "com.meta"
   private const val CODELESS_PREFIX = "com.facebook.appevents.codeless"
   private const val SUGGESTED_EVENTS_PREFIX = "com.facebook.appevents.suggestedevents"
   private const val INSTRUMENT_DIR = "instrument"
@@ -110,7 +111,7 @@ object InstrumentUtility {
     var t = e
     while (t != null && t !== previous) {
       for (element in t.stackTrace) {
-        if (element.className.startsWith(FBSDK_PREFIX)) {
+        if (isFromFBorMeta(element)) {
           return true
         }
       }
@@ -131,7 +132,7 @@ object InstrumentUtility {
 
     // Iterate on thread's stack traces
     thread?.stackTrace?.forEach { element ->
-      if (element.className.startsWith(FBSDK_PREFIX)) {
+      if (isFromFBorMeta(element)) {
 
         // Ignore the ANR caused by calling app itself's click listener or touch listener
         if (element.className.startsWith(CODELESS_PREFIX) ||
@@ -330,5 +331,10 @@ object InstrumentUtility {
     return if (dir.exists() || dir.mkdirs()) {
       dir
     } else null
+  }
+
+  @JvmStatic
+  fun isFromFBorMeta(element: StackTraceElement):Boolean{
+    return element.className.startsWith(FBSDK_PREFIX)|| element.className.startsWith(METASDK_PREFIX);
   }
 }
