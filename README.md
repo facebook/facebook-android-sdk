@@ -1,4 +1,4 @@
-Facebook SDK for Android
+ Facebook SDK for Android
 ========================
 [![Run testsuite with gradle](https://github.com/facebook/facebook-android-sdk/actions/workflows/verifybuild.yml/badge.svg)](https://github.com/facebook/facebook-android-sdk/actions/workflows/verifybuild.yml)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.facebook.android/facebook-android-sdk/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.facebook.android/facebook-android-sdk)
