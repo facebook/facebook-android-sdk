@@ -6,8 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.2.0]
 ### Changed
-- Increased minSdkVersion from 15 to 21
 - Instance variables in `MessengerThreadParams` and `ShareToMessengerParams` are now not directly accessible from Java due to conversion to Kotlin. Use the corresponding getters to access them in Java, i.e. `params.getMetadata()` instead of `params.metadata`.
 - Removed deprecated LoginBehavior.WEB_VIEW_ONLY setting.
 
@@ -454,7 +455,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.1.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.2.0...HEAD
+[15.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.1.0...sdk-version-15.2.0
 [15.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.2...sdk-version-15.1.0
 [15.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.1...sdk-version-15.0.2
 [15.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...sdk-version-15.0.1
