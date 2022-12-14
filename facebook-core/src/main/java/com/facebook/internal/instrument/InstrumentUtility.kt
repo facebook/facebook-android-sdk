@@ -111,7 +111,7 @@ object InstrumentUtility {
     var t = e
     while (t != null && t !== previous) {
       for (element in t.stackTrace) {
-        if (isFromFBorMeta(element)) {
+        if (isFromFbOrMeta(element)) {
           return true
         }
       }
@@ -132,7 +132,7 @@ object InstrumentUtility {
 
     // Iterate on thread's stack traces
     thread?.stackTrace?.forEach { element ->
-      if (isFromFBorMeta(element)) {
+      if (isFromFbOrMeta(element)) {
 
         // Ignore the ANR caused by calling app itself's click listener or touch listener
         if (element.className.startsWith(CODELESS_PREFIX) ||
@@ -334,7 +334,7 @@ object InstrumentUtility {
   }
 
   @JvmStatic
-  fun isFromFBorMeta(element: StackTraceElement):Boolean{
+  fun isFromFbOrMeta(element: StackTraceElement): Boolean {
     return element.className.startsWith(FBSDK_PREFIX)|| element.className.startsWith(METASDK_PREFIX);
   }
 }
