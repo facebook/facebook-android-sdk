@@ -8,20 +8,20 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hellofacebook"
-    android:versionCode="1"
-    android:versionName="1.0">
+    package="com.applabqiioo.ApplicationFacebook"
+    android:versionCode="15"
+    android:versionName="4.0.3">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.Facebook.AndroidActivity" />
 
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name"
-        android:theme="@android:style/Theme.NoTitleBar">
+        android:label="@string/AppLabqiioo"
+        android:theme="@android:style/Theme.MyApplication">
         <activity
-            android:name=".HelloFacebookSampleActivity"
-            android:label="@string/app_name"
+            android:name=".AppLabqiioo.FacebookActivity"
+            android:label="@string/AppLabqiioo"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
@@ -44,16 +44,16 @@
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/app_id" />
+            android:value="@string/444496616992962" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationName"
-            android:value="@string/facebook_app_name" />
+            android:value="@string/facebook_AppLabqiioo" />
 
         <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:authorities="com.facebook.app.FacebookContentProvider355198514515820"
+            android:authorities="com.facebook.app.FacebookContentProvider444496616992962"
             android:exported="true" />
-        <receiver android:name="com.example.hellofacebook.HelloFacebookBroadcastReceiver"
+        <receiver android:name="com.applabqiioo.FacebookBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.facebook.platform.AppCallResultBroadcast" />
