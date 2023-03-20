@@ -136,6 +136,10 @@ class AttributionIdentifiers {
     }
 
     private fun getAndroidIdViaService(context: Context): AttributionIdentifiers? {
+      if (!isGooglePlayServicesAvailable(context)) {
+        return null
+      }
+      
       val connection = GoogleAdServiceConnection()
       val intent = Intent("com.google.android.gms.ads.identifier.service.START")
       intent.setPackage("com.google.android.gms")
