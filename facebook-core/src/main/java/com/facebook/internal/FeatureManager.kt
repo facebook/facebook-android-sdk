@@ -209,8 +209,6 @@ object FeatureManager {
           IapLoggingLib2 -> "IAPLoggingLib2"
           Monitoring -> "Monitoring"
           ServiceUpdateCompliance -> "ServiceUpdateCompliance"
-          Megatron -> "Megatron"
-          Elora -> "Elora"
           Login -> "LoginKit"
           ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
           IgnoreAppSwitchToLoggedOut -> "IgnoreAppSwitchToLoggedOut"
