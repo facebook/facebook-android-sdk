@@ -128,8 +128,6 @@ object FeatureManager {
       Feature.IapLoggingLib2,
       Feature.ChromeCustomTabsPrefetching,
       Feature.Monitoring,
-      Feature.Megatron,
-      Feature.Elora,
       Feature.IgnoreAppSwitchToLoggedOut,
       Feature.BypassAppSwitch -> false
       else -> true
@@ -208,6 +206,8 @@ object FeatureManager {
           IapLogging -> "IAPLogging"
           IapLoggingLib2 -> "IAPLoggingLib2"
           Monitoring -> "Monitoring"
+          Megatron -> "Megatron"
+          Elora -> "Elora"
           ServiceUpdateCompliance -> "ServiceUpdateCompliance"
           Login -> "LoginKit"
           ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
