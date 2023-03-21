@@ -54,6 +54,11 @@ object InstallReferrerUtil {
                   updateReferrer() // No point retrying if feature not supported
               InstallReferrerResponse.SERVICE_UNAVAILABLE -> {}
             }
+            try {
+              referrerClient.endConnection()
+            } catch (e: Exception) {
+              // Silent endConnection errors for unit test and else
+            }
           }
 
           override fun onInstallReferrerServiceDisconnected() = Unit
