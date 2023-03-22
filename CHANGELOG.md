@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [16.0.1]
+### Fixed
+- Fixed AttributionIdentifiers ANR issue
+- Fixed InstallReferrer ANR issue
+
 ## [16.0.0]
 
 ## [15.2.0]
@@ -457,7 +462,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.0.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.0.1...HEAD
+[16.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.0.0...sdk-version-16.0.1
 [16.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.2.0...sdk-version-16.0.0
 [15.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.1.0...sdk-version-15.2.0
 [15.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.2...sdk-version-15.1.0
@@ -518,4 +524,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
