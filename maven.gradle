@@ -12,7 +12,7 @@ apply plugin: 'org.jetbrains.dokka'
 
 def isSnapshot = version.endsWith('-SNAPSHOT')
 def ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : ""
-def ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : ""
+def ossrhPasswor tod = hasProperty('ossrhPassword') ? ossrhPassword : ""
 
 task setVersion {
     // The version will be derived from source
