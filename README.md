@@ -78,6 +78,9 @@ dependencies {
 
     // Facebook App Links only
     implementation 'com.facebook.android:facebook-applinks:latest.release'
+    
+    // Facebook Marketing only
+    implementation 'com.facebook.android:facebook-marketing:latest.release'
 
     // Facebook Android SDK (everything)
     implementation 'com.facebook.android:facebook-android-sdk:latest.release'
