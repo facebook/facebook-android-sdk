@@ -115,7 +115,7 @@ internal constructor(
 
     private fun parseJSONDefinition(definition: JSONObject): Map<Int, Set<Int>?>? {
       val itemsArray = definition.optJSONArray("items")
-      if (itemsArray.length() == 0) {
+      if (itemsArray == null || itemsArray.length() == 0) {
         return null
       }
       val items: MutableMap<Int, Set<Int>?> = HashMap()
