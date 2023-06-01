@@ -640,7 +640,7 @@ object FacebookSdk {
   fun publishInstallAsync(context: Context, applicationId: String) {
     // grab the application context ahead of time, since we will return to the caller
     // immediately.
-    val applicationContext = context.applicationContext
+    val applicationContext = context.applicationContext ?: return
     getExecutor().execute { publishInstallAndWaitForResponse(applicationContext, applicationId) }
     if (FeatureManager.isEnabled(FeatureManager.Feature.OnDeviceEventProcessing) &&
         OnDeviceProcessingManager.isOnDeviceProcessingEnabled()) {
