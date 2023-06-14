@@ -14,6 +14,7 @@ import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.ml.ModelManager
+import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.checkFeature
@@ -58,6 +59,11 @@ object AppEventsManager {
             checkFeature(FeatureManager.Feature.IapLogging) { enabled ->
               if (enabled) {
                 InAppPurchaseManager.enableAutoLogging()
+              }
+            }
+            checkFeature(FeatureManager.Feature.ProtectedMode) { enabled ->
+              if (enabled) {
+                ProtectedModeManager.enable()
               }
             }
             checkFeature(FeatureManager.Feature.CloudBridge) { enabled ->

@@ -23,6 +23,8 @@ import com.facebook.appevents.AppEventQueue.add
 import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
+import com.facebook.appevents.integrity.ProtectedModeManager
+import com.facebook.appevents.integrity.ProtectedModeManager.processParametersForProtectedMode
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
@@ -315,6 +317,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
       return
     }
     try {
+      processParametersForProtectedMode(parameters)
       val event =
           AppEvent(
               contextName,
