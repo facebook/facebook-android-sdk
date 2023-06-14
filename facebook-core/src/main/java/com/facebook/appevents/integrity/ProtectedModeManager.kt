@@ -15,9 +15,94 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 object ProtectedModeManager {
   private var enabled = false
 
+  val standardParameterNames: HashSet<String> by lazy {
+    hashSetOf(
+      "_currency",
+      "_valueToSum",
+      "fb_availability",
+      "fb_body_style",
+      "fb_checkin_date",
+      "fb_checkout_date",
+      "fb_city",
+      "fb_condition_of_vehicle",
+      "fb_content_category",
+      "fb_content_ids",
+      "fb_content_name",
+      "fb_content_type",
+      "fb_contents",
+      "fb_country",
+      "fb_currency",
+      "fb_delivery_category",
+      "fb_departing_arrival_date",
+      "fb_departing_departure_date",
+      "fb_destination_airport",
+      "fb_destination_ids",
+      "fb_dma_code",
+      "fb_drivetrain",
+      "fb_exterior_color",
+      "fb_fuel_type",
+      "fb_hotel_score",
+      "fb_interior_color",
+      "fb_lease_end_date",
+      "fb_lease_start_date",
+      "fb_listing_type",
+      "fb_make",
+      "fb_mileage.unit",
+      "fb_mileage.value",
+      "fb_model",
+      "fb_neighborhood",
+      "fb_num_adults",
+      "fb_num_children",
+      "fb_num_infants",
+      "fb_num_items",
+      "fb_order_id",
+      "fb_origin_airport",
+      "fb_postal_code",
+      "fb_predicted_ltv",
+      "fb_preferred_baths_range",
+      "fb_preferred_beds_range",
+      "fb_preferred_neighborhoods",
+      "fb_preferred_num_stops",
+      "fb_preferred_price_range",
+      "fb_preferred_star_ratings",
+      "fb_price",
+      "fb_property_type",
+      "fb_region",
+      "fb_returning_arrival_date",
+      "fb_returning_departure_date",
+      "fb_search_string",
+      "fb_state_of_vehicle",
+      "fb_status",
+      "fb_suggested_destinations",
+      "fb_suggested_home_listings",
+      "fb_suggested_hotels",
+      "fb_suggested_jobs",
+      "fb_suggested_local_service_businesses",
+      "fb_suggested_location_based_items",
+      "fb_suggested_vehicles",
+      "fb_transmission",
+      "fb_travel_class",
+      "fb_travel_end",
+      "fb_travel_start",
+      "fb_trim",
+      "fb_user_bucket",
+      "fb_value",
+      "fb_vin",
+      "fb_year",
+      "lead_event_source",
+      "predicted_ltv",
+      "product_catalog_id",
+    )
+  }
+
   @JvmStatic
   fun enable() {
     enabled = true
+  }
+
+  @JvmStatic
+  fun disable() {
+    enabled = false
   }
 
   /** Process parameters for protected mode */
@@ -25,6 +110,20 @@ object ProtectedModeManager {
   fun processParametersForProtectedMode(
     parameters: Bundle?
   ) {
-    // stub
+    if (!enabled || parameters == null || parameters.isEmpty) {
+      return
+    }
+
+    val paramsToRemove = mutableListOf<String>()
+
+    parameters.keySet().forEach { param ->
+      if (param !in standardParameterNames) {
+        paramsToRemove.add(param)
+      }
+    }
+
+    paramsToRemove.forEach { paramToRemove ->
+      parameters.remove(paramToRemove)
+    }
   }
 }
