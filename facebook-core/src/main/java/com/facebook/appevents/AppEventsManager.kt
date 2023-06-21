@@ -13,6 +13,7 @@ import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.iap.InAppPurchaseManager
+import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.ml.ModelManager
 import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager
@@ -64,6 +65,11 @@ object AppEventsManager {
             checkFeature(FeatureManager.Feature.ProtectedMode) { enabled ->
               if (enabled) {
                 ProtectedModeManager.enable()
+              }
+            }
+            checkFeature(FeatureManager.Feature.MACARuleMatching) { enabled ->
+              if (enabled) {
+                MACARuleMatchingManager.enable()
               }
             }
             checkFeature(FeatureManager.Feature.CloudBridge) { enabled ->

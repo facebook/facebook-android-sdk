@@ -88,6 +88,13 @@ class FeatureManagerTest {
       FeatureManager.getFeature("com.facebook.appevents.integrity.DoesNotExistAndShouldNotPass"))
 
     assertEquals(
+            Feature.MACARuleMatching,
+            FeatureManager.getFeature("com.facebook.appevents.integrity.MACARuleMatchingManager"))
+    assertNotEquals(
+            Feature.MACARuleMatching,
+            FeatureManager.getFeature("com.facebook.appevents.integrity.DoesNotExistAndShouldNotPass"))
+
+    assertEquals(
         Feature.EventDeactivation,
         FeatureManager.getFeature(
             "com.facebook.appevents.eventdeactivation.EventDeactivationManager"))
@@ -134,6 +141,7 @@ class FeatureManagerTest {
     assertEquals(Feature.PrivacyProtection, Feature.SuggestedEvents.parent)
     assertEquals(Feature.PrivacyProtection, Feature.IntelligentIntegrity.parent)
     assertEquals(Feature.PrivacyProtection, Feature.ProtectedMode.parent)
+    assertEquals(Feature.PrivacyProtection, Feature.MACARuleMatching.parent)
     assertEquals(Feature.AppEvents, Feature.EventDeactivation.parent)
     assertEquals(Feature.Core, Feature.Instrument.parent)
     assertEquals(Feature.Instrument, Feature.CrashReport.parent)
