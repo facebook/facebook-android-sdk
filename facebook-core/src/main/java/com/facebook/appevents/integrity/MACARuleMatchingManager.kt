@@ -10,6 +10,7 @@ package com.facebook.appevents.integrity
 
 import android.os.Bundle
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import org.json.JSONArray
 import org.json.JSONObject
 
 @AutoHandleExceptions
@@ -72,6 +73,48 @@ object MACARuleMatchingManager {
         dataValue.toString().toDouble() >= ruleValue.toDouble()
       }
       else -> false
+    }
+  }
+
+  @JvmStatic
+  fun isMatchCCRule(
+    ruleString: String?,
+    data: Bundle?
+  ): Boolean {
+    if (ruleString == null || data == null) {
+      return false
+    }
+
+    val ruleJson = JSONObject(ruleString)
+    val op = getKey(ruleJson) ?: return false
+    val values = ruleJson.get(op)
+
+    return when (op) {
+      "and" -> {
+        val v = (values as JSONArray?) ?: return false
+        for (i in 0 until v.length()) {
+          val thisRes = isMatchCCRule(v.get(i).toString(), data)
+          if (!thisRes) {
+            return false
+          }
+        }
+        return true
+      }
+      "or" -> {
+        val v = (values as JSONArray?) ?: return false
+        for (i in 0 until v.length()) {
+          val thisRes = isMatchCCRule(v.get(i).toString(), data)
+          if (thisRes) {
+            return true
+          }
+        }
+        return false
+      }
+      "not" -> !isMatchCCRule(values.toString(), data)
+      else -> {
+        val v = (values as JSONObject?) ?: return false
+        return stringComparison(op, v, data)
+      }
     }
   }
 }
