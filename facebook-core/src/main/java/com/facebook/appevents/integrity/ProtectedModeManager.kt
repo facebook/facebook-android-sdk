@@ -92,6 +92,71 @@ object ProtectedModeManager {
       "lead_event_source",
       "predicted_ltv",
       "product_catalog_id",
+
+      // AppCustomEventField list
+      "app_user_id",
+      "appVersion",
+      "_eventName",
+      "_eventName_md5",
+      /* duplicated _currency */
+      "_implicitlyLogged",
+      "_inBackground",
+      "_isTimedEvent",
+      "_logTime",
+      /* duplicated fb_order_id */
+      "_session_id",
+      "_ui",
+      /* duplicated _valueToSum */
+      "_valueToUpdate",
+      "_is_fb_codeless",
+      "_is_suggested_event",
+      "_fb_pixel_referral_id",
+      "fb_pixel_id",
+      "trace_id",
+      "subscription_id",
+      /* duplicated predicted_ltv */
+      "event_id",
+      "_restrictedParams",
+      "_onDeviceParams",
+      "purchase_valid_result_type",
+      "core_lib_included",
+      "login_lib_included",
+      "share_lib_included",
+      "place_lib_included",
+      "messenger_lib_included",
+      "applinks_lib_included",
+      "marketing_lib_included",
+      "_codeless_action",
+      "sdk_initialized",
+      "billing_client_lib_included",
+      "billing_service_lib_included",
+      "user_data_keys",
+      "device_push_token",
+      "fb_mobile_pckg_fp",
+      "fb_mobile_app_cert_hash",
+      "aggregate_id",
+      "anonymous_id",
+      "campaign_ids",
+
+      // AppEventsIgnoredParams List
+      "fb_post_attachment",
+      "receipt_data",
+
+      // List from dev doc
+      "ad_type",
+      "fb_content",
+      "fb_content_id",
+      /* duplicated fb_content_type */
+      /* duplicated fb_currency */
+      "fb_description",
+      "fb_level",
+      "fb_max_rating_value",
+      /* duplicated fb_num_items */
+      /* duplicated fb_order_id */
+      "fb_payment_info_available",
+      "fb_registration_method",
+      /* duplicated fb_search_string */
+      "fb_success",
     )
   }
 
