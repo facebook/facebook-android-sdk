@@ -17,6 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -26,6 +27,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
     override fun setup() {
         super.setup()
         PowerMockito.mockStatic(FacebookSdk::class.java)
+        whenever(FacebookSdk.getApplicationId()).thenReturn("123")
     }
 
     @After

@@ -9,13 +9,16 @@
 package com.facebook.appevents.integrity
 
 import android.os.Bundle
+import com.facebook.FacebookSdk
+import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import org.json.JSONArray
 
 @AutoHandleExceptions
 object ProtectedModeManager {
   private var enabled = false
 
-  val standardParameterNames: HashSet<String> by lazy {
+  val defaultStandardParameterNames: HashSet<String> by lazy {
     hashSetOf(
       "_currency",
       "_valueToSum",
@@ -160,9 +163,12 @@ object ProtectedModeManager {
     )
   }
 
+  private var standardParams: HashSet<String>? = null;
+
   @JvmStatic
   fun enable() {
     enabled = true
+    loadStandardParams()
   }
 
   @JvmStatic
@@ -170,19 +176,39 @@ object ProtectedModeManager {
     enabled = false
   }
 
+  private fun loadStandardParams() {
+    val settings = FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false)
+      ?: return
+    // Load the standard params from app settings first, if it doesn't exist, then use the default
+    // one inside the class
+    standardParams = convertJSONArrayToHashSet(settings.protectedModeStandardParamsSetting) ?: defaultStandardParameterNames
+  }
+
+  private fun convertJSONArrayToHashSet(jsonArray: JSONArray?): HashSet<String>? {
+    if (jsonArray == null || jsonArray!!.length() == 0) {
+      return null
+    }
+    val hashSet: HashSet<String> = HashSet()
+    for (i in 0 until jsonArray.length()) {
+      val element: String = jsonArray.getString(i)
+      hashSet.add(element)
+    }
+    return hashSet
+  }
+
   /** Process parameters for protected mode */
   @JvmStatic
   fun processParametersForProtectedMode(
     parameters: Bundle?
   ) {
-    if (!enabled || parameters == null || parameters.isEmpty) {
+    if (!enabled || parameters == null || parameters.isEmpty || standardParams == null) {
       return
     }
 
     val paramsToRemove = mutableListOf<String>()
 
     parameters.keySet().forEach { param ->
-      if (param !in standardParameterNames) {
+      if (param !in standardParams!!) {
         paramsToRemove.add(param)
       }
     }
