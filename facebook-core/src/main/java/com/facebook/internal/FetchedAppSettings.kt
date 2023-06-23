@@ -38,7 +38,9 @@ class FetchedAppSettings(
     val monitorViaDialogEnabled: Boolean,
     val rawAamRules: String?,
     val suggestedEventsSetting: String?,
-    val restrictiveDataSetting: String?
+    val restrictiveDataSetting: String?,
+    val protectedModeStandardParamsSetting: JSONArray?,
+    val MACARuleMatchingSetting: JSONArray?
 ) {
 
   fun supportsImplicitLogging(): Boolean = supportsImplicitLogging

@@ -63,6 +63,11 @@ object FetchedAppSettingsManager {
   private const val SDK_UPDATE_MESSAGE = "sdk_update_message"
   private const val APP_SETTING_APP_EVENTS_AAM_RULE = "aam_rules"
   private const val SUGGESTED_EVENTS_SETTING = "suggested_events_setting"
+
+  private const val PROTECTED_MODE_RULES = "protected_mode_rules"
+  private const val STANDARD_PARAMS_KEY = "standard_params"
+  private const val MACA_RULES_KEY = "maca_rules"
+
   private val APP_SETTING_FIELDS =
       listOf(
           APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
@@ -78,7 +83,8 @@ object FetchedAppSettingsManager {
           SMART_LOGIN_MENU_ICON_URL,
           APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD,
           APP_SETTING_APP_EVENTS_AAM_RULE,
-          SUGGESTED_EVENTS_SETTING)
+          SUGGESTED_EVENTS_SETTING,
+          PROTECTED_MODE_RULES)
   private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private val fetchedAppSettings: MutableMap<String, FetchedAppSettings> = ConcurrentHashMap()
   private val loadingState = AtomicReference(FetchAppSettingState.NOT_LOADED)
@@ -258,7 +264,10 @@ object FetchedAppSettingsManager {
             monitorEnabled,
             settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE),
             settingsJSON.optString(SUGGESTED_EVENTS_SETTING),
-            settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD))
+            settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD),
+            parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), STANDARD_PARAMS_KEY),
+            parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), MACA_RULES_KEY),
+        )
     fetchedAppSettings[applicationId] = result
     return result
   }
@@ -312,6 +321,17 @@ object FetchedAppSettingsManager {
       }
     }
     return dialogConfigMap
+  }
+
+  private fun parseProtectedModeRules(
+    protectedModeSettings: JSONObject?,
+    ruleType: String,
+  ): JSONArray? {
+    var rule: JSONArray? = null
+    if (protectedModeSettings != null) {
+        rule = protectedModeSettings.optJSONArray(ruleType)
+    }
+    return rule
   }
 
   internal enum class FetchAppSettingState {
