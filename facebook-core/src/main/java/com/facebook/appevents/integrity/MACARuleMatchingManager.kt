@@ -9,6 +9,8 @@
 package com.facebook.appevents.integrity
 
 import android.os.Bundle
+import com.facebook.FacebookSdk
+import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,9 +19,20 @@ import org.json.JSONObject
 object MACARuleMatchingManager {
   private var enabled = false
 
+  private var MACARules: JSONArray? = null
+
   @JvmStatic
   fun enable() {
-    enabled = true
+    loadMACARules()
+    if (MACARules != null) {
+      enabled = true
+    }
+  }
+
+  private fun loadMACARules() {
+    val settings = FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false)
+      ?: return
+    MACARules = settings.MACARuleMatchingSetting
   }
 
   @JvmStatic
