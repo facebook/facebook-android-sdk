@@ -160,6 +160,9 @@ object ProtectedModeManager {
       "fb_registration_method",
       /* duplicated fb_search_string */
       "fb_success",
+      "pm",
+      "_audiencePropertyIds",
+      "cs_maca"
     )
   }
 
@@ -216,5 +219,7 @@ object ProtectedModeManager {
     paramsToRemove.forEach { paramToRemove ->
       parameters.remove(paramToRemove)
     }
+
+    parameters.putBoolean("pm", true)
   }
 }

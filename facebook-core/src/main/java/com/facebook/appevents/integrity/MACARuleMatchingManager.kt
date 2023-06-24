@@ -130,4 +130,36 @@ object MACARuleMatchingManager {
       }
     }
   }
+
+  @JvmStatic
+  fun getMatchPropertyIDs(params: Bundle?): String {
+    if (MACARules == null || MACARules?.length() == 0) {
+      return "[]"
+    }
+    val rules = MACARules as JSONArray
+    val res = mutableListOf<Long>()
+    for (i in 0 until rules.length()) {
+      val entry = rules.optString(i) ?: continue
+      val json = JSONObject(entry)
+      val pid = json.optLong("id")
+      if (pid == 0L) continue
+      val rule = json.optString("rule") ?: continue
+      if (isMatchCCRule(rule, params)) {
+        res.add(pid)
+      }
+    }
+    return JSONArray(res).toString()
+  }
+
+  @JvmStatic
+  fun processParameters(params: Bundle?, event: String) {
+    if (!enabled || params == null) {
+      return
+    }
+
+    params.putString("event", event)
+    params.putString("_audiencePropertyIds", getMatchPropertyIDs(params))
+    params.putBoolean("cs_maca", true)
+    params.remove("event")
+  }
 }
