@@ -17,6 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -42,7 +43,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
         val expectedParameters = null
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
-        assertBundleThat(mockParameters, expectedParameters)
+        assertEqual(mockParameters, expectedParameters)
     }
 
     @Test
@@ -53,8 +54,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
 
-        assertThat(mockParameters.size()).isEqualTo(0)
-        assertBundleThat(mockParameters, expectedParameters)
+        assertEqual(mockParameters, expectedParameters)
     }
 
     @Test
@@ -71,8 +71,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
 
-        assertThat(mockParameters.size()).isEqualTo(2)
-        assertBundleThat(mockParameters, expectedParameters)
+        assertEqual(mockParameters, expectedParameters)
     }
 
     @Test
@@ -91,8 +90,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
 
-        assertThat(mockParameters.size()).isEqualTo(2)
-        assertBundleThat(mockParameters, expectedParameters)
+        assertEqual(mockParameters, expectedParameters)
     }
 
     @Test
@@ -110,11 +108,24 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
 
-        assertThat(mockParameters.size()).isEqualTo(3)
-        assertBundleThat(mockParameters, expectedParameters)
+        assertEqual(mockParameters, expectedParameters)
     }
 
-    private fun assertBundleThat(mockBundle: Bundle?, expectedBundle: Bundle?)  {
-        assertThat(mockBundle.toString()).isEqualTo(expectedBundle.toString())
+    private fun assertEqual(mockBundle: Bundle?, expectedBundle: Bundle?): Boolean {
+        val s1 = mockBundle?.keySet() ?: return false
+        val s2 = expectedBundle?.keySet() ?: return false
+
+        if (!s1.equals(s2)) {
+            return false
+        }
+
+        for (s in s1) {
+            val v1 = mockBundle.get(s) ?: return false
+            val v2 = expectedBundle.get(s) ?: return false
+            if (v1 != v2) {
+                return false
+            }
+        }
+        return true
     }
 }
