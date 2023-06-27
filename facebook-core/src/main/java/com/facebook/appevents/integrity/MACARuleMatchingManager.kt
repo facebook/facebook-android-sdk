@@ -8,9 +8,11 @@
 
 package com.facebook.appevents.integrity
 
+import android.os.Build
 import android.os.Bundle
 import com.facebook.FacebookSdk
 import com.facebook.internal.FetchedAppSettingsManager
+import com.facebook.internal.Utility
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONArray
 import org.json.JSONObject
@@ -20,6 +22,22 @@ object MACARuleMatchingManager {
   private var enabled = false
 
   private var MACARules: JSONArray? = null
+
+  private var keys = arrayOf(
+    "event",
+    "_locale",
+    "_appVersion",
+    "_deviceOS",
+    "_platform",
+    "_deviceModel",
+    "_nativeAppID",
+    "_nativeAppShortVersion",
+    "_timezone",
+    "_carrier",
+    "_deviceOSTypeName",
+    "_deviceOSVersion",
+    "_remainingDiskGB",
+  )
 
   @JvmStatic
   fun enable() {
@@ -157,9 +175,36 @@ object MACARuleMatchingManager {
       return
     }
 
+    try {
+      generateInfo(params, event)
+      params.putString("_audiencePropertyIds", getMatchPropertyIDs(params))
+      params.putString("cs_maca", "1")
+      removeGeneratedInfo(params)
+    } catch (_: Exception) {}
+  }
+
+  @JvmStatic
+  fun generateInfo(params: Bundle, event: String) {
     params.putString("event", event)
-    params.putString("_audiencePropertyIds", getMatchPropertyIDs(params))
-    params.putBoolean("cs_maca", true)
-    params.remove("event")
+    params.putString("_locale",
+      (Utility.locale?.language ?: "")+ '_' + (Utility.locale?.country ?: ""))
+    params.putString("_appVersion", Utility.versionName ?: "")
+    params.putString("_deviceOS", "ANDROID")
+    params.putString("_platform", "mobile")
+    params.putString("_deviceModel", Build.MODEL ?: "")
+    params.putString("_nativeAppID", FacebookSdk.getApplicationId())
+    params.putString("_nativeAppShortVersion", Utility.versionName ?: "")
+    params.putString("_timezone", Utility.deviceTimeZoneName)
+    params.putString("_carrier", Utility.carrierName)
+    params.putString("_deviceOSTypeName", "ANDROID")
+    params.putString("_deviceOSVersion", Build.VERSION.RELEASE)
+    params.putLong("_remainingDiskGB", Utility.availableExternalStorageGB)
+  }
+
+  @JvmStatic
+  fun removeGeneratedInfo(params: Bundle) {
+    for (k in keys) {
+      params.remove(k)
+    }
   }
 }

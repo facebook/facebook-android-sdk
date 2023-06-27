@@ -220,6 +220,6 @@ object ProtectedModeManager {
       parameters.remove(paramToRemove)
     }
 
-    parameters.putBoolean("pm", true)
+    parameters.putString("pm", "1")
   }
 }

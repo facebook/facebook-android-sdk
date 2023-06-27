@@ -92,10 +92,12 @@ object Utility {
   private var numCPUCores = 0
   private var timestampOfLastCheck: Long = -1
   private var totalExternalStorageGB: Long = -1
-  private var availableExternalStorageGB: Long = -1
+  var availableExternalStorageGB: Long = -1
   private var deviceTimezoneAbbreviation = ""
-  private var deviceTimeZoneName = ""
-  private var carrierName = NO_CARRIER
+  var deviceTimeZoneName = ""
+  var carrierName = NO_CARRIER
+  var versionName: String? = ""
+  var locale: Locale? = null
 
   // https://stackoverflow.com/questions/39784415/how-to-detect-programmatically-if-android-app-is-running-in-chrome-book-or-in
   private const val ARC_DEVICE_PATTERN = ".+_cheets|cheets_.+"
@@ -636,7 +638,6 @@ object Utility {
     // Application Manifest info:
     val pkgName = appContext.packageName
     var versionCode = -1
-    var versionName: String? = ""
     try {
       val pi = appContext.packageManager.getPackageInfo(pkgName, 0) ?: return
       versionCode = pi.versionCode
@@ -655,13 +656,13 @@ object Utility {
     extraInfoArray.put(Build.MODEL)
 
     // Locale
-    val locale =
+    locale =
         try {
           appContext.resources.configuration.locale
         } catch (e: Exception) {
           Locale.getDefault()
         }
-    extraInfoArray.put(locale.language + "_" + locale.country)
+    extraInfoArray.put((locale?.language ?: "") + "_" + (locale?.country ?: ""))
 
     // Time zone
     extraInfoArray.put(deviceTimezoneAbbreviation)
