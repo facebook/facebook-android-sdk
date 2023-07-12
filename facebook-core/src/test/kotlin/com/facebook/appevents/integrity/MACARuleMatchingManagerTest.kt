@@ -46,11 +46,42 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
     )
   }
 
+  fun `test string comparison for not_contains`() {
+    val json = JSONObject()
+    json.put("not_contains", "xxxxx")
+    assertFalse(
+      MACARuleMatchingManager.stringComparison(
+        variable = "URL",
+        values = json,
+        data = bundleOf(
+          "event" to "CompleteRegistration",
+          "url" to "www.xxxxx.com"
+        )
+      )
+    )
+  }
+
   @Test
   fun `test string comparison for i_contains`() {
     val json = JSONObject()
     json.put("i_contains", "xxxxx")
     assertTrue(
+      MACARuleMatchingManager.stringComparison(
+        variable = "URL",
+        values = json,
+        data = bundleOf(
+          "event" to "CompleteRegistration",
+          "url" to "www.xxXxx.com"
+        )
+      )
+    )
+  }
+
+  @Test
+  fun `test string comparison for i_not_contains`() {
+    val json = JSONObject()
+    json.put("i_not_contains", "xxxxx")
+    assertFalse(
       MACARuleMatchingManager.stringComparison(
         variable = "URL",
         values = json,
@@ -221,6 +252,19 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
   }
 
   @Test
+  fun `test isMatchCCRule for not_contains`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"event":{"eq":"Lead"}},{"or":[{"URL":{"not_contains":"xxxxx"}}]}]}""",
+        data = bundleOf(
+          "event" to "Lead",
+          "url" to "www.xxXxx.com"
+        )
+      )
+    )
+  }
+
+  @Test
   fun `test isMatchCCRule for i_contains match`() {
     assertTrue(
       MACARuleMatchingManager.isMatchCCRule(
@@ -265,6 +309,162 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
     )
   }
 
+  fun `test isMatchCCRule for starts_with match`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"eq":"Lead"}},{"or":[{"URL":{"starts_with":"ww"}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "Lead",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for i_starts_with match`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"eq":"Lead"}},{"or":[{"URL":{"i_starts_with":"WWW"}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "Lead",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for i_str_eq match`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"eq":"Lead"}},{"or":[{"URL":{"i_str_eq":"www"}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "Lead",
+          "url" to "WWW"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for i_str_neq match`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"eq":"Lead"}},{"or":[{"URL":{"i_str_neq":"ww"}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "Lead",
+          "url" to "www"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for in match`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"in":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "fb_mobile_activate_app",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"is_any":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "fb_page_view",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for i_str_in match`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"i_str_in":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "FB_PAGE_VIEW",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"i_is_any":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "PAGEVIEW",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for not_in`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"not_in":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "fb_mobile_deactivate_app",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+    assertFalse(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"is_not_any":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "fb_page_view",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+  }
+
+  fun `test isMatchCCRule for i_str_not_in`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"i_str_not_in":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "fb_mobile_deactivate_app",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+    assertFalse(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """
+          {"and":[{"event":{"i_is_not_any":["fb_mobile_activate_app","fb_page_view","PixelInitialized","PageView"]}}]}]}
+        """.trimIndent(),
+        data = bundleOf(
+          "event" to "PAgeVIEW",
+          "url" to "www.xxXxxww.com"
+        )
+      )
+    )
+  }
+
   @Test
   fun `test isMatchCCRule for regex match`() {
     assertTrue(
@@ -296,10 +496,66 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
   }
 
   @Test
+  fun `test isMatchCCRule for exists`() {
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"url":{"exists":true}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad",
+          "url" to "www.test.com"
+        )
+      )
+    )
+    assertFalse(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"url":{"exists":false}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad",
+          "url" to "www.test.com"
+        )
+      )
+    )
+    assertFalse(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"product":{"exists":true}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad",
+          "url" to "www.test.com"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"product":{"exists":false}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad",
+          "url" to "www.test.com"
+        )
+      )
+    )
+  }
+
+  @Test
   fun `test isMatchCCRule for eq`() {
     assertTrue(
       MACARuleMatchingManager.isMatchCCRule(
         ruleString = """{"and":[{"event":{"eq":"PageLoad"}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"event":{"=":"PageLoad"}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"event":{"==":"PageLoad"}}]}""",
         data = bundleOf(
           "event" to "PageLoad"
         )
@@ -317,6 +573,22 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
         )
       )
     )
+    assertFalse(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"event":{"ne":"PageLoad"}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad"
+        )
+      )
+    )
+    assertFalse(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"event":{"!=":"PageLoad"}}]}""",
+        data = bundleOf(
+          "event" to "PageLoad"
+        )
+      )
+    )
   }
 
   @Test
@@ -324,6 +596,14 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
     assertTrue(
       MACARuleMatchingManager.isMatchCCRule(
         ruleString = """{"and":[{"value":{"lt":"30"}}]}""",
+        data = bundleOf(
+          "value" to 1
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"value":{"<":"30"}}]}""",
         data = bundleOf(
           "value" to 1
         )
@@ -341,6 +621,22 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
         )
       )
     )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"value":{"le":"30"}}]}""",
+        data = bundleOf(
+          "value" to "30"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"value":{"<=":"30"}}]}""",
+        data = bundleOf(
+          "value" to "30"
+        )
+      )
+    )
   }
 
   @Test
@@ -353,6 +649,14 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
         )
       )
     )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"value":{">":"30"}}]}""",
+        data = bundleOf(
+          "value" to 31
+        )
+      )
+    )
   }
 
   @Test
@@ -360,6 +664,22 @@ class MACARuleMatchingManagerTest: FacebookTestCase() {
     assertTrue(
       MACARuleMatchingManager.isMatchCCRule(
         ruleString = """{"and":[{"value":{"gte":"30"}}]}""",
+        data = bundleOf(
+          "value" to "30"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"value":{"ge":"30"}}]}""",
+        data = bundleOf(
+          "value" to "30"
+        )
+      )
+    )
+    assertTrue(
+      MACARuleMatchingManager.isMatchCCRule(
+        ruleString = """{"and":[{"value":{">=":"30"}}]}""",
         data = bundleOf(
           "value" to "30"
         )

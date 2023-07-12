@@ -70,6 +70,12 @@ object MACARuleMatchingManager {
   ): Boolean {
     val op = getKey(values) ?: return false
     val ruleValue = values.get(op).toString()
+    val ruleArray = getStringArrayList(values.optJSONArray(op))
+
+    if (op == "exists") {
+      return data?.containsKey(variable) == ruleValue.toBoolean()
+    }
+
     val dataValue = (data?.get(variable.lowercase()) ?: data?.get(variable)) ?: return false
 
     return when (op) {
@@ -79,32 +85,77 @@ object MACARuleMatchingManager {
       "i_contains" -> {
         dataValue.toString().lowercase().contains(ruleValue.lowercase())
       }
+      "not_contains" -> {
+        !dataValue.toString().contains(ruleValue)
+      }
       "i_not_contains" -> {
         !dataValue.toString().lowercase().contains(ruleValue.lowercase())
+      }
+      "starts_with" -> {
+        dataValue.toString().startsWith(ruleValue)
+      }
+      "i_starts_with" -> {
+        dataValue.toString().lowercase().startsWith(ruleValue.lowercase())
+      }
+      "i_str_eq" -> {
+        dataValue.toString().lowercase() == ruleValue.lowercase()
+      }
+      "i_str_neq" -> {
+        dataValue.toString().lowercase() != ruleValue.lowercase()
+      }
+      "in", "is_any" -> {
+        val arr = ruleArray ?: return false
+        arr.contains(dataValue.toString())
+      }
+      "i_str_in", "i_is_any" -> {
+        val arr = ruleArray ?: return false
+        arr.any { str -> str.lowercase() == dataValue.toString().lowercase() }
+      }
+      "not_in", "is_not_any" -> {
+        val arr = ruleArray ?: return false
+        arr.contains(dataValue.toString())
+      }
+      "i_str_not_in", "i_is_not_any" -> {
+        val arr = ruleArray ?: return false
+        arr.all { str -> str.lowercase() != dataValue.toString().lowercase() }
       }
       "regex_match" -> {
         ruleValue.toRegex().matches(dataValue.toString())
       }
-      "eq" -> {
+      "eq", "=", "==" -> {
         dataValue.toString() == ruleValue
       }
-      "neq" -> {
+      "neq", "ne", "!=" -> {
         dataValue.toString() != ruleValue
       }
-      "lt" -> {
+      "lt", "<" -> {
         dataValue.toString().toDouble() < ruleValue.toDouble()
       }
-      "lte" -> {
+      "lte", "le", "<=" -> {
         dataValue.toString().toDouble() <= ruleValue.toDouble()
       }
-      "gt" -> {
+      "gt", ">" -> {
         dataValue.toString().toDouble() > ruleValue.toDouble()
       }
-      "gte" -> {
+      "gte", "ge", ">=" -> {
         dataValue.toString().toDouble() >= ruleValue.toDouble()
       }
       else -> false
     }
+  }
+
+  @JvmStatic
+  fun getStringArrayList(
+    jsonArray: JSONArray?
+  ): ArrayList<String>? {
+    if (jsonArray == null) {
+      return null
+    }
+    val res = arrayListOf<String>()
+    for (i in 0 until jsonArray.length()) {
+      res.add(jsonArray.get(i).toString())
+    }
+    return res
   }
 
   @JvmStatic
