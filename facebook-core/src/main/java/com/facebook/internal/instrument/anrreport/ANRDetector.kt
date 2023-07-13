@@ -61,7 +61,7 @@ object ANRDetector {
   @JvmStatic
   @VisibleForTesting
   fun start() {
-    scheduledExecutorService.scheduleAtFixedRate(
+    scheduledExecutorService.scheduleWithFixedDelay(
         anrDetectorRunnable, 0, DETECTION_INTERVAL_IN_MS.toLong(), TimeUnit.MILLISECONDS)
   }
 }
