@@ -43,7 +43,6 @@ open class FacebookActivity : FragmentActivity() {
     private set
 
   public override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
     val intent = intent
 
     // Some apps using this sdk don't put the sdk initialize code in the application
@@ -57,6 +56,7 @@ open class FacebookActivity : FragmentActivity() {
               "your Application's onCreate method.")
       sdkInitialize(applicationContext)
     }
+    super.onCreate(savedInstanceState)
     setContentView(R.layout.com_facebook_activity_layout)
     if (PASS_THROUGH_CANCEL_ACTION == intent.action) {
       handlePassThroughError()
