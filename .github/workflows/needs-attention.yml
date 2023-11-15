@@ -1,6 +1,6 @@
 name: Issue Needs Attention
 # This workflow is triggered on issue comments.
-on:
+on:issues
   issue_comment:
     types: created
 
