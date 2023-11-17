@@ -23,7 +23,6 @@ import com.facebook.core.BuildConfig
 import com.facebook.internal.FetchedAppGateKeepersManager.queryAppGateKeepers
 import com.facebook.internal.InternalSettings.isUnityApp
 import com.facebook.internal.SmartLoginOption.Companion.parseOptions
-import com.facebook.internal.Utility.isNullOrEmpty
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicReference
@@ -68,6 +67,9 @@ object FetchedAppSettingsManager {
   private const val STANDARD_PARAMS_KEY = "standard_params"
   private const val MACA_RULES_KEY = "maca_rules"
 
+  private const val AUTO_LOG_APP_EVENTS_DEFAULT_FIELD = "auto_log_app_events_default"
+  private const val AUTO_LOG_APP_EVENT_ENABLED_FIELD = "auto_log_app_events_enabled"
+
   private val APP_SETTING_FIELDS =
       listOf(
           APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
@@ -84,7 +86,9 @@ object FetchedAppSettingsManager {
           APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD,
           APP_SETTING_APP_EVENTS_AAM_RULE,
           SUGGESTED_EVENTS_SETTING,
-          PROTECTED_MODE_RULES)
+          PROTECTED_MODE_RULES,
+          AUTO_LOG_APP_EVENTS_DEFAULT_FIELD,
+          AUTO_LOG_APP_EVENT_ENABLED_FIELD)
   private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private val fetchedAppSettings: MutableMap<String, FetchedAppSettings> = ConcurrentHashMap()
   private val loadingState = AtomicReference(FetchAppSettingState.NOT_LOADED)
@@ -266,7 +270,8 @@ object FetchedAppSettingsManager {
             settingsJSON.optString(SUGGESTED_EVENTS_SETTING),
             settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD),
             parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), STANDARD_PARAMS_KEY),
-            parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), MACA_RULES_KEY),
+            parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), MACA_RULES_KEY), 
+            parseMigratedAutoLogValues(settingsJSON),
         )
     fetchedAppSettings[applicationId] = result
     return result
@@ -332,6 +337,34 @@ object FetchedAppSettingsManager {
         rule = protectedModeSettings.optJSONArray(ruleType)
     }
     return rule
+  }
+  
+  private fun parseMigratedAutoLogValues(settingsJSON: JSONObject?): Map<String, Boolean>? {
+    if (settingsJSON == null) {
+      return null
+    }
+    
+    var values: MutableMap<String, Boolean> = HashMap()
+    if (!settingsJSON?.isNull(AUTO_LOG_APP_EVENTS_DEFAULT_FIELD)) {
+      try {
+        values[AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] = settingsJSON?.getBoolean(AUTO_LOG_APP_EVENTS_DEFAULT_FIELD)
+      } catch (je: JSONException) {
+        Utility.logd(Utility.LOG_TAG, je)
+      }
+    }
+    if (!settingsJSON?.isNull(AUTO_LOG_APP_EVENT_ENABLED_FIELD)) {
+      try {
+        values[AUTO_LOG_APP_EVENT_ENABLED_FIELD] = settingsJSON?.getBoolean(AUTO_LOG_APP_EVENT_ENABLED_FIELD)
+      } catch (je: JSONException) {
+        Utility.logd(Utility.LOG_TAG, je)
+      }
+    }
+
+    return if (values.isEmpty()) {
+      null
+    } else {
+      values
+    }
   }
 
   internal enum class FetchAppSettingState {

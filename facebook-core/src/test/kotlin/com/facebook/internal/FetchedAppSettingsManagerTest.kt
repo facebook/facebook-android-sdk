@@ -27,7 +27,9 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
           "  \"seamless_login\": 1,\n" +
           "  \"smart_login_bookmark_icon_url\": \"swag\",\n" +
           "  \"smart_login_menu_icon_url\": \"yolo\",\n" +
-          "  \"android_dialog_configs\": \"garbage\"\n" +
+          "  \"android_dialog_configs\": \"garbage\",\n" +
+          "  \"auto_log_app_events_default\": true,\n" +
+          "  \"auto_log_app_events_enabled\": true\n" +
           "}"
 
   private val invalidValueTypesJson =
@@ -52,6 +54,9 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
     assertEquals("swag", result.smartLoginBookmarkIconURL)
     assertEquals("yolo", result.smartLoginMenuIconURL)
     assertThat(result.dialogConfigurations.isEmpty()).isTrue
+    assertThat(result.migratedAutoLogValues).isNotEmpty
+    assertThat(result.migratedAutoLogValues?.get("auto_log_app_events_default")).isTrue
+    assertThat(result.migratedAutoLogValues?.get("auto_log_app_events_enabled")).isTrue
 
     // defaults
     assertThat(result.nuxEnabled).isFalse
