@@ -37,7 +37,7 @@ internal object UserSettingsManager {
   private const val ADVERTISER_ID_KEY = "advertiser_id"
   private const val APPLICATION_FIELDS = GraphRequest.FIELDS_PARAM
   private val autoInitEnabled = UserSetting(true, FacebookSdk.AUTO_INIT_ENABLED_PROPERTY)
-  private val autoLogAppEventsEnabled =
+  private val autoLogAppEventsEnabledLocally =
       UserSetting(true, FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY)
   private val advertiserIDCollectionEnabled =
       UserSetting(true, FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY)
@@ -56,12 +56,6 @@ internal object UserSettingsManager {
   private const val VALUE = "value"
 
   // Warning message for App Event Flags
-  private const val AUTOLOG_APPEVENT_NOT_SET_WARNING =
-      ("Please set a value for AutoLogAppEventsEnabled. Set the flag to TRUE if you want " +
-          "to collect app install, app launch and in-app purchase events automatically. To " +
-          "request user consent before collecting data, set the flag value to FALSE, then " +
-          "change to TRUE once user consent is received. " +
-          "Learn more: https://developers.facebook.com/docs/app-events/getting-started-app-events-android#disable-auto-events.")
   private const val ADVERTISERID_COLLECTION_NOT_SET_WARNING =
       ("You haven't set a value for AdvertiserIDCollectionEnabled. Set the flag to TRUE " +
           "if you want to collect Advertiser ID for better advertising and analytics " +
@@ -87,7 +81,7 @@ internal object UserSettingsManager {
     userSettingPref =
         FacebookSdk.getApplicationContext()
             .getSharedPreferences(USER_SETTINGS, Context.MODE_PRIVATE)
-    initializeUserSetting(autoLogAppEventsEnabled, advertiserIDCollectionEnabled, autoInitEnabled)
+    initializeUserSetting(autoLogAppEventsEnabledLocally, advertiserIDCollectionEnabled, autoInitEnabled)
     initializeCodelessSetupEnabledAsync()
     logWarnings()
     logIfSDKSettingsChanged()
@@ -202,9 +196,6 @@ internal object UserSettingsManager {
       val ai = ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
       if (ai?.metaData != null) {
         // Log warnings for App Event Flags
-        if (!ai.metaData.containsKey(FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY)) {
-          Log.w(TAG, AUTOLOG_APPEVENT_NOT_SET_WARNING)
-        }
         if (!ai.metaData.containsKey(FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY)) {
           Log.w(TAG, ADVERTISERID_COLLECTION_NOT_SET_WARNING)
         }
@@ -228,7 +219,7 @@ internal object UserSettingsManager {
     var bitmask = 0
     var bit = 0
     bitmask = bitmask or ((if (autoInitEnabled.getValue()) 1 else 0) shl bit++)
-    bitmask = bitmask or ((if (autoLogAppEventsEnabled.getValue()) 1 else 0) shl bit++)
+    bitmask = bitmask or ((if (autoLogAppEventsEnabledLocally.getValue()) 1 else 0) shl bit++)
     bitmask = bitmask or ((if (advertiserIDCollectionEnabled.getValue()) 1 else 0) shl bit++)
     bitmask = bitmask or ((if (monitorEnabled.getValue()) 1 else 0) shl bit++)
     val previousBitmask = userSettingPref.getInt(USER_SETTINGS_BITMASK, 0)
@@ -313,10 +304,10 @@ internal object UserSettingsManager {
 
   @JvmStatic
   fun setAutoLogAppEventsEnabled(flag: Boolean) {
-    autoLogAppEventsEnabled.value = flag
-    autoLogAppEventsEnabled.lastTS = System.currentTimeMillis()
+    autoLogAppEventsEnabledLocally.value = flag
+    autoLogAppEventsEnabledLocally.lastTS = System.currentTimeMillis()
     if (isInitialized.get()) {
-      writeSettingToCache(autoLogAppEventsEnabled)
+      writeSettingToCache(autoLogAppEventsEnabledLocally)
     } else {
       initializeIfNotInitialized()
     }
@@ -325,7 +316,7 @@ internal object UserSettingsManager {
   @JvmStatic
   fun getAutoLogAppEventsEnabled(): Boolean {
     initializeIfNotInitialized()
-    return autoLogAppEventsEnabled.getValue()
+    return autoLogAppEventsEnabledLocally.getValue()
   }
 
   @JvmStatic
