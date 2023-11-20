@@ -347,14 +347,14 @@ internal object UserSettingsManager {
     readAutoLogAppEventsSettingFromCache()?.let {
       return it
     }
-    
+
     loadAutoLogAppEventsSettingFromManifest()?.let {
       return it
     }
-    
+
     return null
   }
-  
+
   @JvmStatic
   private fun readAutoLogAppEventsSettingFromCache(): Boolean? {
     validateInitialized()
@@ -383,7 +383,7 @@ internal object UserSettingsManager {
     }
     return null
   }
-  
+
   @JvmStatic
   fun setAdvertiserIDCollectionEnabled(flag: Boolean) {
     advertiserIDCollectionEnabled.value = flag
