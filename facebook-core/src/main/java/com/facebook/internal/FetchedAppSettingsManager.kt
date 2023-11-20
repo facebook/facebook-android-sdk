@@ -67,8 +67,8 @@ object FetchedAppSettingsManager {
   private const val STANDARD_PARAMS_KEY = "standard_params"
   private const val MACA_RULES_KEY = "maca_rules"
 
-  private const val AUTO_LOG_APP_EVENTS_DEFAULT_FIELD = "auto_log_app_events_default"
-  private const val AUTO_LOG_APP_EVENT_ENABLED_FIELD = "auto_log_app_events_enabled"
+  internal const val AUTO_LOG_APP_EVENTS_DEFAULT_FIELD = "auto_log_app_events_default"
+  internal const val AUTO_LOG_APP_EVENT_ENABLED_FIELD = "auto_log_app_events_enabled"
 
   private val APP_SETTING_FIELDS =
       listOf(
@@ -206,7 +206,30 @@ object FetchedAppSettingsManager {
       handler.post { callback.onSuccess(appSettings) }
     }
   }
+  
+  @JvmStatic
+  fun getCachedMigratedAutoLogValuesInAppSettings() : Map<String, Boolean>? {
+    val context = FacebookSdk.getApplicationContext()
+    val applicationId = FacebookSdk.getApplicationId()
+    val settingsKey = String.format(APP_SETTINGS_PREFS_KEY_FORMAT, applicationId)
+    val sharedPrefs = context.getSharedPreferences(APP_SETTINGS_PREFS_STORE, Context.MODE_PRIVATE)
+    val settingsJSONString = sharedPrefs.getString(settingsKey, null)
 
+    if (!Utility.isNullOrEmpty(settingsJSONString)) {
+      checkNotNull(settingsJSONString)
+      var settingsJSON: JSONObject? = null
+      try {
+        settingsJSON = JSONObject(settingsJSONString)
+      } catch (je: JSONException) {
+        Utility.logd(Utility.LOG_TAG, je)
+      }
+      settingsJSON?.let {
+        return parseMigratedAutoLogValues(settingsJSON)
+      }
+    }
+    return null
+  }
+  
   // Note that this method makes a synchronous Graph API call, so should not be called from the
   // main thread. This call can block for long time if network is not available and network
   // timeout is long.
