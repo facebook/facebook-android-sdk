@@ -66,7 +66,8 @@ object FetchedAppSettingsManager {
   private const val PROTECTED_MODE_RULES = "protected_mode_rules"
   private const val STANDARD_PARAMS_KEY = "standard_params"
   private const val MACA_RULES_KEY = "maca_rules"
-
+  private const val BLOCKLIST_EVENTS_KEY = "blocklist_events"
+  
   internal const val AUTO_LOG_APP_EVENTS_DEFAULT_FIELD = "auto_log_app_events_default"
   internal const val AUTO_LOG_APP_EVENT_ENABLED_FIELD = "auto_log_app_events_enabled"
 
@@ -295,6 +296,7 @@ object FetchedAppSettingsManager {
             parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), STANDARD_PARAMS_KEY),
             parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), MACA_RULES_KEY), 
             parseMigratedAutoLogValues(settingsJSON),
+            parseProtectedModeRules(settingsJSON.optJSONObject(PROTECTED_MODE_RULES), BLOCKLIST_EVENTS_KEY)
         )
     fetchedAppSettings[applicationId] = result
     return result

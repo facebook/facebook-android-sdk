@@ -11,6 +11,7 @@ package com.facebook.internal
 import com.facebook.FacebookPowerMockTestCase
 import java.util.EnumSet
 import org.assertj.core.api.Assertions.assertThat
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,6 +29,7 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
           "  \"smart_login_bookmark_icon_url\": \"swag\",\n" +
           "  \"smart_login_menu_icon_url\": \"yolo\",\n" +
           "  \"android_dialog_configs\": \"garbage\",\n" +
+          "  \"protected_mode_rules\": {\"blocklist_events\": [\"test_event_for_block_list_1\", \"test_event_for_block_list_2\"]},\n" +
           "  \"auto_log_app_events_default\": true,\n" +
           "  \"auto_log_app_events_enabled\": true\n" +
           "}"
@@ -38,6 +40,7 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
           "  \"supports_implicit_sdk_logging\": \"true\",\n" +
           "  \"suggested_events_setting\": \"[]\",\n" +
           "  \"aam_rules\": \"hello\",\n" +
+          "  \"protected_mode_rules\": \"hello\",\n" +
           "  \"app_events_session_timeout\": 6.4\n" +
           "}"
 
@@ -57,6 +60,9 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(result.migratedAutoLogValues).isNotEmpty
     assertThat(result.migratedAutoLogValues?.get("auto_log_app_events_default")).isTrue
     assertThat(result.migratedAutoLogValues?.get("auto_log_app_events_enabled")).isTrue
+    assertThat(result.blocklistEvents).isNotNull
+    assertEquals(JSONArray(listOf("test_event_for_block_list_1", "test_event_for_block_list_2")), result.blocklistEvents)
+    
 
     // defaults
     assertThat(result.nuxEnabled).isFalse
