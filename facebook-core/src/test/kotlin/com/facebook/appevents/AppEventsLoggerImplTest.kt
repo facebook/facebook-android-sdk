@@ -320,7 +320,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     whenever(OnDeviceProcessingManager.sendInstallEventAsync(eq(mockAppID), any())).thenAnswer {
       sendInstallEventTimes++
       Unit
-    }
+    }    
     FacebookSdk.publishInstallAsync(
         FacebookSdk.getApplicationContext(), FacebookSdk.getApplicationId())
     verify(mockGraphRequestCreator)
@@ -333,6 +333,28 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     assertThat(captor.value.getString("anon_id")).isEqualTo(mockAnonID)
 
     assertThat(sendInstallEventTimes).isEqualTo(1)
+  }
+  
+  @Test
+  fun testPublishInstallWithAppEventsSkillswitchEnabled() {
+    FacebookSdk.setAdvertiserIDCollectionEnabled(true)
+    val mockGraphRequestCreator: GraphRequestCreator = mock()
+    FacebookSdk.setGraphRequestCreator(mockGraphRequestCreator)
+    val expectedEvent = "MOBILE_APP_INSTALL"
+    val expectedUrl = "$mockAppID/activities"
+    val captor = ArgumentCaptor.forClass(JSONObject::class.java)
+
+    // Should not publish install event given that app_events_killswitch is turned on
+    PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
+    PowerMockito.`when`(
+            FetchedAppGateKeepersManager.getGateKeeperForKey(
+                    eq(APP_EVENTS_KILLSWITCH), any(), any()))
+            .thenReturn(true)
+
+    FacebookSdk.publishInstallAsync(
+            FacebookSdk.getApplicationContext(), FacebookSdk.getApplicationId())
+    verify(mockGraphRequestCreator, never())
+            .createPostRequest(isNull(), eq(expectedUrl), captor.capture(), isNull())
   }
 
   @Test

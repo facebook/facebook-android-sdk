@@ -401,7 +401,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
       }
     }
     private const val APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences"
-    private const val APP_EVENTS_KILLSWITCH = "app_events_killswitch"
+    const val APP_EVENTS_KILLSWITCH = "app_events_killswitch"
+    
     @JvmStatic
     fun activateApp(application: Application, applicationId: String?) {
       var applicationId = applicationId

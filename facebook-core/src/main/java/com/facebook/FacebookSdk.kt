@@ -17,6 +17,7 @@ import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.facebook.appevents.AppEventsLogger
+import com.facebook.appevents.AppEventsLoggerImpl
 import com.facebook.appevents.AppEventsManager
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
 import com.facebook.appevents.internal.AppEventsLoggerUtility
@@ -25,8 +26,10 @@ import com.facebook.core.BuildConfig
 import com.facebook.internal.AttributionIdentifiers.Companion.getAttributionIdentifiers
 import com.facebook.internal.BoltsMeasurementEventListener
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettingsManager.loadAppSettingsAsync
 import com.facebook.internal.LockOnGetVariable
+import com.facebook.internal.Logger.Companion.log
 import com.facebook.internal.NativeProtocol.updateAllAvailableProtocolVersionsAsync
 import com.facebook.internal.ServerProtocol.getDefaultAPIVersion
 import com.facebook.internal.Utility
@@ -641,7 +644,9 @@ object FacebookSdk {
     // grab the application context ahead of time, since we will return to the caller
     // immediately.
     val applicationContext = context.applicationContext ?: return
-    getExecutor().execute { publishInstallAndWaitForResponse(applicationContext, applicationId) }
+    if (!FetchedAppGateKeepersManager.getGateKeeperForKey(AppEventsLoggerImpl.APP_EVENTS_KILLSWITCH, getApplicationId(), false)) {
+      getExecutor().execute { publishInstallAndWaitForResponse(applicationContext, applicationId) }
+    }
     if (FeatureManager.isEnabled(FeatureManager.Feature.OnDeviceEventProcessing) &&
         OnDeviceProcessingManager.isOnDeviceProcessingEnabled()) {
       OnDeviceProcessingManager.sendInstallEventAsync(applicationId, ATTRIBUTION_PREFERENCES)
@@ -678,6 +683,11 @@ object FacebookSdk {
           lastPing = System.currentTimeMillis()
           editor.putLong(pingKey, lastPing)
           editor.apply()
+          log(
+            LoggingBehavior.APP_EVENTS,
+            TAG,
+            "MOBILE_APP_INSTALL has been logged"
+          )
         }
       }
     } catch (e: Exception) {
