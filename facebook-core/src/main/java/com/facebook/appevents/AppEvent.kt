@@ -15,6 +15,7 @@ import com.facebook.FacebookException
 import com.facebook.LoggingBehavior
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager.processDeprecatedParameters
 import com.facebook.appevents.integrity.IntegrityManager
+import com.facebook.appevents.integrity.RedactedEventsManager
 import com.facebook.appevents.internal.AppEventUtility.bytesToHex
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processEvent
@@ -83,18 +84,23 @@ class AppEvent : Serializable {
         } else calculateChecksum() == checksum
 
   private fun getJSONObjectForAppEvent(
-      contextName: String,
-      eventName: String,
-      valueToSum: Double?,
-      parameters: Bundle?,
-      currentSessionId: UUID?
+          contextName: String,
+          eventName: String,
+          valueToSum: Double?,
+          parameters: Bundle?,
+          currentSessionId: UUID?
   ): JSONObject {
-    var eventName = eventName
     validateIdentifier(eventName)
     val eventObject = JSONObject()
-    eventName = processEvent(eventName)
-    eventObject.put(Constants.EVENT_NAME_EVENT_KEY, eventName)
-    eventObject.put(Constants.EVENT_NAME_MD5_EVENT_KEY, md5Checksum(eventName))
+    var finalEventName = processEvent(eventName)
+
+    if (finalEventName == eventName) {
+      /* move forward to next check on event name redaction */
+      finalEventName = RedactedEventsManager.processEventsRedaction(eventName)
+    }
+
+    eventObject.put(Constants.EVENT_NAME_EVENT_KEY, finalEventName)
+    eventObject.put(Constants.EVENT_NAME_MD5_EVENT_KEY, md5Checksum(finalEventName))
     eventObject.put(Constants.LOG_TIME_APP_EVENT_KEY, System.currentTimeMillis() / 1000)
     eventObject.put("_ui", contextName)
     if (currentSessionId != null) {
@@ -139,7 +145,7 @@ class AppEvent : Serializable {
     processDeprecatedParameters(paramMap as MutableMap<String, String?>, name)
     return paramMap
   }
-
+  
   internal class SerializationProxyV2
   constructor(
       private val jsonString: String,
