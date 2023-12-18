@@ -294,6 +294,13 @@ class UtilityTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun testConvertJSONArrayToHashSet() {
+    val validJson = "[\"foo\", \"bar\"]"
+    val result = Utility.convertJSONArrayToHashSet(JSONArray(validJson))
+    assertEquals(hashSetOf("foo", "bar"), result)
+  }
+
+  @Test
   fun testSetAppEventAttributionParametersWithoutServiceUpdateCompliance() {
     whenever(FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance))
         .thenReturn(false)

@@ -333,6 +333,19 @@ object Utility {
   }
 
   @JvmStatic
+  fun convertJSONArrayToHashSet(jsonArray: JSONArray?): HashSet<String>? {
+      if (jsonArray == null || jsonArray?.length() == 0) {
+          return null
+      }
+      val hashSet: HashSet<String> = HashSet()
+      for (i in 0 until jsonArray.length()) {
+          val element: String = jsonArray.getString(i)
+          hashSet.add(element)
+      }
+      return hashSet
+  }
+    
+  @JvmStatic
   fun convertJSONArrayToList(jsonArray: JSONArray): List<String> {
     return try {
       val result: MutableList<String> = ArrayList()

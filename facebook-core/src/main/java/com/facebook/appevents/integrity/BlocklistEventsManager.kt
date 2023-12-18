@@ -8,23 +8,46 @@
 
 package com.facebook.appevents.integrity
 
+import com.facebook.FacebookSdk
+import com.facebook.internal.FetchedAppSettingsManager
+import com.facebook.internal.Utility.convertJSONArrayToHashSet
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import kotlin.collections.HashSet
 
 @AutoHandleExceptions
 object BlocklistEventsManager {
     private var enabled = false
-
+    private var blocklist: MutableSet<String> = HashSet()
+    
     @JvmStatic
     fun enable() {
-        enabled = true
+        loadBlocklistEvents()
+        if (!blocklist.isNullOrEmpty()) {
+            enabled = true
+        }
+    }
+
+    @JvmStatic
+    fun disable() {
+        enabled = false
+        blocklist = HashSet()
+    }
+
+    private fun loadBlocklistEvents() {
+        val settings = FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false)
+                ?: return
+
+        convertJSONArrayToHashSet(settings.blocklistEvents)?.let {
+            blocklist = it
+        }
     }
 
     /** check if the event is in the blocklist */
     @JvmStatic
-    fun isInBlocklist(
-            eventName: String
-    ): Boolean {
-        // stub
-        return false
+    fun isInBlocklist(eventName: String): Boolean {
+        if (!enabled) {
+            return false
+        }
+        return blocklist.contains(eventName)
     }
 }
