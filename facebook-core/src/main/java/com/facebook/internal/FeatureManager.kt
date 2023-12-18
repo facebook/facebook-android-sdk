@@ -96,6 +96,7 @@ object FeatureManager {
     featureMapping[Feature.ProtectedMode] = arrayOf("com.facebook.appevents.integrity.ProtectedModeManager")
     featureMapping[Feature.MACARuleMatching] = arrayOf("com.facebook.appevents.integrity.MACARuleMatchingManager")
     featureMapping[Feature.BlocklistEvents] = arrayOf("com.facebook.appevents.integrity.BlocklistEventsManager")
+    featureMapping[Feature.FilterRedactedEvents] = arrayOf("com.facebook.appevents.integrity.RedactedEventsManager")
     featureMapping[Feature.EventDeactivation] = arrayOf("com.facebook.appevents.eventdeactivation.")
     featureMapping[Feature.OnDeviceEventProcessing] =
         arrayOf("com.facebook.appevents.ondeviceprocessing.")
@@ -132,6 +133,7 @@ object FeatureManager {
       Feature.ProtectedMode,
       Feature.MACARuleMatching,
       Feature.BlocklistEvents,
+      Feature.FilterRedactedEvents,
       Feature.ChromeCustomTabsPrefetching,
       Feature.Monitoring,
       Feature.IgnoreAppSwitchToLoggedOut,
@@ -164,6 +166,7 @@ object FeatureManager {
     ProtectedMode(0x00010404), /* filter out the params which are not supported legally */
     MACARuleMatching(0x00010405),
     BlocklistEvents(0x00010406), /* drop the events in the blocklist */
+    FilterRedactedEvents(0x00010407), /* replace the event name via the redaction string */
     EventDeactivation(0x00010500),
     OnDeviceEventProcessing(0x00010600),
     OnDevicePostInstallEventProcessing(0x00010601),
@@ -211,6 +214,7 @@ object FeatureManager {
           ProtectedMode -> "ProtectedMode"
           MACARuleMatching -> "MACARuleMatching"
           BlocklistEvents -> "BlocklistEvents"
+          FilterRedactedEvents -> "FilterRedactedEvents"
           ModelRequest -> "ModelRequest"
           EventDeactivation -> "EventDeactivation"
           OnDeviceEventProcessing -> "OnDeviceEventProcessing"
