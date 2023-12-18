@@ -75,7 +75,8 @@ class BlocklistEventsManagerTest : FacebookPowerMockTestCase() {
             protectedModeStandardParamsSetting = emptyJSONArray,
             MACARuleMatchingSetting = emptyJSONArray,
             migratedAutoLogValues = null,
-            blocklistEvents = mockBlocklistEvents
+            blocklistEvents = mockBlocklistEvents,
+            redactedEvents = emptyJSONArray
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))

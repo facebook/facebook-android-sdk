@@ -29,7 +29,8 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
           "  \"smart_login_bookmark_icon_url\": \"swag\",\n" +
           "  \"smart_login_menu_icon_url\": \"yolo\",\n" +
           "  \"android_dialog_configs\": \"garbage\",\n" +
-          "  \"protected_mode_rules\": {\"blocklist_events\": [\"test_event_for_block_list_1\", \"test_event_for_block_list_2\"]},\n" +
+          "  \"protected_mode_rules\": {\"blocklist_events\": [\"test_event_for_block_list_1\", \"test_event_for_block_list_2\"], \n" +  
+          "  \"redacted_events\": [{\"key\":\"FilteredEvent\", \"value\":[\"abc\", \"def\"]}, {\"key\":\"RedactedEvent\", \"value\":[\"opq\", \"xyz\"]}]},\n" +
           "  \"auto_log_app_events_default\": true,\n" +
           "  \"auto_log_app_events_enabled\": true\n" +
           "}"
@@ -62,8 +63,16 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
     assertThat(result.migratedAutoLogValues?.get("auto_log_app_events_enabled")).isTrue
     assertThat(result.blocklistEvents).isNotNull
     assertEquals(JSONArray(listOf("test_event_for_block_list_1", "test_event_for_block_list_2")), result.blocklistEvents)
-    
 
+    val expectedRedactedEvents = JSONArray(listOf(mapOf("key" to "FilteredEvent", "value" to listOf("abc", "def")), mapOf("key" to "RedactedEvent", "value" to listOf("opq", "xyz"))))
+    assertThat(result.redactedEvents).isNotNull
+    assertEquals(result.redactedEvents?.length(), expectedRedactedEvents.length())
+    for (i in 0 until result.redactedEvents!!.length()) {
+      val obj = result.redactedEvents?.getJSONObject(i)
+      assertEquals(obj?.getString("key"), expectedRedactedEvents.getJSONObject(i).getString("key"))
+      assertEquals(obj?.getJSONArray("value"), expectedRedactedEvents.getJSONObject(i).getJSONArray("value"))
+    }
+    
     // defaults
     assertThat(result.nuxEnabled).isFalse
     assertEquals("", result.nuxContent)
