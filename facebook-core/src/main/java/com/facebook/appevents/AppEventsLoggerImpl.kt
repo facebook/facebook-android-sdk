@@ -23,6 +23,7 @@ import com.facebook.appevents.AppEventQueue.add
 import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
+import com.facebook.appevents.integrity.BlocklistEventsManager.isInBlocklist
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.integrity.ProtectedModeManager.processParametersForProtectedMode
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
@@ -316,6 +317,12 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
           eventName)
       return
     }
+    
+    // return earlier if the event name is in blocklist
+    if (isInBlocklist(eventName)) {
+      return 
+    }
+    
     try {
       MACARuleMatchingManager.processParameters(parameters, eventName)
       processParametersForProtectedMode(parameters)
