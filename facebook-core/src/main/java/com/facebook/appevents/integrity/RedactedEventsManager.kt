@@ -41,10 +41,15 @@ object RedactedEventsManager {
             if (redactedEventsFromServer !== null && redactedEventsFromServer.length() != 0) {
                 for (i in 0 until redactedEventsFromServer.length()) {
                     val jsonObject = redactedEventsFromServer.getJSONObject(i)
-                    val redactedString = jsonObject.getString("key")
-                    redactedString?.let { /* redacted String */
-                        convertJSONArrayToHashSet(jsonObject.getJSONArray("value"))?.let { /* event names under the specific redacted String */
-                            redactedEvents[redactedString] = it
+                    val hasKey = jsonObject.has("key")
+                    val hasValue = jsonObject.has("value")
+                    if (hasKey && hasValue) {
+                        val redactedString = jsonObject.getString("key")
+                        val eventsNeedToBeRedacted = jsonObject.getJSONArray("value")
+                        redactedString?.let { /* redacted String */
+                            convertJSONArrayToHashSet(eventsNeedToBeRedacted)?.let { /* event names under the specific redacted String */
+                                redactedEvents[redactedString] = it
+                            }
                         }
                     }
                 }

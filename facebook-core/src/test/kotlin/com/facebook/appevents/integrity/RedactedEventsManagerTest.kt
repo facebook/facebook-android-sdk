@@ -115,6 +115,20 @@ class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `test fetched redacted events list is invalid from the server`() {
+        var mockInvalidRedactedEventsFromServer = JSONArray()
+        val jsonObject = JSONObject().apply {
+            put("not_a_key", mockRedactedString)
+            put("not_a_value",mockRedactedEvents)
+        }
+        mockInvalidRedactedEventsFromServer.put(jsonObject)
+        initMockFetchedAppSettings(mockInvalidRedactedEventsFromServer)
+        enable()
+        val finalEventName = processEventsRedaction(mockEventNameInRedactedEventsList1)
+        Assertions.assertThat(finalEventName).isEqualTo(mockEventNameInRedactedEventsList1)
+    }
+
+    @Test
     fun `test fetched redacted events list is not null from the server and does not redaction`() {
         initMockFetchedAppSettings(mockRedactedEventsFromServer)
         enable()
