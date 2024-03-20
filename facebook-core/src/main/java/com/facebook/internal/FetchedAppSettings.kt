@@ -44,6 +44,7 @@ class FetchedAppSettings(
     val migratedAutoLogValues: Map<String, Boolean>?,
     val blocklistEvents: JSONArray?,
     val redactedEvents: JSONArray?,
+    val sensitiveParams: JSONArray?,
 ) {
 
   fun supportsImplicitLogging(): Boolean = supportsImplicitLogging

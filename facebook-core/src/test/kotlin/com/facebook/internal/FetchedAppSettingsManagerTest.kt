@@ -30,7 +30,8 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
           "  \"smart_login_menu_icon_url\": \"yolo\",\n" +
           "  \"android_dialog_configs\": \"garbage\",\n" +
           "  \"protected_mode_rules\": {\"blocklist_events\": [\"test_event_for_block_list_1\", \"test_event_for_block_list_2\"], \n" +  
-          "  \"redacted_events\": [{\"key\":\"FilteredEvent\", \"value\":[\"abc\", \"def\"]}, {\"key\":\"RedactedEvent\", \"value\":[\"opq\", \"xyz\"]}]},\n" +
+          "  \"redacted_events\": [{\"key\":\"FilteredEvent\", \"value\":[\"abc\", \"def\"]}, {\"key\":\"RedactedEvent\", \"value\":[\"opq\", \"xyz\"]}],\n" +
+          "  \"sensitive_params\": [{\"key\":\"test_event_1\", \"value\":[\"last name\", \"first name\"]}, {\"key\":\"test_event_2\", \"value\":[\"address\", \"ssn\"]}]},\n" +
           "  \"auto_log_app_events_default\": true,\n" +
           "  \"auto_log_app_events_enabled\": true\n" +
           "}"
@@ -71,6 +72,15 @@ class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {
       val obj = result.redactedEvents?.getJSONObject(i)
       assertEquals(obj?.getString("key"), expectedRedactedEvents.getJSONObject(i).getString("key"))
       assertEquals(obj?.getJSONArray("value"), expectedRedactedEvents.getJSONObject(i).getJSONArray("value"))
+    }
+
+    val expectedSensitiveParams = JSONArray(listOf(mapOf("key" to "test_event_1", "value" to listOf("last name", "first name")), mapOf("key" to "test_event_2", "value" to listOf("address", "ssn"))))
+    assertThat(result.sensitiveParams).isNotNull
+    assertEquals(result.sensitiveParams?.length(), expectedSensitiveParams.length())
+    for (i in 0 until result.sensitiveParams!!.length()) {
+      val obj = result.sensitiveParams?.getJSONObject(i)
+      assertEquals(obj?.getString("key"), expectedSensitiveParams.getJSONObject(i).getString("key"))
+      assertEquals(obj?.getJSONArray("value"), expectedSensitiveParams.getJSONObject(i).getJSONArray("value"))
     }
     
     // defaults

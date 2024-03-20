@@ -73,7 +73,8 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             MACARuleMatchingSetting = emptyJSONArray,
             migratedAutoLogValues = null,
             blocklistEvents = emptyJSONArray,
-            redactedEvents = emptyJSONArray
+            redactedEvents = emptyJSONArray,
+            sensitiveParams = emptyJSONArray
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))
