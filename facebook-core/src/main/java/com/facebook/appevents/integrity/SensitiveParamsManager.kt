@@ -72,7 +72,7 @@ object SensitiveParamsManager {
         if (!sensitiveParameters.containsKey(eventName)) {
             return
         }
-        
+
         val filteredParamsJSON = JSONArray()
         try {
             val sensitiveParamsForEvent = sensitiveParameters.get(key = eventName)
@@ -86,7 +86,7 @@ object SensitiveParamsManager {
         } catch (e: Exception) {
             /* swallow */
         }
-        
+
         if (filteredParamsJSON.length() > 0) {
             parameters[SENSITIVE_PARAMS_KEY] = filteredParamsJSON.toString()
         }

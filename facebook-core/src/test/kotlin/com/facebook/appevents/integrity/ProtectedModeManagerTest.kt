@@ -12,6 +12,7 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.*
+import org.assertj.core.api.Assertions
 import org.junit.Assert.assertTrue
 import org.json.JSONArray
 import org.junit.After
@@ -50,35 +51,35 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
 
     fun initMockFetchedAppSettings(mockStandardParams:JSONArray?) {
         val mockFetchedAppSettings = FetchedAppSettings(
-            false,
-            "",
-            false,
-            1,
-            SmartLoginOption.parseOptions(0),
-            emptyMap(),
-            false,
-            mockFacebookRequestErrorClassification,
-            "",
-            "",
-            false,
-            codelessEventsEnabled = false,
-            eventBindings = emptyJSONArray,
-            sdkUpdateMessage = "",
-            trackUninstallEnabled = false,
-            monitorViaDialogEnabled = false,
-            rawAamRules = "",
-            suggestedEventsSetting = "",
-            restrictiveDataSetting = "",
-            protectedModeStandardParamsSetting = mockStandardParams,
-            MACARuleMatchingSetting = emptyJSONArray,
-            migratedAutoLogValues = null,
-            blocklistEvents = emptyJSONArray,
-            redactedEvents = emptyJSONArray,
-            sensitiveParams = emptyJSONArray
+                false,
+                "",
+                false,
+                1,
+                SmartLoginOption.parseOptions(0),
+                emptyMap(),
+                false,
+                mockFacebookRequestErrorClassification,
+                "",
+                "",
+                false,
+                codelessEventsEnabled = false,
+                eventBindings = emptyJSONArray,
+                sdkUpdateMessage = "",
+                trackUninstallEnabled = false,
+                monitorViaDialogEnabled = false,
+                rawAamRules = "",
+                suggestedEventsSetting = "",
+                restrictiveDataSetting = "",
+                protectedModeStandardParamsSetting = mockStandardParams,
+                MACARuleMatchingSetting = emptyJSONArray,
+                migratedAutoLogValues = null,
+                blocklistEvents = emptyJSONArray,
+                redactedEvents = emptyJSONArray,
+                sensitiveParams = emptyJSONArray
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))
-            .thenReturn(mockFetchedAppSettings)
+                .thenReturn(mockFetchedAppSettings)
     }
 
     @Test
@@ -204,6 +205,33 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
         assertEqual(mockParameters, expectedParameters)
+    }
+
+    @Test
+    fun `test protected mode is applied`() {
+        initMockFetchedAppSettings(mockStandardParamsFromServer)
+        val mockParametersWithPM = Bundle().apply {
+            putString("fb_currency", "USD")
+            putString("pm", "1")
+        }
+
+        var protectedModeIsApplied = ProtectedModeManager.protectedModeIsApplied(mockParametersWithPM)
+        Assertions.assertThat(protectedModeIsApplied).isTrue
+
+        val mockParametersWithoutPM = Bundle().apply {
+            putString("fb_currency", "USD")
+        }
+
+        protectedModeIsApplied = ProtectedModeManager.protectedModeIsApplied(mockParametersWithoutPM)
+        Assertions.assertThat(protectedModeIsApplied).isFalse
+
+        val mockParametersWithPMNotTrue = Bundle().apply {
+            putString("fb_currency", "USD")
+            putString("pm", "0")
+        }
+
+        protectedModeIsApplied = ProtectedModeManager.protectedModeIsApplied(mockParametersWithPMNotTrue)
+        Assertions.assertThat(protectedModeIsApplied).isFalse
     }
 
     private fun isEqual(mockBundle: Bundle?, expectedBundle: Bundle?): Boolean {
