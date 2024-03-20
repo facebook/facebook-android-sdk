@@ -105,26 +105,87 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
     @Test
     fun `test fetched sensitive params list is not null from the server and no params need to be filtered`() {
         initMockFetchedAppSettings(mockSensitiveParamsFromServer)
-        enable()
-        processFilterSensitiveParams(mockInputParams, mockEventNameWithoutSensitiveParams)
 
-        Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isFalse
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedFinalParamsWithoutChange)
+        var mockInputParamsWithoutSensitiveParams = HashMap<String, String?>()
+        mockInputParamsWithoutSensitiveParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+
+        enable()
+        processFilterSensitiveParams(mockInputParamsWithoutSensitiveParams, mockEventNameWithoutSensitiveParams)
+
+        var expectedFinalParamsWithoutChange = mockInputParamsWithoutSensitiveParams.toMap()
+
+        Assertions.assertThat(mockInputParamsWithoutSensitiveParams.containsKey(filteredParamsKey)).isFalse
+        Assertions.assertThat(mockInputParamsWithoutSensitiveParams).isEqualTo(expectedFinalParamsWithoutChange)
+    }
+
+    @Test
+    fun `test fetched sensitive params list has only default sensitive params from the server and need to filter the params`() {
+        initMockFetchedAppSettings(mockSensitiveParamsFromServerDefaultOnly)
+        enable()
+        processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
+
+        var expectedParams = HashMap<String, String?>()
+        var filteredParams = JSONArray()
+        filteredParams.put(mockSensitiveParam3)
+        expectedParams[filteredParamsKey] = filteredParams.toString()
+        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+        expectedParams[mockSensitiveParam1] = null
+        expectedParams[mockSensitiveParam2] = null
+
+        Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
+        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
     }
 
     @Test
     fun `test fetched sensitive params list is not null from the server and filter the params`() {
         initMockFetchedAppSettings(mockSensitiveParamsFromServer)
+        enable()
+        processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
         var expectedParams = HashMap<String, String?>()
         var filteredParams = JSONArray()
-        filteredParams.put(mockSensitiveParam1)
-        filteredParams.put(mockSensitiveParam2)
+        filteredParams.put(mockSensitiveParam3) /* default sensitive param */
+        filteredParams.put(mockSensitiveParam1) /* specific sensitive params */
+        filteredParams.put(mockSensitiveParam2) /* specific sensitive params */
         expectedParams[filteredParamsKey] = filteredParams.toString()
         expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
 
+        Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
+        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `test fetched sensitive params list default only from the server and filter the params`() {
+        initMockFetchedAppSettings(mockSensitiveParamsFromServerDefaultOnly)
         enable()
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
+
+        var expectedParams = HashMap<String, String?>()
+        var filteredParams = JSONArray()
+        filteredParams.put(mockSensitiveParam3) /* default sensitive param */
+        expectedParams[filteredParamsKey] = filteredParams.toString()
+        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+        expectedParams[mockSensitiveParam1] = null
+        expectedParams[mockSensitiveParam2] = null
+
+        Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
+        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
+    }
+
+    @Test
+    fun `test fetched sensitive params list specific only from the server and filter the params`() {
+        initMockFetchedAppSettings(mockSensitiveParamsFromServerWithoutDefault)
+        enable()
+        processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
+
+        var expectedParams = HashMap<String, String?>()
+        var filteredParams = JSONArray()
+        filteredParams.put(mockSensitiveParam1) /* specific sensitive params */
+        filteredParams.put(mockSensitiveParam2) /* specific sensitive params */
+
+        expectedParams[filteredParamsKey] = filteredParams.toString()
+        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+        expectedParams[mockSensitiveParam3] = null
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
         Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
@@ -135,22 +196,28 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
 
         private const val configKey = "key"
         private const val configValue = "value"
+
         private const val filteredParamsKey = "_filteredKey"
+        private const val defaultSensitiveParametersKey = "_MTSDK_Default_"
 
         private const val mockEventNameWithoutSensitiveParams = "install_app"
         private const val mockEventWithSensitiveParam = "sensitive_event_1"
         private const val mockSensitiveParam1 = "sensitive_param_1"
         private const val mockSensitiveParam2 = "sensitive_param_2"
+        private const val mockSensitiveParam3 = "sensitive_param_3"
         private const val mockNonSensitiveParam = "non_sensitive_param"
         private const val mockNonSensitiveParamValue = "param_value"
 
         private lateinit var emptyJSONArray: JSONArray
 
         /* mock sensitive params with event name */
-        private lateinit var mockSpecificSensitiveParams: JSONObject
+        private lateinit var mockDefaultSensitiveParams: JSONObject /* default sensitive params */
+        private lateinit var mockSpecificSensitiveParams: JSONObject /* non default sensitive params */
 
         /* mock config fetched from server */
-        private lateinit var mockSensitiveParamsFromServer: JSONArray
+        private lateinit var mockSensitiveParamsFromServerDefaultOnly: JSONArray /* default only */
+        private lateinit var mockSensitiveParamsFromServerWithoutDefault: JSONArray /* specific sensitive params only */
+        private lateinit var mockSensitiveParamsFromServer: JSONArray /* specific sensitive params and default */
 
         private lateinit var mockInputParams: HashMap<String, String?>
         private lateinit var expectedFinalParamsWithoutChange: Map<String, String?>
@@ -165,12 +232,26 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
                 put(configKey, mockEventWithSensitiveParam)
                 put(configValue, sensitiveParams)
             }
+            mockSensitiveParamsFromServerWithoutDefault = JSONArray()
+            mockSensitiveParamsFromServerWithoutDefault.put(mockSpecificSensitiveParams)
+
+            sensitiveParams = JSONArray()
+            sensitiveParams.put(mockSensitiveParam3)
+            mockDefaultSensitiveParams = JSONObject().apply {
+                put("key", defaultSensitiveParametersKey)
+                put("value", sensitiveParams)
+            }
+            mockSensitiveParamsFromServerDefaultOnly = JSONArray()
+            mockSensitiveParamsFromServerDefaultOnly.put(mockDefaultSensitiveParams)
+
             mockSensitiveParamsFromServer = JSONArray()
             mockSensitiveParamsFromServer.put(mockSpecificSensitiveParams)
+            mockSensitiveParamsFromServer.put(mockDefaultSensitiveParams)
 
             mockInputParams = HashMap()
             mockInputParams[mockSensitiveParam1] = null
             mockInputParams[mockSensitiveParam2] = null
+            mockInputParams[mockSensitiveParam3] = null
             mockInputParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
 
             expectedFinalParamsWithoutChange = mockInputParams.toMap()

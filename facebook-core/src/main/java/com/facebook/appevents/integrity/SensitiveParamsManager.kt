@@ -18,27 +18,42 @@ import kotlin.collections.HashSet
 @AutoHandleExceptions
 object SensitiveParamsManager {
     private var enabled = false
+
+    /* the parameters will be filtered out for all events */
+    private var defaultSensitiveParameters: HashSet<String> = HashSet()
+
+    /* the parameters will be filtered out based on the event name */
     private var sensitiveParameters: MutableMap<String, HashSet<String>> = HashMap()
-    private const val SENSITIVE_PARAMS_KEY = "_filteredKey"
+
+    private const val DEFAULT_SENSITIVE_PARAMS_KEY = "_MTSDK_Default_"
+    private const val SENSITIVE_PARAMS_KEY = "_filteredKey" /* send back to Meta server */
 
     @JvmStatic
     fun enable() {
         loadSensitiveParameters()
-        if (!sensitiveParameters.isNullOrEmpty()) {
-            enabled = true
+        if (defaultSensitiveParameters.isNullOrEmpty() && sensitiveParameters.isNullOrEmpty()) {
+            enabled = false
+            return
         }
+
+        /* enable only when there is non empty default sensitive params or non empty specific
+         * sensitive params
+         */
+        enabled = true
     }
 
     @JvmStatic
     fun disable() {
         enabled = false
         sensitiveParameters = HashMap()
+        defaultSensitiveParameters = HashSet()
     }
 
     private fun loadSensitiveParameters() {
         val settings = FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false)
                 ?: return
         try {
+            defaultSensitiveParameters = HashSet()
             sensitiveParameters = HashMap()
             val sensitiveParamsFromServer = settings.sensitiveParams
             if (sensitiveParamsFromServer != null && sensitiveParamsFromServer.length() != 0) {
@@ -47,12 +62,19 @@ object SensitiveParamsManager {
                     val hasEventName = jsonObject.has("key")
                     val hasSensitiveParams = jsonObject.has("value")
                     if (hasEventName && hasSensitiveParams) {
-                        val eventName = jsonObject.getString("key")
+                        /*  This indicates that the sensitive params are from the specific event 
+                         *  name or for all events which are the default sensitive params.
+                         */
+                        val sensitiveParamsScope = jsonObject.getString("key")
                         val sensitiveParams = jsonObject.getJSONArray("value")
-                        eventName?.let {
+                        sensitiveParamsScope?.let {
                             sensitiveParams?.let {
                                 convertJSONArrayToHashSet(sensitiveParams)?.let {
-                                    sensitiveParameters[eventName] = it
+                                    if (sensitiveParamsScope.equals(DEFAULT_SENSITIVE_PARAMS_KEY)) {
+                                        defaultSensitiveParameters = it
+                                    } else {
+                                        sensitiveParameters[sensitiveParamsScope] = it
+                                    }
                                 }
                             }
                         }
@@ -69,7 +91,7 @@ object SensitiveParamsManager {
         if (!enabled) {
             return
         }
-        if (!sensitiveParameters.containsKey(eventName)) {
+        if (defaultSensitiveParameters.isNullOrEmpty() && !sensitiveParameters.containsKey(eventName)) {
             return
         }
 
@@ -78,7 +100,7 @@ object SensitiveParamsManager {
             val sensitiveParamsForEvent = sensitiveParameters.get(key = eventName)
             val keys: List<String> = ArrayList(parameters.keys)
             for (key in keys) {
-                if (!sensitiveParamsForEvent.isNullOrEmpty() && sensitiveParamsForEvent.contains(key)) {
+                if (shouldFilterOut(key, sensitiveParamsForEvent)) {
                     parameters.remove(key)
                     filteredParamsJSON.put(key)
                 }
@@ -90,5 +112,10 @@ object SensitiveParamsManager {
         if (filteredParamsJSON.length() > 0) {
             parameters[SENSITIVE_PARAMS_KEY] = filteredParamsJSON.toString()
         }
+    }
+
+    private fun shouldFilterOut(parameterKey: String, sensitiveParamsForEvent: HashSet<String>?) : Boolean {
+        return defaultSensitiveParameters.contains(parameterKey)
+                || (!sensitiveParamsForEvent.isNullOrEmpty() && sensitiveParamsForEvent.contains(parameterKey))
     }
 }
