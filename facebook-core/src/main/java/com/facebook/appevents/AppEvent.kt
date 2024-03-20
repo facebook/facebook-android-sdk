@@ -16,6 +16,7 @@ import com.facebook.LoggingBehavior
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager.processDeprecatedParameters
 import com.facebook.appevents.integrity.IntegrityManager
 import com.facebook.appevents.integrity.RedactedEventsManager
+import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.internal.AppEventUtility.bytesToHex
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processEvent
@@ -140,6 +141,7 @@ class AppEvent : Serializable {
       }
       paramMap[key] = value.toString()
     }
+    processFilterSensitiveParams(paramMap as MutableMap<String, String?>, name)
     IntegrityManager.processParameters(paramMap)
     processParameters(paramMap as MutableMap<String, String?>, name)
     processDeprecatedParameters(paramMap as MutableMap<String, String?>, name)
