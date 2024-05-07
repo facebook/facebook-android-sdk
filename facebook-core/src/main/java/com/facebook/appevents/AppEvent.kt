@@ -15,6 +15,9 @@ import com.facebook.FacebookException
 import com.facebook.LoggingBehavior
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager.processDeprecatedParameters
 import com.facebook.appevents.integrity.IntegrityManager
+import com.facebook.appevents.integrity.ProtectedModeManager.protectedModeIsApplied
+import com.facebook.appevents.integrity.RedactedEventsManager
+import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.internal.AppEventUtility.bytesToHex
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processEvent
@@ -41,27 +44,27 @@ class AppEvent : Serializable {
 
   @Throws(JSONException::class, FacebookException::class)
   constructor(
-      contextName: String,
-      eventName: String,
-      valueToSum: Double?,
-      parameters: Bundle?,
-      isImplicitlyLogged: Boolean,
-      isInBackground: Boolean,
-      currentSessionId: UUID?
+          contextName: String,
+          eventName: String,
+          valueToSum: Double?,
+          parameters: Bundle?,
+          isImplicitlyLogged: Boolean,
+          isInBackground: Boolean,
+          currentSessionId: UUID?
   ) {
     isImplicit = isImplicitlyLogged
     inBackground = isInBackground
     name = eventName
     jsonObject =
-        getJSONObjectForAppEvent(contextName, eventName, valueToSum, parameters, currentSessionId)
+            getJSONObjectForAppEvent(contextName, eventName, valueToSum, parameters, currentSessionId)
     checksum = calculateChecksum()
   }
 
   private constructor(
-      jsonString: String,
-      isImplicit: Boolean,
-      inBackground: Boolean,
-      checksum: String?
+          jsonString: String,
+          isImplicit: Boolean,
+          inBackground: Boolean,
+          checksum: String?
   ) {
     jsonObject = JSONObject(jsonString)
     this.isImplicit = isImplicit
@@ -77,24 +80,29 @@ class AppEvent : Serializable {
   // for old events we don't have a checksum
   val isChecksumValid: Boolean
     get() =
-        if (checksum == null) {
-          // for old events we don't have a checksum
-          true
-        } else calculateChecksum() == checksum
+      if (checksum == null) {
+        // for old events we don't have a checksum
+        true
+      } else calculateChecksum() == checksum
 
   private fun getJSONObjectForAppEvent(
-      contextName: String,
-      eventName: String,
-      valueToSum: Double?,
-      parameters: Bundle?,
-      currentSessionId: UUID?
+          contextName: String,
+          eventName: String,
+          valueToSum: Double?,
+          parameters: Bundle?,
+          currentSessionId: UUID?
   ): JSONObject {
-    var eventName = eventName
     validateIdentifier(eventName)
     val eventObject = JSONObject()
-    eventName = processEvent(eventName)
-    eventObject.put(Constants.EVENT_NAME_EVENT_KEY, eventName)
-    eventObject.put(Constants.EVENT_NAME_MD5_EVENT_KEY, md5Checksum(eventName))
+    var finalEventName = processEvent(eventName)
+
+    if (finalEventName == eventName) {
+      /* move forward to next check on event name redaction */
+      finalEventName = RedactedEventsManager.processEventsRedaction(eventName)
+    }
+
+    eventObject.put(Constants.EVENT_NAME_EVENT_KEY, finalEventName)
+    eventObject.put(Constants.EVENT_NAME_MD5_EVENT_KEY, md5Checksum(finalEventName))
     eventObject.put(Constants.LOG_TIME_APP_EVENT_KEY, System.currentTimeMillis() / 1000)
     eventObject.put("_ui", contextName)
     if (currentSessionId != null) {
@@ -127,12 +135,15 @@ class AppEvent : Serializable {
       val value = parameters[key]
       if (value !is String && value !is Number) {
         throw FacebookException(
-            String.format(
-                "Parameter value '%s' for key '%s' should be a string" + " or a numeric type.",
-                value,
-                key))
+                String.format(
+                        "Parameter value '%s' for key '%s' should be a string" + " or a numeric type.",
+                        value,
+                        key))
       }
       paramMap[key] = value.toString()
+    }
+    if (!protectedModeIsApplied(parameters)) {
+      processFilterSensitiveParams(paramMap as MutableMap<String, String?>, name)
     }
     IntegrityManager.processParameters(paramMap)
     processParameters(paramMap as MutableMap<String, String?>, name)
@@ -142,10 +153,10 @@ class AppEvent : Serializable {
 
   internal class SerializationProxyV2
   constructor(
-      private val jsonString: String,
-      private val isImplicit: Boolean,
-      private val inBackground: Boolean,
-      private val checksum: String?
+          private val jsonString: String,
+          private val isImplicit: Boolean,
+          private val inBackground: Boolean,
+          private val checksum: String?
   ) : Serializable {
     @Throws(JSONException::class, ObjectStreamException::class)
     private fun readResolve(): Any {
@@ -164,10 +175,10 @@ class AppEvent : Serializable {
 
   override fun toString(): String {
     return String.format(
-        "\"%s\", implicit: %b, json: %s",
-        jsonObject.optString("_eventName"),
-        isImplicit,
-        jsonObject.toString())
+            "\"%s\", implicit: %b, json: %s",
+            jsonObject.optString("_eventName"),
+            isImplicit,
+            jsonObject.toString())
   }
 
   private fun calculateChecksum(): String {
@@ -207,11 +218,11 @@ class AppEvent : Serializable {
           identifier = "<None Provided>"
         }
         throw FacebookException(
-            String.format(
-                Locale.ROOT,
-                "Identifier '%s' must be less than %d characters",
-                identifier,
-                MAX_IDENTIFIER_LENGTH))
+                String.format(
+                        Locale.ROOT,
+                        "Identifier '%s' must be less than %d characters",
+                        identifier,
+                        MAX_IDENTIFIER_LENGTH))
       }
       var alreadyValidated: Boolean
       synchronized(validatedIdentifiers) {
@@ -222,11 +233,11 @@ class AppEvent : Serializable {
           synchronized(validatedIdentifiers) { validatedIdentifiers.add(identifier) }
         } else {
           throw FacebookException(
-              String.format(
-                  "Skipping event named '%s' due to illegal name - must be " +
-                      "under 40 chars and alphanumeric, _, - or space, and " +
-                      "not start with a space or hyphen.",
-                  identifier))
+                  String.format(
+                          "Skipping event named '%s' due to illegal name - must be " +
+                                  "under 40 chars and alphanumeric, _, - or space, and " +
+                                  "not start with a space or hyphen.",
+                          identifier))
         }
       }
     }

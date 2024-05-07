@@ -13,9 +13,12 @@ import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.iap.InAppPurchaseManager
+import com.facebook.appevents.integrity.BlocklistEventsManager
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.ml.ModelManager
 import com.facebook.appevents.integrity.ProtectedModeManager
+import com.facebook.appevents.integrity.RedactedEventsManager
+import com.facebook.appevents.integrity.SensitiveParamsManager
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.checkFeature
@@ -70,6 +73,21 @@ object AppEventsManager {
             checkFeature(FeatureManager.Feature.MACARuleMatching) { enabled ->
               if (enabled) {
                 MACARuleMatchingManager.enable()
+              }
+            }
+            checkFeature(FeatureManager.Feature.BlocklistEvents) { enabled ->
+              if (enabled) {
+                BlocklistEventsManager.enable()
+              }
+            }
+            checkFeature(FeatureManager.Feature.FilterRedactedEvents) { enabled ->
+              if (enabled) {
+                RedactedEventsManager.enable()
+              }
+            }
+            checkFeature(FeatureManager.Feature.FilterSensitiveParams) { enabled ->
+              if (enabled) {
+                SensitiveParamsManager.enable()
               }
             }
             checkFeature(FeatureManager.Feature.CloudBridge) { enabled ->
