@@ -660,7 +660,7 @@ object FacebookSdk {
       val preferences = context.getSharedPreferences(ATTRIBUTION_PREFERENCES, Context.MODE_PRIVATE)
       val pingKey = applicationId + "ping"
       var lastPing = preferences.getLong(pingKey, 0)
-      val publishParams =
+      var publishParams =
           try {
             AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
                 AppEventsLoggerUtility.GraphAPIActivityType.MOBILE_INSTALL_EVENT,
@@ -671,6 +671,10 @@ object FacebookSdk {
           } catch (e: JSONException) {
             throw FacebookException("An error occurred while publishing install.", e)
           }
+      val installReferrer = AppEventsLoggerImpl.getInstallReferrer()
+      if (installReferrer != null) {
+        publishParams.put("install_referrer", installReferrer)
+      }
       val publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId)
       val publishRequest =
           graphRequestCreator.createPostRequest(null, publishUrl, publishParams, null)
