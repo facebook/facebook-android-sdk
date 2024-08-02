@@ -9,5 +9,5 @@
 package com.facebook
 
 internal object FacebookSdkVersion {
-  const val BUILD = "17.0.0"
+  const val BUILD = "17.0.1"
 }
