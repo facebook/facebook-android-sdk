@@ -1,7 +1,6 @@
 object Config {
     const val minSdk = 15
     const val compileSdk = 31
-    const val IAPTargetSdk = 33
     const val targetSdk = 31
 }
 
