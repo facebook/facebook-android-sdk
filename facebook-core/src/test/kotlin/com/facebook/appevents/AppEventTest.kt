@@ -32,13 +32,6 @@ class AppEventTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun testChecksumOfAppEventName() {
-    val appEvent = AppEventTestUtilities.getTestAppEvent()
-    val eventNameMd5 = appEvent.getJSONObject().getString(Constants.EVENT_NAME_MD5_EVENT_KEY)
-    assertThat(eventNameMd5).isEqualTo("e0cf6877da9df873a85a2137fb5d2e26")
-  }
-
-  @Test
   fun testChecksumOfAppEvent() {
     val appEvent = AppEventTestUtilities.getTestAppEvent()
     assertThat(appEvent.isChecksumValid).isTrue

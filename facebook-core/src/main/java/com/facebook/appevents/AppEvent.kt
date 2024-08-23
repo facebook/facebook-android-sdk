@@ -102,7 +102,6 @@ class AppEvent : Serializable {
     }
 
     eventObject.put(Constants.EVENT_NAME_EVENT_KEY, finalEventName)
-    eventObject.put(Constants.EVENT_NAME_MD5_EVENT_KEY, md5Checksum(finalEventName))
     eventObject.put(Constants.LOG_TIME_APP_EVENT_KEY, System.currentTimeMillis() / 1000)
     eventObject.put("_ui", contextName)
     if (currentSessionId != null) {
