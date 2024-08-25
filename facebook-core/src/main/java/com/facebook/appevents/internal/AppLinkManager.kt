@@ -9,10 +9,14 @@
 package com.facebook.appevents.internal
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Bundle
 import com.facebook.FacebookSdk
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 
+@AutoHandleExceptions
 class AppLinkManager private constructor() {
 
   private val preferences: SharedPreferences by lazy {
@@ -38,5 +42,38 @@ class AppLinkManager private constructor() {
 
   fun getInfo(key: String): String? {
     return preferences.getString(key, null)
+  }
+
+  fun setupLifecycleListener(application: Application) {
+    application.registerActivityLifecycleCallbacks(
+      object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
+          // no-op
+        }
+
+        override fun onActivityStarted(activity: Activity) {
+          getInstance()?.handleURL(activity)
+        }
+
+        override fun onActivityResumed(activity: Activity) {
+          getInstance()?.handleURL(activity)
+        }
+
+        override fun onActivityPaused(activity: Activity) {
+          // no-op
+        }
+
+        override fun onActivityStopped(activity: Activity) {
+          // no-op
+        }
+
+        override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle) {
+          // no-op
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+          // no-op
+        }
+      })
   }
 }
