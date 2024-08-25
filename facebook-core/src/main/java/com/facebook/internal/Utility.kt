@@ -35,6 +35,7 @@ import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.HttpMethod
 import com.facebook.appevents.UserDataStore
+import com.facebook.appevents.internal.AppLinkManager
 import com.facebook.internal.ProfileInformationCache.getProfileInformation
 import com.facebook.internal.ProfileInformationCache.putProfileInformation
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
@@ -618,7 +619,11 @@ object Utility {
         params.put("installer_package", attributionIdentifiers.androidInstallerPackage)
       }
     }
-  } /* no op */
+    val campaignIDs = AppLinkManager.getInstance()?.getInfo(AppLinkManager.CAMPAIGN_IDS_KEY)
+    if (campaignIDs != null) {
+      params.put("campaign_ids", campaignIDs)
+    }
+  }
 
   /**
    * Get the app version of the app, as specified by the manifest.
