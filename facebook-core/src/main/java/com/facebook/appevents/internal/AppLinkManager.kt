@@ -12,9 +12,11 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import org.json.JSONObject
 
 @AutoHandleExceptions
 class AppLinkManager private constructor() {
@@ -25,6 +27,8 @@ class AppLinkManager private constructor() {
 
   companion object {
     const val APPLINK_INFO = "com.facebook.sdk.APPLINK_INFO"
+    const val APPLINK_DATA_KEY = "al_applink_data"
+    const val CAMPAIGN_IDS_KEY = "campaign_ids"
 
     @Volatile
     private var instance: AppLinkManager? = null
@@ -38,7 +42,19 @@ class AppLinkManager private constructor() {
       }
   }
 
-  fun handleURL(activity: Activity) {}
+  fun handleURL(activity: Activity) {
+    val uri = activity.intent.data ?: return
+    processCampaignIds(uri)
+  }
+
+  fun processCampaignIds(uri: Uri) {
+    val applinkData = uri.getQueryParameter(APPLINK_DATA_KEY) ?: return
+    try {
+      val json = JSONObject(applinkData)
+      val campaignIDs = json.getString(CAMPAIGN_IDS_KEY) ?: return
+      preferences.edit().putString(CAMPAIGN_IDS_KEY, campaignIDs).apply()
+    } catch (_: Exception) {}
+  }
 
   fun getInfo(key: String): String? {
     return preferences.getString(key, null)
