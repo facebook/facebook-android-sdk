@@ -21,6 +21,7 @@ import com.facebook.appevents.AppEventsLoggerImpl
 import com.facebook.appevents.AppEventsManager
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
 import com.facebook.appevents.internal.AppEventsLoggerUtility
+import com.facebook.appevents.internal.AppLinkManager
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager
 import com.facebook.core.BuildConfig
 import com.facebook.internal.AttributionIdentifiers.Companion.getAttributionIdentifiers
@@ -457,6 +458,7 @@ object FacebookSdk {
         UserSettingsManager.getAutoLogAppEventsEnabled()) {
       startTracking(FacebookSdk.applicationContext as Application, applicationId)
     }
+    AppLinkManager.getInstance()?.setupLifecycleListener(FacebookSdk.applicationContext as Application)
 
     // Load app settings from network so that dialog configs are available
     loadAppSettingsAsync()
