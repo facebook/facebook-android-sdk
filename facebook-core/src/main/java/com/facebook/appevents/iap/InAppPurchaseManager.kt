@@ -10,6 +10,10 @@ package com.facebook.appevents.iap
 
 import android.content.pm.PackageManager
 import androidx.annotation.RestrictTo
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.NONE
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_Plus
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
@@ -19,40 +23,67 @@ import java.util.concurrent.atomic.AtomicBoolean
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseManager {
-  private const val GOOGLE_BILLINGCLIENT_VERSION = "com.google.android.play.billingclient.version"
-  private val enabled = AtomicBoolean(false)
+    private const val GOOGLE_BILLINGCLIENT_VERSION = "com.google.android.play.billingclient.version"
+    private val enabled = AtomicBoolean(false)
 
-  @JvmStatic
-  fun enableAutoLogging() {
-    enabled.set(true)
-    startTracking()
-  }
-
-  @JvmStatic
-  fun startTracking() {
-    if (enabled.get()) {
-      if (usingBillingLib2Plus() && isEnabled(FeatureManager.Feature.IapLoggingLib2)) {
-        InAppPurchaseAutoLogger.startIapLogging(getApplicationContext())
-      } else {
-        InAppPurchaseActivityLifecycleTracker.startIapLogging()
-      }
+    @JvmStatic
+    fun enableAutoLogging() {
+        enabled.set(true)
+        startTracking()
     }
-  }
 
-  private fun usingBillingLib2Plus(): Boolean {
-    return try {
-      val context = getApplicationContext()
-      val info =
-          context.packageManager.getApplicationInfo(
-              context.packageName, PackageManager.GET_META_DATA)
-      if (info != null) {
-        val version = info.metaData.getString(GOOGLE_BILLINGCLIENT_VERSION)
-        val versionArray = if (version === null) return false else version.split(".", limit = 3)
-        return versionArray[0].toInt() >= 2
-      }
-      false
-    } catch (e: Exception) {
-      false
+    @JvmStatic
+    fun startTracking() {
+        if (!enabled.get()) {
+            return
+        }
+        // Delegate IAP logic to separate handler based on Google Play Billing Library version
+        when (getIAPHandler()) {
+            NONE -> return
+            V1 -> InAppPurchaseActivityLifecycleTracker.startIapLogging()
+            V2_V4 -> {
+                if (isEnabled(FeatureManager.Feature.IapLoggingLib2)) {
+                    InAppPurchaseAutoLogger.startIapLogging(getApplicationContext())
+                } else {
+                    InAppPurchaseActivityLifecycleTracker.startIapLogging()
+                }
+            }
+
+            V5_Plus -> return
+        }
     }
-  }
+
+    private fun getIAPHandler(): InAppPurchaseUtils.BillingClientVersion {
+        try {
+            val context = getApplicationContext()
+            val info =
+                context.packageManager.getApplicationInfo(
+                    context.packageName, PackageManager.GET_META_DATA
+                )
+            // If we can't find the package, the billing client wrapper will not be able
+            // to fetch any of the necessary methods/classes.
+            val version = info.metaData.getString(GOOGLE_BILLINGCLIENT_VERSION)
+                ?: return NONE
+            val versionArray = version.split(
+                ".",
+                limit = 3
+            )
+            if (version.isEmpty()) {
+                // Default to newest version
+                return V5_Plus
+            }
+            val majorVersion =
+                versionArray[0].toIntOrNull() ?: return V5_Plus
+            return if (majorVersion == 1) {
+                V1
+            } else if (majorVersion < 5) {
+                V2_V4
+            } else {
+                V5_Plus
+            }
+        } catch (e: Exception) {
+            // Default to newest version
+            return V5_Plus
+        }
+    }
 }
