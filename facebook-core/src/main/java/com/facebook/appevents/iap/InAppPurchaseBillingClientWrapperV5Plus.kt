@@ -270,7 +270,7 @@ private constructor(
             val listenerObj = Proxy.newProxyInstance(
                 purchasesResponseListenerClazz.classLoader,
                 arrayOf(purchasesResponseListenerClazz),
-                ListenerWrapper(null)
+                ListenerWrapper(arrayOf(productType))
             )
             invokeMethod(
                 billingClientClazz,
@@ -288,7 +288,7 @@ private constructor(
             val listenerObj = Proxy.newProxyInstance(
                 purchaseHistoryResponseListenerClazz.classLoader,
                 arrayOf(purchaseHistoryResponseListenerClazz),
-                ListenerWrapper(null)
+                ListenerWrapper(arrayOf(productType))
             )
             invokeMethod(
                 billingClientClazz,
@@ -301,7 +301,7 @@ private constructor(
         executeServiceRequest(runnableQuery)
     }
 
-    fun queryProductDetailsAsync(
+    private fun queryProductDetailsAsync(
         productType: InAppPurchaseUtils.IAPProductType,
         productIds: List<String>
     ) {
@@ -355,10 +355,15 @@ private constructor(
 
     @AutoHandleExceptions
     private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        val productType = wrapperArgs?.get(0)
+        if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
+            return
+        }
         val purchaseList = listenerArgs?.get(1)
         if (purchaseList == null || purchaseList !is List<*>) {
             return
         }
+        val productIds = mutableListOf<String>()
         for (purchase in purchaseList) {
             val purchaseJsonStr =
                 invokeMethod(
@@ -369,17 +374,28 @@ private constructor(
             val purchaseJson = JSONObject(purchaseJsonStr)
             if (purchaseJson.has(PRODUCT_ID)) {
                 val productId = purchaseJson.getString(PRODUCT_ID)
+                if (productId !in productDetailsMap) {
+                    productIds.add(productId)
+                }
                 purchaseDetailsMap[productId] = purchaseJson
             }
+        }
+        if (productIds.isNotEmpty()) {
+            queryProductDetailsAsync(productType, productIds)
         }
     }
 
     @AutoHandleExceptions
     private fun onPurchaseHistoryResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        val productType = wrapperArgs?.get(0)
+        if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
+            return
+        }
         val purchaseHistoryRecordList = listenerArgs?.get(1)
         if (purchaseHistoryRecordList == null || purchaseHistoryRecordList !is List<*>) {
             return
         }
+        val productIds = mutableListOf<String>()
         for (purchaseHistoryRecord in purchaseHistoryRecordList) {
             try {
                 val purchaseHistoryRecordJsonStr = invokeMethod(
@@ -392,17 +408,24 @@ private constructor(
                 purchaseHistoryRecordJson.put(PACKAGE_NAME, packageName)
                 if (purchaseHistoryRecordJson.has(PRODUCT_ID)) {
                     val productId = purchaseHistoryRecordJson.getString(PRODUCT_ID)
+                    if (productId !in productDetailsMap) {
+                        productIds.add(productId)
+                    }
                     purchaseDetailsMap[productId] = purchaseHistoryRecordJson
                 }
             } catch (e: Exception) {
                 /* swallow */
             }
         }
+        if (productIds.isNotEmpty()) {
+            queryProductDetailsAsync(productType, productIds)
+        }
     }
 
     @AutoHandleExceptions
     private fun onProductDetailsResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         val productDetailsList = listenerArgs?.get(1)
+
         if (productDetailsList == null || productDetailsList !is List<*>) {
             return
         }
@@ -419,12 +442,12 @@ private constructor(
                     val productId = productDetailJson.getString(PRODUCT_ID)
                     productDetailsMap[productId] = productDetailJson
                 }
-
             } catch (e: Exception) {
                 /* swallow */
             }
         }
     }
+
 
     @AutoHandleExceptions
     private fun onBillingSetupFinished(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {

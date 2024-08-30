@@ -208,6 +208,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         val billingResult: Any = mock()
         val proxy: Any = mock()
         val purchase: Any = mock()
+        val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
+        val wrapperArgs = arrayOf(productType)
         val purchaseList: List<*> = listOf(purchase)
 
         val args = arrayOf(billingResult, purchaseList)
@@ -218,10 +220,11 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 eq(purchase),
             )
         ).thenReturn(purchaseJsonStr)
+
         val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
             InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
-        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
             proxy,
             Class.forName(exampleClassName)
                 .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
@@ -236,6 +239,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         val billingResult: Any = mock()
         val proxy: Any = mock()
         val purchaseHistoryRecord: Any = mock()
+        val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
+        val wrapperArgs = arrayOf(productType)
         val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
 
         val args = arrayOf(billingResult, purchaseHistoryRecordList)
@@ -246,10 +251,11 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 eq(purchaseHistoryRecord),
             )
         ).thenReturn(purchaseHistoryRecordJsonStr)
+
         val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
             InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
-        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
             proxy,
             Class.forName(exampleClassName)
                 .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
