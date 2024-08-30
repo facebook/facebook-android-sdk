@@ -13,6 +13,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
+import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
 import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.Test
@@ -21,19 +22,42 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
+import org.powermock.api.mockito.PowerMockito.doReturn
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
+import java.lang.reflect.Proxy
+import java.lang.reflect.Proxy.newProxyInstance
 
-@PrepareForTest(FacebookSdk::class, InAppPurchaseUtils::class)
+@PrepareForTest(FacebookSdk::class, InAppPurchaseUtils::class, Proxy::class)
 class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() {
     private val exampleClassName =
         "com.facebook.appevents.iap.InAppPurchaseBillingClientWrapperV5PlusTest"
+    private val exampleListener = "com.facebook.appevents.iap.PurchasesUpdatedListener"
     private val exampleMethodName = "setup"
+    private val exampleResponse = "response"
 
     @Before
     override fun setup() {
         super.setup()
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
-        whenever(getClass(anyOrNull())).thenReturn(Class.forName(exampleClassName))
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+        ).thenReturn(exampleResponse)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        ).thenReturn(exampleResponse)
+        val listenerClazz =
+            Class.forName(exampleListener)
+        whenever(getClass(anyOrNull())).thenReturn(listenerClazz)
         whenever(
             getMethod(
                 any(),
@@ -45,6 +69,14 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 .getMethod(exampleMethodName)
         )
 
+        PowerMockito.mockStatic(Proxy::class.java)
+        whenever(
+            newProxyInstance(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        ).thenReturn(exampleResponse)
     }
 
     @Test

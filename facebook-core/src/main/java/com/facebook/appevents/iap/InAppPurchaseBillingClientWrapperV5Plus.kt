@@ -30,6 +30,7 @@ import org.json.JSONObject
 class InAppPurchaseBillingClientWrapperV5Plus
 private constructor(
     private val context: Context,
+    private val billingClient: Any,
     private val billingClientClazz: Class<*>,
     private val purchaseClazz: Class<*>,
     private val productDetailsClazz: Class<*>,
@@ -71,14 +72,11 @@ private constructor(
     private val queryProductDetailsParamsProductBuilderSetProductIdMethod: Method,
     private val queryProductDetailsParamsProductBuilderSetProductTypeMethod: Method,
 
-    private val billingClientNewBuilderMethod: Method,
-    private val billingClientBuilderSetListenerMethod: Method,
-    private val billingClientBuilderEnablePendingPurchasesMethod: Method,
-    private val billingClientBuilderBuildMethod: Method,
     private val billingClientStartConnectionMethod: Method
 ) {
 
-    companion object {
+    @AutoHandleExceptions
+    companion object : InvocationHandler {
         private val TAG = InAppPurchaseBillingClientWrapperV5Plus::class.java.canonicalName
         private var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
 
@@ -300,18 +298,7 @@ private constructor(
                     String::class.java
                 )
 
-            // Get methods: Create billing client
-            val billingClientNewBuilderMethod =
-                getMethod(billingClientClazz, METHOD_NEW_BUILDER, Context::class.java)
-            val billingClientBuilderSetListenerMethod =
-                getMethod(
-                    billingClientBuilderClazz,
-                    METHOD_SET_LISTENER,
-                    purchasesUpdatedListenerClazz
-                )
-            val billingClientBuilderEnablePendingPurchasesMethod =
-                getMethod(billingClientBuilderClazz, METHOD_ENABLE_PENDING_PURCHASES)
-            val billingClientBuilderBuildMethod = getMethod(billingClientBuilderClazz, METHOD_BUILD)
+            // Get methods: Start billing client connection
             val billingClientStartConnectionMethod =
                 getMethod(
                     billingClientClazz,
@@ -339,10 +326,6 @@ private constructor(
                 queryProductDetailsParamsProductBuilderSetProductIdMethod == null ||
                 queryProductDetailsParamsProductBuilderSetProductTypeMethod == null ||
 
-                billingClientNewBuilderMethod == null ||
-                billingClientBuilderSetListenerMethod == null ||
-                billingClientBuilderEnablePendingPurchasesMethod == null ||
-                billingClientBuilderBuildMethod == null ||
                 billingClientStartConnectionMethod == null
             ) {
                 Log.w(
@@ -352,10 +335,23 @@ private constructor(
                 return
             }
 
-            // TODO: Create a billing client
+            val billingClient = createBillingClient(
 
+                context,
+                billingClientClazz,
+                billingClientBuilderClazz,
+                purchasesUpdatedListenerClazz
+            )
+            if (billingClient == null) {
+                Log.w(
+                    TAG,
+                    "Failed to build a Google Play billing library wrapper for in-app purchase auto-logging"
+                )
+                return
+            }
             instance = InAppPurchaseBillingClientWrapperV5Plus(
                 context,
+                billingClient,
                 billingClientClazz,
                 purchaseClazz,
                 productDetailsClazz,
@@ -397,12 +393,70 @@ private constructor(
                 queryProductDetailsParamsProductBuilderSetProductIdMethod,
                 queryProductDetailsParamsProductBuilderSetProductTypeMethod,
 
-                billingClientNewBuilderMethod,
-                billingClientBuilderSetListenerMethod,
-                billingClientBuilderEnablePendingPurchasesMethod,
-                billingClientBuilderBuildMethod,
                 billingClientStartConnectionMethod
             )
         }
+
+        private fun createBillingClient(
+            context: Context,
+            billingClientClazz: Class<*>,
+            billingClientBuilderClazz: Class<*>,
+            purchasesUpdatedListenerClazz: Class<*>
+        ): Any? {
+            val billingClientNewBuilderMethod =
+                getMethod(billingClientClazz, METHOD_NEW_BUILDER, Context::class.java)
+            val billingClientBuilderSetListenerMethod =
+                getMethod(
+                    billingClientBuilderClazz,
+                    METHOD_SET_LISTENER,
+                    purchasesUpdatedListenerClazz
+                )
+            val billingClientBuilderEnablePendingPurchasesMethod =
+                getMethod(billingClientBuilderClazz, METHOD_ENABLE_PENDING_PURCHASES)
+            val billingClientBuilderBuildMethod = getMethod(billingClientBuilderClazz, METHOD_BUILD)
+
+            if (billingClientBuilderBuildMethod == null ||
+                billingClientBuilderSetListenerMethod == null ||
+                billingClientNewBuilderMethod == null ||
+                billingClientBuilderEnablePendingPurchasesMethod == null
+            ) {
+                return null
+            }
+
+            // 1. newBuilder(context)
+            var builder: Any? =
+                invokeMethod(billingClientClazz, billingClientNewBuilderMethod, null, context)
+
+            // 2. setListener(listener)
+            val listenerObj =
+                Proxy.newProxyInstance(
+                    purchasesUpdatedListenerClazz.classLoader,
+                    arrayOf(purchasesUpdatedListenerClazz),
+                    this
+                )
+            builder = invokeMethod(
+                billingClientBuilderClazz,
+                billingClientBuilderSetListenerMethod,
+                builder,
+                listenerObj
+            )
+            if (builder == null) {
+                return null
+            }
+
+            // 3. enablePendingPurchases()
+            builder = invokeMethod(
+                billingClientBuilderClazz,
+                billingClientBuilderEnablePendingPurchasesMethod,
+                builder
+            )
+
+            // 4. build()
+            return invokeMethod(billingClientBuilderClazz, billingClientBuilderBuildMethod, builder)
+        }
+
+        // This serves as the PurchasesUpdatedListener.
+        // Because we are not launching any purchases, we need not implement this.
+        override fun invoke(proxy: Any, m: Method, args: Array<Any>?): Any? = null
     }
 }
