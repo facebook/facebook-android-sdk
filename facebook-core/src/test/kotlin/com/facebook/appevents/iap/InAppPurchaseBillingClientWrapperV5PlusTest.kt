@@ -35,9 +35,12 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     private val exampleListener = "com.facebook.appevents.iap.PurchasesUpdatedListener"
     private val exampleMethodName = "setup"
     private val exampleResponse = "response"
-    private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
+    private val purchaseJsonStr = "{\"productId\":\"product_1\"}"
+    private val purchaseHistoryRecordJsonStr = "{\"productId\":\"product_2\"}"
     private val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
     private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
+    private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
+    private val METHOD_ON_PURCHASE_HISTORY_RESPONSE = "onPurchaseHistoryResponse"
 
     @Before
     override fun setup() {
@@ -193,7 +196,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         val proxy: Any = mock()
         val purchase: Any = mock()
         val purchaseList: List<*> = listOf(purchase)
-        val purchaseJsonStr = "{\"productId\":\"product_1\"}"
+
         val args = arrayOf(billingResult, purchaseList)
         whenever(
             invokeMethod(
@@ -215,8 +218,37 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
             .isEqualTo(JSONObject(purchaseJsonStr).toString())
     }
 
+    @Test
+    fun testQueryPurchaseHistoryAsync() {
+        val billingResult: Any = mock()
+        val proxy: Any = mock()
+        val purchaseHistoryRecord: Any = mock()
+        val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
+
+        val args = arrayOf(billingResult, purchaseHistoryRecordList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchaseHistoryRecord),
+            )
+        ).thenReturn(purchaseHistoryRecordJsonStr)
+        val mockContext: Context = mock()
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap["product_2"].toString())
+            .isEqualTo(JSONObject(purchaseHistoryRecordJsonStr).toString())
+    }
+
 
     fun onBillingSetupFinished() {}
     fun onBillingServiceDisconnected() {}
     fun onQueryPurchasesResponse() {}
+    fun onPurchaseHistoryResponse() {}
 }

@@ -61,6 +61,7 @@ private constructor(
     private val queryPurchaseHistoryParamsNewBuilderMethod: Method,
     private val queryPurchaseHistoryParamsBuilderBuildMethod: Method,
     private val queryPurchaseHistoryParamsBuilderSetProductTypeMethod: Method,
+    private val purchaseHistoryRecordGetOriginalJsonMethod: Method,
 
     private val queryProductDetailsAsyncMethod: Method,
     private val queryProductDetailsParamsNewBuilderMethod: Method,
@@ -84,6 +85,11 @@ private constructor(
                     listenerArgs
                 )
 
+                METHOD_ON_PURCHASE_HISTORY_RESPONSE -> onPurchaseHistoryResponse(
+                    wrapperArgs,
+                    listenerArgs
+                )
+
                 METHOD_ON_BILLING_SETUP_FINISHED -> onBillingSetupFinished(
                     wrapperArgs,
                     listenerArgs
@@ -103,7 +109,7 @@ private constructor(
             invokeMethod(queryPurchasesParamsClazz, queryPurchasesParamsNewBuilderMethod, null)
                 ?: return null
 
-        // 2. setProductType()
+        // 2. setProductType(productType)
         builder = invokeMethod(
             queryPurchasesParamsBuilderClazz,
             queryPurchasesParamsBuilderSetProductTypeMethod,
@@ -119,6 +125,32 @@ private constructor(
         )
     }
 
+    private fun getQueryPurchaseHistoryParams(productType: InAppPurchaseUtils.IAPProductType): Any? {
+        // 1. newBuilder()
+        var builder: Any? = invokeMethod(
+            queryPurchaseHistoryParamsClazz,
+            queryPurchaseHistoryParamsNewBuilderMethod,
+            null
+        )
+
+        // 2. setProductType(productType)
+        builder = invokeMethod(
+            queryPurchaseHistoryParamsBuilderClazz,
+            queryPurchaseHistoryParamsBuilderSetProductTypeMethod,
+            builder,
+            productType.type
+        )
+
+        // 3. build()
+        return invokeMethod(
+            queryPurchaseHistoryParamsBuilderClazz,
+            queryPurchaseHistoryParamsBuilderBuildMethod,
+            builder
+        )
+
+
+    }
+
     fun queryPurchasesAsync(productType: InAppPurchaseUtils.IAPProductType) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
@@ -131,6 +163,24 @@ private constructor(
                 queryPurchasesAsyncMethod,
                 billingClient,
                 getQueryPurchasesParams(productType),
+                listenerObj
+            )
+        }
+        executeServiceRequest(runnableQuery)
+    }
+
+    fun queryPurchaseHistoryAsync(productType: InAppPurchaseUtils.IAPProductType) {
+        val runnableQuery = Runnable {
+            val listenerObj = Proxy.newProxyInstance(
+                purchaseHistoryResponseListenerClazz.classLoader,
+                arrayOf(purchaseHistoryResponseListenerClazz),
+                ListenerWrapper(null)
+            )
+            invokeMethod(
+                billingClientClazz,
+                queryPurchaseHistoryAsyncMethod,
+                billingClient,
+                getQueryPurchaseHistoryParams(productType),
                 listenerObj
             )
         }
@@ -181,6 +231,32 @@ private constructor(
     }
 
     @AutoHandleExceptions
+    private fun onPurchaseHistoryResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        val purchaseHistoryRecordList = listenerArgs?.get(1)
+        if (purchaseHistoryRecordList == null || purchaseHistoryRecordList !is List<*>) {
+            return
+        }
+        for (purchaseHistoryRecord in purchaseHistoryRecordList) {
+            try {
+                val purchaseHistoryRecordJsonStr = invokeMethod(
+                    purchaseHistoryRecordClazz,
+                    purchaseHistoryRecordGetOriginalJsonMethod,
+                    purchaseHistoryRecord
+                ) as? String ?: continue
+                val purchaseHistoryRecordJson = JSONObject(purchaseHistoryRecordJsonStr)
+                val packageName = context.packageName
+                purchaseHistoryRecordJson.put(PACKAGE_NAME, packageName)
+                if (purchaseHistoryRecordJson.has(PRODUCT_ID)) {
+                    val productId = purchaseHistoryRecordJson.getString(PRODUCT_ID)
+                    purchaseDetailsMap[productId] = purchaseHistoryRecordJson
+                }
+            } catch (e: Exception) {
+                /* swallow */
+            }
+        }
+    }
+
+    @AutoHandleExceptions
     private fun onBillingSetupFinished(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         if (listenerArgs.isNullOrEmpty()) {
             return
@@ -208,6 +284,7 @@ private constructor(
         val isServiceConnected = AtomicBoolean(false)
         var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
         private const val PRODUCT_ID = "productId"
+        private const val PACKAGE_NAME = "packageName"
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
         val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
@@ -400,6 +477,8 @@ private constructor(
                     METHOD_SET_PRODUCT_TYPE,
                     String::class.java
                 )
+            val purchaseHistoryRecordGetOriginalJsonMethod =
+                getMethod(purchaseHistoryRecordClazz, METHOD_GET_ORIGINAL_JSON)
 
             // Get methods: Query product details
             val queryProductDetailsAsyncMethod =
@@ -457,6 +536,7 @@ private constructor(
                 queryPurchaseHistoryParamsNewBuilderMethod == null ||
                 queryPurchaseHistoryParamsBuilderBuildMethod == null ||
                 queryPurchaseHistoryParamsBuilderSetProductTypeMethod == null ||
+                purchaseHistoryRecordGetOriginalJsonMethod == null ||
 
                 queryProductDetailsAsyncMethod == null ||
                 queryProductDetailsParamsNewBuilderMethod == null ||
@@ -526,6 +606,7 @@ private constructor(
                 queryPurchaseHistoryParamsNewBuilderMethod,
                 queryPurchaseHistoryParamsBuilderBuildMethod,
                 queryPurchaseHistoryParamsBuilderSetProductTypeMethod,
+                purchaseHistoryRecordGetOriginalJsonMethod,
 
                 queryProductDetailsAsyncMethod,
                 queryProductDetailsParamsNewBuilderMethod,
