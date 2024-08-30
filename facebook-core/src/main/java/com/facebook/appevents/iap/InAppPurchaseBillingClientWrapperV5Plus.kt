@@ -71,6 +71,7 @@ private constructor(
     private val queryProductDetailsParamsProductBuilderBuildMethod: Method,
     private val queryProductDetailsParamsProductBuilderSetProductIdMethod: Method,
     private val queryProductDetailsParamsProductBuilderSetProductTypeMethod: Method,
+    private val productDetailsToStringMethod: Method,
 
     private val billingClientStartConnectionMethod: Method,
     private val billingResultGetResponseCodeMethod: Method
@@ -209,6 +210,12 @@ private constructor(
         )
     }
 
+    fun getOriginalJson(productDetailsString: String): String? {
+        val jsonStringRegex = """jsonString='(.*?)'""".toRegex()
+        val matchResult = jsonStringRegex.find(productDetailsString)
+        return matchResult?.groupValues?.get(1)
+    }
+
     @AutoHandleExceptions
     private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         val purchaseList = listenerArgs?.get(1)
@@ -341,6 +348,7 @@ private constructor(
         private const val METHOD_SET_PRODUCT_LIST = "setProductList"
         private const val METHOD_GET_RESPONSE_CODE = "getResponseCode"
         private const val METHOD_GET_ORIGINAL_JSON = "getOriginalJson"
+        private const val METHOD_TO_STRING = "toString"
         private const val METHOD_QUERY_PURCHASES_ASYNC = "queryPurchasesAsync"
         private const val METHOD_QUERY_PRODUCT_DETAILS_ASYNC = "queryProductDetailsAsync"
         private const val METHOD_QUERY_PURCHASE_HISTORY_ASYNC = "queryPurchaseHistoryAsync"
@@ -514,6 +522,7 @@ private constructor(
                     METHOD_SET_PRODUCT_TYPE,
                     String::class.java
                 )
+            val productDetailsToStringMethod = getMethod(productDetailsClazz, METHOD_TO_STRING)
 
             // Get methods: Start billing client connection
             val billingClientStartConnectionMethod =
@@ -546,6 +555,7 @@ private constructor(
                 queryProductDetailsParamsProductBuilderBuildMethod == null ||
                 queryProductDetailsParamsProductBuilderSetProductIdMethod == null ||
                 queryProductDetailsParamsProductBuilderSetProductTypeMethod == null ||
+                productDetailsToStringMethod == null ||
 
                 billingClientStartConnectionMethod == null ||
                 billingResultGetResponseCodeMethod == null
@@ -616,6 +626,7 @@ private constructor(
                 queryProductDetailsParamsProductBuilderBuildMethod,
                 queryProductDetailsParamsProductBuilderSetProductIdMethod,
                 queryProductDetailsParamsProductBuilderSetProductTypeMethod,
+                productDetailsToStringMethod,
 
                 billingClientStartConnectionMethod,
                 billingResultGetResponseCodeMethod

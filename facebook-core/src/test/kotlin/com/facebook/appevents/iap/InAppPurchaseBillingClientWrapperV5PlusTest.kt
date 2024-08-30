@@ -41,6 +41,13 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
     private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
     private val METHOD_ON_PURCHASE_HISTORY_RESPONSE = "onPurchaseHistoryResponse"
+    private val badProductDetailStr = "/"
+
+    // These strings have been adapted from real ProductDetails objects returned by Google
+    private val productDetailStr =
+        """ProductDetails{jsonString='{"productId":"exampleProductId","type":"inapp","title":"exampleTitle","name":"exampleName","description":"exampleDescription","localizedIn":["en-US"],"skuDetailsToken":"exampleToken=","oneTimePurchaseOfferDetails":{"priceAmountMicros":12000000,"priceCurrencyCode":"USD","formattedPrice":"$12.00","offerIdToken":"exampleOfferIdToken=="}}', parsedJson={"productId":"exampleProductId","type":"inapp","title":"exampleTitle","name":"exampleName","description":"exampleDescription","localizedIn":["en-US"],"skuDetailsToken":"exampleToken=","oneTimePurchaseOfferDetails":{"priceAmountMicros":12000000,"priceCurrencyCode":"USD","formattedPrice":"$12.00","offerIdToken":"exampleOfferIdToken=="}}, productId='exampleProductId', productType='inapp', title='exampleTitle', productDetailsToken='exampleToken=', subscriptionOfferDetails=null}"""
+    private val productDetailsJsonStr =
+        """{"productId":"exampleProductId","type":"inapp","title":"exampleTitle","name":"exampleName","description":"exampleDescription","localizedIn":["en-US"],"skuDetailsToken":"exampleToken=","oneTimePurchaseOfferDetails":{"priceAmountMicros":12000000,"priceCurrencyCode":"USD","formattedPrice":"${'$'}12.00","offerIdToken":"exampleOfferIdToken=="}}"""
 
     @Before
     override fun setup() {
@@ -244,6 +251,24 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         )
         Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap["product_2"].toString())
             .isEqualTo(JSONObject(purchaseHistoryRecordJsonStr).toString())
+    }
+
+    @Test
+    fun testGetOriginalJson() {
+        val mockContext: Context = mock()
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        val result = inAppPurchaseBillingClientWrapperV5Plus?.getOriginalJson(productDetailStr)
+        Assertions.assertThat(result).isEqualTo(productDetailsJsonStr)
+    }
+
+    @Test
+    fun testUnsuccessfullyGetOriginalJson() {
+        val mockContext: Context = mock()
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        val result = inAppPurchaseBillingClientWrapperV5Plus?.getOriginalJson(badProductDetailStr)
+        Assertions.assertThat(result).isNull()
     }
 
 
