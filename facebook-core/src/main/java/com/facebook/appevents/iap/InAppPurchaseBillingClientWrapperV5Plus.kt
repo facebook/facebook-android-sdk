@@ -36,6 +36,7 @@ private constructor(
     private val productDetailsClazz: Class<*>,
     private val purchaseHistoryRecordClazz: Class<*>,
     private val queryProductDetailsParamsProductClazz: Class<*>,
+    private val billingResultClazz: Class<*>,
 
     private val queryProductDetailsParamsClazz: Class<*>,
     private val queryPurchaseHistoryParamsClazz: Class<*>,
@@ -72,13 +73,54 @@ private constructor(
     private val queryProductDetailsParamsProductBuilderSetProductIdMethod: Method,
     private val queryProductDetailsParamsProductBuilderSetProductTypeMethod: Method,
 
-    private val billingClientStartConnectionMethod: Method
+    private val billingClientStartConnectionMethod: Method,
+    private val billingResultGetResponseCodeMethod: Method
 ) {
+
+    fun startConnection(runnable: Runnable) {
+        val listener = InvocationHandler { _, m, args ->
+            when (m.name) {
+                METHOD_ON_BILLING_SETUP_FINISHED -> onBillingSetupFinished(runnable, args)
+                METHOD_ON_BILLING_SERVICE_DISCONNECTED -> onBillingServiceDisconnected(
+                    args
+                )
+            }
+            null
+        }
+        val listenerObj = Proxy.newProxyInstance(
+            billingClientStateListenerClazz.classLoader,
+            arrayOf(billingClientStateListenerClazz),
+            listener
+        )
+        invokeMethod(
+            billingClientClazz,
+            billingClientStartConnectionMethod,
+            billingClient,
+            listenerObj
+        )
+    }
+
+    fun onBillingSetupFinished(runnable: Runnable, args: Array<Any>?) {
+        if (args.isNullOrEmpty()) {
+            return
+        }
+        val billingResult = args.get(0)
+        val responseCode =
+            invokeMethod(billingResultClazz, billingResultGetResponseCodeMethod, billingResult)
+        if (responseCode == 0) {
+            isServiceConnected.set(true)
+        }
+    }
+
+    fun onBillingServiceDisconnected(args: Array<Any>?) {
+        isServiceConnected.set(false)
+    }
 
     @AutoHandleExceptions
     companion object : InvocationHandler {
         private val TAG = InAppPurchaseBillingClientWrapperV5Plus::class.java.canonicalName
-        private var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
+        val isServiceConnected = AtomicBoolean(false)
+        var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
 
         // Class names
         private const val CLASSNAME_BILLING_CLIENT = "com.android.billingclient.api.BillingClient"
@@ -88,6 +130,7 @@ private constructor(
             "com.android.billingclient.api.PurchaseHistoryRecord"
         private const val CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_PRODUCT =
             "com.android.billingclient.api.QueryProductDetailsParams\$Product"
+        private const val CLASSNAME_BILLING_RESULT = "com.android.billingclient.api.BillingResult"
 
         // Class names: Params
         private const val CLASSNAME_PENDING_PURCHASES_PARAMS =
@@ -129,6 +172,7 @@ private constructor(
         private const val METHOD_SET_PRODUCT_ID = "setProductId"
         private const val METHOD_SET_PRODUCT_TYPE = "setProductType"
         private const val METHOD_SET_PRODUCT_LIST = "setProductList"
+        private const val METHOD_GET_RESPONSE_CODE = "getResponseCode"
         private const val METHOD_QUERY_PURCHASES_ASYNC = "queryPurchasesAsync"
         private const val METHOD_QUERY_PRODUCT_DETAILS_ASYNC = "queryProductDetailsAsync"
         private const val METHOD_QUERY_PURCHASE_HISTORY_ASYNC = "queryPurchaseHistoryAsync"
@@ -165,6 +209,7 @@ private constructor(
             val queryProductDetailsParamsProductClazz = getClass(
                 CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_PRODUCT
             )
+            val billingResultClazz = getClass(CLASSNAME_BILLING_RESULT)
 
             // Get classes: Params
             val queryProductDetailsParamsClazz = getClass(CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS)
@@ -201,6 +246,7 @@ private constructor(
                 productDetailsClazz == null ||
                 purchaseHistoryRecordClazz == null ||
                 queryProductDetailsParamsProductClazz == null ||
+                billingResultClazz == null ||
 
                 queryProductDetailsParamsClazz == null ||
                 queryPurchaseHistoryParamsClazz == null ||
@@ -305,6 +351,8 @@ private constructor(
                     METHOD_START_CONNECTION,
                     billingClientStateListenerClazz
                 )
+            val billingResultGetResponseCodeMethod =
+                getMethod(billingResultClazz, METHOD_GET_RESPONSE_CODE)
 
             if (
                 queryPurchasesAsyncMethod == null ||
@@ -326,7 +374,8 @@ private constructor(
                 queryProductDetailsParamsProductBuilderSetProductIdMethod == null ||
                 queryProductDetailsParamsProductBuilderSetProductTypeMethod == null ||
 
-                billingClientStartConnectionMethod == null
+                billingClientStartConnectionMethod == null ||
+                billingResultGetResponseCodeMethod == null
             ) {
                 Log.w(
                     TAG,
@@ -336,7 +385,6 @@ private constructor(
             }
 
             val billingClient = createBillingClient(
-
                 context,
                 billingClientClazz,
                 billingClientBuilderClazz,
@@ -357,6 +405,7 @@ private constructor(
                 productDetailsClazz,
                 purchaseHistoryRecordClazz,
                 queryProductDetailsParamsProductClazz,
+                billingResultClazz,
 
                 queryProductDetailsParamsClazz,
                 queryPurchaseHistoryParamsClazz,
@@ -393,7 +442,8 @@ private constructor(
                 queryProductDetailsParamsProductBuilderSetProductIdMethod,
                 queryProductDetailsParamsProductBuilderSetProductTypeMethod,
 
-                billingClientStartConnectionMethod
+                billingClientStartConnectionMethod,
+                billingResultGetResponseCodeMethod
             )
         }
 
