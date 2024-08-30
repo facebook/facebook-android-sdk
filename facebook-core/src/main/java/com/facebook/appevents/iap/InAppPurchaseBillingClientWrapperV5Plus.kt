@@ -265,12 +265,15 @@ private constructor(
         )
     }
 
-    fun queryPurchasesAsync(productType: InAppPurchaseUtils.IAPProductType) {
+    fun queryPurchasesAsync(
+        productType: InAppPurchaseUtils.IAPProductType,
+        loggingRunnable: Runnable
+    ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 purchasesResponseListenerClazz.classLoader,
                 arrayOf(purchasesResponseListenerClazz),
-                ListenerWrapper(arrayOf(productType))
+                ListenerWrapper(arrayOf(productType, loggingRunnable))
             )
             invokeMethod(
                 billingClientClazz,
@@ -283,12 +286,14 @@ private constructor(
         executeServiceRequest(runnableQuery)
     }
 
-    fun queryPurchaseHistoryAsync(productType: InAppPurchaseUtils.IAPProductType) {
+    fun queryPurchaseHistoryAsync(
+        productType: InAppPurchaseUtils.IAPProductType, loggingRunnable: Runnable
+    ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 purchaseHistoryResponseListenerClazz.classLoader,
                 arrayOf(purchaseHistoryResponseListenerClazz),
-                ListenerWrapper(arrayOf(productType))
+                ListenerWrapper(arrayOf(productType, loggingRunnable))
             )
             invokeMethod(
                 billingClientClazz,
@@ -303,13 +308,14 @@ private constructor(
 
     private fun queryProductDetailsAsync(
         productType: InAppPurchaseUtils.IAPProductType,
-        productIds: List<String>
+        productIds: List<String>,
+        loggingRunnable: Runnable
     ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 productDetailsResponseListenerClazz.classLoader,
                 arrayOf(productDetailsResponseListenerClazz),
-                ListenerWrapper(null)
+                ListenerWrapper(arrayOf(loggingRunnable))
             )
             val queryProductDetailsParams = getQueryProductDetailsParams(productType, productIds)
             if (queryProductDetailsParams != null) {
@@ -353,10 +359,15 @@ private constructor(
         return matchResult?.groupValues?.get(1)
     }
 
+
     @AutoHandleExceptions
     private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         val productType = wrapperArgs?.get(0)
         if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
+            return
+        }
+        val loggingRunnable = wrapperArgs.get(1)
+        if (loggingRunnable !is Runnable) {
             return
         }
         val purchaseList = listenerArgs?.get(1)
@@ -364,6 +375,7 @@ private constructor(
             return
         }
         val productIds = mutableListOf<String>()
+        var newPurchasesToBeLogged = false
         for (purchase in purchaseList) {
             val purchaseJsonStr =
                 invokeMethod(
@@ -378,10 +390,15 @@ private constructor(
                     productIds.add(productId)
                 }
                 purchaseDetailsMap[productId] = purchaseJson
+                newPurchasesToBeLogged = true
             }
         }
         if (productIds.isNotEmpty()) {
-            queryProductDetailsAsync(productType, productIds)
+            queryProductDetailsAsync(productType, productIds, loggingRunnable)
+        } else if (newPurchasesToBeLogged) {
+            // If there is at least one purchase to be logged, but productIds is empty,
+            // it means we already have the productDetails and can log immediately.
+            loggingRunnable.run()
         }
     }
 
@@ -391,11 +408,17 @@ private constructor(
         if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
             return
         }
+        val loggingRunnable = wrapperArgs.get(1)
+        if (loggingRunnable !is Runnable) {
+            return
+        }
         val purchaseHistoryRecordList = listenerArgs?.get(1)
+
         if (purchaseHistoryRecordList == null || purchaseHistoryRecordList !is List<*>) {
             return
         }
         val productIds = mutableListOf<String>()
+        var newPurchasesToBeLogged = false
         for (purchaseHistoryRecord in purchaseHistoryRecordList) {
             try {
                 val purchaseHistoryRecordJsonStr = invokeMethod(
@@ -412,18 +435,24 @@ private constructor(
                         productIds.add(productId)
                     }
                     purchaseDetailsMap[productId] = purchaseHistoryRecordJson
+                    newPurchasesToBeLogged = true
                 }
             } catch (e: Exception) {
                 /* swallow */
             }
         }
         if (productIds.isNotEmpty()) {
-            queryProductDetailsAsync(productType, productIds)
+            queryProductDetailsAsync(productType, productIds, loggingRunnable)
+        } else if (newPurchasesToBeLogged) {
+            // If there is at least one purchase to be logged, but productIds is empty,
+            // it means we already have the productDetails and can log immediately.
+            loggingRunnable.run()
         }
     }
 
     @AutoHandleExceptions
     private fun onProductDetailsResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        val loggingRunnable = wrapperArgs?.get(0)
         val productDetailsList = listenerArgs?.get(1)
 
         if (productDetailsList == null || productDetailsList !is List<*>) {
@@ -444,6 +473,9 @@ private constructor(
                 }
             } catch (e: Exception) {
                 /* swallow */
+            }
+            if (loggingRunnable != null && loggingRunnable is Runnable) {
+                loggingRunnable.run()
             }
         }
     }

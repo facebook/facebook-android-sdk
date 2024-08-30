@@ -34,26 +34,33 @@ object InAppPurchaseManager {
 
     @JvmStatic
     fun startTracking() {
+
         if (!enabled.get()) {
             return
         }
         // Delegate IAP logic to separate handler based on Google Play Billing Library version
-        when (getIAPHandler()) {
+        when (val billingClientVersion = getBillingClientVersion()) {
             NONE -> return
             V1 -> InAppPurchaseActivityLifecycleTracker.startIapLogging()
             V2_V4 -> {
                 if (isEnabled(FeatureManager.Feature.IapLoggingLib2)) {
-                    InAppPurchaseAutoLogger.startIapLogging(getApplicationContext())
+                    InAppPurchaseAutoLogger.startIapLogging(
+                        getApplicationContext(),
+                        billingClientVersion
+                    )
                 } else {
                     InAppPurchaseActivityLifecycleTracker.startIapLogging()
                 }
             }
 
-            V5_Plus -> return
+            V5_Plus -> InAppPurchaseAutoLogger.startIapLogging(
+                getApplicationContext(),
+                billingClientVersion
+            )
         }
     }
 
-    private fun getIAPHandler(): InAppPurchaseUtils.BillingClientVersion {
+    private fun getBillingClientVersion(): InAppPurchaseUtils.BillingClientVersion {
         try {
             val context = getApplicationContext()
             val info =

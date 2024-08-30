@@ -207,9 +207,10 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     fun testQueryPurchasesAsync() {
         val billingResult: Any = mock()
         val proxy: Any = mock()
+        val runnable: Runnable = mock()
         val purchase: Any = mock()
         val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
-        val wrapperArgs = arrayOf(productType)
+        val wrapperArgs = arrayOf(productType, runnable)
         val purchaseList: List<*> = listOf(purchase)
 
         val args = arrayOf(billingResult, purchaseList)
@@ -232,15 +233,17 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         )
         Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap["product_1"].toString())
             .isEqualTo(JSONObject(purchaseJsonStr).toString())
+
     }
 
     @Test
     fun testQueryPurchaseHistoryAsync() {
         val billingResult: Any = mock()
         val proxy: Any = mock()
+        val runnable: Runnable = mock()
         val purchaseHistoryRecord: Any = mock()
         val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
-        val wrapperArgs = arrayOf(productType)
+        val wrapperArgs = arrayOf(productType, runnable)
         val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
 
         val args = arrayOf(billingResult, purchaseHistoryRecordList)
