@@ -11,7 +11,6 @@ package com.facebook.appevents.iap
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RestrictTo
-import com.facebook.appevents.iap.InAppPurchaseSkuDetailsWrapper.Companion.getOrCreateInstance
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
@@ -20,9 +19,7 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
-import org.json.JSONException
 import org.json.JSONObject
 
 @AutoHandleExceptions
@@ -58,6 +55,7 @@ private constructor(
     private val queryPurchasesParamsNewBuilderMethod: Method,
     private val queryPurchasesParamsBuilderBuildMethod: Method,
     private val queryPurchasesParamsBuilderSetProductTypeMethod: Method,
+    private val purchaseGetOriginalJsonMethod: Method,
 
     private val queryPurchaseHistoryAsyncMethod: Method,
     private val queryPurchaseHistoryParamsNewBuilderMethod: Method,
@@ -77,20 +75,81 @@ private constructor(
     private val billingResultGetResponseCodeMethod: Method
 ) {
 
-    fun startConnection(runnable: Runnable) {
-        val listener = InvocationHandler { _, m, args ->
+    @AutoHandleExceptions
+    inner class ListenerWrapper(private var wrapperArgs: Array<Any>?) : InvocationHandler {
+        override fun invoke(proxy: Any, m: Method, listenerArgs: Array<Any>?): Any? {
             when (m.name) {
-                METHOD_ON_BILLING_SETUP_FINISHED -> onBillingSetupFinished(runnable, args)
+                METHOD_ON_QUERY_PURCHASES_RESPONSE -> onQueryPurchasesResponse(
+                    wrapperArgs,
+                    listenerArgs
+                )
+
+                METHOD_ON_BILLING_SETUP_FINISHED -> onBillingSetupFinished(
+                    wrapperArgs,
+                    listenerArgs
+                )
+
                 METHOD_ON_BILLING_SERVICE_DISCONNECTED -> onBillingServiceDisconnected(
-                    args
+                    wrapperArgs, listenerArgs
                 )
             }
-            null
+            return null
         }
+    }
+
+    private fun getQueryPurchasesParams(productType: InAppPurchaseUtils.IAPProductType): Any? {
+        // 1. newBuilder()
+        var builder: Any? =
+            invokeMethod(queryPurchasesParamsClazz, queryPurchasesParamsNewBuilderMethod, null)
+                ?: return null
+
+        // 2. setProductType()
+        builder = invokeMethod(
+            queryPurchasesParamsBuilderClazz,
+            queryPurchasesParamsBuilderSetProductTypeMethod,
+            builder,
+            productType.type
+        )
+
+        // 3. build()
+        return invokeMethod(
+            queryPurchasesParamsBuilderClazz,
+            queryPurchasesParamsBuilderBuildMethod,
+            builder
+        )
+    }
+
+    fun queryPurchasesAsync(productType: InAppPurchaseUtils.IAPProductType) {
+        val runnableQuery = Runnable {
+            val listenerObj = Proxy.newProxyInstance(
+                purchasesResponseListenerClazz.classLoader,
+                arrayOf(purchasesResponseListenerClazz),
+                ListenerWrapper(null)
+            )
+            invokeMethod(
+                billingClientClazz,
+                queryPurchasesAsyncMethod,
+                billingClient,
+                getQueryPurchasesParams(productType),
+                listenerObj
+            )
+        }
+        executeServiceRequest(runnableQuery)
+    }
+
+    private fun executeServiceRequest(runnable: Runnable) {
+        if (isServiceConnected.get()) {
+            runnable.run()
+        } else {
+            startConnection(runnable)
+        }
+    }
+
+    private fun startConnection(runnable: Runnable) {
         val listenerObj = Proxy.newProxyInstance(
             billingClientStateListenerClazz.classLoader,
             arrayOf(billingClientStateListenerClazz),
-            listener
+            ListenerWrapper(arrayOf(runnable))
         )
         invokeMethod(
             billingClientClazz,
@@ -100,19 +159,46 @@ private constructor(
         )
     }
 
-    fun onBillingSetupFinished(runnable: Runnable, args: Array<Any>?) {
-        if (args.isNullOrEmpty()) {
+    @AutoHandleExceptions
+    private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        val purchaseList = listenerArgs?.get(1)
+        if (purchaseList == null || purchaseList !is List<*>) {
             return
         }
-        val billingResult = args.get(0)
+        for (purchase in purchaseList) {
+            val purchaseJsonStr =
+                invokeMethod(
+                    purchaseClazz,
+                    purchaseGetOriginalJsonMethod,
+                    purchase
+                ) as? String ?: continue
+            val purchaseJson = JSONObject(purchaseJsonStr)
+            if (purchaseJson.has(PRODUCT_ID)) {
+                val productId = purchaseJson.getString(PRODUCT_ID)
+                purchaseDetailsMap[productId] = purchaseJson
+            }
+        }
+    }
+
+    @AutoHandleExceptions
+    private fun onBillingSetupFinished(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        if (listenerArgs.isNullOrEmpty()) {
+            return
+        }
+        val billingResult = listenerArgs[0]
         val responseCode =
             invokeMethod(billingResultClazz, billingResultGetResponseCodeMethod, billingResult)
         if (responseCode == 0) {
             isServiceConnected.set(true)
+            if (!wrapperArgs.isNullOrEmpty() && wrapperArgs[0] is Runnable) {
+                val runnable: Runnable? = wrapperArgs[0] as Runnable?
+                runnable?.run()
+            }
         }
     }
 
-    fun onBillingServiceDisconnected(args: Array<Any>?) {
+    @AutoHandleExceptions
+    private fun onBillingServiceDisconnected(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         isServiceConnected.set(false)
     }
 
@@ -121,6 +207,10 @@ private constructor(
         private val TAG = InAppPurchaseBillingClientWrapperV5Plus::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
         var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
+        private const val PRODUCT_ID = "productId"
+
+        // Use ConcurrentHashMap because purchase values may be updated in different threads
+        val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
 
         // Class names
         private const val CLASSNAME_BILLING_CLIENT = "com.android.billingclient.api.BillingClient"
@@ -173,6 +263,7 @@ private constructor(
         private const val METHOD_SET_PRODUCT_TYPE = "setProductType"
         private const val METHOD_SET_PRODUCT_LIST = "setProductList"
         private const val METHOD_GET_RESPONSE_CODE = "getResponseCode"
+        private const val METHOD_GET_ORIGINAL_JSON = "getOriginalJson"
         private const val METHOD_QUERY_PURCHASES_ASYNC = "queryPurchasesAsync"
         private const val METHOD_QUERY_PRODUCT_DETAILS_ASYNC = "queryProductDetailsAsync"
         private const val METHOD_QUERY_PURCHASE_HISTORY_ASYNC = "queryPurchaseHistoryAsync"
@@ -290,6 +381,7 @@ private constructor(
                     METHOD_SET_PRODUCT_TYPE,
                     String::class.java
                 )
+            val purchaseGetOriginalJsonMethod = getMethod(purchaseClazz, METHOD_GET_ORIGINAL_JSON)
 
             // Get methods: Query purchase history
             val queryPurchaseHistoryAsyncMethod = getMethod(
@@ -359,6 +451,7 @@ private constructor(
                 queryPurchasesParamsNewBuilderMethod == null ||
                 queryPurchasesParamsBuilderBuildMethod == null ||
                 queryPurchasesParamsBuilderSetProductTypeMethod == null ||
+                purchaseGetOriginalJsonMethod == null ||
 
                 queryPurchaseHistoryAsyncMethod == null ||
                 queryPurchaseHistoryParamsNewBuilderMethod == null ||
@@ -427,6 +520,7 @@ private constructor(
                 queryPurchasesParamsNewBuilderMethod,
                 queryPurchasesParamsBuilderBuildMethod,
                 queryPurchasesParamsBuilderSetProductTypeMethod,
+                purchaseGetOriginalJsonMethod,
 
                 queryPurchaseHistoryAsyncMethod,
                 queryPurchaseHistoryParamsNewBuilderMethod,

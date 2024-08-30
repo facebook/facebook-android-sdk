@@ -90,4 +90,9 @@ object InAppPurchaseUtils {
         V2_V4,
         V5_Plus
     }
+
+    enum class IAPProductType(val type: String) {
+        INAPP("inapp"),
+        SUBS("subs")
+    }
 }

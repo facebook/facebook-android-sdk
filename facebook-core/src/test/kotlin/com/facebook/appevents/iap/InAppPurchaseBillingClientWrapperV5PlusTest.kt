@@ -15,10 +15,12 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
 import org.assertj.core.api.Assertions
+import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
@@ -33,6 +35,9 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     private val exampleListener = "com.facebook.appevents.iap.PurchasesUpdatedListener"
     private val exampleMethodName = "setup"
     private val exampleResponse = "response"
+    private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
+    private val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
+    private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
 
     @Before
     override fun setup() {
@@ -115,7 +120,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     @Test
     fun testBillingServiceConnectedSuccessfully() {
         val billingResult: Any = mock()
-        val runnable: Runnable = mock()
+        val proxy: Any = mock()
         val args = arrayOf(billingResult)
         whenever(
             invokeMethod(
@@ -127,7 +132,13 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
             InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
-        inAppPurchaseBillingClientWrapperV5Plus?.onBillingSetupFinished(runnable, args)
+
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_BILLING_SETUP_FINISHED),
+            args
+        )
         Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
             .isTrue()
     }
@@ -135,7 +146,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     @Test
     fun testBillingServiceConnectedUnsuccessfully() {
         val billingResult: Any = mock()
-        val runnable: Runnable = mock()
+        val proxy: Any = mock()
         val args = arrayOf(billingResult)
         whenever(
             invokeMethod(
@@ -147,27 +158,65 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
             InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
-        inAppPurchaseBillingClientWrapperV5Plus?.onBillingSetupFinished(runnable, args)
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_BILLING_SETUP_FINISHED),
+            args
+        )
         Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
             .isFalse()
     }
 
     @Test
     fun testBillingServiceDisconnected() {
+        val mockContext: Context = mock()
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
         val billingResult: Any = mock()
+        val proxy: Any = mock()
         val args = arrayOf(billingResult)
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_BILLING_SERVICE_DISCONNECTED),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
+            .isFalse()
+
+    }
+
+    @Test
+    fun testQueryPurchasesAsync() {
+        val billingResult: Any = mock()
+        val proxy: Any = mock()
+        val purchase: Any = mock()
+        val purchaseList: List<*> = listOf(purchase)
+        val purchaseJsonStr = "{\"productId\":\"product_1\"}"
+        val args = arrayOf(billingResult, purchaseList)
         whenever(
             invokeMethod(
                 anyOrNull(),
                 anyOrNull(),
-                anyOrNull(),
+                eq(purchase),
             )
-        ).thenReturn(0)
+        ).thenReturn(purchaseJsonStr)
         val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
             InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
-        inAppPurchaseBillingClientWrapperV5Plus?.onBillingServiceDisconnected(args)
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
-            .isFalse()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap["product_1"].toString())
+            .isEqualTo(JSONObject(purchaseJsonStr).toString())
     }
+
+
+    fun onBillingSetupFinished() {}
+    fun onBillingServiceDisconnected() {}
+    fun onQueryPurchasesResponse() {}
 }
