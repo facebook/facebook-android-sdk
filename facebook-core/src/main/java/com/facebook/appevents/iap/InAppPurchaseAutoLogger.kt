@@ -28,9 +28,9 @@ object InAppPurchaseAutoLogger {
             InAppPurchaseBillingClientWrapper.getOrCreateInstance(context) ?: return
         if (InAppPurchaseBillingClientWrapper.initialized.get()) {
             if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
-                billingClientWrapper.queryPurchaseHistory("inapp") { logPurchase() }
+                billingClientWrapper.queryPurchaseHistory(InAppPurchaseUtils.IAPProductType.INAPP) { logPurchase() }
             } else {
-                billingClientWrapper.queryPurchase("inapp") { logPurchase() }
+                billingClientWrapper.queryPurchase(InAppPurchaseUtils.IAPProductType.INAPP) { logPurchase() }
             }
         }
     }

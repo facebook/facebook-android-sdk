@@ -11,6 +11,47 @@ package com.facebook.appevents.iap
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RestrictTo
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_BILLING_CLIENT
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_BILLING_CLIENT_BUILDER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_BILLING_CLIENT_STATE_LISTENER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_BILLING_RESULT
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PRODUCT_DETAILS
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PRODUCT_DETAILS_RESPONSE_LISTENER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PURCHASE
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PURCHASES_RESPONSE_LISTENER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PURCHASES_UPDATED_LISTENER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PURCHASE_HISTORY_RECORD
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_PURCHASE_HISTORY_RESPONSE_LISTENER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_BUILDER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_PRODUCT
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_PRODUCT_BUILDER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PURCHASES_PARAMS
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PURCHASES_PARAMS_BUILDER
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PURCHASE_HISTORY_PARAMS
+import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PURCHASE_HISTORY_PARAMS_BUILDER
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_BUILD
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ENABLE_PENDING_PURCHASES
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_GET_DEBUG_MESSAGE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_GET_ORIGINAL_JSON
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_GET_RESPONSE_CODE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_NEW_BUILDER
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_BILLING_SERVICE_DISCONNECTED
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_BILLING_SETUP_FINISHED
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_PRODUCT_DETAILS_RESPONSE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_PURCHASE_HISTORY_RESPONSE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_QUERY_PURCHASES_RESPONSE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_QUERY_PRODUCT_DETAILS_ASYNC
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_QUERY_PURCHASES_ASYNC
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_QUERY_PURCHASE_HISTORY_ASYNC
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_LISTENER
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_PRODUCT_ID
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_PRODUCT_LIST
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_PRODUCT_TYPE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_START_CONNECTION
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_TO_STRING
+import com.facebook.appevents.iap.InAppPurchaseConstants.PACKAGE_NAME
+import com.facebook.appevents.iap.InAppPurchaseConstants.PRODUCT_ID
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
@@ -412,82 +453,11 @@ private constructor(
         private val TAG = InAppPurchaseBillingClientWrapperV5Plus::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
         var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
-        private const val PRODUCT_ID = "productId"
-        private const val PACKAGE_NAME = "packageName"
+
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
         val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
-
-        // Class names
-        private const val CLASSNAME_BILLING_CLIENT = "com.android.billingclient.api.BillingClient"
-        private const val CLASSNAME_PURCHASE = "com.android.billingclient.api.Purchase"
-        private const val CLASSNAME_PRODUCT_DETAILS = "com.android.billingclient.api.ProductDetails"
-        private const val CLASSNAME_PURCHASE_HISTORY_RECORD =
-            "com.android.billingclient.api.PurchaseHistoryRecord"
-        private const val CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_PRODUCT =
-            "com.android.billingclient.api.QueryProductDetailsParams\$Product"
-        private const val CLASSNAME_BILLING_RESULT = "com.android.billingclient.api.BillingResult"
-
-        // Class names: Params
-        private const val CLASSNAME_PENDING_PURCHASES_PARAMS =
-            "com.android.billingclient.api.PendingPurchasesParams"
-        private const val CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS =
-            "com.android.billingclient.api.QueryProductDetailsParams"
-        private const val CLASSNAME_QUERY_PURCHASE_HISTORY_PARAMS =
-            "com.android.billingclient.api.QueryPurchaseHistoryParams"
-        private const val CLASSNAME_QUERY_PURCHASES_PARAMS =
-            "com.android.billingclient.api.QueryPurchasesParams"
-
-        // Class names: Builders
-        private const val CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_BUILDER =
-            "com.android.billingclient.api.QueryProductDetailsParams\$Builder"
-        private const val CLASSNAME_QUERY_PURCHASE_HISTORY_PARAMS_BUILDER =
-            "com.android.billingclient.api.QueryPurchaseHistoryParams\$Builder"
-        private const val CLASSNAME_QUERY_PURCHASES_PARAMS_BUILDER =
-            "com.android.billingclient.api.QueryPurchasesParams\$Builder"
-        private const val CLASSNAME_PENDING_PURCHASES_PARAMS_BUILDER =
-            "com.android.billingclient.api.PendingPurchasesParams\$Builder"
-        private const val CLASSNAME_QUERY_PRODUCT_DETAILS_PARAMS_PRODUCT_BUILDER =
-            "com.android.billingclient.api.QueryProductDetailsParams\$Product\$Builder"
-        private const val CLASSNAME_BILLING_CLIENT_BUILDER =
-            "com.android.billingclient.api.BillingClient\$Builder"
-
-        // Class names: Listeners
-        private const val CLASSNAME_PURCHASES_UPDATED_LISTENER =
-            "com.android.billingclient.api.PurchasesUpdatedListener"
-        private const val CLASSNAME_BILLING_CLIENT_STATE_LISTENER =
-            "com.android.billingclient.api.BillingClientStateListener"
-        private const val CLASSNAME_PRODUCT_DETAILS_RESPONSE_LISTENER =
-            "com.android.billingclient.api.ProductDetailsResponseListener"
-        private const val CLASSNAME_PURCHASE_HISTORY_RESPONSE_LISTENER =
-            "com.android.billingclient.api.PurchaseHistoryResponseListener"
-        private const val CLASSNAME_PURCHASES_RESPONSE_LISTENER =
-            "com.android.billingclient.api.PurchasesResponseListener"
-
-        // Method names
-        private const val METHOD_SET_PRODUCT_ID = "setProductId"
-        private const val METHOD_SET_PRODUCT_TYPE = "setProductType"
-        private const val METHOD_SET_PRODUCT_LIST = "setProductList"
-        private const val METHOD_GET_RESPONSE_CODE = "getResponseCode"
-        private const val METHOD_GET_ORIGINAL_JSON = "getOriginalJson"
-        private const val METHOD_TO_STRING = "toString"
-        private const val METHOD_QUERY_PURCHASES_ASYNC = "queryPurchasesAsync"
-        private const val METHOD_QUERY_PRODUCT_DETAILS_ASYNC = "queryProductDetailsAsync"
-        private const val METHOD_QUERY_PURCHASE_HISTORY_ASYNC = "queryPurchaseHistoryAsync"
-        private const val METHOD_NEW_BUILDER = "newBuilder"
-        private const val METHOD_BUILD = "build"
-
-        private const val METHOD_ENABLE_PENDING_PURCHASES = "enablePendingPurchases"
-        private const val METHOD_SET_LISTENER = "setListener"
-        private const val METHOD_START_CONNECTION = "startConnection"
-
-        // Method names: Listeners
-        private const val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
-        private const val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
-        private const val METHOD_ON_PURCHASE_HISTORY_RESPONSE = "onPurchaseHistoryResponse"
-        private const val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
-        private const val METHOD_ON_PRODUCT_DETAILS_RESPONSE = "onProductDetailsResponse"
 
         @Synchronized
         @JvmStatic
