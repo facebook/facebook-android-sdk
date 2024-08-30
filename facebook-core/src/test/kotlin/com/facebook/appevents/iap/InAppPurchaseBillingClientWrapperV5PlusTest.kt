@@ -41,6 +41,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
     private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
     private val METHOD_ON_PURCHASE_HISTORY_RESPONSE = "onPurchaseHistoryResponse"
+    private val METHOD_ON_PRODUCT_DETAILS_RESPONSE = "onProductDetailsResponse"
     private val badProductDetailStr = "/"
 
     // These strings have been adapted from real ProductDetails objects returned by Google
@@ -91,6 +92,11 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 anyOrNull()
             )
         ).thenReturn(exampleResponse)
+
+        InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.set(false)
+        InAppPurchaseBillingClientWrapperV5Plus.instance = null
     }
 
     @Test
@@ -271,9 +277,70 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         Assertions.assertThat(result).isNull()
     }
 
+    @Test
+    fun testQueryProductDetailsAsync() {
+        val billingResult: Any = mock()
+        val proxy: Any = mock()
+        val productDetail: Any = mock()
+        val productDetailsList: List<*> = listOf(productDetail)
+        val args = arrayOf(billingResult, productDetailsList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(productDetail),
+            )
+        ).thenReturn(productDetailStr)
+        val mockContext: Context = mock()
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PRODUCT_DETAILS_RESPONSE),
+            args
+        )
+        Assertions.assertThat(
+            InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.containsKey(
+                "exampleProductId"
+            )
+        ).isTrue()
+    }
+
+    @Test
+    fun testQueryProductDetailsAsyncWithBadProductDetailsJSON() {
+        val billingResult: Any = mock()
+        val proxy: Any = mock()
+        val productDetail: Any = mock()
+        val productDetailsList: List<*> = listOf(productDetail)
+        val args = arrayOf(billingResult, productDetailsList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(productDetail),
+            )
+        ).thenReturn(badProductDetailStr)
+        val mockContext: Context = mock()
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PRODUCT_DETAILS_RESPONSE),
+            args
+        )
+        Assertions.assertThat(
+            InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.containsKey(
+                "exampleProductId"
+            )
+        ).isFalse()
+    }
+
 
     fun onBillingSetupFinished() {}
     fun onBillingServiceDisconnected() {}
     fun onQueryPurchasesResponse() {}
     fun onPurchaseHistoryResponse() {}
+    fun onProductDetailsResponse() {}
 }

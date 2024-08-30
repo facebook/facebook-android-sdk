@@ -91,6 +91,11 @@ private constructor(
                     listenerArgs
                 )
 
+                METHOD_ON_PRODUCT_DETAILS_RESPONSE -> onProductDetailsResponse(
+                    wrapperArgs,
+                    listenerArgs
+                )
+
                 METHOD_ON_BILLING_SETUP_FINISHED -> onBillingSetupFinished(
                     wrapperArgs,
                     listenerArgs
@@ -103,6 +108,7 @@ private constructor(
             return null
         }
     }
+
 
     private fun getQueryPurchasesParams(productType: InAppPurchaseUtils.IAPProductType): Any? {
         // 1. newBuilder()
@@ -148,8 +154,74 @@ private constructor(
             queryPurchaseHistoryParamsBuilderBuildMethod,
             builder
         )
+    }
 
+    private fun getQueryProductDetailsParams(
+        productType: InAppPurchaseUtils.IAPProductType,
+        productIds: List<String?>
+    ): Any? {
+        if (productIds.isEmpty()) {
+            return null
+        }
 
+        val productList = ArrayList<Any>();
+        for (productId in productIds) {
+            // 1. Product.newBuilder()
+            var productBuilder = invokeMethod(
+                queryProductDetailsParamsProductClazz,
+                queryProductDetailsParamsProductNewBuilderMethod,
+                null
+            )
+
+            // productBuilder.setProductId(productId)
+            productBuilder = invokeMethod(
+                queryProductDetailsParamsProductBuilderClazz,
+                queryProductDetailsParamsProductBuilderSetProductIdMethod,
+                productBuilder,
+                productId
+            )
+
+            // productBuilder.setProductType(productType)
+            productBuilder = invokeMethod(
+                queryProductDetailsParamsProductBuilderClazz,
+                queryProductDetailsParamsProductBuilderSetProductTypeMethod,
+                productBuilder,
+                productType.type
+            )
+
+            // productBuilder.build()
+            val product = invokeMethod(
+                queryProductDetailsParamsProductBuilderClazz,
+                queryProductDetailsParamsProductBuilderBuildMethod,
+                productBuilder
+            )
+
+            if (product != null) {
+                productList.add(product)
+            }
+        }
+
+        // 1, QueryProductDetailsParams.newBuilder()
+        var paramBuilder = invokeMethod(
+            queryProductDetailsParamsClazz,
+            queryProductDetailsParamsNewBuilderMethod,
+            null
+        )
+
+        // 2. paramBuilder.setProductList(productList)
+        paramBuilder = invokeMethod(
+            queryProductDetailsParamsBuilderClazz,
+            queryProductDetailsParamsBuilderSetProductListMethod,
+            paramBuilder,
+            productList
+        )
+
+        // 3. paramBuilder.build()
+        return invokeMethod(
+            queryProductDetailsParamsBuilderClazz,
+            queryProductDetailsParamsBuilderBuildMethod,
+            paramBuilder
+        )
     }
 
     fun queryPurchasesAsync(productType: InAppPurchaseUtils.IAPProductType) {
@@ -184,6 +256,30 @@ private constructor(
                 getQueryPurchaseHistoryParams(productType),
                 listenerObj
             )
+        }
+        executeServiceRequest(runnableQuery)
+    }
+
+    fun queryProductDetailsAsync(
+        productType: InAppPurchaseUtils.IAPProductType,
+        productIds: List<String>
+    ) {
+        val runnableQuery = Runnable {
+            val listenerObj = Proxy.newProxyInstance(
+                productDetailsResponseListenerClazz.classLoader,
+                arrayOf(productDetailsResponseListenerClazz),
+                ListenerWrapper(null)
+            )
+            val queryProductDetailsParams = getQueryProductDetailsParams(productType, productIds)
+            if (queryProductDetailsParams != null) {
+                invokeMethod(
+                    billingClientClazz,
+                    queryProductDetailsAsyncMethod,
+                    billingClient,
+                    queryProductDetailsParams,
+                    listenerObj
+                )
+            }
         }
         executeServiceRequest(runnableQuery)
     }
@@ -264,6 +360,32 @@ private constructor(
     }
 
     @AutoHandleExceptions
+    private fun onProductDetailsResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+        val productDetailsList = listenerArgs?.get(1)
+        if (productDetailsList == null || productDetailsList !is List<*>) {
+            return
+        }
+        for (productDetails in productDetailsList) {
+            try {
+                val productDetailStr = invokeMethod(
+                    productDetailsClazz,
+                    productDetailsToStringMethod,
+                    productDetails
+                ) as? String ?: continue
+                val productDetailsJsonStr = getOriginalJson(productDetailStr) ?: continue
+                val productDetailJson = JSONObject(productDetailsJsonStr)
+                if (productDetailJson.has(PRODUCT_ID)) {
+                    val productId = productDetailJson.getString(PRODUCT_ID)
+                    productDetailsMap[productId] = productDetailJson
+                }
+
+            } catch (e: Exception) {
+                /* swallow */
+            }
+        }
+    }
+
+    @AutoHandleExceptions
     private fun onBillingSetupFinished(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         if (listenerArgs.isNullOrEmpty()) {
             return
@@ -295,6 +417,7 @@ private constructor(
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
         val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+        val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
 
         // Class names
         private const val CLASSNAME_BILLING_CLIENT = "com.android.billingclient.api.BillingClient"
