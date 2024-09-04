@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [17.0.2]
+
+### Added
+- Add App Link Auto Setup
+
 ## [17.0.1]
 
 ### Added
@@ -483,7 +488,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.1...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.2...HEAD
+[17.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.1...sdk-version-17.0.2
 [17.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.0...sdk-version-17.0.1
 [17.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.3.0...sdk-version-17.0.0
 [16.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.2.0...sdk-version-16.3.0
