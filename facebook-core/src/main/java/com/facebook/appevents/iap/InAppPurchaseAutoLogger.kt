@@ -33,15 +33,13 @@ object InAppPurchaseAutoLogger {
         if (billingClientVersion == V2_V4) {
             val billingClientWrapper =
                 InAppPurchaseBillingClientWrapper.getOrCreateInstance(context) ?: return
-            if (InAppPurchaseBillingClientWrapper.initialized.get()) {
-                if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
-                    billingClientWrapper.queryPurchaseHistory(INAPP) {
-                        logPurchase(V2_V4)
-                    }
-                } else {
-                    billingClientWrapper.queryPurchase(INAPP) {
-                        logPurchase(V2_V4)
-                    }
+            if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
+                billingClientWrapper.queryPurchaseHistory(INAPP) {
+                    logPurchase(V2_V4)
+                }
+            } else {
+                billingClientWrapper.queryPurchase(INAPP) {
+                    logPurchase(V2_V4)
                 }
             }
         } else if (billingClientVersion == V5_Plus) {

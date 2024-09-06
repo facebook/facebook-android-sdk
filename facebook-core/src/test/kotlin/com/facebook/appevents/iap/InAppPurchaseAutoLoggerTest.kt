@@ -46,10 +46,6 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             .`when`(InAppPurchaseUtils::class.java, "getClass", any())
 
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java, "initialized", AtomicBoolean(true)
-        )
-
-        Whitebox.setInternalState(
             InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapperV2_V4
         )
 

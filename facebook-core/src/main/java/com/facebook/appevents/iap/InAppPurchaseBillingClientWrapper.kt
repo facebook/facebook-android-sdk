@@ -292,7 +292,6 @@ private constructor(
     }
 
     companion object {
-        val initialized = AtomicBoolean(false)
         private var instance: InAppPurchaseBillingClientWrapper? = null
         val isServiceConnected = AtomicBoolean(false)
 
@@ -304,16 +303,11 @@ private constructor(
         @Synchronized
         @JvmStatic
         fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapper? {
-            if (initialized.get()) {
-                return instance
-            }
-            createInstance(context)
-            initialized.set(true)
-            return instance
+            return instance ?: createInstance(context)
         }
 
-        private fun createInstance(context: Context) {
-            val inAppPurchaseSkuDetailsWrapper = getOrCreateInstance() ?: return
+        private fun createInstance(context: Context): InAppPurchaseBillingClientWrapper? {
+            val inAppPurchaseSkuDetailsWrapper = getOrCreateInstance() ?: return null
             val billingClientClazz = getClass(CLASSNAME_BILLING_CLIENT)
             val purchaseClazz = getClass(CLASSNAME_PURCHASE)
             val purchaseResultClazz = getClass(CLASSNAME_PURCHASES_RESULT)
@@ -330,7 +324,7 @@ private constructor(
                 purchaseHistoryRecordClazz == null ||
                 purchaseHistoryResponseListenerClazz == null
             ) {
-                return
+                return null
             }
             val queryPurchasesMethod =
                 getMethod(billingClientClazz, METHOD_QUERY_PURCHASES, String::class.java)
@@ -361,9 +355,9 @@ private constructor(
                 querySkuDetailsAsyncMethod == null ||
                 queryPurchaseHistoryAsyncMethod == null
             ) {
-                return
+                return null
             }
-            val billingClient = createBillingClient(context, billingClientClazz) ?: return
+            val billingClient = createBillingClient(context, billingClientClazz) ?: return null
             instance =
                 InAppPurchaseBillingClientWrapper(
                     context,
@@ -384,6 +378,7 @@ private constructor(
                     queryPurchaseHistoryAsyncMethod,
                     inAppPurchaseSkuDetailsWrapper
                 )
+            return instance
         }
 
         private fun createBillingClient(context: Context?, billingClientClazz: Class<*>): Any? {
