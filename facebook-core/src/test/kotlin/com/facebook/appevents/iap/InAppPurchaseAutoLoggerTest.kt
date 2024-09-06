@@ -10,6 +10,7 @@ package com.facebook.appevents.iap
 
 import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
+import org.assertj.core.api.Assertions
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -35,6 +36,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
 
     @Before
     fun init() {
+        InAppPurchaseAutoLogger.failedToCreateWrapper.set(false)
         mockBillingClientWrapperV2_V4 = mock()
         mockBillingClientWrapperV5Plus = mock()
         mockContext = mock()
@@ -44,40 +46,74 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
         PowerMockito.doAnswer { Class.forName(className) }
             .`when`(InAppPurchaseUtils::class.java, "getClass", any())
-
-        Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapperV2_V4
-        )
-
-        Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapperV5Plus::class.java,
-            "instance",
-            mockBillingClientWrapperV5Plus
-        )
     }
 
     @Test
-    fun testStartIapLoggingNotCallLogPurchase() {
-        var logPurchaseCallTimes = 0
+    fun testFailureToCreateWrapper_V2_V4() {
+        var queryCount = 0
         Whitebox.setInternalState(
             InAppPurchaseBillingClientWrapper::class.java,
-            "isServiceConnected",
-            AtomicBoolean(false)
+            "instance",
+            null as? InAppPurchaseBillingClientWrapper
         )
-        whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
-            logPurchaseCallTimes++
+        PowerMockito.doAnswer { null }
+            .`when`(InAppPurchaseUtils::class.java, "getClass", any())
+        whenever(mockBillingClientWrapperV2_V4.queryPurchaseHistory(any(), any())).thenAnswer {
+            queryCount++
             Unit
         }
-        assertThat(logPurchaseCallTimes).isEqualTo(0)
+        InAppPurchaseAutoLogger.startIapLogging(
+            mockContext,
+            InAppPurchaseUtils.BillingClientVersion.V2_V4
+        )
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isTrue()
+        InAppPurchaseAutoLogger.startIapLogging(
+            mockContext,
+            InAppPurchaseUtils.BillingClientVersion.V2_V4
+        )
+        assertThat(queryCount).isEqualTo(0)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isTrue()
+    }
+
+    @Test
+    fun testFailureToCreateWrapper_V5_Plus() {
+        var queryCount = 0
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            "instance",
+            null as? InAppPurchaseBillingClientWrapperV5Plus
+        )
+        PowerMockito.doAnswer { null }
+            .`when`(InAppPurchaseUtils::class.java, "getClass", any())
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchaseHistoryAsync(
+                any(),
+                any()
+            )
+        ).thenAnswer {
+            queryCount++
+            Unit
+        }
+        InAppPurchaseAutoLogger.startIapLogging(
+            mockContext,
+            InAppPurchaseUtils.BillingClientVersion.V5_Plus
+        )
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isTrue()
+        InAppPurchaseAutoLogger.startIapLogging(
+            mockContext,
+            InAppPurchaseUtils.BillingClientVersion.V5_Plus
+        )
+        assertThat(queryCount).isEqualTo(0)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isTrue()
     }
 
     @Test
     fun testStartIapLoggingWhenEligibleQueryPurchaseHistory_V2_V4() {
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapperV2_V4
+        )
         var logPurchaseCallTimes = 0
         var runnable: Runnable? = null
-        Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java, "isServiceConnected", AtomicBoolean(true)
-        )
         whenever(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(true)
         whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
             logPurchaseCallTimes++
@@ -95,15 +131,17 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         assertThat(runnable).isNotNull
         runnable?.run()
         assertThat(logPurchaseCallTimes).isEqualTo(1)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 
     @Test
     fun testStartIapLoggingWhenNotEligibleQueryPurchaseHistory_V2_V4() {
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapperV2_V4
+        )
+
         var logPurchaseCallTimes = 0
         var runnable: Runnable? = null
-        Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java, "isServiceConnected", AtomicBoolean(true)
-        )
         whenever(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(false)
         whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
             logPurchaseCallTimes++
@@ -121,17 +159,18 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         assertThat(runnable).isNotNull
         runnable?.run()
         assertThat(logPurchaseCallTimes).isEqualTo(1)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 
     @Test
     fun testStartIapLoggingWhenEligibleQueryPurchaseHistory_V5_Plus() {
-        var logPurchaseCallTimes = 0
-        var runnable: Runnable? = null
         Whitebox.setInternalState(
             InAppPurchaseBillingClientWrapperV5Plus::class.java,
-            "isServiceConnected",
-            AtomicBoolean(true)
+            "instance",
+            mockBillingClientWrapperV5Plus
         )
+        var logPurchaseCallTimes = 0
+        var runnable: Runnable? = null
         whenever(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(true)
         whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
             logPurchaseCallTimes++
@@ -154,5 +193,41 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         assertThat(runnable).isNotNull
         runnable?.run()
         assertThat(logPurchaseCallTimes).isEqualTo(1)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
+    }
+
+
+    @Test
+    fun testStartIapLoggingWhenNotEligibleQueryPurchaseHistory_V5_Plus() {
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            "instance",
+            mockBillingClientWrapperV5Plus
+        )
+        var logPurchaseCallTimes = 0
+        var runnable: Runnable? = null
+        whenever(InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()).thenReturn(false)
+        whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any())).thenAnswer {
+            logPurchaseCallTimes++
+            Unit
+        }
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchasesAsync(
+                any(),
+                any()
+            )
+        ).thenAnswer {
+            runnable = it.getArgument(1) as Runnable
+            Unit
+        }
+
+        InAppPurchaseAutoLogger.startIapLogging(
+            mockContext,
+            InAppPurchaseUtils.BillingClientVersion.V5_Plus
+        )
+        assertThat(runnable).isNotNull
+        runnable?.run()
+        assertThat(logPurchaseCallTimes).isEqualTo(1)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 }

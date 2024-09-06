@@ -14,25 +14,30 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.INAPP
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.util.concurrent.atomic.AtomicBoolean
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseAutoLogger {
-    private const val BILLING_CLIENT_PURCHASE_NAME = "com.android.billingclient.api.Purchase"
+    val failedToCreateWrapper = AtomicBoolean(false)
 
     @JvmStatic
     fun startIapLogging(
         context: Context,
         billingClientVersion: InAppPurchaseUtils.BillingClientVersion
     ) {
-        // check if the app has IAP with Billing Lib
-        if (InAppPurchaseUtils.getClass(BILLING_CLIENT_PURCHASE_NAME) == null) {
+        // Check if we have previously tried and failed to create a billing client wrapper
+        if (failedToCreateWrapper.get()) {
             return
         }
 
         if (billingClientVersion == V2_V4) {
             val billingClientWrapper =
-                InAppPurchaseBillingClientWrapper.getOrCreateInstance(context) ?: return
+                InAppPurchaseBillingClientWrapper.getOrCreateInstance(context)
+            if (billingClientWrapper == null) {
+                failedToCreateWrapper.set(true)
+                return
+            }
             if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
                 billingClientWrapper.queryPurchaseHistory(INAPP) {
                     logPurchase(V2_V4)
@@ -44,7 +49,11 @@ object InAppPurchaseAutoLogger {
             }
         } else if (billingClientVersion == V5_Plus) {
             val billingClientWrapper =
-                InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(context) ?: return
+                InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(context)
+            if (billingClientWrapper == null) {
+                failedToCreateWrapper.set(true)
+                return
+            }
             if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
                 billingClientWrapper.queryPurchaseHistoryAsync(INAPP) { logPurchase(V5_Plus) }
             } else {

@@ -25,6 +25,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 import java.lang.reflect.Proxy
 import java.lang.reflect.Proxy.newProxyInstance
 
@@ -53,7 +54,6 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
 
     @Before
     override fun setup() {
-        InAppPurchaseBillingClientWrapperV5Plus.instance = null
         super.setup()
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
         whenever(
@@ -97,7 +97,11 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.set(false)
-        InAppPurchaseBillingClientWrapperV5Plus.instance = null
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            "instance",
+            null as? InAppPurchaseBillingClientWrapperV5Plus
+        )
     }
 
     private fun getWrapperWithMockedContext(): InAppPurchaseBillingClientWrapperV5Plus? {

@@ -505,7 +505,7 @@ private constructor(
     companion object : InvocationHandler {
         private val TAG = InAppPurchaseBillingClientWrapperV5Plus::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
-        var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
+        private var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
 
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
