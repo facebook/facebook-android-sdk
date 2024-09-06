@@ -30,34 +30,25 @@ object InAppPurchaseAutoLogger {
         if (failedToCreateWrapper.get()) {
             return
         }
-
+        var billingClientWrapper: InAppPurchaseBillingClientWrapper? = null
         if (billingClientVersion == V2_V4) {
-            val billingClientWrapper =
+            billingClientWrapper =
                 InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(context)
-            if (billingClientWrapper == null) {
-                failedToCreateWrapper.set(true)
-                return
-            }
-            if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
-                billingClientWrapper.queryPurchaseHistory(INAPP) {
-                    logPurchase(V2_V4)
-                }
-            } else {
-                billingClientWrapper.queryPurchase(INAPP) {
-                    logPurchase(V2_V4)
-                }
-            }
         } else if (billingClientVersion == V5_Plus) {
-            val billingClientWrapper =
+            billingClientWrapper =
                 InAppPurchaseBillingClientWrapperV5V7.getOrCreateInstance(context)
-            if (billingClientWrapper == null) {
-                failedToCreateWrapper.set(true)
-                return
+        }
+        if (billingClientWrapper == null) {
+            failedToCreateWrapper.set(true)
+            return
+        }
+        if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
+            billingClientWrapper.queryPurchaseHistory(INAPP) {
+                logPurchase(billingClientVersion)
             }
-            if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
-                billingClientWrapper.queryPurchaseHistoryAsync(INAPP) { logPurchase(V5_Plus) }
-            } else {
-                billingClientWrapper.queryPurchasesAsync(INAPP) { logPurchase(V5_Plus) }
+        } else {
+            billingClientWrapper.queryPurchases(INAPP) {
+                logPurchase(billingClientVersion)
             }
         }
     }

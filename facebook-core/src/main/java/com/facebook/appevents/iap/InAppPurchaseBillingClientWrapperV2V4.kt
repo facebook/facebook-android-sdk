@@ -58,7 +58,7 @@ import org.json.JSONObject
 class InAppPurchaseBillingClientWrapperV2V4
 private constructor(
     private val packageName: String,
-    private val billingClient: Any,
+    override val billingClient: Any,
     private val billingClientClazz: Class<*>,
     private val purchaseResultClazz: Class<*>,
     private val purchaseClazz: Class<*>,
@@ -74,26 +74,34 @@ private constructor(
     private val querySkuDetailsAsyncMethod: Method,
     private val queryPurchaseHistoryAsyncMethod: Method,
     private val inAppPurchaseSkuDetailsWrapper: InAppPurchaseSkuDetailsWrapper
-) {
+) : InAppPurchaseBillingClientWrapper {
     private val historyPurchaseSet: MutableSet<String?> = CopyOnWriteArraySet()
-    fun queryPurchaseHistory(
-        skuType: InAppPurchaseUtils.IAPProductType,
-        queryPurchaseHistoryRunnable: Runnable
+    override fun queryPurchaseHistory(
+        productType: InAppPurchaseUtils.IAPProductType,
+        runnable: Runnable
     ) {
-        queryPurchaseHistoryAsync(skuType.type) {
+        queryPurchaseHistoryAsync(productType.type) {
             querySkuDetailsAsync(
-                skuType.type,
+                productType.type,
                 ArrayList(historyPurchaseSet),
-                queryPurchaseHistoryRunnable
+                runnable
             )
         }
     }
 
-    fun queryPurchase(skuType: InAppPurchaseUtils.IAPProductType, querySkuRunnable: Runnable) {
+    override fun queryPurchases(
+        productType: InAppPurchaseUtils.IAPProductType,
+        runnable: Runnable
+    ) {
         // TODO (T67568885): support subs
         val queryPurchaseRunnable = Runnable {
             val purchaseResult =
-                invokeMethod(billingClientClazz, queryPurchasesMethod, billingClient, skuType.type)
+                invokeMethod(
+                    billingClientClazz,
+                    queryPurchasesMethod,
+                    billingClient,
+                    productType.type
+                )
             val purchaseObjects =
                 invokeMethod(purchaseResultClazz, getPurchaseListMethod, purchaseResult) as? List<*>
             try {
@@ -114,7 +122,7 @@ private constructor(
                             purchaseDetailsMap[skuID] = purchaseJson
                         }
                     }
-                    querySkuDetailsAsync(skuType.type, skuIDs, querySkuRunnable)
+                    querySkuDetailsAsync(productType.type, skuIDs, runnable)
                 }
             } catch (je: JSONException) {
                 /* swallow */

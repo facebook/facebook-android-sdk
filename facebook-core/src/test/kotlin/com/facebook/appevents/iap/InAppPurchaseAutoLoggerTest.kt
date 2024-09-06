@@ -84,7 +84,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         PowerMockito.doAnswer { null }
             .`when`(InAppPurchaseUtils::class.java, "getClass", any())
         whenever(
-            mockBillingClientWrapperV5Plus.queryPurchaseHistoryAsync(
+            mockBillingClientWrapperV5Plus.queryPurchaseHistory(
                 any(),
                 any()
             )
@@ -149,7 +149,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             logPurchaseCallTimes++
             Unit
         }
-        whenever(mockBillingClientWrapperV2_V4.queryPurchase(any(), any())).thenAnswer {
+        whenever(mockBillingClientWrapperV2_V4.queryPurchases(any(), any())).thenAnswer {
             runnable = it.getArgument(1) as Runnable
             Unit
         }
@@ -179,7 +179,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             Unit
         }
         whenever(
-            mockBillingClientWrapperV5Plus.queryPurchaseHistoryAsync(
+            mockBillingClientWrapperV5Plus.queryPurchaseHistory(
                 any(),
                 any()
             )
@@ -214,7 +214,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             Unit
         }
         whenever(
-            mockBillingClientWrapperV5Plus.queryPurchasesAsync(
+            mockBillingClientWrapperV5Plus.queryPurchases(
                 any(),
                 any()
             )

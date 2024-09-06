@@ -67,7 +67,7 @@ import org.json.JSONObject
 class InAppPurchaseBillingClientWrapperV5V7
 private constructor(
     private val packageName: String,
-    private val billingClient: Any,
+    override val billingClient: Any,
     private val billingClientClazz: Class<*>,
     private val purchaseClazz: Class<*>,
     private val productDetailsClazz: Class<*>,
@@ -113,7 +113,7 @@ private constructor(
 
     private val billingClientStartConnectionMethod: Method,
     private val billingResultGetResponseCodeMethod: Method
-) {
+) : InAppPurchaseBillingClientWrapper {
 
     @AutoHandleExceptions
     inner class ListenerWrapper(private var wrapperArgs: Array<Any>?) : InvocationHandler {
@@ -262,15 +262,15 @@ private constructor(
         )
     }
 
-    fun queryPurchasesAsync(
+    override fun queryPurchases(
         productType: InAppPurchaseUtils.IAPProductType,
-        loggingRunnable: Runnable
+        runnable: Runnable
     ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 purchasesResponseListenerClazz.classLoader,
                 arrayOf(purchasesResponseListenerClazz),
-                ListenerWrapper(arrayOf(productType, loggingRunnable))
+                ListenerWrapper(arrayOf(productType, runnable))
             )
             invokeMethod(
                 billingClientClazz,
@@ -283,14 +283,14 @@ private constructor(
         executeServiceRequest(runnableQuery)
     }
 
-    fun queryPurchaseHistoryAsync(
-        productType: InAppPurchaseUtils.IAPProductType, loggingRunnable: Runnable
+    override fun queryPurchaseHistory(
+        productType: InAppPurchaseUtils.IAPProductType, runnable: Runnable
     ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 purchaseHistoryResponseListenerClazz.classLoader,
                 arrayOf(purchaseHistoryResponseListenerClazz),
-                ListenerWrapper(arrayOf(productType, loggingRunnable))
+                ListenerWrapper(arrayOf(productType, runnable))
             )
             invokeMethod(
                 billingClientClazz,
