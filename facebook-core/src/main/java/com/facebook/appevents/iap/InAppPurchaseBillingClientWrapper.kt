@@ -9,6 +9,7 @@
 package com.facebook.appevents.iap
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_BILLING_CLIENT
 import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_BILLING_CLIENT_BUILDER
@@ -293,6 +294,7 @@ private constructor(
 
     companion object {
         private var instance: InAppPurchaseBillingClientWrapper? = null
+        private val TAG = InAppPurchaseBillingClientWrapper::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
@@ -324,6 +326,10 @@ private constructor(
                 purchaseHistoryRecordClazz == null ||
                 purchaseHistoryResponseListenerClazz == null
             ) {
+                Log.w(
+                    TAG,
+                    "Failed to create Google Play billing library wrapper for in-app purchase auto-logging"
+                )
                 return null
             }
             val queryPurchasesMethod =
@@ -355,9 +361,20 @@ private constructor(
                 querySkuDetailsAsyncMethod == null ||
                 queryPurchaseHistoryAsyncMethod == null
             ) {
+                Log.w(
+                    TAG,
+                    "Failed to create Google Play billing library wrapper for in-app purchase auto-logging"
+                )
                 return null
             }
-            val billingClient = createBillingClient(context, billingClientClazz) ?: return null
+            val billingClient = createBillingClient(context, billingClientClazz)
+            if (billingClient == null) {
+                Log.w(
+                    TAG,
+                    "Failed to build a Google Play billing library wrapper for in-app purchase auto-logging"
+                )
+                return null
+            }
             instance =
                 InAppPurchaseBillingClientWrapper(
                     context.packageName,
