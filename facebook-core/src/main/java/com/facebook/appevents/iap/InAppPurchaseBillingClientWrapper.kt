@@ -56,7 +56,7 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InAppPurchaseBillingClientWrapper
 private constructor(
-    private val context: Context,
+    private val packageName: String,
     private val billingClient: Any,
     private val billingClientClazz: Class<*>,
     private val purchaseResultClazz: Class<*>,
@@ -118,7 +118,7 @@ private constructor(
             } catch (je: JSONException) {
                 /* swallow */
             }
-        };
+        }
         executeServiceRequest(queryPurchaseRunnable)
     }
 
@@ -139,7 +139,7 @@ private constructor(
                 skuDetailsParams,
                 listenerObj
             )
-        };
+        }
         executeServiceRequest(querySkuDetailAsyncRunnable)
     }
 
@@ -158,7 +158,7 @@ private constructor(
                 skuType,
                 listenerObj
             )
-        };
+        }
         executeServiceRequest(queryPurchaseHistoryAsyncRunnable)
     }
 
@@ -240,7 +240,7 @@ private constructor(
                                 as? String
                             ?: continue
                     val purchaseHistoryJson = JSONObject(purchaseHistoryJsonRaw)
-                    val packageName = context.packageName
+                    val packageName = packageName
                     purchaseHistoryJson.put(PACKAGE_NAME, packageName)
                     if (purchaseHistoryJson.has(PRODUCT_ID)) {
                         val skuID = purchaseHistoryJson.getString(PRODUCT_ID)
@@ -268,7 +268,7 @@ private constructor(
             return null
         }
 
-        fun parseSkuDetails(skuDetailsObjectList: List<*>) {
+        private fun parseSkuDetails(skuDetailsObjectList: List<*>) {
             for (skuDetail in skuDetailsObjectList) {
                 try {
                     val skuDetailJson =
@@ -360,7 +360,7 @@ private constructor(
             val billingClient = createBillingClient(context, billingClientClazz) ?: return null
             instance =
                 InAppPurchaseBillingClientWrapper(
-                    context,
+                    context.packageName,
                     billingClient,
                     billingClientClazz,
                     purchaseResultClazz,
