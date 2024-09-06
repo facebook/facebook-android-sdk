@@ -67,7 +67,7 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InAppPurchaseBillingClientWrapperV5Plus
 private constructor(
-    private val context: Context,
+    private val packageName: String,
     private val billingClient: Any,
     private val billingClientClazz: Class<*>,
     private val purchaseClazz: Class<*>,
@@ -84,9 +84,7 @@ private constructor(
     private val queryPurchaseHistoryParamsBuilderClazz: Class<*>,
     private val queryPurchasesParamsBuilderClazz: Class<*>,
     private val queryProductDetailsParamsProductBuilderClazz: Class<*>,
-    private val billingClientBuilderClazz: Class<*>,
 
-    private val purchasesUpdatedListenerClazz: Class<*>,
     private val billingClientStateListenerClazz: Class<*>,
     private val productDetailsResponseListenerClazz: Class<*>,
     private val purchasesResponseListenerClazz: Class<*>,
@@ -205,7 +203,7 @@ private constructor(
             return null
         }
 
-        val productList = ArrayList<Any>();
+        val productList = ArrayList<Any>()
         for (productId in productIds) {
             // 1. Product.newBuilder()
             var productBuilder = invokeMethod(
@@ -427,7 +425,7 @@ private constructor(
                     purchaseHistoryRecord
                 ) as? String ?: continue
                 val purchaseHistoryRecordJson = JSONObject(purchaseHistoryRecordJsonStr)
-                val packageName = context.packageName
+                val packageName = packageName
                 purchaseHistoryRecordJson.put(PACKAGE_NAME, packageName)
                 if (purchaseHistoryRecordJson.has(PRODUCT_ID)) {
                     val productId = purchaseHistoryRecordJson.getString(PRODUCT_ID)
@@ -679,6 +677,7 @@ private constructor(
                     METHOD_START_CONNECTION,
                     billingClientStateListenerClazz
                 )
+
             val billingResultGetResponseCodeMethod =
                 getMethod(billingResultClazz, METHOD_GET_RESPONSE_CODE)
 
@@ -729,7 +728,7 @@ private constructor(
                 return
             }
             instance = InAppPurchaseBillingClientWrapperV5Plus(
-                context,
+                context.packageName,
                 billingClient,
                 billingClientClazz,
                 purchaseClazz,
@@ -746,9 +745,7 @@ private constructor(
                 queryPurchaseHistoryParamsBuilderClazz,
                 queryPurchasesParamsBuilderClazz,
                 queryProductDetailsParamsProductBuilderClazz,
-                billingClientBuilderClazz,
 
-                purchasesUpdatedListenerClazz,
                 billingClientStateListenerClazz,
                 productDetailsResponseListenerClazz,
                 purchasesResponseListenerClazz,

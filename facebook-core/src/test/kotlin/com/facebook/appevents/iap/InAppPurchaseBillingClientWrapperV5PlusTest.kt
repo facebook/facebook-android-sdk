@@ -36,7 +36,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
     private val exampleMethodName = "setup"
     private val exampleResponse = "response"
     private val purchaseJsonStr = "{\"productId\":\"product_1\"}"
-    private val purchaseHistoryRecordJsonStr = "{\"productId\":\"product_2\"}"
+    private val purchaseHistoryRecordJsonStr =
+        "{\"productId\":\"product_2\",\"packageName\":\"examplePackageName\"}"
     private val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
     private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
     private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
@@ -99,20 +100,23 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         InAppPurchaseBillingClientWrapperV5Plus.instance = null
     }
 
+    private fun getWrapperWithMockedContext(): InAppPurchaseBillingClientWrapperV5Plus? {
+        val mockContext: Context = mock()
+        whenever(mockContext.packageName).thenReturn("examplePackageName")
+        return InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+    }
+
     @Test
     fun testHelperClassCanSuccessfullyCreateWrapper() {
-        val mockContext: Context = mock()
-        val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        val inAppPurchaseBillingClientWrapperV5Plus = getWrapperWithMockedContext()
         Assertions.assertThat(inAppPurchaseBillingClientWrapperV5Plus).isNotNull()
     }
 
     @Test
     fun testCantGetClass() {
         whenever(getClass(anyOrNull())).thenReturn(null)
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         Assertions.assertThat(inAppPurchaseBillingClientWrapperV5Plus).isNull()
     }
 
@@ -127,9 +131,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
         ).thenReturn(
             null
         )
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         Assertions.assertThat(inAppPurchaseBillingClientWrapperV5Plus).isNull()
     }
 
@@ -145,9 +148,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 anyOrNull(),
             )
         ).thenReturn(0)
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
 
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
             proxy,
@@ -171,9 +173,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 anyOrNull(),
             )
         ).thenReturn(1)
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
             proxy,
             Class.forName(exampleClassName)
@@ -186,9 +187,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
 
     @Test
     fun testBillingServiceDisconnected() {
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         val billingResult: Any = mock()
         val proxy: Any = mock()
         val args = arrayOf(billingResult)
@@ -222,9 +222,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
             )
         ).thenReturn(purchaseJsonStr)
 
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
             proxy,
             Class.forName(exampleClassName)
@@ -255,9 +254,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
             )
         ).thenReturn(purchaseHistoryRecordJsonStr)
 
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
             proxy,
             Class.forName(exampleClassName)
@@ -270,18 +268,16 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
 
     @Test
     fun testGetOriginalJson() {
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         val result = inAppPurchaseBillingClientWrapperV5Plus?.getOriginalJson(productDetailStr)
         Assertions.assertThat(result).isEqualTo(productDetailsJsonStr)
     }
 
     @Test
     fun testUnsuccessfullyGetOriginalJson() {
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         val result = inAppPurchaseBillingClientWrapperV5Plus?.getOriginalJson(badProductDetailStr)
         Assertions.assertThat(result).isNull()
     }
@@ -300,9 +296,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 eq(productDetail),
             )
         ).thenReturn(productDetailStr)
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
             proxy,
             Class.forName(exampleClassName)
@@ -330,9 +325,8 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 eq(productDetail),
             )
         ).thenReturn(badProductDetailStr)
-        val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapperV5Plus =
-            InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+            getWrapperWithMockedContext()
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
             proxy,
             Class.forName(exampleClassName)
