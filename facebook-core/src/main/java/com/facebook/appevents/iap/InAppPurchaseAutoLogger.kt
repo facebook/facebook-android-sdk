@@ -33,7 +33,7 @@ object InAppPurchaseAutoLogger {
 
         if (billingClientVersion == V2_V4) {
             val billingClientWrapper =
-                InAppPurchaseBillingClientWrapper.getOrCreateInstance(context)
+                InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(context)
             if (billingClientWrapper == null) {
                 failedToCreateWrapper.set(true)
                 return
@@ -49,7 +49,7 @@ object InAppPurchaseAutoLogger {
             }
         } else if (billingClientVersion == V5_Plus) {
             val billingClientWrapper =
-                InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(context)
+                InAppPurchaseBillingClientWrapperV5V7.getOrCreateInstance(context)
             if (billingClientWrapper == null) {
                 failedToCreateWrapper.set(true)
                 return
@@ -65,16 +65,16 @@ object InAppPurchaseAutoLogger {
     private fun logPurchase(billingClientVersion: InAppPurchaseUtils.BillingClientVersion) {
         if (billingClientVersion == V2_V4) {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
-                InAppPurchaseBillingClientWrapper.purchaseDetailsMap,
-                InAppPurchaseBillingClientWrapper.skuDetailsMap
+                InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap,
+                InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap
             )
-            InAppPurchaseBillingClientWrapper.purchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap.clear()
         } else {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
-                InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap,
-                InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap
+                InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap,
+                InAppPurchaseBillingClientWrapperV5V7.productDetailsMap
             )
-            InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap.clear()
         }
     }
 }

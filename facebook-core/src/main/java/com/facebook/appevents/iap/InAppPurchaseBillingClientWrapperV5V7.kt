@@ -32,7 +32,6 @@ import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PURCHAS
 import com.facebook.appevents.iap.InAppPurchaseConstants.CLASSNAME_QUERY_PURCHASE_HISTORY_PARAMS_BUILDER
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_BUILD
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ENABLE_PENDING_PURCHASES
-import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_GET_DEBUG_MESSAGE
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_GET_ORIGINAL_JSON
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_GET_RESPONSE_CODE
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_NEW_BUILDER
@@ -65,7 +64,7 @@ import org.json.JSONObject
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class InAppPurchaseBillingClientWrapperV5Plus
+class InAppPurchaseBillingClientWrapperV5V7
 private constructor(
     private val packageName: String,
     private val billingClient: Any,
@@ -503,18 +502,17 @@ private constructor(
 
     @AutoHandleExceptions
     companion object : InvocationHandler {
-        private val TAG = InAppPurchaseBillingClientWrapperV5Plus::class.java.canonicalName
+        private val TAG = InAppPurchaseBillingClientWrapperV5V7::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
-        private var instance: InAppPurchaseBillingClientWrapperV5Plus? = null
-
-
+        private var instance: InAppPurchaseBillingClientWrapperV5V7? = null
+        
         // Use ConcurrentHashMap because purchase values may be updated in different threads
         val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
 
         @Synchronized
         @JvmStatic
-        fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapperV5Plus? {
+        fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapperV5V7? {
             if (instance != null) {
                 return instance
             }
@@ -727,7 +725,7 @@ private constructor(
                 )
                 return
             }
-            instance = InAppPurchaseBillingClientWrapperV5Plus(
+            instance = InAppPurchaseBillingClientWrapperV5V7(
                 context.packageName,
                 billingClient,
                 billingClientClazz,

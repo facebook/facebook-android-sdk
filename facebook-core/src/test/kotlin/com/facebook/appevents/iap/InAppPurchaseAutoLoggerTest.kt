@@ -10,8 +10,6 @@ package com.facebook.appevents.iap
 
 import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
-import org.assertj.core.api.Assertions
-import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -23,14 +21,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
 @PrepareForTest(
-    InAppPurchaseBillingClientWrapper::class,
-    InAppPurchaseBillingClientWrapperV5Plus::class,
+    InAppPurchaseBillingClientWrapperV2V4::class,
+    InAppPurchaseBillingClientWrapperV5V7::class,
     InAppPurchaseUtils::class,
     InAppPurchaseLoggerManager::class
 )
 class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
-    private lateinit var mockBillingClientWrapperV2_V4: InAppPurchaseBillingClientWrapper
-    private lateinit var mockBillingClientWrapperV5Plus: InAppPurchaseBillingClientWrapperV5Plus
+    private lateinit var mockBillingClientWrapperV2_V4: InAppPurchaseBillingClientWrapperV2V4
+    private lateinit var mockBillingClientWrapperV5Plus: InAppPurchaseBillingClientWrapperV5V7
     private lateinit var mockContext: Context
     private val className = "com.facebook.appevents.iap.InAppPurchaseAutoLoggerTest"
 
@@ -40,8 +38,8 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         mockBillingClientWrapperV2_V4 = mock()
         mockBillingClientWrapperV5Plus = mock()
         mockContext = mock()
-        PowerMockito.mockStatic(InAppPurchaseBillingClientWrapper::class.java)
-        PowerMockito.mockStatic(InAppPurchaseBillingClientWrapperV5Plus::class.java)
+        PowerMockito.mockStatic(InAppPurchaseBillingClientWrapperV2V4::class.java)
+        PowerMockito.mockStatic(InAppPurchaseBillingClientWrapperV5V7::class.java)
         PowerMockito.mockStatic(InAppPurchaseLoggerManager::class.java)
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
         PowerMockito.doAnswer { Class.forName(className) }
@@ -52,9 +50,9 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     fun testFailureToCreateWrapper_V2_V4() {
         var queryCount = 0
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java,
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
             "instance",
-            null as? InAppPurchaseBillingClientWrapper
+            null as? InAppPurchaseBillingClientWrapperV2V4
         )
         PowerMockito.doAnswer { null }
             .`when`(InAppPurchaseUtils::class.java, "getClass", any())
@@ -79,9 +77,9 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     fun testFailureToCreateWrapper_V5_Plus() {
         var queryCount = 0
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            InAppPurchaseBillingClientWrapperV5V7::class.java,
             "instance",
-            null as? InAppPurchaseBillingClientWrapperV5Plus
+            null as? InAppPurchaseBillingClientWrapperV5V7
         )
         PowerMockito.doAnswer { null }
             .`when`(InAppPurchaseUtils::class.java, "getClass", any())
@@ -110,7 +108,9 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     @Test
     fun testStartIapLoggingWhenEligibleQueryPurchaseHistory_V2_V4() {
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapperV2_V4
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
+            "instance",
+            mockBillingClientWrapperV2_V4
         )
         var logPurchaseCallTimes = 0
         var runnable: Runnable? = null
@@ -137,7 +137,9 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     @Test
     fun testStartIapLoggingWhenNotEligibleQueryPurchaseHistory_V2_V4() {
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java, "instance", mockBillingClientWrapperV2_V4
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
+            "instance",
+            mockBillingClientWrapperV2_V4
         )
 
         var logPurchaseCallTimes = 0
@@ -165,7 +167,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     @Test
     fun testStartIapLoggingWhenEligibleQueryPurchaseHistory_V5_Plus() {
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            InAppPurchaseBillingClientWrapperV5V7::class.java,
             "instance",
             mockBillingClientWrapperV5Plus
         )
@@ -200,7 +202,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     @Test
     fun testStartIapLoggingWhenNotEligibleQueryPurchaseHistory_V5_Plus() {
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            InAppPurchaseBillingClientWrapperV5V7::class.java,
             "instance",
             mockBillingClientWrapperV5Plus
         )

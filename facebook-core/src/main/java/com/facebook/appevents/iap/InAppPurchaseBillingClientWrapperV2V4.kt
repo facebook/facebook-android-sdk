@@ -55,7 +55,7 @@ import org.json.JSONObject
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class InAppPurchaseBillingClientWrapper
+class InAppPurchaseBillingClientWrapperV2V4
 private constructor(
     private val packageName: String,
     private val billingClient: Any,
@@ -293,8 +293,8 @@ private constructor(
     }
 
     companion object {
-        private var instance: InAppPurchaseBillingClientWrapper? = null
-        private val TAG = InAppPurchaseBillingClientWrapper::class.java.canonicalName
+        private val TAG = InAppPurchaseBillingClientWrapperV2V4::class.java.canonicalName
+        private var instance: InAppPurchaseBillingClientWrapperV2V4? = null
         val isServiceConnected = AtomicBoolean(false)
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
@@ -304,11 +304,11 @@ private constructor(
 
         @Synchronized
         @JvmStatic
-        fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapper? {
+        fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapperV2V4? {
             return instance ?: createInstance(context)
         }
 
-        private fun createInstance(context: Context): InAppPurchaseBillingClientWrapper? {
+        private fun createInstance(context: Context): InAppPurchaseBillingClientWrapperV2V4? {
             val inAppPurchaseSkuDetailsWrapper = getOrCreateInstance() ?: return null
             val billingClientClazz = getClass(CLASSNAME_BILLING_CLIENT)
             val purchaseClazz = getClass(CLASSNAME_PURCHASE)
@@ -376,7 +376,7 @@ private constructor(
                 return null
             }
             instance =
-                InAppPurchaseBillingClientWrapper(
+                InAppPurchaseBillingClientWrapperV2V4(
                     context.packageName,
                     billingClient,
                     billingClientClazz,

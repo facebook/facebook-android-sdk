@@ -30,9 +30,9 @@ import java.lang.reflect.Proxy
 import java.lang.reflect.Proxy.newProxyInstance
 
 @PrepareForTest(FacebookSdk::class, InAppPurchaseUtils::class, Proxy::class)
-class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() {
+class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
     private val exampleClassName =
-        "com.facebook.appevents.iap.InAppPurchaseBillingClientWrapperV5PlusTest"
+        "com.facebook.appevents.iap.InAppPurchaseBillingClientWrapperV5V7Test"
     private val exampleListener = "com.facebook.appevents.iap.PurchasesUpdatedListener"
     private val exampleMethodName = "setup"
     private val exampleResponse = "response"
@@ -93,21 +93,20 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 anyOrNull()
             )
         ).thenReturn(exampleResponse)
-
-        InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.clear()
-        InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap.clear()
-        InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.set(false)
+        InAppPurchaseBillingClientWrapperV5V7.productDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5V7.isServiceConnected.set(false)
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapperV5Plus::class.java,
+            InAppPurchaseBillingClientWrapperV5V7::class.java,
             "instance",
-            null as? InAppPurchaseBillingClientWrapperV5Plus
+            null as? InAppPurchaseBillingClientWrapperV5V7
         )
     }
 
-    private fun getWrapperWithMockedContext(): InAppPurchaseBillingClientWrapperV5Plus? {
+    private fun getWrapperWithMockedContext(): InAppPurchaseBillingClientWrapperV5V7? {
         val mockContext: Context = mock()
         whenever(mockContext.packageName).thenReturn("examplePackageName")
-        return InAppPurchaseBillingClientWrapperV5Plus.getOrCreateInstance(mockContext)
+        return InAppPurchaseBillingClientWrapperV5V7.getOrCreateInstance(mockContext)
     }
 
     @Test
@@ -161,7 +160,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 .getMethod(METHOD_ON_BILLING_SETUP_FINISHED),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.isServiceConnected.get())
             .isTrue()
     }
 
@@ -185,7 +184,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 .getMethod(METHOD_ON_BILLING_SETUP_FINISHED),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.isServiceConnected.get())
             .isFalse()
     }
 
@@ -202,7 +201,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 .getMethod(METHOD_ON_BILLING_SERVICE_DISCONNECTED),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.isServiceConnected.get())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.isServiceConnected.get())
             .isFalse()
 
     }
@@ -234,7 +233,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap["product_1"].toString())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap["product_1"].toString())
             .isEqualTo(JSONObject(purchaseJsonStr).toString())
 
     }
@@ -266,7 +265,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
                 .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5Plus.purchaseDetailsMap["product_2"].toString())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap["product_2"].toString())
             .isEqualTo(JSONObject(purchaseHistoryRecordJsonStr).toString())
     }
 
@@ -309,7 +308,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
             args
         )
         Assertions.assertThat(
-            InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.containsKey(
+            InAppPurchaseBillingClientWrapperV5V7.productDetailsMap.containsKey(
                 "exampleProductId"
             )
         ).isTrue()
@@ -338,7 +337,7 @@ class InAppPurchaseBillingClientWrapperV5PlusTest : FacebookPowerMockTestCase() 
             args
         )
         Assertions.assertThat(
-            InAppPurchaseBillingClientWrapperV5Plus.productDetailsMap.containsKey(
+            InAppPurchaseBillingClientWrapperV5V7.productDetailsMap.containsKey(
                 "exampleProductId"
             )
         ).isFalse()

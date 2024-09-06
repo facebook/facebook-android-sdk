@@ -8,15 +8,14 @@
 
 package com.facebook.appevents.iap
 
-import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import android.content.Context
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
 import java.lang.reflect.Method
 import java.util.concurrent.Executor
-import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.Test
@@ -29,17 +28,18 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
+
 @PrepareForTest(
     FacebookSdk::class,
     InAppPurchaseUtils::class,
     InAppPurchaseSkuDetailsWrapper::class
 )
-class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
+class InAppPurchaseBillingClientWrapperV2V4Test : FacebookPowerMockTestCase() {
     private val mockExecutor: Executor = FacebookSerialExecutor()
-    private lateinit var inAppPurchaseBillingClientWrapper: InAppPurchaseBillingClientWrapper
+    private lateinit var inAppPurchaseBillingClientWrapperV2V4: InAppPurchaseBillingClientWrapperV2V4
     private lateinit var inAppPurchaseSkuDetailsWrapper: InAppPurchaseSkuDetailsWrapper
     private val exampleClassName =
-        "com.facebook.appevents.iap.InAppPurchaseBillingClientWrapperTest"
+        "com.facebook.appevents.iap.InAppPurchaseBillingClientWrapperV2V4Test"
     private val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
     private val exampleMethodName = "setup"
     private val exampleResponse = "response"
@@ -48,17 +48,18 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     @Before
     override fun setup() {
         super.setup()
-        PowerMockito.spy(InAppPurchaseBillingClientWrapper::class.java)
+        PowerMockito.spy(InAppPurchaseBillingClientWrapperV2V4::class.java)
         PowerMockito.mockStatic(FacebookSdk::class.java)
         PowerMockito.mockStatic(InAppPurchaseSkuDetailsWrapper::class.java)
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
 
-        inAppPurchaseBillingClientWrapper = mock()
+
         inAppPurchaseSkuDetailsWrapper = mock()
+        inAppPurchaseBillingClientWrapperV2V4 = mock()
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java,
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
             "instance",
-            inAppPurchaseBillingClientWrapper
+            inAppPurchaseBillingClientWrapperV2V4
         )
         Whitebox.setInternalState(
             InAppPurchaseSkuDetailsWrapper::class.java,
@@ -103,14 +104,14 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     @Test
     fun testHelperClassCanSuccessfullyCreateWrapper() {
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java,
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
             "instance",
-            null as? InAppPurchaseBillingClientWrapper
+            null as? InAppPurchaseBillingClientWrapperV2V4
         )
         val mockContext: Context = mock()
         whenever(mockContext.packageName).thenReturn("packageName")
         val inAppPurchaseBillingClientWrapper =
-            InAppPurchaseBillingClientWrapper.getOrCreateInstance(mockContext)
+            InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(mockContext)
         Assertions.assertThat(inAppPurchaseBillingClientWrapper).isNotNull()
     }
 
@@ -118,13 +119,13 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     fun testCantGetClass() {
         whenever(getClass(anyOrNull())).thenReturn(null)
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java,
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
             "instance",
-            null as? InAppPurchaseBillingClientWrapper
+            null as? InAppPurchaseBillingClientWrapperV2V4
         )
         val mockContext: Context = mock()
         val inAppPurchaseBillingClientWrapper =
-            InAppPurchaseBillingClientWrapper.getOrCreateInstance(mockContext)
+            InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(mockContext)
         Assertions.assertThat(inAppPurchaseBillingClientWrapper).isNull()
     }
 
@@ -141,14 +142,14 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
             null
         )
         Whitebox.setInternalState(
-            InAppPurchaseBillingClientWrapper::class.java,
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
             "instance",
-            null as? InAppPurchaseBillingClientWrapper
+            null as? InAppPurchaseBillingClientWrapperV2V4
         )
         val mockContext: Context = mock()
         whenever(mockContext.packageName).thenReturn("packageName")
         val inAppPurchaseBillingClientWrapper =
-            InAppPurchaseBillingClientWrapper.getOrCreateInstance(mockContext)
+            InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(mockContext)
         Assertions.assertThat(inAppPurchaseBillingClientWrapper).isNull()
     }
 
@@ -157,12 +158,12 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
 
         // Test BillingClientStateListenerWrapper
         val billingClientStateListenerWrapper =
-            InAppPurchaseBillingClientWrapper.BillingClientStateListenerWrapper(mock())
+            InAppPurchaseBillingClientWrapperV2V4.BillingClientStateListenerWrapper(mock())
         Assertions.assertThat(billingClientStateListenerWrapper).isNotNull
 
         // Test PurchasesUpdatedListenerWrapper
         val purchasesUpdatedListenerWrapper =
-            InAppPurchaseBillingClientWrapper.PurchasesUpdatedListenerWrapper()
+            InAppPurchaseBillingClientWrapperV2V4.PurchasesUpdatedListenerWrapper()
         Assertions.assertThat(purchasesUpdatedListenerWrapper).isNotNull
     }
 
@@ -186,7 +187,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         whenever(invokeMethod(anyOrNull(), anyOrNull(), eq(billingResult))).thenReturn(
             0
         )
-        InAppPurchaseBillingClientWrapper.BillingClientStateListenerWrapper(runnable)
+        InAppPurchaseBillingClientWrapperV2V4.BillingClientStateListenerWrapper(runnable)
             .invoke(proxy, mockMethod, args)
         Assertions.assertThat(test_var).isEqualTo(0)
 
@@ -196,11 +197,11 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
     fun testBillingClientWrapper() {
         val runnable: Runnable = mock()
         val purchaseHistoryResponseListenerWrapper =
-            inAppPurchaseBillingClientWrapper.PurchaseHistoryResponseListenerWrapper(runnable)
+            inAppPurchaseBillingClientWrapperV2V4.PurchaseHistoryResponseListenerWrapper(runnable)
         Assertions.assertThat(purchaseHistoryResponseListenerWrapper).isNotNull
 
         Whitebox.setInternalState(
-            inAppPurchaseBillingClientWrapper, "historyPurchaseSet", HashSet<Any>()
+            inAppPurchaseBillingClientWrapperV2V4, "historyPurchaseSet", HashSet<Any>()
         )
 
         val purchaseHistoryRecord =
@@ -208,7 +209,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         val mockList: MutableList<Any> = arrayListOf(purchaseHistoryRecord)
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
         whenever(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(purchaseHistoryRecord)
-        Whitebox.setInternalState(inAppPurchaseBillingClientWrapper, "packageName", "value")
+        Whitebox.setInternalState(inAppPurchaseBillingClientWrapperV2V4, "packageName", "value")
 
         val mockMethod: Method = mock()
         whenever(mockMethod.name).thenReturn("onPurchaseHistoryResponse")
@@ -216,7 +217,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
             mock(), mockMethod, arrayOf(listOf<String>(), mockList)
         )
 
-        val purchaseDetailsMap = InAppPurchaseBillingClientWrapper.purchaseDetailsMap
+        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap
         Assertions.assertThat(purchaseDetailsMap).isNotEmpty
     }
 
@@ -225,7 +226,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         // Test can successfully create skuDetailsResponseListenerWrapper
         val runnable: Runnable = mock()
         val skuDetailsResponseListenerWrapper =
-            inAppPurchaseBillingClientWrapper.SkuDetailsResponseListenerWrapper(runnable)
+            inAppPurchaseBillingClientWrapperV2V4.SkuDetailsResponseListenerWrapper(runnable)
         Assertions.assertThat(skuDetailsResponseListenerWrapper).isNotNull
 
         val skuDetailExample =
@@ -239,7 +240,7 @@ class InAppPurchaseBillingClientWrapperTest : FacebookPowerMockTestCase() {
         skuDetailsResponseListenerWrapper.invoke(
             mock(), mockMethod, arrayOf(listOf<String>(), mockList)
         )
-        val skuDetailsMap = InAppPurchaseBillingClientWrapper.skuDetailsMap
+        val skuDetailsMap = InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap
         Assertions.assertThat(skuDetailsMap).isNotEmpty
     }
 }
