@@ -11,9 +11,11 @@ package com.facebook.appevents.internal
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONObject
@@ -44,16 +46,30 @@ class AppLinkManager private constructor() {
 
   fun handleURL(activity: Activity) {
     val uri = activity.intent.data ?: return
-    processCampaignIds(uri)
+    processCampaignIds(uri, activity.intent)
   }
 
-  fun processCampaignIds(uri: Uri) {
-    val applinkData = uri.getQueryParameter(APPLINK_DATA_KEY) ?: return
+  fun processCampaignIds(uri: Uri, intent: Intent) {
+    val campaignIDs = getCampaignIDFromUri(uri) ?: getCampaignIDFromIntentExtra(intent)
+    if (campaignIDs != null) {
+      preferences.edit().putString(CAMPAIGN_IDS_KEY, campaignIDs).apply()
+    }
+  }
+
+  fun getCampaignIDFromUri(uri: Uri): String? {
+    val applinkData = uri.getQueryParameter(APPLINK_DATA_KEY) ?: return null
     try {
       val json = JSONObject(applinkData)
-      val campaignIDs = json.getString(CAMPAIGN_IDS_KEY) ?: return
-      preferences.edit().putString(CAMPAIGN_IDS_KEY, campaignIDs).apply()
-    } catch (_: Exception) {}
+      return json.getString(CAMPAIGN_IDS_KEY)
+    } catch (_: Exception) {
+      Log.d("AppLinkManager", "Fail to parse Applink data from Uri")
+    }
+    return null
+  }
+
+  fun getCampaignIDFromIntentExtra(intent: Intent): String? {
+    val applinkBundle = intent.getBundleExtra(APPLINK_DATA_KEY) ?: return null
+    return applinkBundle.getString(CAMPAIGN_IDS_KEY)
   }
 
   fun getInfo(key: String): String? {
