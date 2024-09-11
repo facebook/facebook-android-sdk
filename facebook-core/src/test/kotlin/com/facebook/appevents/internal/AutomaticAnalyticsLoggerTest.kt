@@ -47,167 +47,186 @@ import org.robolectric.RuntimeEnvironment
     FetchedAppSettings::class,
     FetchedAppSettingsManager::class,
     AutomaticAnalyticsLogger::class,
-    FetchedAppGateKeepersManager::class)
+    FetchedAppGateKeepersManager::class
+)
 class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
-  private val appID = "123"
-  private val activityName = "activity name"
-  private val timeSpent = 5L
-  private val purchase =
-      "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\"}"
-  private val skuDetails = "{\"price_currency_code\":\"USD\",\"price_amount_micros\":5000}"
+    private val appID = "123"
+    private val activityName = "activity name"
+    private val timeSpent = 5L
+    private val purchase =
+        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\"}"
+    private val skuDetails = "{\"price_currency_code\":\"USD\",\"price_amount_micros\":5000}"
+    private val skuDetails_gpbl_v5_v7 =
+        """{"oneTimePurchaseOfferDetails": {"priceAmountMicros": 12000000, "priceCurrencyCode": "USD"}}"""
 
-  private var logWarningCallCount = 0
-  private var appEventLoggerCallCount = 0
+    private var logWarningCallCount = 0
+    private var appEventLoggerCallCount = 0
 
-  private lateinit var context: Context
-  private lateinit var mockInternalAppEventsLogger: InternalAppEventsLogger
-  private lateinit var mockBundle: Bundle
-  private lateinit var mockFetchedAppSettings: FetchedAppSettings
+    private lateinit var context: Context
+    private lateinit var mockInternalAppEventsLogger: InternalAppEventsLogger
+    private lateinit var mockBundle: Bundle
+    private lateinit var mockFetchedAppSettings: FetchedAppSettings
 
-  @Before
-  fun init() {
-    mockStatic(FacebookSdk::class.java)
-    mockStatic(Log::class.java)
-    mockStatic(FetchedAppSettingsManager::class.java)
-    mockStatic(FetchedAppGateKeepersManager::class.java)
+    @Before
+    fun init() {
+        mockStatic(FacebookSdk::class.java)
+        mockStatic(Log::class.java)
+        mockStatic(FetchedAppSettingsManager::class.java)
+        mockStatic(FetchedAppGateKeepersManager::class.java)
 
-    context = Robolectric.buildActivity(Activity::class.java).get()
-    whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
-    whenever(FacebookSdk.isInitialized()).thenReturn(true)
-    whenever(FacebookSdk.getApplicationId()).thenReturn(appID)
+        context = Robolectric.buildActivity(Activity::class.java).get()
+        whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
+        whenever(FacebookSdk.isInitialized()).thenReturn(true)
+        whenever(FacebookSdk.getApplicationId()).thenReturn(appID)
 
-    mockInternalAppEventsLogger = mock(InternalAppEventsLogger::class.java)
-    whenNew(InternalAppEventsLogger::class.java)
-        .withAnyArguments()
-        .thenReturn(mockInternalAppEventsLogger)
+        mockInternalAppEventsLogger = mock(InternalAppEventsLogger::class.java)
+        whenNew(InternalAppEventsLogger::class.java)
+            .withAnyArguments()
+            .thenReturn(mockInternalAppEventsLogger)
 
-    Whitebox.setInternalState(
-        AutomaticAnalyticsLogger::class.java,
-        "internalAppEventsLogger",
-        mockInternalAppEventsLogger)
+        Whitebox.setInternalState(
+            AutomaticAnalyticsLogger::class.java,
+            "internalAppEventsLogger",
+            mockInternalAppEventsLogger
+        )
 
-    mockBundle = mock(Bundle::class.java)
-    whenNew(Bundle::class.java).withAnyArguments().thenReturn(mockBundle)
+        mockBundle = mock(Bundle::class.java)
+        whenNew(Bundle::class.java).withAnyArguments().thenReturn(mockBundle)
 
-    mockFetchedAppSettings = mock(FetchedAppSettings::class.java)
-    whenever(FetchedAppSettingsManager.queryAppSettings(appID, false))
-        .thenReturn(mockFetchedAppSettings)
-    whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
-        .thenReturn(mockFetchedAppSettings)
+        mockFetchedAppSettings = mock(FetchedAppSettings::class.java)
+        whenever(FetchedAppSettingsManager.queryAppSettings(appID, false))
+            .thenReturn(mockFetchedAppSettings)
+        whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
+            .thenReturn(mockFetchedAppSettings)
 
-    whenever(Log.w(any(), any<String>())).then { logWarningCallCount++ }
-    whenever(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
+        whenever(Log.w(any(), any<String>())).then { logWarningCallCount++ }
+        whenever(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
 
-    val mockManager = mock(FetchedAppGateKeepersManager::class.java)
-    Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
+        val mockManager = mock(FetchedAppGateKeepersManager::class.java)
+        Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
 
-    whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
-        .thenReturn(true)
-  }
-
-  @Test
-  fun `test log activate app event when autoLogAppEvent disable`() {
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
-
-    AutomaticAnalyticsLogger.logActivateAppEvent()
-
-    assertEquals(0, logWarningCallCount)
-    assertEquals(0, appEventLoggerCallCount)
-  }
-
-  @Test
-  fun `test log activate app event when autoLogAppEvent enable`() {
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-
-    AutomaticAnalyticsLogger.logActivateAppEvent()
-
-    assertEquals(1, logWarningCallCount)
-  }
-
-  @Test
-  fun `test log activate app event when autoLogAppEvent enable & context is application`() {
-    val appContext = RuntimeEnvironment.application
-    whenever(FacebookSdk.getApplicationContext()).thenReturn(appContext)
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-    val mockCompanion = mock(AppEventsLogger.Companion::class.java)
-    WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
-    whenever(mockCompanion.activateApp(appContext, appID)).then { appEventLoggerCallCount++ }
-
-    AutomaticAnalyticsLogger.logActivateAppEvent()
-
-    assertEquals(1, appEventLoggerCallCount)
-  }
-
-  @Test
-  fun `test log activity time spent event when automatic logging disable`() {
-    whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(false)
-
-    AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
-
-    verify(mockFetchedAppSettings).automaticLoggingEnabled
-    verifyNew(Bundle::class.java, never()).withArguments(any())
-    verify(mockInternalAppEventsLogger, never()).logEvent(any(), any())
-  }
-
-  @Test
-  fun `test log activity time spent event when automatic logging enable`() {
-    whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
-
-    AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
-
-    verify(mockFetchedAppSettings).automaticLoggingEnabled
-    verifyNew(Bundle::class.java).withArguments(eq(1))
-    verify(mockInternalAppEventsLogger)
-        .logEvent(eq(Constants.AA_TIME_SPENT_EVENT_NAME), eq(5.0), eq(mockBundle))
-  }
-
-  @Test
-  fun `test log purchase when implicit purchase logging disable`() {
-    var appGateKeepersManagerCallCount = 0
-    val mockManager = mock(FetchedAppGateKeepersManager::class.java)
-    Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
-    whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>())).then {
-      appGateKeepersManagerCallCount++
+        whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
+            .thenReturn(true)
     }
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
-    AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
+    @Test
+    fun `test log activate app event when autoLogAppEvent disable`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
-    assertEquals(0, appGateKeepersManagerCallCount)
-  }
+        AutomaticAnalyticsLogger.logActivateAppEvent()
 
-  @Test
-  fun `test log purchase when implicit purchase logging enable & subscribed`() {
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-    AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
-    verify(mockInternalAppEventsLogger)
-        .logEventImplicitly(
-            eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
-            any<BigDecimal>(),
-            any<Currency>(),
-            any<Bundle>())
-  }
+        assertEquals(0, logWarningCallCount)
+        assertEquals(0, appEventLoggerCallCount)
+    }
 
-  @Test
-  fun `test log purchase when implicit purchase logging enable & not subscribed`() {
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-    AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, false)
-    verify(mockInternalAppEventsLogger)
-        .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
-  }
+    @Test
+    fun `test log activate app event when autoLogAppEvent enable`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
 
-  @Test
-  fun `test is implicit purchase logging enabled when autoLogAppEvent Disable`() {
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
-    val result = AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()
-    assertEquals(false, result)
-  }
+        AutomaticAnalyticsLogger.logActivateAppEvent()
 
-  @Test
-  fun `test is implicit purchase logging enabled when autoLogAppEvent enable`() {
-    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-    val result2 = AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()
-    assertEquals(true, result2)
-  }
+        assertEquals(1, logWarningCallCount)
+    }
+
+    @Test
+    fun `test log activate app event when autoLogAppEvent enable & context is application`() {
+        val appContext = RuntimeEnvironment.application
+        whenever(FacebookSdk.getApplicationContext()).thenReturn(appContext)
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        val mockCompanion = mock(AppEventsLogger.Companion::class.java)
+        WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
+        whenever(mockCompanion.activateApp(appContext, appID)).then { appEventLoggerCallCount++ }
+
+        AutomaticAnalyticsLogger.logActivateAppEvent()
+
+        assertEquals(1, appEventLoggerCallCount)
+    }
+
+    @Test
+    fun `test log activity time spent event when automatic logging disable`() {
+        whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(false)
+
+        AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
+
+        verify(mockFetchedAppSettings).automaticLoggingEnabled
+        verifyNew(Bundle::class.java, never()).withArguments(any())
+        verify(mockInternalAppEventsLogger, never()).logEvent(any(), any())
+    }
+
+    @Test
+    fun `test log activity time spent event when automatic logging enable`() {
+        whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
+
+        AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
+
+        verify(mockFetchedAppSettings).automaticLoggingEnabled
+        verifyNew(Bundle::class.java).withArguments(eq(1))
+        verify(mockInternalAppEventsLogger)
+            .logEvent(eq(Constants.AA_TIME_SPENT_EVENT_NAME), eq(5.0), eq(mockBundle))
+    }
+
+    @Test
+    fun `test log purchase when implicit purchase logging disable`() {
+        var appGateKeepersManagerCallCount = 0
+        val mockManager = mock(FetchedAppGateKeepersManager::class.java)
+        Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
+        whenever(
+            mockManager.getGateKeeperForKey(
+                any<String>(),
+                any<String>(),
+                any<Boolean>()
+            )
+        ).then {
+            appGateKeepersManagerCallCount++
+        }
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+
+        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
+
+        assertEquals(0, appGateKeepersManagerCallCount)
+    }
+
+    @Test
+    fun `test log purchase when implicit purchase logging enable & subscribed`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
+        verify(mockInternalAppEventsLogger)
+            .logEventImplicitly(
+                eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>()
+            )
+    }
+
+    @Test
+    fun `test log purchase when implicit purchase logging enable & not subscribed with GPBL v2 - v4`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, false)
+        verify(mockInternalAppEventsLogger)
+            .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+    }
+
+    @Test
+    fun `test log purchase when implicit purchase logging enable & not subscribed with GPBL v5 - v7`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails_gpbl_v5_v7, false)
+        verify(mockInternalAppEventsLogger)
+            .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+    }
+
+    @Test
+    fun `test is implicit purchase logging enabled when autoLogAppEvent Disable`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+        val result = AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `test is implicit purchase logging enabled when autoLogAppEvent enable`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        val result2 = AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()
+        assertEquals(true, result2)
+    }
 }
