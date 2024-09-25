@@ -38,7 +38,6 @@ object Versions {
     const val json = "20180130"
     const val kotlin = "1.5.10"
     const val leakcanaryAndroid = "2.9.1"
-    const val liquidcore = "0.6.2"
     const val material = "1.0.0"
     const val mockitoInline = "2.26.0"
     const val mockitoKotlin = "2.2.11"
@@ -120,7 +119,6 @@ object Libs {
         "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanaryAndroid}"
     const val leakcanary_object_watcher =
         "com.squareup.leakcanary:leakcanary-object-watcher-android:${Versions.leakcanaryAndroid}"
-    const val liquidcore = "com.github.LiquidPlayer:LiquidCore:${Versions.liquidcore}"
     const val mockito_inline = "org.mockito:mockito-inline:${Versions.mockitoInline}"
     const val mockito_kotlin = "org.mockito.kotlin:mockito-kotlin:${Versions.mockitoKotlin}"
     const val mockwebserver = "com.squareup.okhttp3:mockwebserver:${Versions.mockwebserver}"
