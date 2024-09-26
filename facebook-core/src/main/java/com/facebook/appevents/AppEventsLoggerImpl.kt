@@ -25,7 +25,9 @@ import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
 import com.facebook.appevents.integrity.BlocklistEventsManager.isInBlocklist
 import com.facebook.appevents.integrity.MACARuleMatchingManager
+import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.appevents.integrity.ProtectedModeManager.processParametersForProtectedMode
+import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
@@ -48,19 +50,14 @@ import com.facebook.internal.Utility.logd
 import com.facebook.internal.Utility.stringsEqualOrEmpty
 import com.facebook.internal.Validate.sdkInitialized
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import org.json.JSONException
+import org.json.JSONObject
 import java.math.BigDecimal
 import java.util.Currency
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import kotlin.collections.HashSet
-import kotlin.collections.MutableSet
-import kotlin.collections.indices
-import kotlin.collections.isNotEmpty
-import kotlin.collections.toTypedArray
-import org.json.JSONException
-import org.json.JSONObject
 
 @AutoHandleExceptions
 internal class AppEventsLoggerImpl
@@ -324,6 +321,9 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
     
     try {
+      if (!ProtectedModeManager.protectedModeIsApplied(parameters)) {
+        processFilterSensitiveParams(parameters, eventName)
+      }
       MACARuleMatchingManager.processParameters(parameters, eventName)
       processParametersForProtectedMode(parameters)
       val event =

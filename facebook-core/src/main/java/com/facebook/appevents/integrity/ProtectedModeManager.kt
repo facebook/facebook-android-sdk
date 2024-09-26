@@ -221,7 +221,11 @@ object ProtectedModeManager {
     parameters.putString(PROTECTED_MODE_IS_APPLIED_KEY, PROTECTED_MODE_IS_APPLIED_VALUE)
   }
 
-  fun protectedModeIsApplied(parameters: Bundle): Boolean {
+  fun protectedModeIsApplied(parameters: Bundle?): Boolean {
+    if(parameters == null){
+      // if parameters aren't provided then the flag indicating core setup can't be assumed implicitly
+      return false
+    }
     return parameters.containsKey(PROTECTED_MODE_IS_APPLIED_KEY) && parameters.get(PROTECTED_MODE_IS_APPLIED_KEY) == PROTECTED_MODE_IS_APPLIED_VALUE
   }
 }

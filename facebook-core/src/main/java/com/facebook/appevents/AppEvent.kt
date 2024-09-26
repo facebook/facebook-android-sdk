@@ -15,15 +15,15 @@ import com.facebook.FacebookException
 import com.facebook.LoggingBehavior
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager.processDeprecatedParameters
 import com.facebook.appevents.integrity.IntegrityManager
-import com.facebook.appevents.integrity.ProtectedModeManager.protectedModeIsApplied
 import com.facebook.appevents.integrity.RedactedEventsManager
-import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.internal.AppEventUtility.bytesToHex
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processEvent
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processParameters
 import com.facebook.internal.Logger.Companion.log
 import com.facebook.internal.Utility.logd
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.ObjectStreamException
 import java.io.Serializable
 import java.io.UnsupportedEncodingException
@@ -31,8 +31,6 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.Locale
 import java.util.UUID
-import org.json.JSONException
-import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AppEvent : Serializable {
@@ -140,9 +138,6 @@ class AppEvent : Serializable {
                         key))
       }
       paramMap[key] = value.toString()
-    }
-    if (!protectedModeIsApplied(parameters)) {
-      processFilterSensitiveParams(paramMap as MutableMap<String, String?>, name)
     }
     IntegrityManager.processParameters(paramMap)
     processParameters(paramMap as MutableMap<String, String?>, name)

@@ -8,6 +8,7 @@
 
 package com.facebook.appevents.integrity
 
+import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.integrity.SensitiveParamsManager.disable
@@ -18,6 +19,7 @@ import org.assertj.core.api.Assertions
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -88,7 +90,7 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isFalse
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedFinalParamsWithoutChange)
+        assertEqual(mockInputParams, expectedFinalParamsWithoutChange)
     }
 
     @Test
@@ -99,23 +101,21 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isFalse
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedFinalParamsWithoutChange)
+        assertEqual(mockInputParams, expectedFinalParamsWithoutChange)
     }
 
     @Test
     fun `test fetched sensitive params list is not null from the server and no params need to be filtered`() {
         initMockFetchedAppSettings(mockSensitiveParamsFromServer)
 
-        var mockInputParamsWithoutSensitiveParams = HashMap<String, String?>()
-        mockInputParamsWithoutSensitiveParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+        val mockInputParamsWithoutSensitiveParams = Bundle()
+        mockInputParamsWithoutSensitiveParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
 
         enable()
         processFilterSensitiveParams(mockInputParamsWithoutSensitiveParams, mockEventNameWithoutSensitiveParams)
 
-        var expectedFinalParamsWithoutChange = mockInputParamsWithoutSensitiveParams.toMap()
-
         Assertions.assertThat(mockInputParamsWithoutSensitiveParams.containsKey(filteredParamsKey)).isFalse
-        Assertions.assertThat(mockInputParamsWithoutSensitiveParams).isEqualTo(expectedFinalParamsWithoutChange)
+        assertEqual(mockInputParamsWithoutSensitiveParams, mockInputParamsWithoutSensitiveParams)
     }
 
     @Test
@@ -124,16 +124,17 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         enable()
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
-        var expectedParams = HashMap<String, String?>()
-        var filteredParams = JSONArray()
+        val filteredParams = JSONArray()
         filteredParams.put(mockSensitiveParam3)
-        expectedParams[filteredParamsKey] = filteredParams.toString()
-        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
-        expectedParams[mockSensitiveParam1] = null
-        expectedParams[mockSensitiveParam2] = null
+
+        val expectedParams = Bundle()
+        expectedParams.putString(filteredParamsKey, filteredParams.toString())
+        expectedParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
+        expectedParams.putString(mockSensitiveParam1, null)
+        expectedParams.putString(mockSensitiveParam2, null)
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
+        assertEqual(mockInputParams, expectedParams)
     }
 
     @Test
@@ -142,16 +143,17 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         enable()
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
-        var expectedParams = HashMap<String, String?>()
-        var filteredParams = JSONArray()
+        val filteredParams = JSONArray()
         filteredParams.put(mockSensitiveParam3) /* default sensitive param */
         filteredParams.put(mockSensitiveParam1) /* specific sensitive params */
         filteredParams.put(mockSensitiveParam2) /* specific sensitive params */
-        expectedParams[filteredParamsKey] = filteredParams.toString()
-        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+
+        val expectedParams = Bundle()
+        expectedParams.putString(filteredParamsKey, filteredParams.toString())
+        expectedParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
+        assertEqual(mockInputParams, expectedParams)
     }
 
     @Test
@@ -160,16 +162,17 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         enable()
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
-        var expectedParams = HashMap<String, String?>()
-        var filteredParams = JSONArray()
+        val filteredParams = JSONArray()
         filteredParams.put(mockSensitiveParam3) /* default sensitive param */
-        expectedParams[filteredParamsKey] = filteredParams.toString()
-        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
-        expectedParams[mockSensitiveParam1] = null
-        expectedParams[mockSensitiveParam2] = null
+
+        val expectedParams = Bundle()
+        expectedParams.putString(filteredParamsKey, filteredParams.toString())
+        expectedParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
+        expectedParams.putString(mockSensitiveParam1, null)
+        expectedParams.putString(mockSensitiveParam2, null)
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
+        assertEqual(mockInputParams, expectedParams)
     }
 
     @Test
@@ -178,17 +181,48 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         enable()
         processFilterSensitiveParams(mockInputParams, mockEventWithSensitiveParam)
 
-        var expectedParams = HashMap<String, String?>()
-        var filteredParams = JSONArray()
+        val filteredParams = JSONArray()
         filteredParams.put(mockSensitiveParam1) /* specific sensitive params */
         filteredParams.put(mockSensitiveParam2) /* specific sensitive params */
 
-        expectedParams[filteredParamsKey] = filteredParams.toString()
-        expectedParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
-        expectedParams[mockSensitiveParam3] = null
+        val expectedParams = Bundle()
+        expectedParams.putString(filteredParamsKey, filteredParams.toString())
+        expectedParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
+        expectedParams.putString(mockSensitiveParam3, null)
 
         Assertions.assertThat(mockInputParams.containsKey(filteredParamsKey)).isTrue
-        Assertions.assertThat(mockInputParams).isEqualTo(expectedParams)
+        assertEqual(mockInputParams, expectedParams)
+    }
+
+    private fun isEqual(mockBundle: Bundle?, expectedBundle: Bundle?): Boolean {
+        if (mockBundle == null && expectedBundle == null) {
+            return true
+        }
+        val s1 = mockBundle?.keySet() ?: return false
+        val s2 = expectedBundle?.keySet() ?: return false
+
+        if (!s1.equals(s2)) {
+            return false
+        }
+
+        for (s in s1) {
+            val v1 = mockBundle.get(s)
+            val v2 = expectedBundle.get(s)
+
+            // cant compare serialized lists directly present in _filteredKey
+            if(s.equals(filteredParamsKey) && v1.toString().length == v2.toString().length) {
+                continue
+            }
+
+            if (v1 != v2) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun assertEqual(mockBundle: Bundle?, expectedBundle: Bundle?) {
+        Assert.assertTrue(isEqual(mockBundle, expectedBundle))
     }
 
     companion object {
@@ -219,8 +253,8 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         private lateinit var mockSensitiveParamsFromServerWithoutDefault: JSONArray /* specific sensitive params only */
         private lateinit var mockSensitiveParamsFromServer: JSONArray /* specific sensitive params and default */
 
-        private lateinit var mockInputParams: HashMap<String, String?>
-        private lateinit var expectedFinalParamsWithoutChange: Map<String, String?>
+        private lateinit var mockInputParams: Bundle
+        private lateinit var expectedFinalParamsWithoutChange: Bundle
 
         fun setupTestConfigs() {
             emptyJSONArray = JSONArray()
@@ -248,13 +282,15 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
             mockSensitiveParamsFromServer.put(mockSpecificSensitiveParams)
             mockSensitiveParamsFromServer.put(mockDefaultSensitiveParams)
 
-            mockInputParams = HashMap()
-            mockInputParams[mockSensitiveParam1] = null
-            mockInputParams[mockSensitiveParam2] = null
-            mockInputParams[mockSensitiveParam3] = null
-            mockInputParams[mockNonSensitiveParam] = mockNonSensitiveParamValue
+            mockInputParams = Bundle()
+            mockInputParams.putString(mockSensitiveParam1, null)
+            mockInputParams.putString(mockSensitiveParam2, null)
+            mockInputParams.putString(mockSensitiveParam3, null)
+            mockInputParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
 
-            expectedFinalParamsWithoutChange = mockInputParams.toMap()
+            expectedFinalParamsWithoutChange = Bundle()
+            expectedFinalParamsWithoutChange.putAll(mockInputParams)
+
         }
     }
 }

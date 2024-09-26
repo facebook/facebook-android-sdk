@@ -165,11 +165,11 @@ object FeatureManager {
     SuggestedEvents(0x00010401),
     IntelligentIntegrity(0x00010402),
     ModelRequest(0x00010403),
-    ProtectedMode(0x00010404), /* filter out the params which are not supported legally */
+    FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
     MACARuleMatching(0x00010405),
+    ProtectedMode(0x00010404), /* filter out the params which are not supported legally */
     BlocklistEvents(0x00010406), /* drop the events in the blocklist */
     FilterRedactedEvents(0x00010407), /* replace the event name via the redaction string */
-    FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
     EventDeactivation(0x00010500),
     OnDeviceEventProcessing(0x00010600),
     OnDevicePostInstallEventProcessing(0x00010601),

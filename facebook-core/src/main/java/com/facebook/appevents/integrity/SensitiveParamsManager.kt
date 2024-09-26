@@ -8,6 +8,7 @@
 
 package com.facebook.appevents.integrity
 
+import android.os.Bundle
 import com.facebook.FacebookSdk
 import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.Utility.convertJSONArrayToHashSet
@@ -31,7 +32,7 @@ object SensitiveParamsManager {
     @JvmStatic
     fun enable() {
         loadSensitiveParameters()
-        if (defaultSensitiveParameters.isNullOrEmpty() && sensitiveParameters.isNullOrEmpty()) {
+        if (defaultSensitiveParameters.isEmpty() && sensitiveParameters.isEmpty()) {
             enabled = false
             return
         }
@@ -67,7 +68,7 @@ object SensitiveParamsManager {
                          */
                         val sensitiveParamsScope = jsonObject.getString("key")
                         val sensitiveParams = jsonObject.getJSONArray("value")
-                        sensitiveParamsScope?.let {
+                        sensitiveParamsScope.let {
                             sensitiveParams?.let {
                                 convertJSONArrayToHashSet(sensitiveParams)?.let {
                                     if (sensitiveParamsScope.equals(DEFAULT_SENSITIVE_PARAMS_KEY)) {
@@ -87,18 +88,17 @@ object SensitiveParamsManager {
     }
 
     @JvmStatic
-    fun processFilterSensitiveParams(parameters: MutableMap<String, String?>, eventName: String) {
-        if (!enabled) {
+    fun processFilterSensitiveParams(parameters: Bundle?, eventName: String){
+        if (!enabled || parameters == null) {
             return
         }
-        if (defaultSensitiveParameters.isNullOrEmpty() && !sensitiveParameters.containsKey(eventName)) {
+        if (defaultSensitiveParameters.isEmpty() && !sensitiveParameters.containsKey(eventName)) {
             return
         }
-
         val filteredParamsJSON = JSONArray()
         try {
             val sensitiveParamsForEvent = sensitiveParameters.get(key = eventName)
-            val keys: List<String> = ArrayList(parameters.keys)
+            val keys = ArrayList(parameters.keySet())
             for (key in keys) {
                 if (shouldFilterOut(key, sensitiveParamsForEvent)) {
                     parameters.remove(key)
@@ -108,9 +108,8 @@ object SensitiveParamsManager {
         } catch (e: Exception) {
             /* swallow */
         }
-
         if (filteredParamsJSON.length() > 0) {
-            parameters[SENSITIVE_PARAMS_KEY] = filteredParamsJSON.toString()
+            parameters.putString(SENSITIVE_PARAMS_KEY, filteredParamsJSON.toString())
         }
     }
 
