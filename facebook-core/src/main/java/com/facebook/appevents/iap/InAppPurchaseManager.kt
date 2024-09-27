@@ -34,7 +34,6 @@ object InAppPurchaseManager {
 
     @JvmStatic
     fun startTracking() {
-
         if (!enabled.get()) {
             return
         }

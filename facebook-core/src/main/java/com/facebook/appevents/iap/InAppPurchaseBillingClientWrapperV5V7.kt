@@ -471,9 +471,9 @@ private constructor(
             } catch (e: Exception) {
                 /* swallow */
             }
-            if (loggingRunnable != null && loggingRunnable is Runnable) {
-                loggingRunnable.run()
-            }
+        }
+        if (loggingRunnable != null && loggingRunnable is Runnable) {
+            loggingRunnable.run()
         }
     }
 
@@ -505,7 +505,7 @@ private constructor(
         private val TAG = InAppPurchaseBillingClientWrapperV5V7::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
         private var instance: InAppPurchaseBillingClientWrapperV5V7? = null
-        
+
         // Use ConcurrentHashMap because purchase values may be updated in different threads
         val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()

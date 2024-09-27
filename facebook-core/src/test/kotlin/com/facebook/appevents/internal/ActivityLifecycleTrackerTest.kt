@@ -13,8 +13,10 @@ import android.app.Application
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.codeless.CodelessManager
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.suggestedevents.SuggestedEventsManager
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.Utility
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -32,63 +34,135 @@ import org.powermock.reflect.Whitebox
     FeatureManager::class,
     CodelessManager::class,
     MetadataIndexer::class,
-    SuggestedEventsManager::class)
+    SuggestedEventsManager::class,
+    InAppPurchaseManager::class,
+    Utility::class,
+)
 class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
 
-  private lateinit var mockApplication: Application
-  private lateinit var mockActivity: Activity
-  private lateinit var mockScheduledExecutor: FacebookSerialThreadPoolMockExecutor
+    private lateinit var mockApplication: Application
+    private lateinit var mockActivity: Activity
+    private lateinit var mockScheduledExecutor: FacebookSerialThreadPoolMockExecutor
 
-  private val appID = "123"
+    private val appID = "123"
 
-  @Before
-  fun init() {
-    mockApplication = PowerMockito.mock(Application::class.java)
-    mockActivity = PowerMockito.mock(Activity::class.java)
-    PowerMockito.mockStatic(FeatureManager::class.java)
-    PowerMockito.mockStatic(CodelessManager::class.java)
-    PowerMockito.mockStatic(MetadataIndexer::class.java)
-    PowerMockito.mockStatic(SuggestedEventsManager::class.java)
+    @Before
+    fun init() {
+        mockApplication = PowerMockito.mock(Application::class.java)
+        mockActivity = PowerMockito.mock(Activity::class.java)
+        PowerMockito.mockStatic(FeatureManager::class.java)
+        PowerMockito.mockStatic(CodelessManager::class.java)
+        PowerMockito.mockStatic(InAppPurchaseManager::class.java)
+        PowerMockito.mockStatic(MetadataIndexer::class.java)
+        PowerMockito.mockStatic(SuggestedEventsManager::class.java)
+        PowerMockito.mockStatic(Utility::class.java)
+        whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "ProxyBillingActivity" }
 
-    mockScheduledExecutor = spy(FacebookSerialThreadPoolMockExecutor(1))
-    Whitebox.setInternalState(
-        ActivityLifecycleTracker::class.java, "singleThreadExecutor", mockScheduledExecutor)
-  }
-
-  @Test
-  fun `test start tracking`() {
-    ActivityLifecycleTracker.startTracking(mockApplication, appID)
-    verify(mockApplication, times(1)).registerActivityLifecycleCallbacks(any())
-  }
-
-  @Test
-  fun `test create activity`() {
-    ActivityLifecycleTracker.onActivityCreated(mockActivity)
-    verify(mockScheduledExecutor).execute(any<Runnable>())
-  }
-
-  @Test
-  fun `test resume activity`() {
-    var codelessManagerCounter = 0
-    var metadataIndexerCounter = 0
-    var suggestedEventsManagerCounter = 0
-
-    whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
-      codelessManagerCounter++
+        mockScheduledExecutor = spy(FacebookSerialThreadPoolMockExecutor(1))
+        Whitebox.setInternalState(
+            ActivityLifecycleTracker::class.java, "singleThreadExecutor", mockScheduledExecutor
+        )
+        Whitebox.setInternalState(
+            ActivityLifecycleTracker::class.java, "previousActivityName", "MainActivity"
+        )
     }
-    whenever(MetadataIndexer.onActivityResumed(eq(mockActivity))).thenAnswer {
-      metadataIndexerCounter++
-    }
-    whenever(SuggestedEventsManager.trackActivity(eq(mockActivity))).thenAnswer {
-      suggestedEventsManagerCounter++
-    }
-    ActivityLifecycleTracker.onActivityResumed(mockActivity)
-    assertEquals(1, codelessManagerCounter)
-    assertEquals(1, metadataIndexerCounter)
-    assertEquals(1, suggestedEventsManagerCounter)
 
-    verify(mockScheduledExecutor).execute(any<Runnable>())
+    @Test
+    fun `test start tracking`() {
+        ActivityLifecycleTracker.startTracking(mockApplication, appID)
+        verify(mockApplication, times(1)).registerActivityLifecycleCallbacks(any())
+    }
 
-    assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
-  }
+    @Test
+    fun `test create activity`() {
+        ActivityLifecycleTracker.onActivityCreated(mockActivity)
+        verify(mockScheduledExecutor).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test resume activity`() {
+        var codelessManagerCounter = 0
+        var metadataIndexerCounter = 0
+        var suggestedEventsManagerCounter = 0
+
+        whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
+            codelessManagerCounter++
+        }
+        whenever(MetadataIndexer.onActivityResumed(eq(mockActivity))).thenAnswer {
+            metadataIndexerCounter++
+        }
+        whenever(SuggestedEventsManager.trackActivity(eq(mockActivity))).thenAnswer {
+            suggestedEventsManagerCounter++
+        }
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertEquals(1, codelessManagerCounter)
+        assertEquals(1, metadataIndexerCounter)
+        assertEquals(1, suggestedEventsManagerCounter)
+
+        verify(mockScheduledExecutor).execute(any<Runnable>())
+
+        assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
+    }
+
+    @Test
+    fun `test resume activity after in-app purchase`() {
+        var startTrackingCount = 0
+        var codelessManagerCounter = 0
+        var metadataIndexerCounter = 0
+        var suggestedEventsManagerCounter = 0
+
+        whenever(InAppPurchaseManager.startTracking()).thenAnswer { startTrackingCount++ }
+        whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
+            codelessManagerCounter++
+        }
+        whenever(MetadataIndexer.onActivityResumed(eq(mockActivity))).thenAnswer {
+            metadataIndexerCounter++
+        }
+        whenever(SuggestedEventsManager.trackActivity(eq(mockActivity))).thenAnswer {
+            suggestedEventsManagerCounter++
+        }
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertEquals(1, codelessManagerCounter)
+        assertEquals(1, metadataIndexerCounter)
+        assertEquals(1, suggestedEventsManagerCounter)
+
+        verify(mockScheduledExecutor).execute(any<Runnable>())
+
+        assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
+
+        // New activity, after IAP event
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertEquals(startTrackingCount, 1)
+    }
+
+    @Test
+    fun `test resume activity after non in-app purchase`() {
+        var startTrackingCount = 0
+        var codelessManagerCounter = 0
+        var metadataIndexerCounter = 0
+        var suggestedEventsManagerCounter = 0
+        whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "MainActivity" }
+        whenever(InAppPurchaseManager.startTracking()).thenAnswer { startTrackingCount++ }
+        whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
+            codelessManagerCounter++
+        }
+        whenever(MetadataIndexer.onActivityResumed(eq(mockActivity))).thenAnswer {
+            metadataIndexerCounter++
+        }
+        whenever(SuggestedEventsManager.trackActivity(eq(mockActivity))).thenAnswer {
+            suggestedEventsManagerCounter++
+        }
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertEquals(1, codelessManagerCounter)
+        assertEquals(1, metadataIndexerCounter)
+        assertEquals(1, suggestedEventsManagerCounter)
+
+        verify(mockScheduledExecutor).execute(any<Runnable>())
+
+        assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
+
+        // New activity, after IAP event
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertEquals(startTrackingCount, 0)
+    }
 }
