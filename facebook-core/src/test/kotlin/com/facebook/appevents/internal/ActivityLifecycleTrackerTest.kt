@@ -22,11 +22,13 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
+import org.powermock.api.mockito.internal.mockcreation.DefaultMockCreator.mock
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -43,6 +45,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     private lateinit var mockApplication: Application
     private lateinit var mockActivity: Activity
     private lateinit var mockScheduledExecutor: FacebookSerialThreadPoolMockExecutor
+    private lateinit var mockIapExecutor: FacebookSerialThreadPoolMockExecutor
 
     private val appID = "123"
 
@@ -59,6 +62,16 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "ProxyBillingActivity" }
 
         mockScheduledExecutor = spy(FacebookSerialThreadPoolMockExecutor(1))
+        Whitebox.setInternalState(
+            ActivityLifecycleTracker::class.java, "singleThreadExecutor", mockScheduledExecutor
+        )
+
+        mockIapExecutor = mock()
+        Whitebox.setInternalState(
+            ActivityLifecycleTracker::class.java,
+            "iapExecutor",
+            mockIapExecutor
+        )
         Whitebox.setInternalState(
             ActivityLifecycleTracker::class.java, "singleThreadExecutor", mockScheduledExecutor
         )
@@ -98,9 +111,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         assertEquals(1, codelessManagerCounter)
         assertEquals(1, metadataIndexerCounter)
         assertEquals(1, suggestedEventsManagerCounter)
-
-        verify(mockScheduledExecutor).execute(any<Runnable>())
-
+        verify(mockScheduledExecutor, times(1)).execute(any<Runnable>())
         assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
     }
 
@@ -111,7 +122,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         var metadataIndexerCounter = 0
         var suggestedEventsManagerCounter = 0
 
-        whenever(InAppPurchaseManager.startTracking()).thenAnswer { startTrackingCount++ }
+        whenever(mockIapExecutor.execute(any())).thenAnswer { startTrackingCount++ }
         whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
             codelessManagerCounter++
         }
@@ -125,14 +136,15 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         assertEquals(1, codelessManagerCounter)
         assertEquals(1, metadataIndexerCounter)
         assertEquals(1, suggestedEventsManagerCounter)
-
-        verify(mockScheduledExecutor).execute(any<Runnable>())
+        assertEquals(0, startTrackingCount)
+        verify(mockScheduledExecutor, times(1)).execute(any<Runnable>())
 
         assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
 
         // New activity, after IAP event
         ActivityLifecycleTracker.onActivityResumed(mockActivity)
         assertEquals(startTrackingCount, 1)
+        verify(mockScheduledExecutor, times(2)).execute(any<Runnable>())
     }
 
     @Test
@@ -142,7 +154,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         var metadataIndexerCounter = 0
         var suggestedEventsManagerCounter = 0
         whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "MainActivity" }
-        whenever(InAppPurchaseManager.startTracking()).thenAnswer { startTrackingCount++ }
+        whenever(mockIapExecutor.execute(any())).thenAnswer { startTrackingCount++ }
         whenever(CodelessManager.onActivityResumed(eq(mockActivity))).thenAnswer {
             codelessManagerCounter++
         }
@@ -156,13 +168,15 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         assertEquals(1, codelessManagerCounter)
         assertEquals(1, metadataIndexerCounter)
         assertEquals(1, suggestedEventsManagerCounter)
-
-        verify(mockScheduledExecutor).execute(any<Runnable>())
+        assertEquals(startTrackingCount, 0)
+        verify(mockScheduledExecutor, times(1)).execute(any<Runnable>())
 
         assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
 
         // New activity, after IAP event
         ActivityLifecycleTracker.onActivityResumed(mockActivity)
         assertEquals(startTrackingCount, 0)
+        verify(mockScheduledExecutor, times(2)).execute(any<Runnable>())
+
     }
 }

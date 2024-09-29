@@ -13,6 +13,7 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_Plu
 import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.INAPP
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.SUBS
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -42,12 +43,8 @@ object InAppPurchaseAutoLogger {
             failedToCreateWrapper.set(true)
             return
         }
-        if (InAppPurchaseLoggerManager.eligibleQueryPurchaseHistory()) {
-            billingClientWrapper.queryPurchaseHistory(INAPP) {
-                logPurchase(billingClientVersion)
-            }
-        } else {
-            billingClientWrapper.queryPurchases(INAPP) {
+        billingClientWrapper.queryPurchaseHistory(INAPP) {
+            billingClientWrapper.queryPurchaseHistory(SUBS) {
                 logPurchase(billingClientVersion)
             }
         }
@@ -57,15 +54,29 @@ object InAppPurchaseAutoLogger {
         if (billingClientVersion == V2_V4) {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap,
-                InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap
+                InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap,
+                false
+            )
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap,
+                InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap,
+                true
             )
             InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap.clear()
         } else {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap,
-                InAppPurchaseBillingClientWrapperV5V7.productDetailsMap
+                InAppPurchaseBillingClientWrapperV5V7.productDetailsMap,
+                false
+            )
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap,
+                InAppPurchaseBillingClientWrapperV5V7.productDetailsMap,
+                true
             )
             InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()
         }
     }
 }

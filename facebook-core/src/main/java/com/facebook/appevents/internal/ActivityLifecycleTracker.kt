@@ -49,6 +49,7 @@ object ActivityLifecycleTracker {
                 "activateApp from your Application's onCreate method"
     private const val INTERRUPTION_THRESHOLD_MILLISECONDS: Long = 1000
     private val singleThreadExecutor = Executors.newSingleThreadScheduledExecutor()
+    private val iapExecutor = Executors.newSingleThreadScheduledExecutor()
 
     @Volatile
     private var currentFuture: ScheduledFuture<*>? = null
@@ -159,7 +160,7 @@ object ActivityLifecycleTracker {
         MetadataIndexer.onActivityResumed(activity)
         SuggestedEventsManager.trackActivity(activity)
         if (previousActivityName?.contains("ProxyBillingActivity") == true) {
-            InAppPurchaseManager.startTracking()
+            iapExecutor.execute { InAppPurchaseManager.startTracking() }
         }
         val appContext = activity.applicationContext
         val handleActivityResume = Runnable {
