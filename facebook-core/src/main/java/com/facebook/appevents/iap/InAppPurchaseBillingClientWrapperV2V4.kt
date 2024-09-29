@@ -56,7 +56,6 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InAppPurchaseBillingClientWrapperV2V4
 private constructor(
-    private val packageName: String,
     override val billingClient: Any,
     private val billingClientClazz: Class<*>,
     private val purchaseResultClazz: Class<*>,
@@ -246,8 +245,6 @@ private constructor(
                             purchaseHistoryObject
                         ) as? String ?: continue
                     val purchaseHistoryJson = JSONObject(purchaseHistoryJsonRaw)
-                    val packageName = packageName
-                    purchaseHistoryJson.put(PACKAGE_NAME, packageName)
                     if (!purchaseHistoryJson.has(PRODUCT_ID)) {
                         continue
                     }
@@ -391,7 +388,6 @@ private constructor(
             }
             instance =
                 InAppPurchaseBillingClientWrapperV2V4(
-                    context.packageName,
                     billingClient,
                     billingClientClazz,
                     purchaseResultClazz,

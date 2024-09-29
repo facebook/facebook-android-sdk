@@ -28,6 +28,7 @@ import org.powermock.reflect.Whitebox
 class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     private val mockExecutor: Executor = FacebookSerialExecutor()
     private lateinit var mockPrefs: SharedPreferences
+    private val packageName = "sample.packagename"
 
     @Before
     fun init() {
@@ -117,21 +118,30 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         // Test purchase is too old to log
         val result1 =
             InAppPurchaseLoggerManager.constructLoggingReadyMap(
-                mockPurchaseDetailsMap, mockSkuDetailsMap
+                mockPurchaseDetailsMap, mockSkuDetailsMap,
+                packageName
             )
         Assertions.assertThat(result1).isEmpty()
 
         // Test logging ready events can be added into map
         var newPurchaseDetailString =
             "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":%s,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
-        newPurchaseDetailString = String.format(newPurchaseDetailString, System.currentTimeMillis())
+        val currTime = System.currentTimeMillis()
+        newPurchaseDetailString = String.format(newPurchaseDetailString, currTime)
         val newPurchaseDetailStringJson = JSONObject(newPurchaseDetailString)
         mockPurchaseDetailsMap.clear()
         mockPurchaseDetailsMap["espresso"] = newPurchaseDetailStringJson
         val result2 =
             InAppPurchaseLoggerManager.constructLoggingReadyMap(
-                mockPurchaseDetailsMap, mockSkuDetailsMap
+                mockPurchaseDetailsMap, mockSkuDetailsMap,
+                packageName
             )
         Assertions.assertThat(result2).isNotEmpty
+        val expectedResult = String.format(
+            "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":%s,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}",
+            currTime
+        )
+        Assertions.assertThat(result2.containsKey(expectedResult))
+            .isTrue()
     }
 }

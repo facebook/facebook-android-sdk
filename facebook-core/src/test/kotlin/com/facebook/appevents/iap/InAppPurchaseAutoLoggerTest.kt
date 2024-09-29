@@ -32,6 +32,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     private lateinit var mockBillingClientWrapperV5Plus: InAppPurchaseBillingClientWrapperV5V7
     private lateinit var mockContext: Context
     private val className = "com.facebook.appevents.iap.InAppPurchaseAutoLoggerTest"
+    private val packageName = "examplePackageName"
 
     @Before
     fun init() {
@@ -39,6 +40,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         mockBillingClientWrapperV2_V4 = mock()
         mockBillingClientWrapperV5Plus = mock()
         mockContext = mock()
+        whenever(mockContext.packageName).thenReturn(packageName)
         PowerMockito.mockStatic(InAppPurchaseBillingClientWrapperV2V4::class.java)
         PowerMockito.mockStatic(InAppPurchaseBillingClientWrapperV5V7::class.java)
         PowerMockito.mockStatic(InAppPurchaseLoggerManager::class.java)
@@ -118,7 +120,14 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         var querySubCount = 0
         var loggingRunnable: Runnable? = null
         var querySubsRunnable: Runnable? = null
-        whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any(), any())).thenAnswer {
+        whenever(
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenAnswer {
             logPurchaseCallTimes++
             Unit
         }
@@ -169,7 +178,14 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         var querySubCount = 0
         var loggingRunnable: Runnable? = null
         var querySubsRunnable: Runnable? = null
-        whenever(InAppPurchaseLoggerManager.filterPurchaseLogging(any(), any(), any())).thenAnswer {
+        whenever(
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenAnswer {
             logPurchaseCallTimes++
             Unit
         }

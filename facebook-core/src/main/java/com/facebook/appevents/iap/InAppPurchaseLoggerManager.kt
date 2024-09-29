@@ -68,11 +68,17 @@ object InAppPurchaseLoggerManager {
     fun filterPurchaseLogging(
         purchaseDetailsMap: MutableMap<String, JSONObject>,
         skuDetailsMap: Map<String, JSONObject?>,
-        isSubscription: Boolean
+        isSubscription: Boolean,
+        packageName: String
+
     ) {
         readPurchaseCache()
         val loggingReadyMap: Map<String, String> =
-            constructLoggingReadyMap(cacheDeDupPurchase(purchaseDetailsMap), skuDetailsMap)
+            constructLoggingReadyMap(
+                cacheDeDupPurchase(purchaseDetailsMap),
+                skuDetailsMap,
+                packageName
+            )
         logPurchases(loggingReadyMap, isSubscription)
     }
 
@@ -131,14 +137,18 @@ object InAppPurchaseLoggerManager {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun constructLoggingReadyMap(
         purchaseDetailsMap: Map<String, JSONObject>,
-        skuDetailsMap: Map<String, JSONObject?>
+        skuDetailsMap: Map<String, JSONObject?>,
+        packageName: String
     ): Map<String, String> {
         val nowSec = System.currentTimeMillis() / 1000L
         val purchaseResultMap: MutableMap<String, String> = mutableMapOf()
         for ((key, purchaseDetail) in purchaseDetailsMap) {
             val skuDetail = skuDetailsMap[key]
-            if (purchaseDetail != null && purchaseDetail.has(PURCHASE_TIME)) {
+            if (purchaseDetail.has(PURCHASE_TIME)) {
                 try {
+                    // Used during server-side processing of purchase verification
+                    purchaseDetail.put(InAppPurchaseConstants.PACKAGE_NAME, packageName)
+
                     val purchaseTime = purchaseDetail.getLong(PURCHASE_TIME)
                     // Purchase is too old (more than 24h) to log
                     if (nowSec - purchaseTime / 1000L > PURCHASE_IN_CACHE_INTERVAL) {

@@ -38,7 +38,7 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
     private val exampleResponse = "response"
     private val purchaseJsonStr = "{\"productId\":\"product_1\"}"
     private val purchaseHistoryRecordJsonStr =
-        "{\"productId\":\"product_2\",\"packageName\":\"examplePackageName\"}"
+        "{\"productId\":\"product_2\"}"
     private val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
     private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
     private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
@@ -115,7 +115,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
 
     private fun getWrapperWithMockedContext(): InAppPurchaseBillingClientWrapperV5V7? {
         val mockContext: Context = mock()
-        whenever(mockContext.packageName).thenReturn("examplePackageName")
         return InAppPurchaseBillingClientWrapperV5V7.getOrCreateInstance(mockContext)
     }
 

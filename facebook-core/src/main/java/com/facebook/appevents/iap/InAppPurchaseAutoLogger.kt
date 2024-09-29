@@ -45,22 +45,27 @@ object InAppPurchaseAutoLogger {
         }
         billingClientWrapper.queryPurchaseHistory(INAPP) {
             billingClientWrapper.queryPurchaseHistory(SUBS) {
-                logPurchase(billingClientVersion)
+                logPurchase(billingClientVersion, context.packageName)
             }
         }
     }
 
-    private fun logPurchase(billingClientVersion: InAppPurchaseUtils.BillingClientVersion) {
+    private fun logPurchase(
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion,
+        packageName: String
+    ) {
         if (billingClientVersion == V2_V4) {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap,
-                false
+                false,
+                packageName
             )
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap,
-                true
+                true,
+                packageName
             )
             InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap.clear()
@@ -68,12 +73,14 @@ object InAppPurchaseAutoLogger {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV5V7.productDetailsMap,
-                false
+                false,
+                packageName
             )
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV5V7.productDetailsMap,
-                true
+                true,
+                packageName
             )
             InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()
