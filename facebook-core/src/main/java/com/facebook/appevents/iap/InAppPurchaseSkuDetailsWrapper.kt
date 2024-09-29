@@ -26,13 +26,16 @@ class InAppPurchaseSkuDetailsWrapper(
     private val setSkusListMethod: Method,
     private val buildMethod: Method
 ) {
-    fun getSkuDetailsParams(skuType: String?, skuIDs: List<String?>?): Any? {
+    fun getSkuDetailsParams(
+        productType: InAppPurchaseUtils.IAPProductType,
+        skuIDs: List<String?>?
+    ): Any? {
         // 1. newBuilder()
         var builder: Any? =
             invokeMethod(skuDetailsParamsClazz, newBuilderMethod, null) ?: return null
 
         // 2. setType(skuType)
-        builder = invokeMethod(builderClazz, setTypeMethod, builder, skuType)
+        builder = invokeMethod(builderClazz, setTypeMethod, builder, productType.type)
         if (builder == null) {
             return null
         }

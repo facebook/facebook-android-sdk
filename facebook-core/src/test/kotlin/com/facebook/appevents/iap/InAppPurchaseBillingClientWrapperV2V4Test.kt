@@ -17,6 +17,7 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
 import java.lang.reflect.Method
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions
+import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -27,12 +28,15 @@ import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
+import java.lang.reflect.Proxy
+import java.lang.reflect.Proxy.newProxyInstance
 
 
 @PrepareForTest(
     FacebookSdk::class,
     InAppPurchaseUtils::class,
-    InAppPurchaseSkuDetailsWrapper::class
+    InAppPurchaseSkuDetailsWrapper::class,
+    Proxy::class
 )
 class InAppPurchaseBillingClientWrapperV2V4Test : FacebookPowerMockTestCase() {
     private val mockExecutor: Executor = FacebookSerialExecutor()
@@ -44,6 +48,11 @@ class InAppPurchaseBillingClientWrapperV2V4Test : FacebookPowerMockTestCase() {
     private val exampleMethodName = "setup"
     private val exampleResponse = "response"
     private val exampleListener = "com.facebook.appevents.iap.PurchasesUpdatedListener"
+    private val purchaseHistoryRecord =
+        "{\"productId\":\"coffee\",\"purchaseToken\":\"exampleToken\",\"purchaseTime\":1010101,\"developerPayload\":null}"
+    private val purchaseHistoryRecordWithPackageName =
+        "{\"productId\":\"coffee\",\"purchaseToken\":\"exampleToken\",\"purchaseTime\":1010101,\"developerPayload\":null,\"packageName\":\"value\"}"
+
 
     @Before
     override fun setup() {
@@ -66,6 +75,8 @@ class InAppPurchaseBillingClientWrapperV2V4Test : FacebookPowerMockTestCase() {
             "instance",
             inAppPurchaseSkuDetailsWrapper
         )
+        InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap.clear()
         val listenerClazz =
             Class.forName(exampleListener)
 
@@ -194,18 +205,125 @@ class InAppPurchaseBillingClientWrapperV2V4Test : FacebookPowerMockTestCase() {
     }
 
     @Test
-    fun testBillingClientWrapper() {
+    fun testQueryPurchases() {
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
+            "instance",
+            null as? InAppPurchaseBillingClientWrapperV2V4
+        )
+        val mockContext: Context = mock()
+        whenever(mockContext.packageName).thenReturn("packageName")
+        val inAppPurchaseBillingClientWrapper =
+            InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(mockContext)
+        Assertions.assertThat(inAppPurchaseBillingClientWrapper).isNotNull()
+        val purchaseList =
+            mutableListOf(JSONObject(purchaseHistoryRecord), JSONObject(purchaseHistoryRecord))
+        val purchaseResult: Any = mock()
+        PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
+        whenever(invokeMethod(anyOrNull(), anyOrNull(), any(), eq("inapp"))).thenReturn(
+            purchaseResult
+        )
+        InAppPurchaseBillingClientWrapperV2V4.isServiceConnected.set(true)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                any()
+            )
+        ).thenReturn(
+            purchaseHistoryRecord
+        )
+        whenever(invokeMethod(anyOrNull(), anyOrNull(), eq(purchaseResult))).thenReturn(
+            purchaseList
+        )
+        PowerMockito.mockStatic(Proxy::class.java)
+        whenever(newProxyInstance(anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(null)
+
+        val runnable: Runnable = mock()
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        ).thenReturn(purchaseResult)
+        inAppPurchaseBillingClientWrapper?.queryPurchases(
+            InAppPurchaseUtils.IAPProductType.INAPP,
+            runnable
+        )
+        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap
+        Assertions.assertThat(purchaseDetailsMap).isNotEmpty
+        Assertions.assertThat(purchaseDetailsMap["coffee"].toString())
+            .isEqualTo(purchaseHistoryRecord)
+    }
+    
+    @Test
+    fun testQuerySubscriptions() {
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapperV2V4::class.java,
+            "instance",
+            null as? InAppPurchaseBillingClientWrapperV2V4
+        )
+        val mockContext: Context = mock()
+        whenever(mockContext.packageName).thenReturn("packageName")
+        val inAppPurchaseBillingClientWrapper =
+            InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(mockContext)
+        Assertions.assertThat(inAppPurchaseBillingClientWrapper).isNotNull()
+        val purchaseList =
+            mutableListOf(JSONObject(purchaseHistoryRecord), JSONObject(purchaseHistoryRecord))
+        val purchaseResult: Any = mock()
+        PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
+        whenever(invokeMethod(anyOrNull(), anyOrNull(), any(), eq("subs"))).thenReturn(
+            purchaseResult
+        )
+        InAppPurchaseBillingClientWrapperV2V4.isServiceConnected.set(true)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                any()
+            )
+        ).thenReturn(
+            purchaseHistoryRecord
+        )
+        whenever(invokeMethod(anyOrNull(), anyOrNull(), eq(purchaseResult))).thenReturn(
+            purchaseList
+        )
+        PowerMockito.mockStatic(Proxy::class.java)
+        whenever(newProxyInstance(anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(null)
+
+        val runnable: Runnable = mock()
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        ).thenReturn(purchaseResult)
+        inAppPurchaseBillingClientWrapper?.queryPurchases(
+            InAppPurchaseUtils.IAPProductType.SUBS,
+            runnable
+        )
+        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap
+        Assertions.assertThat(purchaseDetailsMap).isNotEmpty
+        Assertions.assertThat(purchaseDetailsMap["coffee"].toString())
+            .isEqualTo(purchaseHistoryRecord)
+    }
+
+    @Test
+    fun testQueryPurchaseHistory() {
         val runnable: Runnable = mock()
         val purchaseHistoryResponseListenerWrapper =
-            inAppPurchaseBillingClientWrapperV2V4.PurchaseHistoryResponseListenerWrapper(runnable)
+            inAppPurchaseBillingClientWrapperV2V4.PurchaseHistoryResponseListenerWrapper(
+                InAppPurchaseUtils.IAPProductType.INAPP,
+                runnable
+            )
         Assertions.assertThat(purchaseHistoryResponseListenerWrapper).isNotNull
 
-        Whitebox.setInternalState(
-            inAppPurchaseBillingClientWrapperV2V4, "historyPurchaseSet", HashSet<Any>()
-        )
-
-        val purchaseHistoryRecord =
-            "{\"productId\":\"coffee\",\"purchaseToken\":\"aedeglbgcjhjcjnabndchooe.AO-J1Oydf8j_hBxWxvsAvKHLC1h8Kw6YPDtGERpjCWDKSB0Hd6asHyo5E_NjbPg1u1hW5rW-s4go3d0D_DjFstxDA6zn9H_85ReDVbQBdgb2VAAyTX39jcM\",\"purchaseTime\":1614677061238,\"developerPayload\":null}\n"
         val mockList: MutableList<Any> = arrayListOf(purchaseHistoryRecord)
         PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
         whenever(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(purchaseHistoryRecord)
@@ -217,8 +335,63 @@ class InAppPurchaseBillingClientWrapperV2V4Test : FacebookPowerMockTestCase() {
             mock(), mockMethod, arrayOf(listOf<String>(), mockList)
         )
 
-        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap
+        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap
         Assertions.assertThat(purchaseDetailsMap).isNotEmpty
+        Assertions.assertThat(purchaseDetailsMap["coffee"].toString())
+            .isEqualTo(purchaseHistoryRecordWithPackageName)
+    }
+
+    @Test
+    fun testQueryPurchaseHistoryWithMissingParameters() {
+        val runnable: Runnable = mock()
+        val purchaseHistoryResponseListenerWrapper =
+            inAppPurchaseBillingClientWrapperV2V4.PurchaseHistoryResponseListenerWrapper(
+                InAppPurchaseUtils.IAPProductType.INAPP,
+                runnable
+            )
+        Assertions.assertThat(purchaseHistoryResponseListenerWrapper).isNotNull
+
+        PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
+        whenever(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(purchaseHistoryRecord)
+        Whitebox.setInternalState(inAppPurchaseBillingClientWrapperV2V4, "packageName", "value")
+
+        val mockMethod: Method = mock()
+        whenever(mockMethod.name).thenReturn("onPurchaseHistoryResponse")
+
+        // Don't include purchase history record list
+        purchaseHistoryResponseListenerWrapper.invoke(
+            mock(), mockMethod, arrayOf(listOf<String>())
+        )
+
+        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap
+        Assertions.assertThat(purchaseDetailsMap).isEmpty()
+    }
+
+    @Test
+    fun testQuerySubscriptionHistory() {
+        val runnable: Runnable = mock()
+        val purchaseHistoryResponseListenerWrapper =
+            inAppPurchaseBillingClientWrapperV2V4.PurchaseHistoryResponseListenerWrapper(
+                InAppPurchaseUtils.IAPProductType.SUBS,
+                runnable
+            )
+        Assertions.assertThat(purchaseHistoryResponseListenerWrapper).isNotNull
+
+        val mockList: MutableList<Any> = arrayListOf(purchaseHistoryRecord)
+        PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
+        whenever(invokeMethod(anyOrNull(), anyOrNull(), any())).thenReturn(purchaseHistoryRecord)
+        Whitebox.setInternalState(inAppPurchaseBillingClientWrapperV2V4, "packageName", "value")
+
+        val mockMethod: Method = mock()
+        whenever(mockMethod.name).thenReturn("onPurchaseHistoryResponse")
+        purchaseHistoryResponseListenerWrapper.invoke(
+            mock(), mockMethod, arrayOf(listOf<String>(), mockList)
+        )
+
+        val purchaseDetailsMap = InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap
+        Assertions.assertThat(purchaseDetailsMap).isNotEmpty
+        Assertions.assertThat(purchaseDetailsMap["coffee"].toString())
+            .isEqualTo(purchaseHistoryRecordWithPackageName)
     }
 
     @Test

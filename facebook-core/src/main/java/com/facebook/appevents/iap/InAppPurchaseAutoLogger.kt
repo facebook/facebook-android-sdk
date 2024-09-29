@@ -56,10 +56,10 @@ object InAppPurchaseAutoLogger {
     private fun logPurchase(billingClientVersion: InAppPurchaseUtils.BillingClientVersion) {
         if (billingClientVersion == V2_V4) {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
-                InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap,
+                InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap
             )
-            InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap.clear()
         } else {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap,

@@ -48,7 +48,6 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicBoolean
 import org.json.JSONException
 import org.json.JSONObject
@@ -75,25 +74,11 @@ private constructor(
     private val queryPurchaseHistoryAsyncMethod: Method,
     private val inAppPurchaseSkuDetailsWrapper: InAppPurchaseSkuDetailsWrapper
 ) : InAppPurchaseBillingClientWrapper {
-    private val historyPurchaseSet: MutableSet<String?> = CopyOnWriteArraySet()
-    override fun queryPurchaseHistory(
-        productType: InAppPurchaseUtils.IAPProductType,
-        runnable: Runnable
-    ) {
-        queryPurchaseHistoryAsync(productType.type) {
-            querySkuDetailsAsync(
-                productType.type,
-                ArrayList(historyPurchaseSet),
-                runnable
-            )
-        }
-    }
 
     override fun queryPurchases(
         productType: InAppPurchaseUtils.IAPProductType,
-        runnable: Runnable
+        completionHandler: Runnable
     ) {
-        // TODO (T67568885): support subs
         val queryPurchaseRunnable = Runnable {
             val purchaseResult =
                 invokeMethod(
@@ -106,24 +91,29 @@ private constructor(
                 invokeMethod(purchaseResultClazz, getPurchaseListMethod, purchaseResult) as? List<*>
             try {
                 val skuIDs: MutableList<String?> = arrayListOf()
-                if (purchaseObjects != null) {
-                    for (purchaseObject in purchaseObjects) {
-                        val purchaseJsonStr =
-                            invokeMethod(
-                                purchaseClazz,
-                                getOriginalJsonMethod,
-                                purchaseObject
-                            ) as? String
-                                ?: continue
-                        val purchaseJson = JSONObject(purchaseJsonStr)
-                        if (purchaseJson.has(PRODUCT_ID)) {
-                            val skuID = purchaseJson.getString(PRODUCT_ID)
-                            skuIDs.add(skuID)
-                            purchaseDetailsMap[skuID] = purchaseJson
-                        }
-                    }
-                    querySkuDetailsAsync(productType.type, skuIDs, runnable)
+                if (purchaseObjects == null) {
+                    return@Runnable
                 }
+                for (purchaseObject in purchaseObjects) {
+                    val purchaseJsonStr =
+                        invokeMethod(
+                            purchaseClazz,
+                            getOriginalJsonMethod,
+                            purchaseObject
+                        ) as? String ?: continue
+                    val purchaseJson = JSONObject(purchaseJsonStr)
+                    if (!purchaseJson.has(PRODUCT_ID)) {
+                        continue
+                    }
+                    val skuID = purchaseJson.getString(PRODUCT_ID)
+                    skuIDs.add(skuID)
+                    if (productType == InAppPurchaseUtils.IAPProductType.INAPP) {
+                        iapPurchaseDetailsMap[skuID] = purchaseJson
+                    } else {
+                        subsPurchaseDetailsMap[skuID] = purchaseJson
+                    }
+                }
+                querySkuDetailsAsync(productType, skuIDs, completionHandler)
             } catch (je: JSONException) {
                 /* swallow */
             }
@@ -131,13 +121,17 @@ private constructor(
         executeServiceRequest(queryPurchaseRunnable)
     }
 
-    private fun querySkuDetailsAsync(skuType: String, skuIDs: List<String?>, runnable: Runnable) {
+    private fun querySkuDetailsAsync(
+        skuType: InAppPurchaseUtils.IAPProductType,
+        skuIDs: List<String?>,
+        completionHandler: Runnable
+    ) {
         val querySkuDetailAsyncRunnable = Runnable {
             val listenerObj =
                 Proxy.newProxyInstance(
                     skuDetailsResponseListenerClazz.classLoader,
                     arrayOf(skuDetailsResponseListenerClazz),
-                    SkuDetailsResponseListenerWrapper(runnable)
+                    SkuDetailsResponseListenerWrapper(completionHandler)
                 )
             val skuDetailsParams =
                 inAppPurchaseSkuDetailsWrapper.getSkuDetailsParams(skuType, skuIDs)
@@ -152,19 +146,22 @@ private constructor(
         executeServiceRequest(querySkuDetailAsyncRunnable)
     }
 
-    private fun queryPurchaseHistoryAsync(skuType: String, runnable: Runnable) {
+    override fun queryPurchaseHistory(
+        productType: InAppPurchaseUtils.IAPProductType,
+        completionHandler: Runnable
+    ) {
         val queryPurchaseHistoryAsyncRunnable = Runnable {
             val listenerObj =
                 Proxy.newProxyInstance(
                     purchaseHistoryResponseListenerClazz.classLoader,
                     arrayOf(purchaseHistoryResponseListenerClazz),
-                    PurchaseHistoryResponseListenerWrapper(runnable)
+                    PurchaseHistoryResponseListenerWrapper(productType, completionHandler)
                 )
             invokeMethod(
                 billingClientClazz,
                 queryPurchaseHistoryAsyncMethod,
                 billingClient,
-                skuType,
+                productType.type,
                 listenerObj
             )
         }
@@ -192,10 +189,11 @@ private constructor(
     }
 
     @AutoHandleExceptions
-    internal class BillingClientStateListenerWrapper(val runnable: Runnable?) : InvocationHandler {
+    internal class BillingClientStateListenerWrapper(private val runnable: Runnable?) :
+        InvocationHandler {
         override fun invoke(proxy: Any, m: Method, args: Array<Any>?): Any? {
             if (m.name == METHOD_ON_BILLING_SETUP_FINISHED) {
-                val billingResult = args?.get(0)
+                val billingResult = args?.getOrNull(0)
                 val billingResultClazz = getClass(CLASSNAME_BILLING_RESULT) ?: return null
                 val billingResultGetResponseCodeMethod =
                     getMethod(
@@ -225,19 +223,20 @@ private constructor(
     }
 
     @AutoHandleExceptions
-    internal inner class PurchaseHistoryResponseListenerWrapper(var runnable: Runnable) :
+    internal inner class PurchaseHistoryResponseListenerWrapper(
+        private var skuType: InAppPurchaseUtils.IAPProductType,
+        private var completionHandler: Runnable
+    ) :
         InvocationHandler {
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
-            if (method.name == METHOD_ON_PURCHASE_HISTORY_RESPONSE) {
-                val purchaseHistoryRecordListObject = args?.get(1)
-                if (purchaseHistoryRecordListObject != null && purchaseHistoryRecordListObject is List<*>) {
-                    getPurchaseHistoryRecord(purchaseHistoryRecordListObject)
-                }
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>?) {
+            if (method.name != METHOD_ON_PURCHASE_HISTORY_RESPONSE) {
+                return
             }
-            return null
-        }
-
-        private fun getPurchaseHistoryRecord(purchaseHistoryRecordList: List<*>) {
+            val purchaseHistoryRecordList = args?.getOrNull(1)
+            if (purchaseHistoryRecordList == null || purchaseHistoryRecordList !is List<*>) {
+                return
+            }
+            val skuIDs = mutableListOf<String>()
             for (purchaseHistoryObject in purchaseHistoryRecordList) {
                 try {
                     val purchaseHistoryJsonRaw =
@@ -245,58 +244,64 @@ private constructor(
                             purchaseHistoryRecordClazz,
                             getOriginalJsonPurchaseHistoryMethod,
                             purchaseHistoryObject
-                        )
-                                as? String
-                            ?: continue
+                        ) as? String ?: continue
                     val purchaseHistoryJson = JSONObject(purchaseHistoryJsonRaw)
                     val packageName = packageName
                     purchaseHistoryJson.put(PACKAGE_NAME, packageName)
-                    if (purchaseHistoryJson.has(PRODUCT_ID)) {
-                        val skuID = purchaseHistoryJson.getString(PRODUCT_ID)
-                        historyPurchaseSet.add(skuID)
-                        purchaseDetailsMap[skuID] = purchaseHistoryJson
+                    if (!purchaseHistoryJson.has(PRODUCT_ID)) {
+                        continue
+                    }
+                    val skuID = purchaseHistoryJson.getString(PRODUCT_ID)
+                    skuIDs.add(skuID)
+                    if (skuType == InAppPurchaseUtils.IAPProductType.INAPP) {
+                        iapPurchaseDetailsMap[skuID] = purchaseHistoryJson
+                    } else {
+                        subsPurchaseDetailsMap[skuID] = purchaseHistoryJson
                     }
                 } catch (e: Exception) {
                     /* swallow */
                 }
             }
-            runnable.run()
+            if (skuIDs.isNotEmpty()) {
+                querySkuDetailsAsync(skuType, skuIDs, completionHandler)
+            } else {
+                // If skuIDs is empty we have all of the product info we need and can execute our completion handler
+                completionHandler.run()
+            }
+
         }
     }
 
     @AutoHandleExceptions
-    internal inner class SkuDetailsResponseListenerWrapper(var runnable: Runnable) :
+    internal inner class SkuDetailsResponseListenerWrapper(private var completionHandler: Runnable) :
         InvocationHandler {
-        override fun invoke(proxy: Any, m: Method, args: Array<Any>?): Any? {
-            if (m.name == METHOD_ON_SKU_DETAILS_RESPONSE) {
-                val skuDetailsObj = args?.get(1)
-                if (skuDetailsObj != null && skuDetailsObj is List<*>) {
-                    parseSkuDetails(skuDetailsObj)
-                }
+        override fun invoke(proxy: Any, m: Method, args: Array<Any>?) {
+            if (m.name != METHOD_ON_SKU_DETAILS_RESPONSE) {
+                return
             }
-            return null
-        }
-
-        private fun parseSkuDetails(skuDetailsObjectList: List<*>) {
-            for (skuDetail in skuDetailsObjectList) {
+            val skuDetailsList = args?.getOrNull(1)
+            if (skuDetailsList == null || skuDetailsList !is List<*>) {
+                return
+            }
+            for (skuDetail in skuDetailsList) {
                 try {
                     val skuDetailJson =
                         invokeMethod(
                             skuDetailsClazz,
                             getOriginalJsonSkuMethod,
                             skuDetail
-                        ) as? String
-                            ?: continue
+                        ) as? String ?: continue
                     val skuJson = JSONObject(skuDetailJson)
-                    if (skuJson.has(PRODUCT_ID)) {
-                        val skuID = skuJson.getString(PRODUCT_ID)
-                        skuDetailsMap[skuID] = skuJson
+                    if (!skuJson.has(PRODUCT_ID)) {
+                        continue
                     }
+                    val skuID = skuJson.getString(PRODUCT_ID)
+                    skuDetailsMap[skuID] = skuJson
                 } catch (e: Exception) {
                     /* swallow */
                 }
             }
-            runnable.run()
+            completionHandler.run()
         }
     }
 
@@ -306,7 +311,8 @@ private constructor(
         val isServiceConnected = AtomicBoolean(false)
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
-        val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+        val iapPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+        val subsPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val skuDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
 
 
