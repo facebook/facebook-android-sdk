@@ -97,12 +97,12 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         }
         InAppPurchaseAutoLogger.startIapLogging(
             mockContext,
-            InAppPurchaseUtils.BillingClientVersion.V5_Plus
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
         assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isTrue()
         InAppPurchaseAutoLogger.startIapLogging(
             mockContext,
-            InAppPurchaseUtils.BillingClientVersion.V5_Plus
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
         assertThat(queryCount).isEqualTo(0)
         assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isTrue()
@@ -122,6 +122,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         var querySubsRunnable: Runnable? = null
         whenever(
             InAppPurchaseLoggerManager.filterPurchaseLogging(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -183,6 +184,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).thenAnswer {
@@ -212,7 +214,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
 
         InAppPurchaseAutoLogger.startIapLogging(
             mockContext,
-            InAppPurchaseUtils.BillingClientVersion.V5_Plus
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
         assertThat(querySubsRunnable).isNotNull
         querySubsRunnable?.run()

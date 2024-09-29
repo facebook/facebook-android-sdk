@@ -13,7 +13,7 @@ import androidx.annotation.RestrictTo
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.NONE
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
-import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_Plus
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
@@ -40,7 +40,7 @@ object InAppPurchaseManager {
         // Delegate IAP logic to separate handler based on Google Play Billing Library version
         when (val billingClientVersion = getBillingClientVersion()) {
             NONE -> return
-            V1 -> InAppPurchaseActivityLifecycleTracker.startIapLogging()
+            V1 -> InAppPurchaseActivityLifecycleTracker.startIapLogging(V1)
             V2_V4 -> {
                 if (isEnabled(FeatureManager.Feature.IapLoggingLib2)) {
                     InAppPurchaseAutoLogger.startIapLogging(
@@ -48,11 +48,11 @@ object InAppPurchaseManager {
                         billingClientVersion
                     )
                 } else {
-                    InAppPurchaseActivityLifecycleTracker.startIapLogging()
+                    InAppPurchaseActivityLifecycleTracker.startIapLogging(V2_V4)
                 }
             }
 
-            V5_Plus -> InAppPurchaseAutoLogger.startIapLogging(
+            V5_V7 -> InAppPurchaseAutoLogger.startIapLogging(
                 getApplicationContext(),
                 billingClientVersion
             )
@@ -76,20 +76,20 @@ object InAppPurchaseManager {
             )
             if (version.isEmpty()) {
                 // Default to newest version
-                return V5_Plus
+                return V5_V7
             }
             val majorVersion =
-                versionArray[0].toIntOrNull() ?: return V5_Plus
+                versionArray[0].toIntOrNull() ?: return V5_V7
             return if (majorVersion == 1) {
                 V1
             } else if (majorVersion < 5) {
                 V2_V4
             } else {
-                V5_Plus
+                V5_V7
             }
         } catch (e: Exception) {
             // Default to newest version
-            return V5_Plus
+            return V5_V7
         }
     }
 }

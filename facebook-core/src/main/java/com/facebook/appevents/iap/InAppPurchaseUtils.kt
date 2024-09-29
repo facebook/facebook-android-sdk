@@ -84,11 +84,11 @@ object InAppPurchaseUtils {
         }
     }
 
-    enum class BillingClientVersion {
-        NONE,
-        V1,
-        V2_V4,
-        V5_Plus
+    enum class BillingClientVersion(val type: String) {
+        NONE("none"),
+        V1("Android-GPBL-V1"),
+        V2_V4("Android-GPBL-V2-V4"),
+        V5_V7("Android-GPBL-V5-V7")
     }
 
     enum class IAPProductType(val type: String) {

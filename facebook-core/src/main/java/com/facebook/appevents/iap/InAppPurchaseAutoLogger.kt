@@ -9,7 +9,7 @@
 package com.facebook.appevents.iap
 
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
-import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_Plus
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.INAPP
 import android.content.Context
 import androidx.annotation.RestrictTo
@@ -35,7 +35,7 @@ object InAppPurchaseAutoLogger {
         if (billingClientVersion == V2_V4) {
             billingClientWrapper =
                 InAppPurchaseBillingClientWrapperV2V4.getOrCreateInstance(context)
-        } else if (billingClientVersion == V5_Plus) {
+        } else if (billingClientVersion == V5_V7) {
             billingClientWrapper =
                 InAppPurchaseBillingClientWrapperV5V7.getOrCreateInstance(context)
         }
@@ -59,13 +59,15 @@ object InAppPurchaseAutoLogger {
                 InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap,
                 false,
-                packageName
+                packageName,
+                billingClientVersion
             )
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV2V4.skuDetailsMap,
                 true,
-                packageName
+                packageName,
+                billingClientVersion
             )
             InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap.clear()
@@ -74,13 +76,15 @@ object InAppPurchaseAutoLogger {
                 InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV5V7.productDetailsMap,
                 false,
-                packageName
+                packageName,
+                billingClientVersion
             )
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV5V7.productDetailsMap,
                 true,
-                packageName
+                packageName,
+                billingClientVersion
             )
             InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()

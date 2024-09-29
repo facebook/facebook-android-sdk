@@ -29,6 +29,7 @@ object Constants {
     const val IAP_FREE_TRIAL_PERIOD = "fb_free_trial_period"
     const val IAP_INTRO_PRICE_AMOUNT_MICROS = "fb_intro_price_amount_micros"
     const val IAP_INTRO_PRICE_CYCLES = "fb_intro_price_cycles"
+    const val IAP_AUTOLOG_IMPLEMENTATION = "fb_iap_sdk_supported_library_versions"
 
     // The following are in app purchase parameters returned by Google Play
     const val GP_IAP_PRODUCT_ID = "productId"

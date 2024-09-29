@@ -78,11 +78,17 @@ object AutomaticAnalyticsLogger {
     }
 
     @JvmStatic
-    fun logPurchase(purchase: String, skuDetails: String, isSubscription: Boolean) {
+    fun logPurchase(
+        purchase: String,
+        skuDetails: String,
+        isSubscription: Boolean,
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
+    ) {
         if (!isImplicitPurchaseLoggingEnabled()) {
             return
         }
-        val loggingParameters = getPurchaseLoggingParameters(purchase, skuDetails) ?: return
+        val loggingParameters =
+            getPurchaseLoggingParameters(purchase, skuDetails, billingClientVersion) ?: return
         val logAsSubs =
             isSubscription &&
                     getGateKeeperForKey(
@@ -123,9 +129,10 @@ object AutomaticAnalyticsLogger {
 
     private fun getPurchaseLoggingParameters(
         purchase: String,
-        skuDetails: String
+        skuDetails: String,
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
     ): PurchaseLoggingParameters? {
-        return getPurchaseLoggingParameters(purchase, skuDetails, HashMap())
+        return getPurchaseLoggingParameters(purchase, skuDetails, HashMap(), billingClientVersion)
     }
 
     private fun getPurchaseParametersGPBLV2V4(
@@ -224,12 +231,19 @@ object AutomaticAnalyticsLogger {
     private fun getPurchaseLoggingParameters(
         purchase: String,
         skuDetails: String,
-        extraParameter: Map<String, String>
+        extraParameter: Map<String, String>,
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
     ): PurchaseLoggingParameters? {
         try {
             val purchaseJSON = JSONObject(purchase)
             val skuDetailsJSON = JSONObject(skuDetails)
             val params = Bundle(1)
+            if (billingClientVersion != null) {
+                params.putCharSequence(
+                    Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                    billingClientVersion.type
+                )
+            }
             params.putCharSequence(
                 Constants.IAP_PRODUCT_ID,
                 purchaseJSON.getString(Constants.GP_IAP_PRODUCT_ID)

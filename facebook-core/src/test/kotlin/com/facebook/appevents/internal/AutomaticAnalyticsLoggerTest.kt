@@ -17,6 +17,7 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.appevents.iap.InAppPurchaseUtils
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
@@ -224,7 +225,12 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         }
         whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
-        AutomaticAnalyticsLogger.logPurchase(oneTimePurchase, oneTimePurchaseDetailsGPBLV2V4, true)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV2V4,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V2_V4
+        )
 
         assertEquals(0, appGateKeepersManagerCallCount)
     }
@@ -234,7 +240,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         AutomaticAnalyticsLogger.logPurchase(
             subscriptionPurchase,
             subscriptionDetailsGPBLV2V4,
-            true
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V2_V4
         )
         verify(mockInternalAppEventsLogger)
             .logEventImplicitly(
@@ -245,6 +252,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             )
 
         Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
             .isEqualTo("12345")
@@ -275,7 +284,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         AutomaticAnalyticsLogger.logPurchase(
             subscriptionPurchase,
             subscriptionDetailsWithNoFreeTrialGPBLV2V4,
-            true
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V2_V4
         )
         verify(mockInternalAppEventsLogger)
             .logEventImplicitly(
@@ -286,6 +296,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             )
 
         Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
             .isEqualTo("12345")
@@ -316,7 +328,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         AutomaticAnalyticsLogger.logPurchase(
             subscriptionPurchase,
             subscriptionDetailsGPBLV5V7,
-            true
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
         verify(mockInternalAppEventsLogger)
             .logEventImplicitly(
@@ -327,6 +340,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             )
 
         Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
             .isEqualTo("12345")
@@ -355,11 +370,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         AutomaticAnalyticsLogger.logPurchase(
             oneTimePurchase,
             oneTimePurchaseDetailsGPBLV2V4,
-            false
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V2_V4
         )
         verify(mockInternalAppEventsLogger)
             .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
         Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
             .isEqualTo("12345")
@@ -379,10 +397,17 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun `test log purchase when implicit purchase logging enable & not subscribed with GPBL v5 - v7`() {
-        AutomaticAnalyticsLogger.logPurchase(oneTimePurchase, oneTimePurchaseDetailsGPBLV5V7, false)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
         verify(mockInternalAppEventsLogger)
             .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
         Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
             .isEqualTo("12345")

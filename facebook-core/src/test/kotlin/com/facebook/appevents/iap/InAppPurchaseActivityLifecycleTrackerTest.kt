@@ -34,59 +34,69 @@ import org.powermock.reflect.Whitebox
     AutomaticAnalyticsLogger::class,
     InternalAppEventsLogger::class,
     InAppPurchaseEventManager::class,
-    InAppPurchaseUtils::class)
+    InAppPurchaseUtils::class
+)
 class InAppPurchaseActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
-  private lateinit var applicationContext: Application
+    private lateinit var applicationContext: Application
 
-  override fun setup() {
-    super.setup()
-    PowerMockito.whenNew(InternalAppEventsLogger::class.java).withAnyArguments().thenReturn(mock())
-    applicationContext = mock<Application>()
-    whenever(applicationContext.registerActivityLifecycleCallbacks(any())).thenAnswer {}
-    whenever(applicationContext.bindService(any<Intent>(), any<ServiceConnection>(), any<Int>()))
-        .thenReturn(true)
-    PowerMockito.mockStatic(FacebookSdk::class.java)
-    whenever(FacebookSdk.isInitialized()).thenReturn(true)
-    whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
-    whenever(FacebookSdk.getApplicationContext()).thenReturn(applicationContext)
-    PowerMockito.mockStatic(AutomaticAnalyticsLogger::class.java)
-    PowerMockito.mockStatic(InAppPurchaseEventManager::class.java)
+    override fun setup() {
+        super.setup()
+        PowerMockito.whenNew(InternalAppEventsLogger::class.java).withAnyArguments()
+            .thenReturn(mock())
+        applicationContext = mock<Application>()
+        whenever(applicationContext.registerActivityLifecycleCallbacks(any())).thenAnswer {}
+        whenever(
+            applicationContext.bindService(
+                any<Intent>(),
+                any<ServiceConnection>(),
+                any<Int>()
+            )
+        )
+            .thenReturn(true)
+        PowerMockito.mockStatic(FacebookSdk::class.java)
+        whenever(FacebookSdk.isInitialized()).thenReturn(true)
+        whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
+        whenever(FacebookSdk.getApplicationContext()).thenReturn(applicationContext)
+        PowerMockito.mockStatic(AutomaticAnalyticsLogger::class.java)
+        PowerMockito.mockStatic(InAppPurchaseEventManager::class.java)
 
-    Whitebox.setInternalState(
-        InAppPurchaseActivityLifecycleTracker::class.java, "hasBillingService", null as Boolean?)
-    Whitebox.setInternalState(
-        InAppPurchaseActivityLifecycleTracker::class.java, "isTracking", AtomicBoolean(false))
-    PowerMockito.spy(InAppPurchaseActivityLifecycleTracker::class.java)
-    PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
-    PowerMockito.doAnswer { this.javaClass }
-        .`when`(InAppPurchaseUtils::class.java, "getClass", any<String>())
-  }
+        Whitebox.setInternalState(
+            InAppPurchaseActivityLifecycleTracker::class.java, "hasBillingService", null as Boolean?
+        )
+        Whitebox.setInternalState(
+            InAppPurchaseActivityLifecycleTracker::class.java, "isTracking", AtomicBoolean(false)
+        )
+        PowerMockito.spy(InAppPurchaseActivityLifecycleTracker::class.java)
+        PowerMockito.mockStatic(InAppPurchaseUtils::class.java)
+        PowerMockito.doAnswer { this.javaClass }
+            .`when`(InAppPurchaseUtils::class.java, "getClass", any<String>())
+    }
 
-  @Test
-  fun `test startIapLogging will bind iap intent and lifecycle callback`() {
-    val intentCaptor = argumentCaptor<Intent>()
-    whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
-    InAppPurchaseActivityLifecycleTracker.startIapLogging()
-    verify(applicationContext).registerActivityLifecycleCallbacks(any())
-    verify(applicationContext)
-        .bindService(intentCaptor.capture(), any<ServiceConnection>(), any<Int>())
-    assertThat(intentCaptor.firstValue.action)
-        .isEqualTo("com.android.vending.billing.InAppBillingService.BIND")
-    assertThat(intentCaptor.firstValue.`package`).isEqualTo("com.android.vending")
-  }
+    @Test
+    fun `test startIapLogging will bind iap intent and lifecycle callback`() {
+        val intentCaptor = argumentCaptor<Intent>()
+        whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
+        InAppPurchaseActivityLifecycleTracker.startIapLogging(InAppPurchaseUtils.BillingClientVersion.V1)
+        verify(applicationContext).registerActivityLifecycleCallbacks(any())
+        verify(applicationContext)
+            .bindService(intentCaptor.capture(), any<ServiceConnection>(), any<Int>())
+        assertThat(intentCaptor.firstValue.action)
+            .isEqualTo("com.android.vending.billing.InAppBillingService.BIND")
+        assertThat(intentCaptor.firstValue.`package`).isEqualTo("com.android.vending")
+    }
 
-  @Test
-  fun `test startIapLogging will only register once`() {
-    whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
-    InAppPurchaseActivityLifecycleTracker.startIapLogging()
-    InAppPurchaseActivityLifecycleTracker.startIapLogging()
-    verify(applicationContext, times(1)).registerActivityLifecycleCallbacks(any())
-  }
+    @Test
+    fun `test startIapLogging will only register once`() {
+        whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
+        InAppPurchaseActivityLifecycleTracker.startIapLogging(InAppPurchaseUtils.BillingClientVersion.V1)
+        InAppPurchaseActivityLifecycleTracker.startIapLogging(InAppPurchaseUtils.BillingClientVersion.V1)
+        verify(applicationContext, times(1)).registerActivityLifecycleCallbacks(any())
+    }
 
-  @Test
-  fun `test startIapLogging will not register if implicit purchase disabled`() {
-    whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)
-    InAppPurchaseActivityLifecycleTracker.startIapLogging()
-    verify(applicationContext, never()).registerActivityLifecycleCallbacks(any())
-  }
+    @Test
+    fun `test startIapLogging will not register if implicit purchase disabled`() {
+        whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)
+        InAppPurchaseActivityLifecycleTracker.startIapLogging(InAppPurchaseUtils.BillingClientVersion.V1)
+        verify(applicationContext, never()).registerActivityLifecycleCallbacks(any())
+    }
 }

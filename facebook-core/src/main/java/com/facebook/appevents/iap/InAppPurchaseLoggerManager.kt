@@ -69,7 +69,8 @@ object InAppPurchaseLoggerManager {
         purchaseDetailsMap: MutableMap<String, JSONObject>,
         skuDetailsMap: Map<String, JSONObject?>,
         isSubscription: Boolean,
-        packageName: String
+        packageName: String,
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion
 
     ) {
         readPurchaseCache()
@@ -79,12 +80,16 @@ object InAppPurchaseLoggerManager {
                 skuDetailsMap,
                 packageName
             )
-        logPurchases(loggingReadyMap, isSubscription)
+        logPurchases(loggingReadyMap, isSubscription, billingClientVersion)
     }
 
-    private fun logPurchases(purchaseDetailsMap: Map<String, String>, isSubscription: Boolean) {
+    private fun logPurchases(
+        purchaseDetailsMap: Map<String, String>,
+        isSubscription: Boolean,
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion
+    ) {
         for ((purchaseDetails, skuDetails) in purchaseDetailsMap) {
-            logPurchase(purchaseDetails, skuDetails, isSubscription)
+            logPurchase(purchaseDetails, skuDetails, isSubscription, billingClientVersion)
         }
     }
 

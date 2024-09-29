@@ -55,7 +55,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
             .toReturn(InAppPurchaseUtils.BillingClientVersion.V1)
         var isStartIapLoggingCalled = false
-        whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
+        whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging(eq(InAppPurchaseUtils.BillingClientVersion.V1))).thenAnswer {
             isStartIapLoggingCalled = true
             Unit
         }
@@ -70,7 +70,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
             .toReturn(InAppPurchaseUtils.BillingClientVersion.NONE)
         var isStartIapLoggingCalled = false
-        whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
+        whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging(eq(InAppPurchaseUtils.BillingClientVersion.NONE))).thenAnswer {
             isStartIapLoggingCalled = true
             Unit
         }
@@ -86,7 +86,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             .toReturn(InAppPurchaseUtils.BillingClientVersion.V2_V4)
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2)).thenReturn(false)
         var isStartIapLoggingCalled = false
-        whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging()).thenAnswer {
+        whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging(InAppPurchaseUtils.BillingClientVersion.V2_V4)).thenAnswer {
             isStartIapLoggingCalled = true
             Unit
         }
@@ -145,7 +145,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         whenever(
             InAppPurchaseAutoLogger.startIapLogging(
                 any(),
-                eq(InAppPurchaseUtils.BillingClientVersion.V5_Plus)
+                eq(InAppPurchaseUtils.BillingClientVersion.V5_V7)
             )
         ).thenAnswer {
             isStartIapLoggingCalled = true
