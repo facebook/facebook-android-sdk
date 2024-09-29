@@ -45,6 +45,12 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
     private val METHOD_ON_PURCHASE_HISTORY_RESPONSE = "onPurchaseHistoryResponse"
     private val METHOD_ON_PRODUCT_DETAILS_RESPONSE = "onProductDetailsResponse"
     private val badProductDetailStr = "/"
+    private val billingResult: Any = mock()
+    private val proxy: Any = mock()
+    private lateinit var runnable: Runnable
+    private val purchase: Any = mock()
+    private val purchaseHistoryRecord: Any = mock()
+    private val productDetail: Any = mock()
 
     // These strings have been adapted from real ProductDetails objects returned by Google
     private val productDetailStr =
@@ -94,13 +100,17 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
             )
         ).thenReturn(exampleResponse)
         InAppPurchaseBillingClientWrapperV5V7.productDetailsMap.clear()
-        InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV5V7.isServiceConnected.set(false)
         Whitebox.setInternalState(
             InAppPurchaseBillingClientWrapperV5V7::class.java,
             "instance",
             null as? InAppPurchaseBillingClientWrapperV5V7
         )
+        runnable = Runnable {
+            return@Runnable
+        }
     }
 
     private fun getWrapperWithMockedContext(): InAppPurchaseBillingClientWrapperV5V7? {
@@ -141,8 +151,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
 
     @Test
     fun testBillingServiceConnectedSuccessfully() {
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
         val args = arrayOf(billingResult)
         whenever(
             invokeMethod(
@@ -166,8 +174,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
 
     @Test
     fun testBillingServiceConnectedUnsuccessfully() {
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
         val args = arrayOf(billingResult)
         whenever(
             invokeMethod(
@@ -192,8 +198,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
     fun testBillingServiceDisconnected() {
         val inAppPurchaseBillingClientWrapperV5Plus =
             getWrapperWithMockedContext()
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
         val args = arrayOf(billingResult)
         inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(null)?.invoke(
             proxy,
@@ -208,10 +212,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
 
     @Test
     fun testQueryPurchasesAsync() {
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
-        val runnable: Runnable = mock()
-        val purchase: Any = mock()
         val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
         val wrapperArgs = arrayOf(productType, runnable)
         val purchaseList: List<*> = listOf(purchase)
@@ -233,17 +233,67 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
                 .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap["product_1"].toString())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap["product_1"].toString())
             .isEqualTo(JSONObject(purchaseJsonStr).toString())
+    }
+
+
+    @Test
+    fun testQueryPurchasesMissingArgument() {
+        val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
+
+        // Missing completion handler
+        val wrapperArgs = arrayOf(productType)
+        val purchaseList: List<*> = listOf(purchase)
+
+        val args = arrayOf(billingResult, purchaseList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchase),
+            )
+        ).thenReturn(purchaseJsonStr)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.size)
+            .isEqualTo(0)
 
     }
 
     @Test
+    fun testQuerySubscriptionsAsync() {
+        val productType: Any = InAppPurchaseUtils.IAPProductType.SUBS
+        val wrapperArgs = arrayOf(productType, runnable)
+        val purchaseList: List<*> = listOf(purchase)
+        val args = arrayOf(billingResult, purchaseList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchase),
+            )
+        ).thenReturn(purchaseJsonStr)
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
+            proxy, Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE), args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap["product_1"].toString())
+            .isEqualTo(JSONObject(purchaseJsonStr).toString())
+    }
+
+
+    @Test
     fun testQueryPurchaseHistoryAsync() {
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
-        val runnable: Runnable = mock()
-        val purchaseHistoryRecord: Any = mock()
         val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
         val wrapperArgs = arrayOf(productType, runnable)
         val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
@@ -265,7 +315,61 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
                 .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
             args
         )
-        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap["product_2"].toString())
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap["product_2"].toString())
+            .isEqualTo(JSONObject(purchaseHistoryRecordJsonStr).toString())
+    }
+
+    @Test
+    fun testQueryPurchaseHistoryMissingParameters() {
+        val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
+
+        // Missing completion handler
+        val wrapperArgs = arrayOf(productType)
+        val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
+
+        val args = arrayOf(billingResult, purchaseHistoryRecordList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchaseHistoryRecord),
+            )
+        ).thenReturn(purchaseHistoryRecordJsonStr)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.size)
+            .isEqualTo(0)
+    }
+
+    @Test
+    fun testQuerySubscriptionHistoryAsync() {
+        val productType: Any = InAppPurchaseUtils.IAPProductType.SUBS
+        val wrapperArgs = arrayOf(productType, runnable)
+        val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
+        val args = arrayOf(billingResult, purchaseHistoryRecordList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchaseHistoryRecord),
+            )
+        ).thenReturn(purchaseHistoryRecordJsonStr)
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap["product_2"].toString())
             .isEqualTo(JSONObject(purchaseHistoryRecordJsonStr).toString())
     }
 
@@ -287,9 +391,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
 
     @Test
     fun testQueryProductDetailsAsync() {
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
-        val productDetail: Any = mock()
         val productDetailsList: List<*> = listOf(productDetail)
         val args = arrayOf(billingResult, productDetailsList)
         whenever(
@@ -316,9 +417,6 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
 
     @Test
     fun testQueryProductDetailsAsyncWithBadProductDetailsJSON() {
-        val billingResult: Any = mock()
-        val proxy: Any = mock()
-        val productDetail: Any = mock()
         val productDetailsList: List<*> = listOf(productDetail)
         val args = arrayOf(billingResult, productDetailsList)
         whenever(

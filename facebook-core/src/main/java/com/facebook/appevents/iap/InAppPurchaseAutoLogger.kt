@@ -62,10 +62,10 @@ object InAppPurchaseAutoLogger {
             InAppPurchaseBillingClientWrapperV2V4.purchaseDetailsMap.clear()
         } else {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
-                InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap,
+                InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap,
                 InAppPurchaseBillingClientWrapperV5V7.productDetailsMap
             )
-            InAppPurchaseBillingClientWrapperV5V7.purchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
         }
     }
 }

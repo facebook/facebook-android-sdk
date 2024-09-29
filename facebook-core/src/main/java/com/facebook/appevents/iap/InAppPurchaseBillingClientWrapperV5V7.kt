@@ -115,7 +115,6 @@ private constructor(
     private val billingResultGetResponseCodeMethod: Method
 ) : InAppPurchaseBillingClientWrapper {
 
-    @AutoHandleExceptions
     inner class ListenerWrapper(private var wrapperArgs: Array<Any>?) : InvocationHandler {
         override fun invoke(proxy: Any, m: Method, listenerArgs: Array<Any>?): Any? {
             when (m.name) {
@@ -264,13 +263,13 @@ private constructor(
 
     override fun queryPurchases(
         productType: InAppPurchaseUtils.IAPProductType,
-        runnable: Runnable
+        completionHandler: Runnable
     ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 purchasesResponseListenerClazz.classLoader,
                 arrayOf(purchasesResponseListenerClazz),
-                ListenerWrapper(arrayOf(productType, runnable))
+                ListenerWrapper(arrayOf(productType, completionHandler))
             )
             invokeMethod(
                 billingClientClazz,
@@ -284,13 +283,13 @@ private constructor(
     }
 
     override fun queryPurchaseHistory(
-        productType: InAppPurchaseUtils.IAPProductType, runnable: Runnable
+        productType: InAppPurchaseUtils.IAPProductType, completionHandler: Runnable
     ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 purchaseHistoryResponseListenerClazz.classLoader,
                 arrayOf(purchaseHistoryResponseListenerClazz),
-                ListenerWrapper(arrayOf(productType, runnable))
+                ListenerWrapper(arrayOf(productType, completionHandler))
             )
             invokeMethod(
                 billingClientClazz,
@@ -306,13 +305,13 @@ private constructor(
     private fun queryProductDetailsAsync(
         productType: InAppPurchaseUtils.IAPProductType,
         productIds: List<String>,
-        loggingRunnable: Runnable
+        completionHandler: Runnable
     ) {
         val runnableQuery = Runnable {
             val listenerObj = Proxy.newProxyInstance(
                 productDetailsResponseListenerClazz.classLoader,
                 arrayOf(productDetailsResponseListenerClazz),
-                ListenerWrapper(arrayOf(loggingRunnable))
+                ListenerWrapper(arrayOf(completionHandler))
             )
             val queryProductDetailsParams = getQueryProductDetailsParams(productType, productIds)
             if (queryProductDetailsParams != null) {
@@ -353,26 +352,23 @@ private constructor(
     fun getOriginalJson(productDetailsString: String): String? {
         val jsonStringRegex = """jsonString='(.*?)'""".toRegex()
         val matchResult = jsonStringRegex.find(productDetailsString)
-        return matchResult?.groupValues?.get(1)
+        return matchResult?.groupValues?.getOrNull(1)
     }
 
-
-    @AutoHandleExceptions
     private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val productType = wrapperArgs?.get(0)
+        val productType = wrapperArgs?.getOrNull(0)
         if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
             return
         }
-        val loggingRunnable = wrapperArgs.get(1)
-        if (loggingRunnable !is Runnable) {
+        val completionHandler = wrapperArgs.getOrNull(1)
+        if (completionHandler !is Runnable) {
             return
         }
-        val purchaseList = listenerArgs?.get(1)
+        val purchaseList = listenerArgs?.getOrNull(1)
         if (purchaseList == null || purchaseList !is List<*>) {
             return
         }
         val productIds = mutableListOf<String>()
-        var newPurchasesToBeLogged = false
         for (purchase in purchaseList) {
             val purchaseJsonStr =
                 invokeMethod(
@@ -386,36 +382,37 @@ private constructor(
                 if (productId !in productDetailsMap) {
                     productIds.add(productId)
                 }
-                purchaseDetailsMap[productId] = purchaseJson
-                newPurchasesToBeLogged = true
+                if (productType == InAppPurchaseUtils.IAPProductType.INAPP) {
+                    iapPurchaseDetailsMap[productId] = purchaseJson
+                } else {
+                    subsPurchaseDetailsMap[productId] = purchaseJson
+                }
             }
         }
         if (productIds.isNotEmpty()) {
-            queryProductDetailsAsync(productType, productIds, loggingRunnable)
-        } else if (newPurchasesToBeLogged) {
-            // If there is at least one purchase to be logged, but productIds is empty,
-            // it means we already have the productDetails and can log immediately.
-            loggingRunnable.run()
+            queryProductDetailsAsync(productType, productIds, completionHandler)
+        } else {
+            // If productIds is empty we have all of the product info we need and can execute our completion handler
+            completionHandler.run()
         }
     }
 
-    @AutoHandleExceptions
+
     private fun onPurchaseHistoryResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val productType = wrapperArgs?.get(0)
+        val productType = wrapperArgs?.getOrNull(0)
         if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
             return
         }
-        val loggingRunnable = wrapperArgs.get(1)
-        if (loggingRunnable !is Runnable) {
+        val completionHandler = wrapperArgs.getOrNull(1)
+        if (completionHandler !is Runnable) {
             return
         }
-        val purchaseHistoryRecordList = listenerArgs?.get(1)
+        val purchaseHistoryRecordList = listenerArgs?.getOrNull(1)
 
         if (purchaseHistoryRecordList == null || purchaseHistoryRecordList !is List<*>) {
             return
         }
         val productIds = mutableListOf<String>()
-        var newPurchasesToBeLogged = false
         for (purchaseHistoryRecord in purchaseHistoryRecordList) {
             try {
                 val purchaseHistoryRecordJsonStr = invokeMethod(
@@ -431,26 +428,27 @@ private constructor(
                     if (productId !in productDetailsMap) {
                         productIds.add(productId)
                     }
-                    purchaseDetailsMap[productId] = purchaseHistoryRecordJson
-                    newPurchasesToBeLogged = true
+                    if (productType == InAppPurchaseUtils.IAPProductType.INAPP) {
+                        iapPurchaseDetailsMap[productId] = purchaseHistoryRecordJson
+                    } else {
+                        subsPurchaseDetailsMap[productId] = purchaseHistoryRecordJson
+                    }
                 }
             } catch (e: Exception) {
                 /* swallow */
             }
         }
         if (productIds.isNotEmpty()) {
-            queryProductDetailsAsync(productType, productIds, loggingRunnable)
-        } else if (newPurchasesToBeLogged) {
-            // If there is at least one purchase to be logged, but productIds is empty,
-            // it means we already have the productDetails and can log immediately.
-            loggingRunnable.run()
+            queryProductDetailsAsync(productType, productIds, completionHandler)
+        } else {
+            // If productIds is empty we have all of the product info we need and can execute our completion handler
+            completionHandler.run()
         }
     }
 
-    @AutoHandleExceptions
     private fun onProductDetailsResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val loggingRunnable = wrapperArgs?.get(0)
-        val productDetailsList = listenerArgs?.get(1)
+        val completionHandler = wrapperArgs?.getOrNull(0)
+        val productDetailsList = listenerArgs?.getOrNull(1)
 
         if (productDetailsList == null || productDetailsList !is List<*>) {
             return
@@ -472,13 +470,11 @@ private constructor(
                 /* swallow */
             }
         }
-        if (loggingRunnable != null && loggingRunnable is Runnable) {
-            loggingRunnable.run()
+        if (completionHandler != null && completionHandler is Runnable) {
+            completionHandler.run()
         }
     }
 
-
-    @AutoHandleExceptions
     private fun onBillingSetupFinished(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         if (listenerArgs.isNullOrEmpty()) {
             return
@@ -495,32 +491,27 @@ private constructor(
         }
     }
 
-    @AutoHandleExceptions
     private fun onBillingServiceDisconnected(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         isServiceConnected.set(false)
     }
 
-    @AutoHandleExceptions
     companion object : InvocationHandler {
         private val TAG = InAppPurchaseBillingClientWrapperV5V7::class.java.canonicalName
         val isServiceConnected = AtomicBoolean(false)
         private var instance: InAppPurchaseBillingClientWrapperV5V7? = null
 
         // Use ConcurrentHashMap because purchase values may be updated in different threads
-        val purchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+        val iapPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+        val subsPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
 
         @Synchronized
         @JvmStatic
         fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapperV5V7? {
-            if (instance != null) {
-                return instance
-            }
-            createInstance(context)
-            return instance
+            return instance ?: createInstance(context)
         }
 
-        private fun createInstance(context: Context) {
+        private fun createInstance(context: Context): InAppPurchaseBillingClientWrapperV5V7? {
             // Get classes
             val billingClientClazz = getClass(CLASSNAME_BILLING_CLIENT)
             val purchaseClazz = getClass(CLASSNAME_PURCHASE)
@@ -589,7 +580,7 @@ private constructor(
                     TAG,
                     "Failed to create Google Play billing library wrapper for in-app purchase auto-logging"
                 )
-                return
+                return null
             }
 
             // Get methods: Query purchases
@@ -709,7 +700,7 @@ private constructor(
                     TAG,
                     "Failed to create Google Play billing library wrapper for in-app purchase auto-logging"
                 )
-                return
+                return null
             }
 
             val billingClient = createBillingClient(
@@ -723,7 +714,7 @@ private constructor(
                     TAG,
                     "Failed to build a Google Play billing library wrapper for in-app purchase auto-logging"
                 )
-                return
+                return null
             }
             instance = InAppPurchaseBillingClientWrapperV5V7(
                 context.packageName,
@@ -774,6 +765,7 @@ private constructor(
                 billingClientStartConnectionMethod,
                 billingResultGetResponseCodeMethod
             )
+            return instance
         }
 
         private fun createBillingClient(
