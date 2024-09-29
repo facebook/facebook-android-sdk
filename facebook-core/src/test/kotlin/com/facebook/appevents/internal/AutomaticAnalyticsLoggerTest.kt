@@ -20,6 +20,7 @@ import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
+import org.assertj.core.api.Assertions
 import java.math.BigDecimal
 import java.util.Currency
 import org.junit.Assert.assertEquals
@@ -54,12 +55,20 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     private val appID = "123"
     private val activityName = "activity name"
     private val timeSpent = 5L
-    private val purchase =
-        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\"}"
-    private val skuDetails = "{\"price_currency_code\":\"USD\",\"price_amount_micros\":5000}"
-    private val skuDetails_gpbl_v5_v7 =
-        """{"oneTimePurchaseOfferDetails": {"priceAmountMicros": 12000000, "priceCurrencyCode": "USD"}}"""
-
+    private val subscriptionPurchase =
+        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"packageName\": \"examplePackageName\", \"autoRenewing\": true}"
+    private val oneTimePurchase =
+        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"packageName\": \"examplePackageName\"}"
+    private val oneTimePurchaseDetailsGPBLV2V4 =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"description\":\"Exampledescription.\",\"price\":\"$12.00\",\"price_amount_micros\":12000000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"sampleToken\"}"
+    private val oneTimePurchaseDetailsGPBLV5V7 =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken=\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$12.00\",\"offerIdToken\":\"offerIdToken==\"}}"
+    private val subscriptionDetailsGPBLV2V4 =
+        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"freeTrialPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\"}"
+    private val subscriptionDetailsWithNoFreeTrialGPBLV2V4 =
+        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\"}"
+    private val subscriptionDetailsGPBLV5V7 =
+        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken\",\"subscriptionOfferDetails\":[{\"offerIdToken\":\"offerIdToken1=\",\"basePlanId\":\"baseplanId\",\"offerId\":\"offerId\",\"pricingPhases\":[{\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"Free\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":2,\"billingCycleCount\":1},{\"priceAmountMicros\":3590000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.59\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":2,\"billingCycleCount\":2},{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":1}],\"offerTags\":[]},{\"offerIdToken\":\"offerIdToken2=\",\"basePlanId\":\"basePlanId2\",\"pricingPhases\":[{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":1}],\"offerTags\":[]}]}"
     private var logWarningCallCount = 0
     private var appEventLoggerCallCount = 0
 
@@ -67,6 +76,10 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     private lateinit var mockInternalAppEventsLogger: InternalAppEventsLogger
     private lateinit var mockBundle: Bundle
     private lateinit var mockFetchedAppSettings: FetchedAppSettings
+    private var eventName: String? = null
+    private var bundle: Bundle? = null
+    private var amount: BigDecimal? = null
+    private var currency: Currency? = null
 
     @Before
     fun init() {
@@ -91,7 +104,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             mockInternalAppEventsLogger
         )
 
-        mockBundle = mock(Bundle::class.java)
+        mockBundle = Bundle(1)
         whenNew(Bundle::class.java).withAnyArguments().thenReturn(mockBundle)
 
         mockFetchedAppSettings = mock(FetchedAppSettings::class.java)
@@ -108,6 +121,35 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
         whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
             .thenReturn(true)
+
+
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        whenever(
+            mockInternalAppEventsLogger.logEventImplicitly(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenAnswer {
+            eventName = it.getArgument(0) as String
+            amount = it.getArgument(1) as BigDecimal
+            currency = it.getArgument(2) as Currency
+            bundle = it.getArgument(3) as Bundle
+            Unit
+        }
+        whenever(
+            mockInternalAppEventsLogger.logPurchaseImplicitly(
+                any(),
+                any(),
+                any(),
+            )
+        ).thenAnswer {
+            amount = it.getArgument(0) as BigDecimal
+            currency = it.getArgument(1) as Currency
+            bundle = it.getArgument(2) as Bundle
+            Unit
+        }
     }
 
     @Test
@@ -182,15 +224,59 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         }
         whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
-        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
+        AutomaticAnalyticsLogger.logPurchase(oneTimePurchase, oneTimePurchaseDetailsGPBLV2V4, true)
 
         assertEquals(0, appGateKeepersManagerCallCount)
     }
 
     @Test
-    fun `test log purchase when implicit purchase logging enable & subscribed`() {
-        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
+    fun `test log purchase when implicit purchase logging enable & start trial with GPBL v2 - v4`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV2V4,
+            true
+        )
+        verify(mockInternalAppEventsLogger)
+            .logEventImplicitly(
+                eq(AppEventsConstants.EVENT_NAME_START_TRIAL),
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>()
+            )
+
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("subs")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
+            .isEqualTo("true")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_FREE_TRIAL_PERIOD))
+            .isEqualTo("P1W")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PRICE_AMOUNT_MICROS))
+            .isEqualTo("3590000")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
+            .isEqualTo("P1W")
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
+        Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_START_TRIAL)
+
+    }
+
+    @Test
+    fun `test log purchase when implicit purchase logging enable & subscribe with GPBL v2 - v4`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsWithNoFreeTrialGPBLV2V4,
+            true
+        )
         verify(mockInternalAppEventsLogger)
             .logEventImplicitly(
                 eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
@@ -198,22 +284,121 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 any<Currency>(),
                 any<Bundle>()
             )
+
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("subs")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
+            .isEqualTo("true")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PRICE_AMOUNT_MICROS))
+            .isEqualTo("3590000")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
+            .isEqualTo("P1W")
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
+        Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
+
     }
+
+
+    @Test
+    fun `test log purchase when implicit purchase logging enable & subscribed with GPBL v5 - v7`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true
+        )
+        verify(mockInternalAppEventsLogger)
+            .logEventImplicitly(
+                eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>()
+            )
+
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
+            .isEqualTo("Exampledescription.")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("subs")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
+            .isEqualTo("true")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
+            .isEqualTo("P1W")
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(0))
+        Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
+    }
+
 
     @Test
     fun `test log purchase when implicit purchase logging enable & not subscribed with GPBL v2 - v4`() {
-        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, false)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV2V4,
+            false
+        )
         verify(mockInternalAppEventsLogger)
             .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
+            .isEqualTo("Exampledescription.")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("inapp")
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
     }
 
     @Test
     fun `test log purchase when implicit purchase logging enable & not subscribed with GPBL v5 - v7`() {
-        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
-        AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails_gpbl_v5_v7, false)
+        AutomaticAnalyticsLogger.logPurchase(oneTimePurchase, oneTimePurchaseDetailsGPBLV5V7, false)
         verify(mockInternalAppEventsLogger)
             .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
+            .isEqualTo("Exampledescription.")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("inapp")
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
+
     }
 
     @Test

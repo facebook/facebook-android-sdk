@@ -128,6 +128,99 @@ object AutomaticAnalyticsLogger {
         return getPurchaseLoggingParameters(purchase, skuDetails, HashMap())
     }
 
+    private fun getPurchaseParametersGPBLV2V4(
+        type: String,
+        params: Bundle,
+        purchaseJSON: JSONObject,
+        skuDetailsJSON: JSONObject
+    ): PurchaseLoggingParameters? {
+        if (type == InAppPurchaseUtils.IAPProductType.SUBS.type) {
+            params.putCharSequence(
+                Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                java.lang.Boolean.toString(
+                    purchaseJSON.optBoolean(
+                        Constants.GP_IAP_AUTORENEWING,
+                        false
+                    )
+                )
+            )
+            params.putCharSequence(
+                Constants.IAP_SUBSCRIPTION_PERIOD,
+                skuDetailsJSON.optString(Constants.GP_IAP_SUBSCRIPTION_PERIOD)
+            )
+            params.putCharSequence(
+                Constants.IAP_FREE_TRIAL_PERIOD,
+                skuDetailsJSON.optString(Constants.GP_IAP_FREE_TRIAL_PERIOD)
+            )
+            val introductoryPriceCycles =
+                skuDetailsJSON.optString(Constants.GP_IAP_INTRODUCTORY_PRICE_CYCLES)
+            if (introductoryPriceCycles.isNotEmpty()) {
+                params.putCharSequence(
+                    Constants.IAP_INTRO_PRICE_CYCLES,
+                    introductoryPriceCycles
+                )
+            }
+            val introductoryPriceAmountMicros =
+                skuDetailsJSON.optString(Constants.GP_IAP_INTRODUCTORY_PRICE_AMOUNT_MICROS)
+            if (introductoryPriceAmountMicros.isNotEmpty()) {
+                params.putCharSequence(
+                    Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
+                    introductoryPriceAmountMicros
+                )
+            }
+        }
+        return PurchaseLoggingParameters(
+            BigDecimal(skuDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V2V4) / 1_000_000.0),
+            Currency.getInstance(skuDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V2V4)),
+            params
+        )
+    }
+
+    private fun getPurchaseParametersGPBLV5V7(
+        type: String,
+        params: Bundle,
+        purchaseJSON: JSONObject,
+        skuDetailsJSON: JSONObject
+    ): PurchaseLoggingParameters? {
+        if (type == InAppPurchaseUtils.IAPProductType.SUBS.type) {
+            val subscriptionOfferDetailsJSON =
+                skuDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS)
+                    .getJSONObject(0) ?: return null
+            val subscriptionJSON =
+                subscriptionOfferDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_PRICING_PHASES)
+                    .getJSONObject(0) ?: return null
+
+
+            params.putCharSequence(
+                Constants.IAP_SUBSCRIPTION_PERIOD, subscriptionJSON.optString(
+                    Constants.GP_IAP_BILLING_PERIOD
+                )
+            )
+            if (subscriptionJSON.has(Constants.GP_IAP_RECURRENCE_MODE) && subscriptionJSON.getInt(
+                    Constants.GP_IAP_RECURRENCE_MODE
+                ) != 3
+            ) {
+                params.putCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING, true.toString())
+            } else {
+                params.putCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING, false.toString())
+            }
+            return PurchaseLoggingParameters(
+                BigDecimal(subscriptionJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
+                Currency.getInstance(subscriptionJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
+                params
+            )
+        } else {
+            val oneTimePurchaseOfferDetailsJSON =
+                skuDetailsJSON.getJSONObject(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)
+                    ?: return null
+            return PurchaseLoggingParameters(
+                BigDecimal(oneTimePurchaseOfferDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
+                Currency.getInstance(oneTimePurchaseOfferDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
+                params
+            )
+        }
+    }
+
     private fun getPurchaseLoggingParameters(
         purchase: String,
         skuDetails: String,
@@ -163,57 +256,21 @@ object AutomaticAnalyticsLogger {
             )
             val type = skuDetailsJSON.optString(Constants.GP_IAP_TYPE)
             params.putCharSequence(Constants.IAP_PRODUCT_TYPE, type)
-            if (type == InAppPurchaseUtils.IAPProductType.SUBS.type) {
-                params.putCharSequence(
-                    Constants.IAP_SUBSCRIPTION_AUTORENEWING,
-                    java.lang.Boolean.toString(
-                        purchaseJSON.optBoolean(
-                            Constants.GP_IAP_AUTORENEWING,
-                            false
-                        )
-                    )
-                )
-                params.putCharSequence(
-                    Constants.IAP_SUBSCRIPTION_PERIOD,
-                    skuDetailsJSON.optString(Constants.GP_IAP_SUBSCRIPTION_PERIOD)
-                )
-                params.putCharSequence(
-                    Constants.IAP_FREE_TRIAL_PERIOD,
-                    skuDetailsJSON.optString(Constants.GP_IAP_FREE_TRIAL_PERIOD)
-                )
-                val introductoryPriceCycles =
-                    skuDetailsJSON.optString(Constants.GP_IAP_INTRODUCTORY_PRICE_CYCLES)
-                if (introductoryPriceCycles.isNotEmpty()) {
-                    params.putCharSequence(
-                        Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
-                        skuDetailsJSON.optString(Constants.GP_IAP_INTRODUCTORY_PRICE_AMOUNT_MICROS)
-                    )
-                    params.putCharSequence(
-                        Constants.IAP_INTRO_PRICE_CYCLES,
-                        introductoryPriceCycles
-                    )
-                }
-            }
             extraParameter.forEach { (k, v) -> params.putCharSequence(k, v) }
-            if (skuDetailsJSON.has(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V2V4) && skuDetailsJSON.has(
-                    Constants.GP_IAP_PRICE_CURRENCY_CODE_V2V4
+
+
+            return if (skuDetailsJSON.has(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V2V4)) {
+                // GPBL v2 - v4
+                getPurchaseParametersGPBLV2V4(type, params, purchaseJSON, skuDetailsJSON)
+
+            } else if (skuDetailsJSON.has(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS) || skuDetailsJSON.has(
+                    Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS
                 )
             ) {
-                return PurchaseLoggingParameters(
-                    BigDecimal(skuDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V2V4) / 1_000_000.0),
-                    Currency.getInstance(skuDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V2V4)),
-                    params
-                )
-            } else if (skuDetailsJSON.has(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)) {
-                val oneTimePurchaseOfferDetailsJSON =
-                    skuDetailsJSON.getJSONObject(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)
-                return PurchaseLoggingParameters(
-                    BigDecimal(oneTimePurchaseOfferDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
-                    Currency.getInstance(oneTimePurchaseOfferDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
-                    params
-                )
+                // GPBL v5 - v7
+                getPurchaseParametersGPBLV5V7(type, params, purchaseJSON, skuDetailsJSON)
             } else {
-                return null
+                null
             }
         } catch (e: JSONException) {
             Log.e(TAG, "Error parsing in-app purchase/subscription data.", e)

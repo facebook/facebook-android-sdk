@@ -40,17 +40,23 @@ object Constants {
     const val GP_IAP_TYPE = "type"
     const val GP_IAP_AUTORENEWING = "autoRenewing"
     const val GP_IAP_SUBSCRIPTION_PERIOD = "subscriptionPeriod"
-    const val GP_IAP_FREE_TRIAL_PERIOD = "freeTrialPeriod"
-    const val GP_IAP_INTRODUCTORY_PRICE_CYCLES = "introductoryPriceCycles"
-    const val GP_IAP_INTRODUCTORY_PRICE_AMOUNT_MICROS = "introductoryPriceAmountMicros"
+
+
+    // Google Play Billing v2 - v4
     const val GP_IAP_PRICE_AMOUNT_MICROS_V2V4 = "price_amount_micros"
     const val GP_IAP_PRICE_CURRENCY_CODE_V2V4 = "price_currency_code"
+    const val GP_IAP_INTRODUCTORY_PRICE_CYCLES = "introductoryPriceCycles"
+    const val GP_IAP_INTRODUCTORY_PRICE_AMOUNT_MICROS = "introductoryPriceAmountMicros"
+    const val GP_IAP_FREE_TRIAL_PERIOD = "freeTrialPeriod"
 
     // Google Play Billing v5 - v7
     const val GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS = "oneTimePurchaseOfferDetails"
     const val GP_IAP_PRICE_AMOUNT_MICROS_V5V7 = "priceAmountMicros"
     const val GP_IAP_PRICE_CURRENCY_CODE_V5V7 = "priceCurrencyCode"
-
+    const val GP_IAP_SUBSCRIPTION_OFFER_DETAILS = "subscriptionOfferDetails"
+    const val GP_IAP_SUBSCRIPTION_PRICING_PHASES = "pricingPhases"
+    const val GP_IAP_RECURRENCE_MODE = "recurrenceMode"
+    const val GP_IAP_BILLING_PERIOD = "billingPeriod"
 
     // The following are product catalog related parameters.
     /**
