@@ -32,6 +32,7 @@ object Constants {
     const val IAP_AUTOLOG_IMPLEMENTATION = "fb_iap_sdk_supported_library_versions"
     const val IAP_INTRO_PERIOD = "fb_intro_period"
     const val IAP_BASE_PLAN = "fb_iap_base_plan"
+    const val IAP_BILLING_LIBRARY_VERSION = "fb_iap_client_library_version"
 
     // The following are in app purchase parameters returned by Google Play
     const val GP_IAP_PRODUCT_ID = "productId"

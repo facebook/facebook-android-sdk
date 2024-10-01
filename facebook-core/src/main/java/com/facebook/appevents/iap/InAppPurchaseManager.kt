@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseManager {
+    private var specificBillingLibraryVersion: String? = null;
     private const val GOOGLE_BILLINGCLIENT_VERSION = "com.google.android.play.billingclient.version"
     private val enabled = AtomicBoolean(false)
 
@@ -59,6 +60,16 @@ object InAppPurchaseManager {
         }
     }
 
+    @JvmStatic
+    private fun setSpecificBillingLibraryVersion(version: String) {
+        specificBillingLibraryVersion = version
+    }
+
+    @JvmStatic
+    fun getSpecificBillingLibraryVersion(): String? {
+        return specificBillingLibraryVersion
+    }
+
     private fun getBillingClientVersion(): InAppPurchaseUtils.BillingClientVersion {
         try {
             val context = getApplicationContext()
@@ -78,6 +89,7 @@ object InAppPurchaseManager {
                 // Default to newest version
                 return V5_V7
             }
+            setSpecificBillingLibraryVersion("GPBL.$version")
             val majorVersion =
                 versionArray[0].toIntOrNull() ?: return V5_V7
             return if (majorVersion == 1) {

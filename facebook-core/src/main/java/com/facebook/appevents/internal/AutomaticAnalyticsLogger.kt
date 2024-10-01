@@ -17,6 +17,7 @@ import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.appevents.iap.InAppPurchaseEventManager
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
 import com.facebook.internal.FetchedAppGateKeepersManager.getGateKeeperForKey
 import com.facebook.internal.FetchedAppSettingsManager.getAppSettingsWithoutQuery
@@ -205,7 +206,7 @@ object AutomaticAnalyticsLogger {
 
             val basePlanId = subscriptionOfferDetailsJSON.getString(Constants.GP_IAP_BASE_PLAN_ID)
             params.putCharSequence(Constants.IAP_BASE_PLAN, basePlanId)
-            
+
             val pricingPhases =
                 subscriptionOfferDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_PRICING_PHASES)
 
@@ -285,6 +286,15 @@ object AutomaticAnalyticsLogger {
             )
             val type = skuDetailsJSON.optString(Constants.GP_IAP_TYPE)
             params.putCharSequence(Constants.IAP_PRODUCT_TYPE, type)
+            val specificBillingLibraryVersion =
+                InAppPurchaseManager.getSpecificBillingLibraryVersion()
+            if (billingClientVersion != null) {
+                params.putCharSequence(
+                    Constants.IAP_BILLING_LIBRARY_VERSION,
+                    specificBillingLibraryVersion
+                )
+            }
+
             extraParameter.forEach { (k, v) -> params.putCharSequence(k, v) }
 
 

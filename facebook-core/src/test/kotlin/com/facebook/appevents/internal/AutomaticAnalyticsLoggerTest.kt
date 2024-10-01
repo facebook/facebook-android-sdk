@@ -17,6 +17,7 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
@@ -49,7 +50,8 @@ import org.robolectric.RuntimeEnvironment
     FetchedAppSettings::class,
     FetchedAppSettingsManager::class,
     AutomaticAnalyticsLogger::class,
-    FetchedAppGateKeepersManager::class
+    FetchedAppGateKeepersManager::class,
+    InAppPurchaseManager::class,
 )
 class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
@@ -84,6 +86,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     @Before
     fun init() {
+        mockStatic(InAppPurchaseManager::class.java)
         mockStatic(FacebookSdk::class.java)
         mockStatic(Log::class.java)
         mockStatic(FetchedAppSettingsManager::class.java)
@@ -93,7 +96,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
         whenever(FacebookSdk.isInitialized()).thenReturn(true)
         whenever(FacebookSdk.getApplicationId()).thenReturn(appID)
-
+        whenever(InAppPurchaseManager.getSpecificBillingLibraryVersion()).thenReturn("GPBL.5.1.0")
         mockInternalAppEventsLogger = mock(InternalAppEventsLogger::class.java)
         whenNew(InternalAppEventsLogger::class.java)
             .withAnyArguments()
@@ -278,6 +281,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_START_TRIAL)
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
 
     }
 
@@ -322,7 +330,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
-
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
     }
 
 
@@ -368,6 +380,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
     }
 
 
@@ -399,6 +416,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("inapp")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
     }
 
     @Test
@@ -429,6 +451,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("inapp")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
 
     }
 
