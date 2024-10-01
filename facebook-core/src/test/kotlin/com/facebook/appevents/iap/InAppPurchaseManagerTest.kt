@@ -126,7 +126,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
-    fun `test start iap logging when billing library is v5_`() {
+    fun `test start iap logging when billing library is v5_v7 and feature is enabled`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib5To7)).thenReturn(true)
         val mockPackageManager: PackageManager = mock()
         val mockApplicationInfo = ApplicationInfo()
         val metaData = Bundle()
@@ -153,6 +154,38 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         }
         InAppPurchaseManager.enableAutoLogging()
         assertThat(isStartIapLoggingCalled).isTrue
+    }
 
+    @Test
+    fun `test start iap logging when billing library is v5_v7 and feature is disabled`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib5To7)).thenReturn(
+            false
+        )
+        val mockPackageManager: PackageManager = mock()
+        val mockApplicationInfo = ApplicationInfo()
+        val metaData = Bundle()
+        metaData.putString("com.google.android.play.billingclient.version", "5.0.3")
+        whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+        whenever(mockContext.packageName).thenReturn("com.facebook.test")
+        whenever(
+            mockPackageManager.getApplicationInfo(
+                any(),
+                any()
+            )
+        ).thenReturn(mockApplicationInfo)
+        mockApplicationInfo.metaData = metaData
+
+        var isStartIapLoggingCalled = false
+        whenever(
+            InAppPurchaseAutoLogger.startIapLogging(
+                any(),
+                eq(InAppPurchaseUtils.BillingClientVersion.V5_V7)
+            )
+        ).thenAnswer {
+            isStartIapLoggingCalled = true
+            Unit
+        }
+        InAppPurchaseManager.enableAutoLogging()
+        assertThat(isStartIapLoggingCalled).isFalse
     }
 }

@@ -53,10 +53,14 @@ object InAppPurchaseManager {
                 }
             }
 
-            V5_V7 -> InAppPurchaseAutoLogger.startIapLogging(
-                getApplicationContext(),
-                billingClientVersion
-            )
+            V5_V7 -> {
+                if (isEnabled(FeatureManager.Feature.IapLoggingLib5To7)) {
+                    InAppPurchaseAutoLogger.startIapLogging(
+                        getApplicationContext(),
+                        billingClientVersion
+                    )
+                }
+            }
         }
     }
 
