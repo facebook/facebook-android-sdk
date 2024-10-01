@@ -7,7 +7,7 @@ object Config {
 object Versions {
     const val acra = "5.5.0"
     const val analytics = "4.+"
-    const val android_billingclient = "6.0.0"
+    const val android_billingclient = "7.0.0"
     const val android_installreferrer =
         "1.0" // there are issues with 1.1 regarding permissions, asks for unnecessary permissions
     const val androidx = "1.1.0"
