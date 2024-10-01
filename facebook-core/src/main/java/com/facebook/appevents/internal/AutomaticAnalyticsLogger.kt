@@ -202,10 +202,16 @@ object AutomaticAnalyticsLogger {
             val subscriptionOfferDetailsJSON =
                 skuDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS)
                     .getJSONObject(0) ?: return null
-            val subscriptionJSON =
-                subscriptionOfferDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_PRICING_PHASES)
-                    .getJSONObject(0) ?: return null
 
+            val basePlanId = subscriptionOfferDetailsJSON.getString(Constants.GP_IAP_BASE_PLAN_ID)
+            params.putCharSequence(Constants.IAP_BASE_PLAN, basePlanId)
+            
+            val pricingPhases =
+                subscriptionOfferDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_PRICING_PHASES)
+
+            // Get the price of the final phase, which is the price of the actual base plan
+            val subscriptionJSON =
+                pricingPhases.getJSONObject(pricingPhases.length() - 1) ?: return null
 
             params.putCharSequence(
                 Constants.IAP_SUBSCRIPTION_PERIOD, subscriptionJSON.optString(

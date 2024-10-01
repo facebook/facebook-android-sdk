@@ -363,8 +363,10 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("true")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
             .isEqualTo("P1W")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_BASE_PLAN))
+            .isEqualTo("baseplanId")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
-        Assertions.assertThat(amount).isEqualTo(BigDecimal(0))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
     }
 
