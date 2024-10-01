@@ -18,6 +18,8 @@ import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
@@ -28,7 +30,10 @@ import org.powermock.reflect.Whitebox
 class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     private val mockExecutor: Executor = FacebookSerialExecutor()
     private lateinit var mockPrefs: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
     private val packageName = "sample.packagename"
+    private val TIME_OF_LAST_LOGGED_PURCHASE_KEY = "TIME_OF_LAST_LOGGED_PURCHASE"
+    private val TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY = "TIME_OF_LAST_LOGGED_SUBSCRIPTION"
 
     @Before
     fun init() {
@@ -41,18 +46,84 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         PowerMockito.spy(InAppPurchaseLoggerManager::class.java)
         mockPrefs = mock()
         whenever(context.getSharedPreferences(any<String>(), any<Int>())).thenReturn(mockPrefs)
-        val editor: SharedPreferences.Editor = mock()
+        editor = mock()
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java, "sharedPreferences", mockPrefs
         )
         whenever(mockPrefs.edit()).thenReturn(editor)
-        whenever(editor.putLong(any(), any())).thenReturn(editor)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(editor)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenReturn(editor)
         whenever(editor.putString(any(), any())).thenReturn(editor)
         whenever(editor.putStringSet(any(), any())).thenReturn(editor)
+        doNothing().whenever(editor).apply()
     }
 
     @Test
-    fun testCacheDeDupPurchase() {
+    fun testGetTimeOfNewestPurchaseInOldCache() {
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            mutableMapOf(
+                "purchase_token_1" to 100,
+                "purchase_token_2" to 200,
+                "purchase_token_3" to 300
+            )
+        )
+        Assertions.assertThat(InAppPurchaseLoggerManager.getTimeOfNewestPurchaseInOldCache())
+            .isEqualTo(300000)
+    }
+
+    @Test
+    fun testCacheDeDupPurchaseOnFirstTimeLoggingWithNewIAPImplementation() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(0)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"purchase_token\",\"purchaseTime\":1600000000000,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "cachedPurchaseMap",
+            mutableMapOf(
+                "purchase_token" to
+                        1_600_000_000L
+            )
+        )
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            true
+        )
+
+        // Test duplicate purchase event can be successfully removed from purchase details map
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, false)
+        Assertions.assertThat(cachedMap).isEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1600000000000)
+    }
+
+    @Test
+    fun testCacheDeDupPurchaseOnFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(0)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -67,21 +138,120 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             InAppPurchaseLoggerManager::class.java,
             "cachedPurchaseMap",
             mutableMapOf(
-                "token123" to
+                "otherpurchasetoken" to
                         lastClearedTime
             )
         )
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            true
+        )
 
-        // Test duplicate purchase event can be successfully removed from purchase details map
-        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap)
-        Assertions.assertThat(cachedMap).isEmpty()
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, false)
+        Assertions.assertThat(cachedMap).isNotEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1620000000000)
     }
 
     @Test
-    fun testClearOutDatedProductInfoInCache() {
-        // Add clear history data into cachedPurchaseMap
+    fun testCacheDeDupPurchaseNotFirstTimeLoggingWithNewIAPImplementation() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(
+            1630000000000
+        )
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1620000000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            false
+        )
+
+        // Test duplicate purchase event can be successfully removed from purchase details map
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, false)
+        Assertions.assertThat(cachedMap).isEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isNull()
+    }
+
+    @Test
+    fun testCacheDeDupPurchaseNotFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(
+            1620000000000
+        )
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1630000000000000,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            false
+        )
+
+        // Test duplicate purchase event can be successfully removed from purchase details map
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, false)
+        Assertions.assertThat(cachedMap).isNotEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1630000000000000)
+    }
+
+    @Test
+    fun testCacheDeDupSubscriptionOnFirstTimeLoggingWithNewIAPImplementation() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenReturn(0)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1600000000000,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
         val lastClearedTime = 1_600_000_000L
-        whenever(mockPrefs.getLong("LAST_CLEARED_TIME", 0)).thenReturn(lastClearedTime)
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
             "cachedPurchaseMap",
@@ -90,38 +260,153 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
                         lastClearedTime
             )
         )
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            true
+        )
 
-        InAppPurchaseLoggerManager.clearOutdatedProductInfoInCache()
-        val cachedPurchaseMap =
-            Whitebox.getInternalState<MutableMap<String, Long>>(
-                InAppPurchaseLoggerManager::class.java, "cachedPurchaseMap"
-            )
+        // Test duplicate purchase event can be successfully removed from purchase details map
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, true)
+        Assertions.assertThat(cachedMap).isEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
 
-        Assertions.assertThat(cachedPurchaseMap).isEmpty()
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1600000000000)
     }
 
     @Test
-    fun testConstructLoggingReadyMap() {
+    fun testCacheDeDupSubscriptionOnFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenReturn(0)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
             JSONObject(
                 "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1620000000000,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
+        val lastClearedTime = 1_600_000_000L
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "cachedPurchaseMap",
+            mutableMapOf(
+                "otherpurchasetoken" to
+                        lastClearedTime
+            )
+        )
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            true
+        )
+
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, true)
+        Assertions.assertThat(cachedMap).isNotEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1620000000000)
+    }
+
+    @Test
+    fun testCacheDeDupSubscriptionNotFirstTimeLoggingWithNewIAPImplementation() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenReturn(
+            1620000000002
+        )
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1620000000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            false
+        )
+
+        // Test duplicate purchase event can be successfully removed from purchase details map
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, true)
+        Assertions.assertThat(cachedMap).isEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isNull()
+    }
+
+    @Test
+    fun testCacheDeDupSubscriptionNotFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenReturn(
+            1620000000000
+        )
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1620000000000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            false
+        )
+
+        // Test duplicate purchase event can be successfully removed from purchase details map
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, true)
+        Assertions.assertThat(cachedMap).isNotEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1620000000000001)
+    }
+
+
+    @Test
+    fun testConstructLoggingReadyMap() {
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val mockSkuDetailsMap: MutableMap<String, JSONObject> = HashMap()
         val skuDetailJson =
             JSONObject(
                 "{\"productId\":\"coffee\",\"type\":\"inapp\",\"price\":\"$2.99\",\"price_amount_micros\":2990000,\"price_currency_code\":\"USD\",\"title\":\"coffee\",\"description\":\"Basic coffee \",\"skuDetailsToken\":\"detailsToken=\"}"
             )
         mockSkuDetailsMap["espresso"] = skuDetailJson
-
-        // Test purchase is too old to log
-        val result1 =
-            InAppPurchaseLoggerManager.constructLoggingReadyMap(
-                mockPurchaseDetailsMap, mockSkuDetailsMap,
-                packageName
-            )
-        Assertions.assertThat(result1).isEmpty()
 
         // Test logging ready events can be added into map
         var newPurchaseDetailString =
