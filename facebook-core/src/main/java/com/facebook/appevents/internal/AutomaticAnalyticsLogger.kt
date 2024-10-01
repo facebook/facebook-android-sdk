@@ -167,6 +167,15 @@ object AutomaticAnalyticsLogger {
                     introductoryPriceCycles
                 )
             }
+
+            val introductoryPricePeriod =
+                skuDetailsJSON.optString(Constants.GP_IAP_INTRODUCTORY_PRICE_PERIOD)
+            if (introductoryPricePeriod.isNotEmpty()) {
+                params.putCharSequence(
+                    Constants.IAP_INTRO_PERIOD,
+                    introductoryPricePeriod
+                )
+            }
             val introductoryPriceAmountMicros =
                 skuDetailsJSON.optString(Constants.GP_IAP_INTRODUCTORY_PRICE_AMOUNT_MICROS)
             if (introductoryPriceAmountMicros.isNotEmpty()) {

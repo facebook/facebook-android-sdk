@@ -30,6 +30,7 @@ object Constants {
     const val IAP_INTRO_PRICE_AMOUNT_MICROS = "fb_intro_price_amount_micros"
     const val IAP_INTRO_PRICE_CYCLES = "fb_intro_price_cycles"
     const val IAP_AUTOLOG_IMPLEMENTATION = "fb_iap_sdk_supported_library_versions"
+    const val IAP_INTRO_PERIOD = "fb_intro_period"
 
     // The following are in app purchase parameters returned by Google Play
     const val GP_IAP_PRODUCT_ID = "productId"
@@ -47,8 +48,10 @@ object Constants {
     const val GP_IAP_PRICE_AMOUNT_MICROS_V2V4 = "price_amount_micros"
     const val GP_IAP_PRICE_CURRENCY_CODE_V2V4 = "price_currency_code"
     const val GP_IAP_INTRODUCTORY_PRICE_CYCLES = "introductoryPriceCycles"
+    const val GP_IAP_INTRODUCTORY_PRICE_PERIOD = "introductoryPricePeriod"
     const val GP_IAP_INTRODUCTORY_PRICE_AMOUNT_MICROS = "introductoryPriceAmountMicros"
     const val GP_IAP_FREE_TRIAL_PERIOD = "freeTrialPeriod"
+
 
     // Google Play Billing v5 - v7
     const val GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS = "oneTimePurchaseOfferDetails"

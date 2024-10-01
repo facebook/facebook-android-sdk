@@ -65,9 +65,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     private val oneTimePurchaseDetailsGPBLV5V7 =
         "{\"productId\":\"id123\",\"type\":\"inapp\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken=\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$12.00\",\"offerIdToken\":\"offerIdToken==\"}}"
     private val subscriptionDetailsGPBLV2V4 =
-        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"freeTrialPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\"}"
+        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"freeTrialPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\", \"introductoryPricePeriod\": \"P1W\"}"
     private val subscriptionDetailsWithNoFreeTrialGPBLV2V4 =
-        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\"}"
+        "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\", \"introductoryPricePeriod\": \"P1W\"}"
     private val subscriptionDetailsGPBLV5V7 =
         "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken\",\"subscriptionOfferDetails\":[{\"offerIdToken\":\"offerIdToken1=\",\"basePlanId\":\"baseplanId\",\"offerId\":\"offerId\",\"pricingPhases\":[{\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"Free\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":2,\"billingCycleCount\":1},{\"priceAmountMicros\":3590000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.59\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":2,\"billingCycleCount\":2},{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":1}],\"offerTags\":[]},{\"offerIdToken\":\"offerIdToken2=\",\"basePlanId\":\"basePlanId2\",\"pricingPhases\":[{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":1}],\"offerTags\":[]}]}"
     private var logWarningCallCount = 0
@@ -269,6 +269,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("true")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_FREE_TRIAL_PERIOD))
             .isEqualTo("P1W")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PERIOD))
+            .isEqualTo("P1W")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PRICE_AMOUNT_MICROS))
             .isEqualTo("3590000")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
@@ -313,6 +315,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("true")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PRICE_AMOUNT_MICROS))
             .isEqualTo("3590000")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PERIOD))
+            .isEqualTo("P1W")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
             .isEqualTo("P1W")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
