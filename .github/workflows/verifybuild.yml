@@ -9,6 +9,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '11'
       - name: Run corekit tests
         run:  GITHUB_ACTIONS=1 ./gradlew :facebook-core:test -i
       - name: Run GamingServicesKit tests
