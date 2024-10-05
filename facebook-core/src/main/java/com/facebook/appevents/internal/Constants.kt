@@ -118,6 +118,13 @@ object Constants {
      */
     const val EVENT_PARAM_PRODUCT_PRICE_CURRENCY = "fb_product_price_currency"
 
+    /**
+     * Parameters used to let us know if an app has autologging turned on
+     */
+    const val EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED = "is_autolog_app_events_enabled"
+    const val EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED =
+        "is_implicit_purchase_logging_enabled"
+
     @JvmStatic
     fun getDefaultAppEventsSessionTimeoutInSeconds(): Int = 60
 }
