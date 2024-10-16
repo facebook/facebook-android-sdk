@@ -14,6 +14,7 @@ import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.iap.InAppPurchaseManager
+import com.facebook.appevents.integrity.BannedParamManager
 import com.facebook.appevents.integrity.BlocklistEventsManager
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.ml.ModelManager
@@ -61,6 +62,11 @@ object AppEventsManager {
                     checkFeature(FeatureManager.Feature.EventDeactivation) { enabled ->
                         if (enabled) {
                             EventDeactivationManager.enable()
+                        }
+                    }
+                    checkFeature(FeatureManager.Feature.BannedParamFiltering) { enabled ->
+                        if (enabled) {
+                            BannedParamManager.enable()
                         }
                     }
                     checkFeature(FeatureManager.Feature.IapLogging) { enabled ->

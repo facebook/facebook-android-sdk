@@ -69,6 +69,7 @@ object FetchedAppSettingsManager {
   private const val BLOCKLIST_EVENTS_KEY = "blocklist_events"
   private const val REDACTED_EVENTS_KEY = "redacted_events"
   private const val SENSITIVE_PARAMS_KEY = "sensitive_params"
+
   private const val STD_PARAMS_SCHEMA_KEY = "standard_params_schema"
   private const val STD_PARAMS_BLOCKED_KEY = "standard_params_blocked"
 

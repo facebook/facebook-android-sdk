@@ -24,6 +24,7 @@ import com.facebook.appevents.AppEventQueue.add
 import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
+import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.integrity.BlocklistEventsManager.isInBlocklist
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.integrity.ProtectedModeManager
@@ -79,7 +80,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     fun logEvent(eventName: String?) {
         logEvent(eventName, null)
     }
-
+    
     fun logEvent(eventName: String?, parameters: Bundle? = null) {
         logEvent(eventName, null, parameters, false, getCurrentSessionGuid())
     }
@@ -339,6 +340,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             if (!ProtectedModeManager.protectedModeIsApplied(parameters)) {
                 processFilterSensitiveParams(parameters, eventName)
             }
+            processFilterBannedParams(parameters)
             MACARuleMatchingManager.processParameters(parameters, eventName)
             processFilterParamSchemaBlocking(parameters)
             processParametersForProtectedMode(parameters)

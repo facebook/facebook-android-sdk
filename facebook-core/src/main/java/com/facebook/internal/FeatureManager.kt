@@ -140,6 +140,7 @@ object FeatureManager {
             Feature.IapLogging,
             Feature.IapLoggingLib2,
             Feature.IapLoggingLib5To7,
+            Feature.BannedParamFiltering,
             Feature.ProtectedMode,
             Feature.StdParamEnforcement,
             Feature.MACARuleMatching,
@@ -150,7 +151,6 @@ object FeatureManager {
             Feature.Monitoring,
             Feature.IgnoreAppSwitchToLoggedOut,
             Feature.BypassAppSwitch -> false
-
             else -> true
         }
     }
@@ -182,6 +182,7 @@ object FeatureManager {
         FilterRedactedEvents(0x00010407), /* replace the event name via the redaction string */
         FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
         StdParamEnforcement(0x01010409),
+        BannedParamFiltering(0x0101040a),
         EventDeactivation(0x00010500),
         OnDeviceEventProcessing(0x00010600),
         OnDevicePostInstallEventProcessing(0x00010601),
@@ -227,6 +228,7 @@ object FeatureManager {
                 IntelligentIntegrity -> "IntelligentIntegrity"
                 StdParamEnforcement -> "StdParamEnforcement"
                 ProtectedMode -> "ProtectedMode"
+                BannedParamFiltering -> "BannedParamFiltering"
                 MACARuleMatching -> "MACARuleMatching"
                 BlocklistEvents -> "BlocklistEvents"
                 FilterRedactedEvents -> "FilterRedactedEvents"
