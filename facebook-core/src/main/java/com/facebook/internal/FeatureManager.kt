@@ -141,6 +141,7 @@ object FeatureManager {
             Feature.IapLoggingLib2,
             Feature.IapLoggingLib5To7,
             Feature.ProtectedMode,
+            Feature.StdParamEnforcement,
             Feature.MACARuleMatching,
             Feature.BlocklistEvents,
             Feature.FilterRedactedEvents,
@@ -175,11 +176,12 @@ object FeatureManager {
         SuggestedEvents(0x00010401),
         IntelligentIntegrity(0x00010402),
         ModelRequest(0x00010403),
-        FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
-        MACARuleMatching(0x00010405),
         ProtectedMode(0x00010404), /* filter out the params which are not supported legally */
+        MACARuleMatching(0x00010405),
         BlocklistEvents(0x00010406), /* drop the events in the blocklist */
         FilterRedactedEvents(0x00010407), /* replace the event name via the redaction string */
+        FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
+        StdParamEnforcement(0x01010409),
         EventDeactivation(0x00010500),
         OnDeviceEventProcessing(0x00010600),
         OnDevicePostInstallEventProcessing(0x00010601),
@@ -196,14 +198,12 @@ object FeatureManager {
         ServiceUpdateCompliance(0x00030100),
         Megatron(0x00040000),
         Elora(0x00050000),
-
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
         ChromeCustomTabsPrefetching(0x01010000),
         IgnoreAppSwitchToLoggedOut(0x01020000),
         BypassAppSwitch(0x01030000),
-
         // Features in ShareKit
         /** Essential of ShareKit */
         Share(0x02000000);
@@ -225,6 +225,7 @@ object FeatureManager {
                 PrivacyProtection -> "PrivacyProtection"
                 SuggestedEvents -> "SuggestedEvents"
                 IntelligentIntegrity -> "IntelligentIntegrity"
+                StdParamEnforcement -> "StdParamEnforcement"
                 ProtectedMode -> "ProtectedMode"
                 MACARuleMatching -> "MACARuleMatching"
                 BlocklistEvents -> "BlocklistEvents"

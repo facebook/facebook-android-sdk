@@ -75,7 +75,9 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
                 migratedAutoLogValues = null,
                 blocklistEvents = emptyJSONArray,
                 redactedEvents = emptyJSONArray,
-                sensitiveParams = mockSensitiveParams
+                sensitiveParams = mockSensitiveParams,
+                schemaRestrictions = emptyJSONArray,
+                bannedParams = emptyJSONArray,
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))

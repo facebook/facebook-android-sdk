@@ -76,7 +76,9 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
                 migratedAutoLogValues = null,
                 blocklistEvents = emptyJSONArray,
                 redactedEvents = emptyJSONArray,
-                sensitiveParams = emptyJSONArray
+                sensitiveParams = emptyJSONArray,
+                schemaRestrictions = emptyJSONArray,
+                bannedParams = emptyJSONArray,
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))

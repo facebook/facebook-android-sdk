@@ -45,6 +45,8 @@ class FetchedAppSettings(
     val blocklistEvents: JSONArray?,
     val redactedEvents: JSONArray?,
     val sensitiveParams: JSONArray?,
+    val schemaRestrictions: JSONArray?,
+    val bannedParams: JSONArray?,
 ) {
 
   fun supportsImplicitLogging(): Boolean = supportsImplicitLogging
