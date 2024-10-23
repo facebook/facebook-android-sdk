@@ -14,6 +14,8 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.INAPP
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.SUBS
+import com.facebook.internal.FeatureManager
+import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -43,8 +45,14 @@ object InAppPurchaseAutoLogger {
             failedToCreateWrapper.set(true)
             return
         }
-        billingClientWrapper.queryPurchaseHistory(INAPP) {
-            billingClientWrapper.queryPurchaseHistory(SUBS) {
+        if (isEnabled(FeatureManager.Feature.AndroidIAPSubscriptionAutoLogging)) {
+            billingClientWrapper.queryPurchaseHistory(INAPP) {
+                billingClientWrapper.queryPurchaseHistory(SUBS) {
+                    logPurchase(billingClientVersion, context.packageName)
+                }
+            }
+        } else {
+            billingClientWrapper.queryPurchaseHistory(INAPP) {
                 logPurchase(billingClientVersion, context.packageName)
             }
         }

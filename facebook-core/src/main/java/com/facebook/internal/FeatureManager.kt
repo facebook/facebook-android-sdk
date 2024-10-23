@@ -142,6 +142,7 @@ object FeatureManager {
             Feature.IapLoggingLib5To7,
             Feature.AndroidManualImplicitPurchaseDedupe,
             Feature.AndroidManualImplicitSubsDedupe,
+            Feature.AndroidIAPSubscriptionAutoLogging,
             Feature.BannedParamFiltering,
             Feature.ProtectedMode,
             Feature.StdParamEnforcement,
@@ -194,6 +195,7 @@ object FeatureManager {
         IapLoggingLib5To7(0x0010702),
         AndroidManualImplicitPurchaseDedupe(0x0010703),
         AndroidManualImplicitSubsDedupe(0x0010704),
+        AndroidIAPSubscriptionAutoLogging(0x0010705),
         Instrument(0x00020000),
         CrashReport(0x00020100),
         CrashShield(0x00020101),
@@ -247,6 +249,7 @@ object FeatureManager {
                 IapLoggingLib5To7 -> "IAPLoggingLib5To7"
                 AndroidManualImplicitPurchaseDedupe -> "AndroidManualImplicitPurchaseDedupe"
                 AndroidManualImplicitSubsDedupe -> "AndroidManualImplicitSubsDedupe"
+                AndroidIAPSubscriptionAutoLogging -> "AndroidIAPSubscriptionAutoLogging"
                 Monitoring -> "Monitoring"
                 Megatron -> "Megatron"
                 Elora -> "Elora"
