@@ -112,13 +112,26 @@ object AutomaticAnalyticsLogger {
                     AppEventsConstants.EVENT_NAME_SUBSCRIBE
                 }
         }
-        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)) {
-            if (isSubscription && isDuplicateSubscription(loggingParameters, eventName)) {
-                return
-            } else if (!isSubscription && isDuplicateInAppPurchase(loggingParameters)) {
-                return
-            }
+        if (isSubscription &&
+            isEnabled(
+                FeatureManager.Feature.AndroidManualImplicitSubsDedupe
+            ) &&
+            isDuplicateSubscription(
+                loggingParameters,
+                eventName
+            )
+        ) {
+            return
         }
+        if (!isSubscription &&
+            isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe) &&
+            isDuplicateInAppPurchase(
+                loggingParameters
+            )
+        ) {
+            return
+        }
+
         if (logAsSubs) {
             internalAppEventsLogger.logEventImplicitly(
                 eventName,

@@ -154,7 +154,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogManualSubscriptionWithDedupeDisabled() {
-        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(false)
         var appEventCapture: AppEvent? = null
         whenever(AppEventQueue.add(any(), any())).thenAnswer {
@@ -179,7 +179,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             "timesOfImplicitPurchases",
             implicitPurchaseHistory
         )
-        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         var appEventCapture: AppEvent? = null
         whenever(AppEventQueue.add(any(), any())).thenAnswer {
@@ -206,7 +206,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             "timesOfImplicitPurchases",
             implicitPurchaseHistory
         )
-        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         var appEventCapture: AppEvent? = null
         whenever(AppEventQueue.add(any(), any())).thenAnswer {

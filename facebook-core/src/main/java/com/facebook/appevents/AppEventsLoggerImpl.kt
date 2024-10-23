@@ -94,7 +94,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
 
     fun logEvent(eventName: String?, valueToSum: Double, parameters: Bundle?) {
-        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)
+        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe)
             && isImplicitPurchaseLoggingEnabled()
             && (eventName == AppEventsConstants.EVENT_NAME_SUBSCRIBE
                     || eventName == AppEventsConstants.EVENT_NAME_START_TRIAL)

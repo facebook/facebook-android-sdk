@@ -402,7 +402,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun `test dedupe implicit subscription with GPBL v5 - v7`() {
-        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
 
         val manualPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
