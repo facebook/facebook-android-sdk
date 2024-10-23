@@ -94,6 +94,30 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
 
     fun logEvent(eventName: String?, valueToSum: Double, parameters: Bundle?) {
+        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)
+            && isImplicitPurchaseLoggingEnabled()
+            && (eventName == AppEventsConstants.EVENT_NAME_SUBSCRIBE
+                    || eventName == AppEventsConstants.EVENT_NAME_START_TRIAL)
+        ) {
+            val currencyCode = parameters?.getString(AppEventsConstants.EVENT_PARAM_CURRENCY)
+            if (currencyCode != null) {
+                try {
+                    val currency = Currency.getInstance(currencyCode)
+                    val purchase = InAppPurchase(eventName, valueToSum, currency)
+                    if (InAppPurchaseManager.isDuplicate(
+                            purchase,
+                            System.currentTimeMillis(),
+                            false
+                        )
+                    ) {
+                        return
+                    }
+
+                } catch (e: Exception) {
+                    /** Swallow invalid currency code */
+                }
+            }
+        }
         logEvent(eventName, valueToSum, parameters, false, getCurrentSessionGuid())
     }
 
@@ -115,6 +139,29 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                 "You are logging purchase events while auto-logging of in-app purchase is " +
                         "enabled in the SDK. Make sure you don't log duplicate events"
             )
+            if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)) {
+                if (purchaseAmount == null) {
+                    notifyDeveloperError("purchaseAmount cannot be null")
+                    return
+                } else if (currency == null) {
+                    notifyDeveloperError("currency cannot be null")
+                    return
+                }
+                val purchase =
+                    InAppPurchase(
+                        AppEventsConstants.EVENT_NAME_PURCHASED,
+                        purchaseAmount.toDouble(),
+                        currency
+                    )
+                if (InAppPurchaseManager.isDuplicate(
+                        purchase,
+                        System.currentTimeMillis(),
+                        false,
+                    )
+                ) {
+                    return
+                }
+            }
         }
         logPurchase(purchaseAmount, currency, parameters, false)
     }
@@ -145,18 +192,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             parameters = Bundle()
         }
         parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
-        val purchase = InAppPurchase(purchaseAmount, currency)
         // Dedupe implicitly and manually logged purchases
-        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe) &&
-            (isImplicitlyLogged || isImplicitPurchaseLoggingEnabled()) &&
-            InAppPurchaseManager.isDuplicate(
-                purchase,
-                System.currentTimeMillis(),
-                isImplicitlyLogged
-            )
-        ) {
-            return
-        }
         logEvent(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             purchaseAmount.toDouble(),

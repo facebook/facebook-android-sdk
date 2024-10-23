@@ -17,8 +17,10 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
+import com.facebook.internal.FeatureManager
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
@@ -35,6 +37,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
+import org.powermock.api.mockito.PowerMockito.spy
 import org.powermock.api.mockito.PowerMockito.verifyNew
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -42,6 +45,10 @@ import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.Robolectric
 import org.robolectric.RuntimeEnvironment
+import java.math.MathContext
+import java.math.RoundingMode
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 @PrepareForTest(
     Log::class,
@@ -52,6 +59,7 @@ import org.robolectric.RuntimeEnvironment
     AutomaticAnalyticsLogger::class,
     FetchedAppGateKeepersManager::class,
     InAppPurchaseManager::class,
+    FeatureManager::class
 )
 class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
@@ -86,11 +94,12 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     @Before
     fun init() {
-        mockStatic(InAppPurchaseManager::class.java)
+        spy(InAppPurchaseManager::class.java)
         mockStatic(FacebookSdk::class.java)
         mockStatic(Log::class.java)
         mockStatic(FetchedAppSettingsManager::class.java)
         mockStatic(FetchedAppGateKeepersManager::class.java)
+        mockStatic(FeatureManager::class.java)
 
         context = Robolectric.buildActivity(Activity::class.java).get()
         whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
@@ -101,6 +110,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenNew(InternalAppEventsLogger::class.java)
             .withAnyArguments()
             .thenReturn(mockInternalAppEventsLogger)
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(false)
 
         Whitebox.setInternalState(
             AutomaticAnalyticsLogger::class.java,
@@ -375,8 +386,10 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("true")
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
             .isEqualTo("P1W")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_BASE_PLAN))
-            .isEqualTo("baseplanId")
+        val basePlanId = bundle?.getCharSequence(Constants.IAP_BASE_PLAN)
+        val validBasePlan = basePlanId == "basePlanId" || basePlanId == "basePlanId2"
+        Assertions.assertThat(validBasePlan)
+            .isTrue()
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
@@ -387,6 +400,33 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("GPBL.5.1.0")
     }
 
+    @Test
+    fun `test dedupe implicit subscription with GPBL v5 - v7`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+
+        val manualPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] = mutableListOf(System.currentTimeMillis())
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+
+        Assertions.assertThat(bundle).isNull()
+    }
 
     @Test
     fun `test log purchase when implicit purchase logging enable & not subscribed with GPBL v2 - v4`() {

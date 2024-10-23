@@ -9,15 +9,19 @@
 package com.facebook.appevents.iap
 
 import android.content.pm.PackageManager
+import android.os.Bundle
 import androidx.annotation.RestrictTo
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.NONE
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.FacebookSdk.getApplicationContext
+import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.math.MathContext
+import java.math.RoundingMode
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -119,12 +123,23 @@ object InAppPurchaseManager {
 
     @Synchronized
     @JvmStatic
-    fun isDuplicate(purchase: InAppPurchase, time: Long, isImplicitlyLogged: Boolean): Boolean {
+    fun isDuplicate(
+        purchase: InAppPurchase,
+        time: Long,
+        isImplicitlyLogged: Boolean,
+    ): Boolean {
         val dedupeCandidates: MutableList<Long>?
+
+        // Round to two decimal places
+        val roundedPurchase = InAppPurchase(
+            purchase.eventName,
+            purchase.amount.toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble(),
+            purchase.currency
+        )
         if (isImplicitlyLogged) {
-            dedupeCandidates = timesOfManualPurchases[purchase]
+            dedupeCandidates = timesOfManualPurchases[roundedPurchase]
         } else {
-            dedupeCandidates = timesOfImplicitPurchases[purchase]
+            dedupeCandidates = timesOfImplicitPurchases[roundedPurchase]
         }
 
         // We should dedupe with the oldest one in the time window to allow for as many valid dedupes as possible
@@ -149,24 +164,24 @@ object InAppPurchaseManager {
         if (!dedupeCandidates.isNullOrEmpty() && indexOfOldestValidDedupe != null) {
             dedupeCandidates.removeAt(indexOfOldestValidDedupe)
             if (isImplicitlyLogged) {
-                timesOfManualPurchases[purchase] = dedupeCandidates
+                timesOfManualPurchases[roundedPurchase] = dedupeCandidates
             } else {
-                timesOfImplicitPurchases[purchase] = dedupeCandidates
+                timesOfImplicitPurchases[roundedPurchase] = dedupeCandidates
             }
             return true
         }
 
         // If we don't have a valid dedupe candidate, we should add our purchase event to the cache
         if (isImplicitlyLogged) {
-            if (timesOfImplicitPurchases[purchase] == null) {
-                timesOfImplicitPurchases[purchase] = mutableListOf()
+            if (timesOfImplicitPurchases[roundedPurchase] == null) {
+                timesOfImplicitPurchases[roundedPurchase] = mutableListOf()
             }
-            timesOfImplicitPurchases[purchase]?.add(time)
+            timesOfImplicitPurchases[roundedPurchase]?.add(time)
         } else {
-            if (timesOfManualPurchases[purchase] == null) {
-                timesOfManualPurchases[purchase] = mutableListOf()
+            if (timesOfManualPurchases[roundedPurchase] == null) {
+                timesOfManualPurchases[roundedPurchase] = mutableListOf()
             }
-            timesOfManualPurchases[purchase]?.add(time)
+            timesOfManualPurchases[roundedPurchase]?.add(time)
         }
         return false
     }

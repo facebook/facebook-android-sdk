@@ -14,6 +14,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsConstants
+import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FeatureManager
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
@@ -197,12 +199,22 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testIsDuplicate() {
-        val purchase = InAppPurchase(BigDecimal(10.0), Currency.getInstance(Locale.US))
+        val params = Bundle()
+        params.putCharSequence(Constants.IAP_PRODUCT_TYPE, "inapp")
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            10.0,
+            Currency.getInstance(Locale.US)
+        )
         val time = System.currentTimeMillis()
         assertEquals(false, InAppPurchaseManager.isDuplicate(purchase, time, true))
-
+        AppEventsConstants.EVENT_NAME_PURCHASED
         val purchaseWithDifferentCurrency =
-            InAppPurchase(BigDecimal(10.0), Currency.getInstance(Locale.UK))
+            InAppPurchase(
+                AppEventsConstants.EVENT_NAME_PURCHASED,
+                10.0,
+                Currency.getInstance(Locale.UK)
+            )
         assertEquals(
             false,
             InAppPurchaseManager.isDuplicate(purchaseWithDifferentCurrency, time, false)
@@ -220,7 +232,11 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             InAppPurchaseManager.isDuplicate(purchase, time + 120000, false)
         )
 
-        val oneDollarPurchase = InAppPurchase(BigDecimal(1), Currency.getInstance(Locale.US))
+        val oneDollarPurchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            1.0,
+            Currency.getInstance(Locale.US)
+        )
         assertEquals(false, InAppPurchaseManager.isDuplicate(oneDollarPurchase, 0, false))
         assertEquals(
             false,
@@ -238,11 +254,45 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             false,
             InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true)
         )
+
+        params.putCharSequence(Constants.IAP_PRODUCT_TYPE, "subs")
+        val oneDollarSubscription = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            1.0,
+            Currency.getInstance(Locale.US)
+        )
+        assertEquals(
+            false,
+            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false)
+        )
+        assertEquals(
+            true,
+            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, true)
+        )
+        assertEquals(
+            false,
+            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false)
+        )
+        val oneDollarStartTrial = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_START_TRIAL,
+            1.0,
+            Currency.getInstance(Locale.US)
+        )
+        assertEquals(
+            false,
+            InAppPurchaseManager.isDuplicate(oneDollarStartTrial, 60000, true)
+        )
     }
 
     @Test
     fun testIsDuplicate_ConcurrentCalls() {
-        val purchase = InAppPurchase(BigDecimal(10.0), Currency.getInstance(Locale.US))
+        val params = Bundle()
+        params.putCharSequence(Constants.IAP_PRODUCT_TYPE, "inapp")
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            10.0,
+            Currency.getInstance(Locale.US)
+        )
         val time1 = System.currentTimeMillis()
         val time2 = time1 + 100
         var result1: Boolean? = null
@@ -275,10 +325,13 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var result3: Boolean? = null
         var result4: Boolean? = null
         executor1.execute {
-            result3 = InAppPurchaseManager.isDuplicate(purchase, time3, true); latch.countDown()
+            result3 =
+                InAppPurchaseManager.isDuplicate(purchase, time3, true);
+            latch.countDown()
         }
         executor2.execute {
-            result4 = InAppPurchaseManager.isDuplicate(purchase, time4, false); latch.countDown()
+            result4 = InAppPurchaseManager.isDuplicate(purchase, time4, false);
+            latch.countDown()
         }
         latch.await()
         numDuplicates = 0
