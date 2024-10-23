@@ -16,6 +16,8 @@ import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.GraphRequestCreator
 import com.facebook.UserSettingsManager
 import com.facebook.appevents.AppEventsLoggerImpl.Companion.addImplicitPurchaseParameters
+import com.facebook.appevents.iap.InAppPurchase
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.internal.AppEventUtility
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
@@ -46,6 +48,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.RuntimeEnvironment
+import java.util.concurrent.ConcurrentHashMap
 
 @PrepareForTest(
     AppEventQueue::class,
@@ -57,8 +60,8 @@ import org.robolectric.RuntimeEnvironment
     FeatureManager::class,
     RemoteServiceWrapper::class,
     OnDeviceProcessingManager::class,
-
-    )
+    InAppPurchaseManager::class,
+)
 class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     private val mockExecutor: Executor = FacebookSerialExecutor()
     private val mockAppID = "12345"
@@ -119,6 +122,13 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         // Disable AppEventUtility.isMainThread since executor now runs in main thread
         PowerMockito.mockStatic(AppEventUtility::class.java)
         whenever(AppEventUtility.assertIsNotMainThread()).doAnswer {}
+
+        PowerMockito.spy(InAppPurchaseManager::class.java)
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        )
     }
 
     @Test

@@ -25,6 +25,8 @@ import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
 import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
+import com.facebook.appevents.iap.InAppPurchase
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.integrity.BlocklistEventsManager.isInBlocklist
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.integrity.ProtectedModeManager
@@ -80,7 +82,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     fun logEvent(eventName: String?) {
         logEvent(eventName, null)
     }
-    
+
     fun logEvent(eventName: String?, parameters: Bundle? = null) {
         logEvent(eventName, null, parameters, false, getCurrentSessionGuid())
     }
@@ -141,6 +143,16 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             parameters = Bundle()
         }
         parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
+        val purchase = InAppPurchase(purchaseAmount, currency)
+        // Dedupe implicitly and manually logged purchases
+        if ((isImplicitlyLogged || isImplicitPurchaseLoggingEnabled()) && InAppPurchaseManager.isDuplicate(
+                purchase,
+                System.currentTimeMillis(),
+                isImplicitlyLogged
+            )
+        ) {
+            return
+        }
         logEvent(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             purchaseAmount.toDouble(),
