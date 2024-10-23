@@ -59,6 +59,8 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
+import java.time.Clock
+import java.util.Calendar
 import java.util.Currency
 import java.util.UUID
 import java.util.concurrent.Executor
@@ -145,7 +147,9 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
         val purchase = InAppPurchase(purchaseAmount, currency)
         // Dedupe implicitly and manually logged purchases
-        if ((isImplicitlyLogged || isImplicitPurchaseLoggingEnabled()) && InAppPurchaseManager.isDuplicate(
+        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe) &&
+            (isImplicitlyLogged || isImplicitPurchaseLoggingEnabled()) &&
+            InAppPurchaseManager.isDuplicate(
                 purchase,
                 System.currentTimeMillis(),
                 isImplicitlyLogged
