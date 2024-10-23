@@ -18,14 +18,22 @@ import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.abs
+import kotlin.math.max
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseManager {
+    private val timesOfManualPurchases = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+    private val timesOfImplicitPurchases = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
     private var specificBillingLibraryVersion: String? = null;
     private const val GOOGLE_BILLINGCLIENT_VERSION = "com.google.android.play.billingclient.version"
     private val enabled = AtomicBoolean(false)
+    private val dedupeWindow = TimeUnit.MINUTES.toMillis(1)
 
     @JvmStatic
     fun enableAutoLogging() {
@@ -107,5 +115,59 @@ object InAppPurchaseManager {
             // Default to newest version
             return V5_V7
         }
+    }
+
+    @Synchronized
+    @JvmStatic
+    fun isDuplicate(purchase: InAppPurchase, time: Long, isImplicitlyLogged: Boolean): Boolean {
+        val dedupeCandidates: MutableList<Long>?
+        if (isImplicitlyLogged) {
+            dedupeCandidates = timesOfManualPurchases[purchase]
+        } else {
+            dedupeCandidates = timesOfImplicitPurchases[purchase]
+        }
+
+        // We should dedupe with the oldest one in the time window to allow for as many valid dedupes as possible
+        var indexOfOldestValidDedupe: Int? = null
+        var oldestValidTime: Long? = null
+        if (!dedupeCandidates.isNullOrEmpty()) {
+            for ((index, candidateTime) in dedupeCandidates.withIndex()) {
+                if (abs(time - candidateTime) > dedupeWindow) {
+                    continue
+                }
+                if (oldestValidTime == null || candidateTime < oldestValidTime) {
+                    oldestValidTime = candidateTime
+                    indexOfOldestValidDedupe = index
+                }
+            }
+        }
+
+        // If we have a valid dedupe candidate, we should remove it from the list in memory
+        // so it doesn't dedupe multiple purchase events. Likewise, we should not add the current
+        // purchase event time because we won't actually log it because is a duplicate.
+
+        if (!dedupeCandidates.isNullOrEmpty() && indexOfOldestValidDedupe != null) {
+            dedupeCandidates.removeAt(indexOfOldestValidDedupe)
+            if (isImplicitlyLogged) {
+                timesOfManualPurchases[purchase] = dedupeCandidates
+            } else {
+                timesOfImplicitPurchases[purchase] = dedupeCandidates
+            }
+            return true
+        }
+
+        // If we don't have a valid dedupe candidate, we should add our purchase event to the cache
+        if (isImplicitlyLogged) {
+            if (timesOfImplicitPurchases[purchase] == null) {
+                timesOfImplicitPurchases[purchase] = mutableListOf()
+            }
+            timesOfImplicitPurchases[purchase]?.add(time)
+        } else {
+            if (timesOfManualPurchases[purchase] == null) {
+                timesOfManualPurchases[purchase] = mutableListOf()
+            }
+            timesOfManualPurchases[purchase]?.add(time)
+        }
+        return false
     }
 }
