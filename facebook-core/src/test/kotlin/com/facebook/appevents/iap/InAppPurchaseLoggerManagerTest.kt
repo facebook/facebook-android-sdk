@@ -99,7 +99,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             true
         )
 
@@ -109,7 +109,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -144,7 +144,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             true
         )
 
@@ -153,7 +153,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -188,7 +188,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             true
         )
 
@@ -197,7 +197,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -224,7 +224,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             false
         )
 
@@ -234,7 +234,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -261,7 +261,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             false
         )
 
@@ -271,7 +271,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -306,7 +306,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             true
         )
 
@@ -316,7 +316,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -351,7 +351,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             true
         )
 
@@ -360,7 +360,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -387,7 +387,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             false
         )
 
@@ -397,7 +397,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()
@@ -424,7 +424,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Whitebox.setInternalState(
             InAppPurchaseLoggerManager::class.java,
-            "firstTimeLoggingIAP",
+            "oldCacheHistoryExists",
             false
         )
 
@@ -434,7 +434,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(
             Whitebox.getInternalState(
                 InAppPurchaseLoggerManager::class.java,
-                "firstTimeLoggingIAP"
+                "oldCacheHistoryExists"
             ) as Boolean
 
         ).isFalse()

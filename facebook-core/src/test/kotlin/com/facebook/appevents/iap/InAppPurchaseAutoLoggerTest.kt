@@ -134,7 +134,8 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                any(),
             )
         ).thenAnswer {
             logPurchaseCallTimes++
@@ -196,6 +197,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).thenAnswer {
@@ -241,6 +243,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         var querySubsRunnable: Runnable? = null
         whenever(
             InAppPurchaseLoggerManager.filterPurchaseLogging(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -308,7 +311,8 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                any(),
             )
         ).thenAnswer {
             logPurchaseCallTimes++
@@ -365,6 +369,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         var querySubsRunnable: Runnable? = null
         whenever(
             InAppPurchaseLoggerManager.filterPurchaseLogging(
+                any(),
                 any(),
                 any(),
                 any(),

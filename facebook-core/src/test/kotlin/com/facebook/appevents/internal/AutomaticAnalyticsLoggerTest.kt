@@ -442,6 +442,58 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `test log subscription restored on first app launch`() {
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7,
+            true
+        )
+        verify(mockInternalAppEventsLogger)
+            .logEventImplicitly(
+                eq(Constants.EVENT_NAME_SUBSCRIPTION_RESTORED),
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>()
+            )
+
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
+            .isEqualTo("Exampledescription.")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("subs")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
+            .isEqualTo("true")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
+            .isEqualTo("P2W")
+        val basePlanId = bundle?.getCharSequence(Constants.IAP_BASE_PLAN)
+        val validBasePlan = basePlanId == "baseplanId" || basePlanId == "basePlanId2"
+        Assertions.assertThat(validBasePlan)
+            .isTrue()
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
+        Assertions.assertThat(eventName).isEqualTo(Constants.EVENT_NAME_SUBSCRIPTION_RESTORED)
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
+    }
+
+    @Test
     fun `test actual and test dedupe implicit purchase with GPBL v5 - v7`() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
@@ -898,6 +950,49 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .isEqualTo("inapp")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
+        Assertions.assertThat(
+            bundle?.getCharSequence(
+                Constants.IAP_BILLING_LIBRARY_VERSION,
+            )
+        ).isEqualTo("GPBL.5.1.0")
+
+    }
+
+    @Test
+    fun `test log purchase restored event`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7,
+            true
+        )
+        verify(mockInternalAppEventsLogger)
+            .logEventImplicitly(
+                eq(Constants.EVENT_NAME_PURCHASE_RESTORED),
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>()
+            )
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
+            .isEqualTo("12345")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
+            .isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
+            .isEqualTo("examplePackageName")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
+            .isEqualTo("ExampleTitle")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
+            .isEqualTo("Exampledescription.")
+        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
+            .isEqualTo("inapp")
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
+        Assertions.assertThat(eventName).isEqualTo(Constants.EVENT_NAME_PURCHASE_RESTORED)
         Assertions.assertThat(
             bundle?.getCharSequence(
                 Constants.IAP_BILLING_LIBRARY_VERSION,

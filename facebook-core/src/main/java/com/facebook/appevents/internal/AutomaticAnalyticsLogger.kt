@@ -87,7 +87,8 @@ object AutomaticAnalyticsLogger {
         purchase: String,
         skuDetails: String,
         isSubscription: Boolean,
-        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?,
+        isFirstAppLaunch: Boolean = false
     ) {
         if (!isImplicitPurchaseLoggingEnabled()) {
             return
@@ -104,14 +105,20 @@ object AutomaticAnalyticsLogger {
                         FacebookSdk.getApplicationId(),
                         false
                     )
-        var eventName = AppEventsConstants.EVENT_NAME_PURCHASED
-        if (logAsSubs) {
-            eventName =
-                if (InAppPurchaseEventManager.hasFreeTrialPeirod(skuDetails)) {
-                    AppEventsConstants.EVENT_NAME_START_TRIAL
-                } else {
-                    AppEventsConstants.EVENT_NAME_SUBSCRIBE
-                }
+        val eventName = if (logAsSubs) {
+            if (isFirstAppLaunch) {
+                Constants.EVENT_NAME_SUBSCRIPTION_RESTORED
+            } else if (InAppPurchaseEventManager.hasFreeTrialPeirod(skuDetails)) {
+                AppEventsConstants.EVENT_NAME_START_TRIAL
+            } else {
+                AppEventsConstants.EVENT_NAME_SUBSCRIBE
+            }
+        } else {
+            if (isFirstAppLaunch) {
+                Constants.EVENT_NAME_PURCHASE_RESTORED
+            } else {
+                AppEventsConstants.EVENT_NAME_PURCHASED
+            }
         }
         val dedupeParameters =
             if (isSubscription &&
@@ -131,7 +138,7 @@ object AutomaticAnalyticsLogger {
         )
         loggingParameters[0].param = combinedParameters ?: Bundle()
 
-        if (logAsSubs) {
+        if (eventName != AppEventsConstants.EVENT_NAME_PURCHASED) {
             internalAppEventsLogger.logEventImplicitly(
                 eventName,
                 loggingParameters[0].purchaseAmount,

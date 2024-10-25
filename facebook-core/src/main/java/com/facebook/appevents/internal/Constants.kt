@@ -11,6 +11,8 @@ package com.facebook.appevents.internal
 object Constants {
     const val LOG_TIME_APP_EVENT_KEY = "_logTime"
     const val EVENT_NAME_EVENT_KEY = "_eventName"
+    const val EVENT_NAME_PURCHASE_RESTORED = "fb_mobile_purchase_restored"
+    const val EVENT_NAME_SUBSCRIPTION_RESTORED = "SubscriptionRestore"
 
     // The following are for Automatic Analytics events and parameters
     const val AA_TIME_SPENT_EVENT_NAME = "fb_aa_time_spent_on_view"
