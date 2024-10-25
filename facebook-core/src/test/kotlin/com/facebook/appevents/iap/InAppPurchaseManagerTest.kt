@@ -21,8 +21,6 @@ import com.facebook.internal.FetchedAppSettingsManager
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -32,7 +30,6 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
-import java.math.BigDecimal
 import java.util.Currency
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
@@ -204,7 +201,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
-    fun testIsDuplicate() {
+    fun testperformDedupe() {
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             10.0,
@@ -213,88 +210,106 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         val time = System.currentTimeMillis()
         val bundle = Bundle()
         bundle.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
-        assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(
+        var result =
+            InAppPurchaseManager.performDedupe(
                 purchase,
                 time,
                 true,
                 bundle
             )
-        )
-        AppEventsConstants.EVENT_NAME_PURCHASED
+        assertThat(result).isNull()
         val purchaseWithDifferentCurrency =
             InAppPurchase(
                 AppEventsConstants.EVENT_NAME_PURCHASED,
                 10.0,
                 Currency.getInstance(Locale.UK)
             )
+        result =
+            InAppPurchaseManager.performDedupe(
+                purchaseWithDifferentCurrency,
+                time,
+                false,
+                bundle
+            )
+        assertThat(result).isNull()
+
+        result =
+            InAppPurchaseManager.performDedupe(purchase, time + 60001, false, bundle)
+        assertThat(result).isNull()
+        result =
+            InAppPurchaseManager.performDedupe(purchase, time + 120000, true, bundle)
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(purchaseWithDifferentCurrency, time, false, bundle)
+            result?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(purchase, time + 60001, false, bundle)
-        )
-        assertEquals(
-            true,
-            InAppPurchaseManager.isDuplicate(purchase, time + 120000, true, bundle)
-        )
-        assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(purchase, time + 120000, false, bundle)
-        )
+        assertEquals(result?.keySet()?.size, 3)
+        result =
+            InAppPurchaseManager.performDedupe(purchase, time + 120000, false, bundle)
+        assertThat(result).isNull()
 
         val oneDollarPurchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             1.0,
             Currency.getInstance(Locale.US)
         )
-        assertEquals(false, InAppPurchaseManager.isDuplicate(oneDollarPurchase, 0, false, bundle))
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarPurchase, 0, false, bundle)
+        assertThat(result).isNull()
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarPurchase, 60000, false, bundle)
+        assertThat(result).isNull()
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarPurchase, 60000, true, bundle)
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, false, bundle)
+            result?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
         )
+        assertEquals(result?.keySet()?.size, 3)
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarPurchase, 120000, true, bundle)
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            true,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true, bundle)
+            result?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(
-            true,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 120000, true, bundle)
-        )
-        assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true, bundle)
-        )
+        assertEquals(result?.keySet()?.size, 3)
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarPurchase, 60000, true, bundle)
+        assertThat(result).isNull()
 
         val oneDollarSubscription = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             1.0,
             Currency.getInstance(Locale.US)
         )
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarSubscription, 60000, false, bundle)
+        assertThat(result).isNull()
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarSubscription, 60000, true, bundle)
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false, bundle)
+            result?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(
-            true,
-            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, true, bundle)
-        )
-        assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false, bundle)
-        )
+        assertEquals(result?.keySet()?.size, 3)
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarSubscription, 60000, false, bundle)
+        assertThat(result).isNull()
         val oneDollarStartTrial = InAppPurchase(
             AppEventsConstants.EVENT_NAME_START_TRIAL,
             1.0,
             Currency.getInstance(Locale.US)
         )
-        assertEquals(
-            false,
-            InAppPurchaseManager.isDuplicate(oneDollarStartTrial, 60000, true, bundle)
-        )
+        result =
+            InAppPurchaseManager.performDedupe(oneDollarStartTrial, 60000, true, bundle)
+        assertThat(result).isNull()
     }
 
     @Test
@@ -308,23 +323,23 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
         val time1 = System.currentTimeMillis()
         val time2 = time1 + 100
-        var result1: Boolean? = null
-        var result2: Boolean? = null
+        var result1: Bundle? = null
+        var result2: Bundle? = null
         val thread1 = Thread {
-            result1 = InAppPurchaseManager.isDuplicate(purchase, time1, true, bundle)
+            result1 = InAppPurchaseManager.performDedupe(purchase, time1, true, bundle)
         }
         val thread2 = Thread {
-            result2 = InAppPurchaseManager.isDuplicate(purchase, time2, false, bundle)
+            result2 = InAppPurchaseManager.performDedupe(purchase, time2, false, bundle)
         }
         thread1.start()
         thread2.start()
         thread1.join()
         thread2.join()
         var numDuplicates = 0
-        if (result1 == true) {
+        if (result1 != null) {
             numDuplicates++
         }
-        if (result2 == true) {
+        if (result2 != null) {
             numDuplicates++
         }
         assertEquals(numDuplicates, 1)
@@ -335,85 +350,86 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         val executor2 = Executors.newSingleThreadExecutor()
         val time3 = time1 + 100000000000
         val time4 = time1 + 100000000001
-        var result3: Boolean? = null
-        var result4: Boolean? = null
+        var result3: Bundle? = null
+        var result4: Bundle? = null
         executor1.execute {
             result3 =
-                InAppPurchaseManager.isDuplicate(purchase, time3, true, bundle);
+                InAppPurchaseManager.performDedupe(purchase, time3, true, bundle);
             latch.countDown()
         }
         executor2.execute {
-            result4 = InAppPurchaseManager.isDuplicate(purchase, time4, false, bundle);
+            result4 = InAppPurchaseManager.performDedupe(purchase, time4, false, bundle);
             latch.countDown()
         }
         latch.await()
         numDuplicates = 0
-        if (result3 == true) {
+        if (result3 != null) {
             numDuplicates++
         }
-        if (result4 == true) {
+        if (result4 != null) {
             numDuplicates++
         }
         assertEquals(numDuplicates, 1)
     }
 
     @Test
-    fun testAtLeastOneEquivalentDedupeParameter() {
+    fun testGetDedupeParameter() {
         val newParams = Bundle()
         val oldParams = Bundle()
         newParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "productID")
         oldParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "productID")
-        assertFalse(
-            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+        var result =
+            InAppPurchaseManager.getDedupeParameter(
                 newParams,
                 oldParams,
                 false
             )
-        )
+        assertThat(result).isNull()
+
 
         newParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "prductID")
         oldParams.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
-        assertFalse(
-            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+        result =
+            InAppPurchaseManager.getDedupeParameter(
                 newParams,
                 oldParams,
                 true
             )
-        )
+        assertThat(result).isNull()
         newParams.clear()
         oldParams.clear()
 
         newParams.putCharSequence(Constants.IAP_PRODUCT_DESCRIPTION, "description ")
         oldParams.putCharSequence(Constants.IAP_PRODUCT_DESCRIPTION, "description ")
-        assertTrue(
-            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+        result =
+            InAppPurchaseManager.getDedupeParameter(
                 newParams,
                 oldParams,
                 true
             )
-        )
+        assertThat(result).isNotNull()
         newParams.clear()
         oldParams.clear()
 
-        newParams.putCharSequence(Constants.EVENT_PARAM_PRODUCT_TITLE, "title ")
+        newParams.putCharSequence(Constants.IAP_PRODUCT_TITLE, "title ")
         oldParams.putCharSequence(Constants.IAP_PRODUCT_TITLE, "title ")
-        assertFalse(
-            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+        result =
+            InAppPurchaseManager.getDedupeParameter(
                 newParams,
                 oldParams,
                 true
             )
-        )
+        assertThat(result).isNotNull()
         newParams.clear()
         oldParams.clear()
         newParams.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token ")
         oldParams.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token ")
-        assertTrue(
-            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+        result =
+            InAppPurchaseManager.getDedupeParameter(
                 newParams,
                 oldParams,
                 true
             )
-        )
+        assertThat(result).isNotNull()
     }
 }

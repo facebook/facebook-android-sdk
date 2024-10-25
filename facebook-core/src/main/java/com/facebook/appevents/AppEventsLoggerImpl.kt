@@ -316,6 +316,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             return
         }
 
+        var modifiedParameters = parameters
         // Attempt implicit x manual purchase/subscription dedupe
         if (!isImplicitlyLogged &&
             isImplicitPurchaseLoggingEnabled() &&
@@ -344,14 +345,17 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                             purchaseAmount.toDouble(),
                             currency
                         )
-                    if (InAppPurchaseManager.isDuplicate(
-                            purchase,
-                            System.currentTimeMillis(),
-                            false,
-                            parameters
+                    val dedupeParameters = InAppPurchaseManager.performDedupe(
+                        purchase,
+                        System.currentTimeMillis(),
+                        false,
+                        parameters
+                    )
+                    if (dedupeParameters != null) {
+                        modifiedParameters = InAppPurchaseManager.addDedupeParameters(
+                            dedupeParameters,
+                            modifiedParameters
                         )
-                    ) {
-                        return
                     }
                 }
             }
@@ -373,22 +377,22 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             return
         }
 
-        addImplicitPurchaseParameters(parameters)
+        addImplicitPurchaseParameters(modifiedParameters)
 
         try {
-            if (!ProtectedModeManager.protectedModeIsApplied(parameters)) {
-                processFilterSensitiveParams(parameters, eventName)
+            if (!ProtectedModeManager.protectedModeIsApplied(modifiedParameters)) {
+                processFilterSensitiveParams(modifiedParameters, eventName)
             }
-            processFilterBannedParams(parameters)
-            MACARuleMatchingManager.processParameters(parameters, eventName)
-            processFilterParamSchemaBlocking(parameters)
-            processParametersForProtectedMode(parameters)
+            processFilterBannedParams(modifiedParameters)
+            MACARuleMatchingManager.processParameters(modifiedParameters, eventName)
+            processFilterParamSchemaBlocking(modifiedParameters)
+            processParametersForProtectedMode(modifiedParameters)
             val event =
                 AppEvent(
                     contextName,
                     eventName,
                     valueToSum,
-                    parameters,
+                    modifiedParameters,
                     isImplicitlyLogged,
                     isInBackground(),
                     currentSessionId

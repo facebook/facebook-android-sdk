@@ -33,6 +33,11 @@ object Constants {
     const val IAP_INTRO_PERIOD = "fb_intro_period"
     const val IAP_BASE_PLAN = "fb_iap_base_plan"
     const val IAP_BILLING_LIBRARY_VERSION = "fb_iap_client_library_version"
+    const val IAP_NON_DEDUPED_EVENT_TIME = "fb_iap_non_deduped_event_time"
+    const val IAP_ACTUAL_DEDUP_RESULT = "fb_iap_actual_dedup_result"
+    const val IAP_ACTUAL_DEDUP_KEY_USED = "fb_iap_actual_dedup_key_used"
+    const val IAP_TEST_DEDUP_RESULT = "fb_iap_test_dedup_result"
+    const val IAP_TEST_DEDUP_KEY_USED = "fb_iap_test_dedup_key_used"
 
     // The following are in app purchase parameters returned by Google Play
     const val GP_IAP_PRODUCT_ID = "productId"

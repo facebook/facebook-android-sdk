@@ -32,6 +32,7 @@ import java.util.Locale
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -219,7 +220,15 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         }
 
         logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0, params)
-        assertThat(appEventCapture?.name).isNull()
+        val loggedParams = appEventCapture?.getJSONObject()
+        assertEquals(loggedParams?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(
+            loggedParams?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
+        )
+        assertEquals(loggedParams?.length(), 12)
+        assertThat(appEventCapture?.name).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
     }
 
     @Test
@@ -357,7 +366,15 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         }
 
         logger.logPurchase(BigDecimal(1.0), Currency.getInstance(Locale.US), parameters)
-        assertThat(appEventCapture).isNull()
+        val loggedParams = appEventCapture?.getJSONObject()
+        assertEquals(loggedParams?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(
+            loggedParams?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
+        )
+        assertEquals(loggedParams?.length(), 12)
+        assertThat(appEventCapture?.name).isEqualTo(AppEventsConstants.EVENT_NAME_PURCHASED)
     }
 
     @Test

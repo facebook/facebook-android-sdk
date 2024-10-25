@@ -124,17 +124,19 @@ object InAppPurchaseManager {
         }
     }
 
+    // This method will perform deduplication and return the dedupe parameters
     @Synchronized
     @JvmStatic
-    fun isDuplicate(
+    fun performDedupe(
         purchase: InAppPurchase,
         time: Long,
         isImplicitlyLogged: Boolean,
         newPurchaseParameters: Bundle?
-    ): Boolean {
+    ): Bundle? {
         if (newPurchaseParameters == null) {
-            return false
+            return null
         }
+        var dedupeParameters: Bundle? = null
         val dedupeCandidates: MutableList<Pair<Long, Bundle>>?
 
         // Round to two decimal places
@@ -152,6 +154,7 @@ object InAppPurchaseManager {
         // We should dedupe with the oldest one in the time window to allow for as many valid dedupes as possible
         var indexOfOldestValidDedupe: Int? = null
         var oldestValidTime: Long? = null
+        var dedupeParameter: String? = null
         if (!dedupeCandidates.isNullOrEmpty()) {
             for ((index, timeBundlePair) in dedupeCandidates.withIndex()) {
                 val candidateTime = timeBundlePair.first
@@ -159,15 +162,16 @@ object InAppPurchaseManager {
                 if (abs(time - candidateTime) > InAppPurchaseDedupeConfig.getDedupeWindow()) {
                     continue
                 }
-                if ((oldestValidTime == null || candidateTime < oldestValidTime)
-                    && atLeastOneEquivalentDedupeParameter(
+                if ((oldestValidTime == null || candidateTime < oldestValidTime)) {
+                    dedupeParameter = getDedupeParameter(
                         newPurchaseParameters,
                         candidateParameters,
                         !isImplicitlyLogged
                     )
-                ) {
-                    oldestValidTime = candidateTime
-                    indexOfOldestValidDedupe = index
+                    if (dedupeParameter != null) {
+                        oldestValidTime = candidateTime
+                        indexOfOldestValidDedupe = index
+                    }
                 }
             }
         }
@@ -176,14 +180,28 @@ object InAppPurchaseManager {
         // so it doesn't dedupe multiple purchase events. Likewise, we should not add the current
         // purchase event time because we won't actually log it because is a duplicate.
 
-        if (!dedupeCandidates.isNullOrEmpty() && indexOfOldestValidDedupe != null) {
+        if (!dedupeCandidates.isNullOrEmpty() && indexOfOldestValidDedupe != null && dedupeParameter != null) {
             dedupeCandidates.removeAt(indexOfOldestValidDedupe)
             if (isImplicitlyLogged) {
                 timesOfManualPurchases[roundedPurchase] = dedupeCandidates
             } else {
                 timesOfImplicitPurchases[roundedPurchase] = dedupeCandidates
             }
-            return true
+            dedupeParameters = Bundle()
+            val oldestValidTimeInSeconds = oldestValidTime?.div(1000) ?: 0
+            dedupeParameters.putString(
+                Constants.IAP_NON_DEDUPED_EVENT_TIME,
+                oldestValidTimeInSeconds.toString()
+            )
+            dedupeParameters.putString(
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                "1"
+            )
+            dedupeParameters.putString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+                dedupeParameter
+            )
+            return dedupeParameters
         }
 
         // If we don't have a valid dedupe candidate, we should add our purchase event to the cache
@@ -198,14 +216,14 @@ object InAppPurchaseManager {
             }
             timesOfManualPurchases[roundedPurchase]?.add(Pair(time, newPurchaseParameters))
         }
-        return false
+        return null
     }
 
-    fun atLeastOneEquivalentDedupeParameter(
+    fun getDedupeParameter(
         newPurchaseParameters: Bundle,
         oldPurchaseParameters: Bundle,
         dedupingWithImplicitlyLoggedHistory: Boolean
-    ): Boolean {
+    ): String? {
         val dedupeParameters =
             InAppPurchaseDedupeConfig.getDedupeParameters(dedupingWithImplicitlyLoggedHistory)
         for (parameter in dedupeParameters) {
@@ -219,10 +237,27 @@ object InAppPurchaseManager {
                     continue
                 }
                 if (parameterInOldEvent == parameterInNewEvent) {
-                    return true
+                    return parameter.first
                 }
             }
         }
-        return false;
+        return null
+    }
+
+    fun addDedupeParameters(
+        dedupeParameters: Bundle,
+        originalParameters: Bundle?
+    ): Bundle {
+        var result = originalParameters
+        if (result == null) {
+            result = Bundle()
+        }
+        for (key in dedupeParameters.keySet()) {
+            val value = dedupeParameters.getString(key)
+            if (value != null) {
+                result.putString(key, value)
+            }
+        }
+        return result
     }
 }

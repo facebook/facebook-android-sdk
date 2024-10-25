@@ -451,8 +451,13 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             true,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-
-        Assertions.assertThat(bundle).isNull()
+        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(
+            bundle?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
+        )
+        assertEquals(bundle?.keySet()?.size, 15)
     }
 
     @Test

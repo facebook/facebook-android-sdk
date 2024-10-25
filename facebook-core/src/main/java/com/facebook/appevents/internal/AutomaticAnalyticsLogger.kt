@@ -91,7 +91,7 @@ object AutomaticAnalyticsLogger {
         if (!isImplicitPurchaseLoggingEnabled()) {
             return
         }
-        val loggingParameters =
+        var loggingParameters =
             getPurchaseLoggingParameters(purchase, skuDetails, billingClientVersion) ?: return
         if (loggingParameters.isEmpty()) {
             return
@@ -112,24 +112,27 @@ object AutomaticAnalyticsLogger {
                     AppEventsConstants.EVENT_NAME_SUBSCRIBE
                 }
         }
-        if (isSubscription &&
-            isEnabled(
+        if (isSubscription && isEnabled(
                 FeatureManager.Feature.AndroidManualImplicitSubsDedupe
-            ) &&
-            isDuplicateSubscription(
-                loggingParameters,
-                eventName
             )
         ) {
-            return
-        }
-        if (!isSubscription &&
-            isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe) &&
-            isDuplicateInAppPurchase(
-                loggingParameters
-            )
+            val dedupeParameters = getSubscriptionDedupeParameters(loggingParameters, eventName)
+            if (dedupeParameters != null) {
+                loggingParameters[0].param = InAppPurchaseManager.addDedupeParameters(
+                    dedupeParameters,
+                    loggingParameters[0].param
+                )
+            }
+        } else if (!isSubscription &&
+            isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)
         ) {
-            return
+            val dedupeParameters = getPurchaseDedupeParameters(loggingParameters)
+            if (dedupeParameters != null) {
+                loggingParameters[0].param = InAppPurchaseManager.addDedupeParameters(
+                    dedupeParameters,
+                    loggingParameters[0].param
+                )
+            }
         }
 
         if (logAsSubs) {
@@ -150,14 +153,14 @@ object AutomaticAnalyticsLogger {
 
     @Synchronized
     @JvmStatic
-    fun isDuplicateInAppPurchase(purchaseLoggingParametersList: List<PurchaseLoggingParameters>): Boolean {
+    fun getPurchaseDedupeParameters(purchaseLoggingParametersList: List<PurchaseLoggingParameters>): Bundle? {
         val purchaseParams = purchaseLoggingParametersList[0]
         val inAppPurchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             purchaseParams.purchaseAmount.toDouble(),
             purchaseParams.currency
         )
-        return InAppPurchaseManager.isDuplicate(
+        return InAppPurchaseManager.performDedupe(
             inAppPurchase,
             System.currentTimeMillis(),
             true,
@@ -167,10 +170,10 @@ object AutomaticAnalyticsLogger {
 
     @Synchronized
     @JvmStatic
-    fun isDuplicateSubscription(
+    fun getSubscriptionDedupeParameters(
         purchaseLoggingParametersList: List<PurchaseLoggingParameters>,
         eventName: String
-    ): Boolean {
+    ): Bundle? {
         for (purchaseParams in purchaseLoggingParametersList) {
             val inAppPurchase =
                 InAppPurchase(
@@ -178,17 +181,17 @@ object AutomaticAnalyticsLogger {
                     purchaseParams.purchaseAmount.toDouble(),
                     purchaseParams.currency
                 )
-            if (InAppPurchaseManager.isDuplicate(
-                    inAppPurchase,
-                    System.currentTimeMillis(),
-                    true,
-                    purchaseParams.param
-                )
-            ) {
-                return true
+            val dedupeParameters = InAppPurchaseManager.performDedupe(
+                inAppPurchase,
+                System.currentTimeMillis(),
+                true,
+                purchaseParams.param
+            )
+            if (dedupeParameters != null) {
+                return dedupeParameters
             }
         }
-        return false
+        return null
     }
 
 
