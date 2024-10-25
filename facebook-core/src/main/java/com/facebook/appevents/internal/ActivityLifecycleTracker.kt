@@ -159,7 +159,7 @@ object ActivityLifecycleTracker {
         CodelessManager.onActivityResumed(activity)
         MetadataIndexer.onActivityResumed(activity)
         SuggestedEventsManager.trackActivity(activity)
-        if (previousActivityName?.contains("ProxyBillingActivity") == true) {
+        if (previousActivityName?.contains("ProxyBillingActivity") == true && activityName != "ProxyBillingActivity") {
             iapExecutor.execute { InAppPurchaseManager.startTracking() }
         }
         val appContext = activity.applicationContext

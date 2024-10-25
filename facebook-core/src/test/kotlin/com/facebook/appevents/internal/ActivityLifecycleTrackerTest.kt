@@ -142,6 +142,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         assertEquals(mockActivity, ActivityLifecycleTracker.getCurrentActivity())
 
         // New activity, after IAP event
+        whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "NOTProxyBillingActivity" }
         ActivityLifecycleTracker.onActivityResumed(mockActivity)
         assertEquals(startTrackingCount, 1)
         verify(mockScheduledExecutor, times(2)).execute(any<Runnable>())
