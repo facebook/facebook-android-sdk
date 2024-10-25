@@ -23,6 +23,8 @@ object InAppPurchaseDedupeConfig {
     /**
      * Map of parameters we consider in deduplication to their equivalents.
      * i.e. We should consider the case where content_id = product_id when deduplicating.
+     * The LHS will be the key that is implicitly logged, and the RHS will be the keys we consider
+     * equivalent to the LHS that may be found in the manually logged event.
      */
     private val defaultDedupeParameters =
         listOf(

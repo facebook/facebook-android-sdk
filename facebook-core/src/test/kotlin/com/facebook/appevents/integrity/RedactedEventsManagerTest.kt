@@ -26,8 +26,9 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(
-        FacebookSdk::class,
-        FetchedAppSettingsManager::class)
+    FacebookSdk::class,
+    FetchedAppSettingsManager::class
+)
 class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
 
     @Mock
@@ -36,12 +37,12 @@ class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
     private lateinit var mockRedactedEvents: JSONArray
     private val mockEventNameNotInRedactedEventsList = "install_app"
     private val mockRedactedString = "FilteredEvent"
-    
+
     private val mockEventNameInRedactedEventsList1 = "redacted_events_1"
     private val mockEventNameInRedactedEventsList2 = "redacted_events_2"
     private val mockAppID = "123"
     private val emptyJSONArray = JSONArray()
-    
+
     @Before
     override fun setup() {
         super.setup()
@@ -49,14 +50,14 @@ class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
         whenever(FacebookSdk.getApplicationId()).thenReturn(mockAppID)
 
         mockRedactedEvents = JSONArray()
-        
+
         mockRedactedEvents.put(mockEventNameInRedactedEventsList1)
         mockRedactedEvents.put(mockEventNameInRedactedEventsList2)
 
         mockRedactedEventsFromServer = JSONArray()
         val jsonObject = JSONObject().apply {
             put("key", mockRedactedString)
-            put("value",mockRedactedEvents)
+            put("value", mockRedactedEvents)
         }
         mockRedactedEventsFromServer.put(jsonObject)
     }
@@ -68,37 +69,41 @@ class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
 
     private fun initMockFetchedAppSettings(mockRedactedEvents: JSONArray?) {
         val mockFetchedAppSettings = FetchedAppSettings(
-                false,
-                "",
-                false,
-                1,
-                SmartLoginOption.parseOptions(0),
-                emptyMap(),
-                false,
-                mockFacebookRequestErrorClassification,
-                "",
-                "",
-                false,
-                codelessEventsEnabled = false,
-                eventBindings = emptyJSONArray,
-                sdkUpdateMessage = "",
-                trackUninstallEnabled = false,
-                monitorViaDialogEnabled = false,
-                rawAamRules = "",
-                suggestedEventsSetting = "",
-                restrictiveDataSetting = "",
-                protectedModeStandardParamsSetting = emptyJSONArray,
-                MACARuleMatchingSetting = emptyJSONArray,
-                migratedAutoLogValues = null,
-                blocklistEvents = emptyJSONArray,
-                redactedEvents = mockRedactedEvents,
-                sensitiveParams = emptyJSONArray,
-                schemaRestrictions = emptyJSONArray,
-                bannedParams = emptyJSONArray
+            false,
+            "",
+            false,
+            1,
+            SmartLoginOption.parseOptions(0),
+            emptyMap(),
+            false,
+            mockFacebookRequestErrorClassification,
+            "",
+            "",
+            false,
+            codelessEventsEnabled = false,
+            eventBindings = emptyJSONArray,
+            sdkUpdateMessage = "",
+            trackUninstallEnabled = false,
+            monitorViaDialogEnabled = false,
+            rawAamRules = "",
+            suggestedEventsSetting = "",
+            restrictiveDataSetting = "",
+            protectedModeStandardParamsSetting = emptyJSONArray,
+            MACARuleMatchingSetting = emptyJSONArray,
+            migratedAutoLogValues = null,
+            blocklistEvents = emptyJSONArray,
+            redactedEvents = mockRedactedEvents,
+            sensitiveParams = emptyJSONArray,
+            schemaRestrictions = emptyJSONArray,
+            bannedParams = emptyJSONArray,
+            currencyDedupeParameters = emptyList(),
+            purchaseValueDedupeParameters = emptyList(),
+            prodDedupeParameters = emptyList(),
+            testDedupeParameters = emptyList()
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))
-                .thenReturn(mockFetchedAppSettings)
+            .thenReturn(mockFetchedAppSettings)
     }
 
     @Test
@@ -122,7 +127,7 @@ class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
         var mockInvalidRedactedEventsFromServer = JSONArray()
         val jsonObject = JSONObject().apply {
             put("not_a_key", mockRedactedString)
-            put("not_a_value",mockRedactedEvents)
+            put("not_a_value", mockRedactedEvents)
         }
         mockInvalidRedactedEventsFromServer.put(jsonObject)
         initMockFetchedAppSettings(mockInvalidRedactedEventsFromServer)
@@ -138,6 +143,7 @@ class RedactedEventsManagerTest : FacebookPowerMockTestCase() {
         val finalEventName = processEventsRedaction(mockEventNameNotInRedactedEventsList)
         Assertions.assertThat(finalEventName).isEqualTo(mockEventNameNotInRedactedEventsList)
     }
+
     @Test
     fun `test fetched redacted events list is not null from the server and does redaction`() {
         initMockFetchedAppSettings(mockRedactedEventsFromServer)

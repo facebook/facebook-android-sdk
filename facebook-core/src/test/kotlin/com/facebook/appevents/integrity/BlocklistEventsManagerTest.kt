@@ -51,7 +51,7 @@ class BlocklistEventsManagerTest : FacebookPowerMockTestCase() {
         BlocklistEventsManager.disable()
     }
 
-    fun initMockFetchedAppSettings(mockBlocklistEvents:JSONArray?) {
+    fun initMockFetchedAppSettings(mockBlocklistEvents: JSONArray?) {
         val mockFetchedAppSettings = FetchedAppSettings(
             false,
             "",
@@ -79,7 +79,11 @@ class BlocklistEventsManagerTest : FacebookPowerMockTestCase() {
             redactedEvents = emptyJSONArray,
             sensitiveParams = emptyJSONArray,
             schemaRestrictions = emptyJSONArray,
-            bannedParams = emptyJSONArray
+            bannedParams = emptyJSONArray,
+            currencyDedupeParameters = emptyList(),
+            purchaseValueDedupeParameters = emptyList(),
+            prodDedupeParameters = emptyList(),
+            testDedupeParameters = emptyList()
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))
@@ -99,6 +103,7 @@ class BlocklistEventsManagerTest : FacebookPowerMockTestCase() {
         BlocklistEventsManager.enable()
         assertTrue(BlocklistEventsManager.isInBlocklist(mockEventNameInBlocklist1))
     }
+
     @Test
     fun `test fetched blocklist is not null from the server and return false from isInBlocklist()`() {
         initMockFetchedAppSettings(mockBlocklistEventsFromServer)

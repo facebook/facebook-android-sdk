@@ -45,39 +45,43 @@ class BannedParamsManagerTest : FacebookPowerMockTestCase() {
         ProtectedModeManager.disable()
     }
 
-    private fun initMockFetchedAppSettings(mockBlockedParams:JSONArray?) {
+    private fun initMockFetchedAppSettings(mockBlockedParams: JSONArray?) {
         val mockFetchedAppSettings = FetchedAppSettings(
-                false,
-                "",
-                false,
-                1,
-                SmartLoginOption.parseOptions(0),
-                emptyMap(),
-                false,
-                mockFacebookRequestErrorClassification,
-                "",
-                "",
-                false,
-                codelessEventsEnabled = false,
-                eventBindings = emptyJSONArray,
-                sdkUpdateMessage = "",
-                trackUninstallEnabled = false,
-                monitorViaDialogEnabled = false,
-                rawAamRules = "",
-                suggestedEventsSetting = "",
-                restrictiveDataSetting = "",
-                protectedModeStandardParamsSetting = emptyJSONArray,
-                MACARuleMatchingSetting = emptyJSONArray,
-                migratedAutoLogValues = null,
-                blocklistEvents = emptyJSONArray,
-                redactedEvents = emptyJSONArray,
-                sensitiveParams = emptyJSONArray,
-                schemaRestrictions = emptyJSONArray,
-                bannedParams = mockBlockedParams
+            false,
+            "",
+            false,
+            1,
+            SmartLoginOption.parseOptions(0),
+            emptyMap(),
+            false,
+            mockFacebookRequestErrorClassification,
+            "",
+            "",
+            false,
+            codelessEventsEnabled = false,
+            eventBindings = emptyJSONArray,
+            sdkUpdateMessage = "",
+            trackUninstallEnabled = false,
+            monitorViaDialogEnabled = false,
+            rawAamRules = "",
+            suggestedEventsSetting = "",
+            restrictiveDataSetting = "",
+            protectedModeStandardParamsSetting = emptyJSONArray,
+            MACARuleMatchingSetting = emptyJSONArray,
+            migratedAutoLogValues = null,
+            blocklistEvents = emptyJSONArray,
+            redactedEvents = emptyJSONArray,
+            sensitiveParams = emptyJSONArray,
+            schemaRestrictions = emptyJSONArray,
+            bannedParams = mockBlockedParams,
+            currencyDedupeParameters = emptyList(),
+            purchaseValueDedupeParameters = emptyList(),
+            prodDedupeParameters = emptyList(),
+            testDedupeParameters = emptyList()
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))
-                .thenReturn(mockFetchedAppSettings)
+            .thenReturn(mockFetchedAppSettings)
     }
 
     @Test

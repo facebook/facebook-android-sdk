@@ -28,8 +28,9 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(
-        FacebookSdk::class,
-        FetchedAppSettingsManager::class)
+    FacebookSdk::class,
+    FetchedAppSettingsManager::class
+)
 class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
 
     @Mock
@@ -51,37 +52,41 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
 
     private fun initMockFetchedAppSettings(mockSensitiveParams: JSONArray?) {
         val mockFetchedAppSettings = FetchedAppSettings(
-                false,
-                "",
-                false,
-                1,
-                SmartLoginOption.parseOptions(0),
-                emptyMap(),
-                false,
-                mockFacebookRequestErrorClassification,
-                "",
-                "",
-                false,
-                codelessEventsEnabled = false,
-                eventBindings = emptyJSONArray,
-                sdkUpdateMessage = "",
-                trackUninstallEnabled = false,
-                monitorViaDialogEnabled = false,
-                rawAamRules = "",
-                suggestedEventsSetting = "",
-                restrictiveDataSetting = "",
-                protectedModeStandardParamsSetting = emptyJSONArray,
-                MACARuleMatchingSetting = emptyJSONArray,
-                migratedAutoLogValues = null,
-                blocklistEvents = emptyJSONArray,
-                redactedEvents = emptyJSONArray,
-                sensitiveParams = mockSensitiveParams,
-                schemaRestrictions = emptyJSONArray,
-                bannedParams = emptyJSONArray,
+            false,
+            "",
+            false,
+            1,
+            SmartLoginOption.parseOptions(0),
+            emptyMap(),
+            false,
+            mockFacebookRequestErrorClassification,
+            "",
+            "",
+            false,
+            codelessEventsEnabled = false,
+            eventBindings = emptyJSONArray,
+            sdkUpdateMessage = "",
+            trackUninstallEnabled = false,
+            monitorViaDialogEnabled = false,
+            rawAamRules = "",
+            suggestedEventsSetting = "",
+            restrictiveDataSetting = "",
+            protectedModeStandardParamsSetting = emptyJSONArray,
+            MACARuleMatchingSetting = emptyJSONArray,
+            migratedAutoLogValues = null,
+            blocklistEvents = emptyJSONArray,
+            redactedEvents = emptyJSONArray,
+            sensitiveParams = mockSensitiveParams,
+            schemaRestrictions = emptyJSONArray,
+            bannedParams = emptyJSONArray,
+            currencyDedupeParameters = emptyList(),
+            purchaseValueDedupeParameters = emptyList(),
+            prodDedupeParameters = emptyList(),
+            testDedupeParameters = emptyList()
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))
-                .thenReturn(mockFetchedAppSettings)
+            .thenReturn(mockFetchedAppSettings)
     }
 
     @Test
@@ -111,10 +116,16 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
         initMockFetchedAppSettings(mockSensitiveParamsFromServer)
 
         val mockInputParamsWithoutSensitiveParams = Bundle()
-        mockInputParamsWithoutSensitiveParams.putString(mockNonSensitiveParam, mockNonSensitiveParamValue)
+        mockInputParamsWithoutSensitiveParams.putString(
+            mockNonSensitiveParam,
+            mockNonSensitiveParamValue
+        )
 
         enable()
-        processFilterSensitiveParams(mockInputParamsWithoutSensitiveParams, mockEventNameWithoutSensitiveParams)
+        processFilterSensitiveParams(
+            mockInputParamsWithoutSensitiveParams,
+            mockEventNameWithoutSensitiveParams
+        )
 
         Assertions.assertThat(mockInputParamsWithoutSensitiveParams.containsKey(filteredParamsKey)).isFalse
         assertEqual(mockInputParamsWithoutSensitiveParams, mockInputParamsWithoutSensitiveParams)
@@ -212,7 +223,7 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
             val v2 = expectedBundle.get(s)
 
             // cant compare serialized lists directly present in _filteredKey
-            if(s.equals(filteredParamsKey) && v1.toString().length == v2.toString().length) {
+            if (s.equals(filteredParamsKey) && v1.toString().length == v2.toString().length) {
                 continue
             }
 
