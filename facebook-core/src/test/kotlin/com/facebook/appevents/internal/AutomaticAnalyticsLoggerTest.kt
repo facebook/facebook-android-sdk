@@ -12,6 +12,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import androidx.core.os.bundleOf
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
@@ -85,7 +86,6 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     private lateinit var context: Context
     private lateinit var mockInternalAppEventsLogger: InternalAppEventsLogger
-    private lateinit var mockBundle: Bundle
     private lateinit var mockFetchedAppSettings: FetchedAppSettings
     private var eventName: String? = null
     private var bundle: Bundle? = null
@@ -119,9 +119,6 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             mockInternalAppEventsLogger
         )
 
-        mockBundle = Bundle(1)
-        whenNew(Bundle::class.java).withAnyArguments().thenReturn(mockBundle)
-
         mockFetchedAppSettings = mock(FetchedAppSettings::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(appID, false))
             .thenReturn(mockFetchedAppSettings)
@@ -143,12 +140,27 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 "fb_iap_product_description",
                 listOf("fb_description", "fb_iap_product_description")
             ),
+        )
+        val testDedupeParameters = listOf(
+            Pair(
+                "fb_iap_product_id",
+                listOf("fb_content_id", "fb_product_item_id", "fb_iap_product_id")
+            ),
+            Pair(
+                "fb_iap_product_title",
+                listOf("fb_content_title", "fb_product_title", "fb_iap_product_title")
+            ),
+            Pair(
+                "fb_iap_product_description",
+                listOf("fb_description", "fb_iap_product_description")
+            ),
             Pair(
                 "fb_iap_purchase_token",
                 listOf("fb_iap_purchase_token", "fb_transaction_id", "fb_order_id")
             )
         )
         whenever(mockFetchedAppSettings.prodDedupeParameters).thenReturn(dedupeParameters)
+        whenever(mockFetchedAppSettings.testDedupeParameters).thenReturn(testDedupeParameters)
         val currencyParameters = listOf("fb_currency", "fb_product_price_currency")
         whenever(mockFetchedAppSettings.currencyDedupeParameters).thenReturn(currencyParameters)
         val purchaseValueParameters = listOf("_valueToSum", "fb_product_price_amount")
@@ -227,24 +239,32 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     @Test
     fun `test log activity time spent event when automatic logging disable`() {
         whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(false)
-
         AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
-
         verify(mockFetchedAppSettings).automaticLoggingEnabled
-        verifyNew(Bundle::class.java, never()).withArguments(any())
         verify(mockInternalAppEventsLogger, never()).logEvent(any(), any())
     }
 
     @Test
     fun `test log activity time spent event when automatic logging enable`() {
+        var actualName: String? = null
+        var actualValue: Double? = null
+        var actualBundle: Bundle? = null
+        whenever(mockInternalAppEventsLogger.logEvent(any(), any(), any())).thenAnswer {
+            actualName = it.getArgument(0)
+            actualValue = it.getArgument(1)
+            actualBundle = it.getArgument(2)
+            Unit
+        }
         whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
-
         AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
-
         verify(mockFetchedAppSettings).automaticLoggingEnabled
-        verifyNew(Bundle::class.java).withArguments(eq(1))
-        verify(mockInternalAppEventsLogger)
-            .logEvent(eq(Constants.AA_TIME_SPENT_EVENT_NAME), eq(5.0), eq(mockBundle))
+        assertEquals(actualName, Constants.AA_TIME_SPENT_EVENT_NAME)
+        assertEquals(actualValue, timeSpent.toDouble())
+        assertEquals(
+            actualBundle?.getString(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME),
+            activityName
+        )
+
     }
 
     @Test
@@ -411,7 +431,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
             .isEqualTo("P1W")
         val basePlanId = bundle?.getCharSequence(Constants.IAP_BASE_PLAN)
-        val validBasePlan = basePlanId == "basePlanId" || basePlanId == "basePlanId2"
+        val validBasePlan = basePlanId == "baseplanId" || basePlanId == "basePlanId2"
         Assertions.assertThat(validBasePlan)
             .isTrue()
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
@@ -457,7 +477,55 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 Constants.IAP_ACTUAL_DEDUP_KEY_USED,
             ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(bundle?.keySet()?.size, 15)
+        assertEquals(bundle?.keySet()?.size, 17)
+        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
+        assertEquals(
+            bundle?.getString(
+                Constants.IAP_TEST_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
+        )
+    }
+
+    @Test
+    fun `test dedupe implicit subscription with test dedupe config and GPBL v5 - v7`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+        val parameters = Bundle()
+        parameters.putCharSequence("fb_order_id", "token123")
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
+        assertEquals(
+            bundle?.getString(
+                Constants.IAP_TEST_DEDUP_KEY_USED,
+            ), "fb_order_id"
+        )
+        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
+        assertEquals(
+            bundle?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), null
+        )
+        assertEquals(bundle?.keySet()?.size, 14)
     }
 
     @Test

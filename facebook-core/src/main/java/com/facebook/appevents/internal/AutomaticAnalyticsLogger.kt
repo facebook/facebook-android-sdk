@@ -157,10 +157,10 @@ object AutomaticAnalyticsLogger {
             purchaseParams.currency
         )
         val dedupeParameters = InAppPurchaseManager.performDedupe(
-            inAppPurchase,
+            listOf(inAppPurchase),
             System.currentTimeMillis(),
             true,
-            purchaseParams.param
+            listOf(purchaseParams.param)
         )
         return InAppPurchaseDedupeConfig.addDedupeParameters(
             dedupeParameters.second,
@@ -174,8 +174,7 @@ object AutomaticAnalyticsLogger {
         purchaseLoggingParametersList: List<PurchaseLoggingParameters>,
         eventName: String
     ): Bundle? {
-        var actualDedupeParameters: Bundle? = null
-        var testDedupeParameters: Bundle? = null
+        val purchasesToDedupe = ArrayList<InAppPurchase>()
         for (purchaseParams in purchaseLoggingParametersList) {
             val inAppPurchase =
                 InAppPurchase(
@@ -183,25 +182,17 @@ object AutomaticAnalyticsLogger {
                     purchaseParams.purchaseAmount.toDouble(),
                     purchaseParams.currency
                 )
-            val dedupeParameters = InAppPurchaseManager.performDedupe(
-                inAppPurchase,
-                System.currentTimeMillis(),
-                true,
-                purchaseParams.param
-            )
-            val potentialActualDedupeParameters = dedupeParameters.first
-            val potentialTestDedupeParameters = dedupeParameters.second
-            if (potentialActualDedupeParameters != null) {
-                actualDedupeParameters = potentialActualDedupeParameters
-            }
-            if (potentialTestDedupeParameters != null) {
-                testDedupeParameters = potentialTestDedupeParameters
-            }
+            purchasesToDedupe.add(inAppPurchase)
         }
+        val dedupeParameters = InAppPurchaseManager.performDedupe(
+            purchasesToDedupe,
+            System.currentTimeMillis(),
+            true,
+            purchaseLoggingParametersList.map { it.param })
         val combinedParameters =
             InAppPurchaseDedupeConfig.addDedupeParameters(
-                testDedupeParameters,
-                actualDedupeParameters
+                dedupeParameters.first,
+                dedupeParameters.second
             )
         return combinedParameters
     }

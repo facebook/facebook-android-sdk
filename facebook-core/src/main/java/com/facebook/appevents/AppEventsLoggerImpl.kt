@@ -346,10 +346,10 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                             currency
                         )
                     val dedupeParameters = InAppPurchaseManager.performDedupe(
-                        purchase,
+                        listOf(purchase),
                         System.currentTimeMillis(),
                         false,
-                        parameters
+                        listOf(parameters)
                     )
                     val combinedDedupeParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
                         dedupeParameters.second,

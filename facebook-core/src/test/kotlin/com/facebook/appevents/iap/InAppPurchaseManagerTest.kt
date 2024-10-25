@@ -264,10 +264,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         bundle.putCharSequence("other_dedup_key", "val")
         var result =
             InAppPurchaseManager.performDedupe(
-                purchase,
+                listOf(purchase),
                 time,
                 true,
-                bundle
+                listOf(bundle)
             )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
@@ -279,20 +279,30 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             )
         result =
             InAppPurchaseManager.performDedupe(
-                purchaseWithDifferentCurrency,
+                listOf(purchaseWithDifferentCurrency),
                 time,
                 false,
-                bundle
+                listOf(bundle)
             )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
 
         result =
-            InAppPurchaseManager.performDedupe(purchase, time + 60001, false, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(purchase),
+                time + 60001,
+                false,
+                listOf(bundle)
+            )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
         result =
-            InAppPurchaseManager.performDedupe(purchase, time + 120000, true, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(purchase),
+                time + 120000,
+                true,
+                listOf(bundle)
+            )
         assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
             result.first?.getString(
@@ -310,7 +320,12 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             ), "other_dedup_key"
         )
         result =
-            InAppPurchaseManager.performDedupe(purchase, time + 120000, false, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(purchase),
+                time + 120000,
+                false,
+                listOf(bundle)
+            )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
 
@@ -320,15 +335,30 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         result =
-            InAppPurchaseManager.performDedupe(oneDollarPurchase, 0, false, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(oneDollarPurchase),
+                0,
+                false,
+                listOf(bundle)
+            )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
         result =
-            InAppPurchaseManager.performDedupe(oneDollarPurchase, 60000, false, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(oneDollarPurchase),
+                60000,
+                false,
+                listOf(bundle)
+            )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
         result =
-            InAppPurchaseManager.performDedupe(oneDollarPurchase, 60000, true, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(oneDollarPurchase),
+                60000,
+                true,
+                listOf(bundle)
+            )
         assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
             result.first?.getString(
@@ -346,7 +376,12 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             ), "other_dedup_key"
         )
         result =
-            InAppPurchaseManager.performDedupe(oneDollarPurchase, 120000, true, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(oneDollarPurchase),
+                120000,
+                true,
+                listOf(bundle)
+            )
         assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
             result.first?.getString(
@@ -364,7 +399,12 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             ), "other_dedup_key"
         )
         result =
-            InAppPurchaseManager.performDedupe(oneDollarPurchase, 60000, true, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(oneDollarPurchase),
+                60000,
+                true,
+                listOf(bundle)
+            )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
 
@@ -375,19 +415,19 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
         result =
             InAppPurchaseManager.performDedupe(
-                oneDollarSubscription,
+                listOf(oneDollarSubscription),
                 60000,
                 false,
-                bundle
+                listOf(bundle)
             )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
         result =
             InAppPurchaseManager.performDedupe(
-                oneDollarSubscription,
+                listOf(oneDollarSubscription),
                 60000,
                 true,
-                bundle
+                listOf(bundle)
             )
         assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
@@ -407,10 +447,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
         result =
             InAppPurchaseManager.performDedupe(
-                oneDollarSubscription,
+                listOf(oneDollarSubscription),
                 60000,
                 false,
-                bundle
+                listOf(bundle)
             )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
@@ -420,27 +460,32 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         result =
-            InAppPurchaseManager.performDedupe(oneDollarStartTrial, 60000, true, bundle)
+            InAppPurchaseManager.performDedupe(
+                listOf(oneDollarStartTrial),
+                60000,
+                true,
+                listOf(bundle)
+            )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
 
         val bundleWithImplicitlyLoggedTestParameter = bundleOf(Pair("other_dedup_key", "value"))
         result =
             InAppPurchaseManager.performDedupe(
-                oneDollarStartTrial,
+                listOf(oneDollarStartTrial),
                 100000,
                 true,
-                bundleWithImplicitlyLoggedTestParameter
+                listOf(bundleWithImplicitlyLoggedTestParameter)
             )
         assertThat(result.first).isNull()
         assertThat(result.second).isNull()
         val bundleWithManuallyLoggedTestParameter = bundleOf(Pair("other_dedup_key1", "value"))
         result =
             InAppPurchaseManager.performDedupe(
-                oneDollarStartTrial,
+                listOf(oneDollarStartTrial),
                 100000,
                 false,
-                bundleWithManuallyLoggedTestParameter
+                listOf(bundleWithManuallyLoggedTestParameter)
             )
         assertEquals(
             result.second?.getString(
@@ -469,10 +514,20 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var result1: Bundle? = null
         var result2: Bundle? = null
         val thread1 = Thread {
-            result1 = InAppPurchaseManager.performDedupe(purchase, time1, true, bundle).first
+            result1 = InAppPurchaseManager.performDedupe(
+                listOf(purchase),
+                time1,
+                true,
+                listOf(bundle)
+            ).first
         }
         val thread2 = Thread {
-            result2 = InAppPurchaseManager.performDedupe(purchase, time2, false, bundle).first
+            result2 = InAppPurchaseManager.performDedupe(
+                listOf(purchase),
+                time2,
+                false,
+                listOf(bundle)
+            ).first
         }
         thread1.start()
         thread2.start()
@@ -497,11 +552,21 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var result4: Bundle? = null
         executor1.execute {
             result3 =
-                InAppPurchaseManager.performDedupe(purchase, time3, true, bundle).first
+                InAppPurchaseManager.performDedupe(
+                    listOf(purchase),
+                    time3,
+                    true,
+                    listOf(bundle)
+                ).first
             latch.countDown()
         }
         executor2.execute {
-            result4 = InAppPurchaseManager.performDedupe(purchase, time4, false, bundle).first
+            result4 = InAppPurchaseManager.performDedupe(
+                listOf(purchase),
+                time4,
+                false,
+                listOf(bundle)
+            ).first
             latch.countDown()
         }
         latch.await()
