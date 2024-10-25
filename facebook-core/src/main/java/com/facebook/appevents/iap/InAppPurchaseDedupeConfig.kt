@@ -55,6 +55,27 @@ object InAppPurchaseDedupeConfig {
         return swappedParameters
     }
 
+    fun getTestDedupeParameters(dedupingWithImplicitlyLoggedHistory: Boolean): List<Pair<String, List<String>>>? {
+        val settings =
+            FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
+                ?: return null
+        if (settings.testDedupeParameters.isNullOrEmpty()) {
+            return null
+        }
+        if (!dedupingWithImplicitlyLoggedHistory) {
+            return settings.testDedupeParameters
+        }
+        // If we are deduping with the implicitly logged purchases, we should let the values be the keys
+        val swappedParameters = ArrayList<Pair<String, List<String>>>()
+        for (item in settings.testDedupeParameters) {
+            val values = item.second
+            for (value in values) {
+                swappedParameters.add(Pair(value, listOf(item.first)))
+            }
+        }
+        return swappedParameters
+    }
+
     fun getCurrencyParameterEquivalents(): List<String> {
         val settings =
             FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
@@ -112,5 +133,29 @@ object InAppPurchaseDedupeConfig {
             return defaultDedupeWindow
         }
         return settings.dedupeWindow
+    }
+
+    fun addDedupeParameters(
+        dedupeParameters: Bundle?,
+        originalParameters: Bundle?
+    ): Bundle? {
+        var result = originalParameters
+        if (dedupeParameters == null) {
+            return result
+        }
+        try {
+            for (key in dedupeParameters.keySet()) {
+                val value = dedupeParameters.getString(key)
+                if (value != null) {
+                    if (result == null) {
+                        result = Bundle()
+                    }
+                    result.putString(key, value)
+                }
+            }
+        } catch (e: Exception) {
+            // If we run into an error parsing the bundle, just return the original parameters
+        }
+        return result
     }
 }

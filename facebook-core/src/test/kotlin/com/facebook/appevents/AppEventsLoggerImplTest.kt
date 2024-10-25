@@ -307,13 +307,16 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogPurchaseWithDedupeEnabledAndIsNotADuplicate() {
-        val implicitPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        val implicitPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             1.0,
             Currency.getInstance(Locale.US)
         )
-        implicitPurchaseHistory[purchase] = mutableListOf(1)
+        val previouslyLoggedParameters = Bundle()
+        previouslyLoggedParameters.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        implicitPurchaseHistory[purchase] = mutableListOf(Pair(1, previouslyLoggedParameters))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfImplicitPurchases",

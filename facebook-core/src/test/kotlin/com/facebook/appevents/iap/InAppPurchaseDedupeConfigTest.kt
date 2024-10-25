@@ -1,5 +1,6 @@
 package com.facebook.appevents.iap
 
+import androidx.core.os.bundleOf
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.FacebookRequestErrorClassification
@@ -26,7 +27,7 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
     private lateinit var purchaseAmountParameters: List<String>
     private lateinit var currencyParameters: List<String>
     private lateinit var dedupeParameters: List<Pair<String, List<String>>>
-
+    private lateinit var testDedupeParameters: List<Pair<String, List<String>>>
     override fun setup() {
         super.setup()
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
@@ -50,6 +51,12 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
                 "fb_iap_purchase_token",
                 listOf("fb_iap_purchase_token", "fb_transaction_id", "fb_order_id")
             )
+        )
+        testDedupeParameters = listOf(
+            Pair(
+                "fb_iap_product_description",
+                listOf("fb_description", "fb_iap_product_description")
+            ),
         )
         currencyParameters = listOf("fb_currency", "fb_product_price_currency")
         purchaseAmountParameters = listOf("_valueToSum", "fb_product_price_amount")
@@ -84,8 +91,8 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
             currencyDedupeParameters = currencyParameters,
             purchaseValueDedupeParameters = purchaseAmountParameters,
             prodDedupeParameters = dedupeParameters,
-            testDedupeParameters = emptyList(),
-            dedupeWindow = 100L
+            testDedupeParameters = testDedupeParameters,
+            dedupeWindow = 100L,
         )
         whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(any())).thenReturn(
             mockFetchedAppSettings
@@ -99,6 +106,17 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
         assertEquals(dedupeParamsWhenNewImplicitPurchase, dedupeParameters)
         val dedupeParamsWhenNewManualPurchase = InAppPurchaseDedupeConfig.getDedupeParameters(true)
         assertEquals(dedupeParamsWhenNewManualPurchase.size, 11)
+    }
+
+    @Test
+    fun `get test dedupe parameters`() {
+        val dedupParamsWhenNewImplicitPurchase =
+            InAppPurchaseDedupeConfig.getTestDedupeParameters(false)
+        assertEquals(dedupParamsWhenNewImplicitPurchase, testDedupeParameters)
+        val dedupeParamsWhenNewManualPurchase =
+            InAppPurchaseDedupeConfig.getTestDedupeParameters(true)
+        assertEquals(dedupeParamsWhenNewManualPurchase?.size, 2)
+
     }
 
     @Test
@@ -117,5 +135,41 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
     fun `get dedupe window`() {
         val dedupeWindow = InAppPurchaseDedupeConfig.getDedupeWindow()
         assertEquals(dedupeWindow, 100L)
+    }
+
+    @Test
+    fun `add dedupe parameters`() {
+        assertEquals(InAppPurchaseDedupeConfig.addDedupeParameters(null, null), null)
+        val originalParams = bundleOf(Pair("key", "value"))
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(null, originalParams)?.getString("key"),
+            "value"
+        )
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, null)?.getString("key"),
+            "value"
+        )
+        val dedupeParams = bundleOf(Pair("key1", "value1"))
+        val bothParams = bundleOf(Pair("key1", "value1"), Pair("key", "value"))
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, dedupeParams)
+                ?.getString("key"),
+            "value"
+        )
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, dedupeParams)
+                ?.getString("key1"),
+            "value1"
+        )
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(dedupeParams, originalParams)
+                ?.getString("key"),
+            "value"
+        )
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(dedupeParams, originalParams)
+                ?.getString("key1"),
+            "value1"
+        )
     }
 }

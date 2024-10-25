@@ -351,12 +351,14 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                         false,
                         parameters
                     )
-                    if (dedupeParameters != null) {
-                        modifiedParameters = InAppPurchaseManager.addDedupeParameters(
-                            dedupeParameters,
-                            modifiedParameters
-                        )
-                    }
+                    val combinedDedupeParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
+                        dedupeParameters.second,
+                        dedupeParameters.first
+                    )
+                    modifiedParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
+                        combinedDedupeParameters,
+                        modifiedParameters
+                    )
                 }
             }
         }

@@ -17,6 +17,7 @@ import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.appevents.iap.InAppPurchase
+import com.facebook.appevents.iap.InAppPurchaseDedupeConfig
 import com.facebook.appevents.iap.InAppPurchaseEventManager
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
@@ -112,28 +113,23 @@ object AutomaticAnalyticsLogger {
                     AppEventsConstants.EVENT_NAME_SUBSCRIBE
                 }
         }
-        if (isSubscription && isEnabled(
-                FeatureManager.Feature.AndroidManualImplicitSubsDedupe
-            )
-        ) {
-            val dedupeParameters = getSubscriptionDedupeParameters(loggingParameters, eventName)
-            if (dedupeParameters != null) {
-                loggingParameters[0].param = InAppPurchaseManager.addDedupeParameters(
-                    dedupeParameters,
-                    loggingParameters[0].param
-                )
+        val dedupeParameters =
+            if (isSubscription &&
+                isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe)
+            ) {
+                getSubscriptionDedupeParameters(loggingParameters, eventName)
+            } else if (!isSubscription &&
+                isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)
+            ) {
+                getPurchaseDedupeParameters(loggingParameters)
+            } else {
+                null
             }
-        } else if (!isSubscription &&
-            isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)
-        ) {
-            val dedupeParameters = getPurchaseDedupeParameters(loggingParameters)
-            if (dedupeParameters != null) {
-                loggingParameters[0].param = InAppPurchaseManager.addDedupeParameters(
-                    dedupeParameters,
-                    loggingParameters[0].param
-                )
-            }
-        }
+        val combinedParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
+            dedupeParameters,
+            loggingParameters[0].param
+        )
+        loggingParameters[0].param = combinedParameters ?: Bundle()
 
         if (logAsSubs) {
             internalAppEventsLogger.logEventImplicitly(
@@ -160,11 +156,15 @@ object AutomaticAnalyticsLogger {
             purchaseParams.purchaseAmount.toDouble(),
             purchaseParams.currency
         )
-        return InAppPurchaseManager.performDedupe(
+        val dedupeParameters = InAppPurchaseManager.performDedupe(
             inAppPurchase,
             System.currentTimeMillis(),
             true,
             purchaseParams.param
+        )
+        return InAppPurchaseDedupeConfig.addDedupeParameters(
+            dedupeParameters.second,
+            dedupeParameters.first
         )
     }
 
@@ -174,6 +174,8 @@ object AutomaticAnalyticsLogger {
         purchaseLoggingParametersList: List<PurchaseLoggingParameters>,
         eventName: String
     ): Bundle? {
+        var actualDedupeParameters: Bundle? = null
+        var testDedupeParameters: Bundle? = null
         for (purchaseParams in purchaseLoggingParametersList) {
             val inAppPurchase =
                 InAppPurchase(
@@ -187,11 +189,21 @@ object AutomaticAnalyticsLogger {
                 true,
                 purchaseParams.param
             )
-            if (dedupeParameters != null) {
-                return dedupeParameters
+            val potentialActualDedupeParameters = dedupeParameters.first
+            val potentialTestDedupeParameters = dedupeParameters.second
+            if (potentialActualDedupeParameters != null) {
+                actualDedupeParameters = potentialActualDedupeParameters
+            }
+            if (potentialTestDedupeParameters != null) {
+                testDedupeParameters = potentialTestDedupeParameters
             }
         }
-        return null
+        val combinedParameters =
+            InAppPurchaseDedupeConfig.addDedupeParameters(
+                testDedupeParameters,
+                actualDedupeParameters
+            )
+        return combinedParameters
     }
 
 
