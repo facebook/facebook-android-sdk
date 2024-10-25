@@ -14,6 +14,7 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.INAPP
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.SUBS
+import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
@@ -45,7 +46,10 @@ object InAppPurchaseAutoLogger {
             failedToCreateWrapper.set(true)
             return
         }
-        if (isEnabled(FeatureManager.Feature.AndroidIAPSubscriptionAutoLogging)) {
+        
+        if (isEnabled(FeatureManager.Feature.AndroidIAPSubscriptionAutoLogging)
+            && (!ProtectedModeManager.isEnabled() || billingClientVersion == V2_V4)
+        ) {
             billingClientWrapper.queryPurchaseHistory(INAPP) {
                 billingClientWrapper.queryPurchaseHistory(SUBS) {
                     logPurchase(billingClientVersion, context.packageName)

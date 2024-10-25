@@ -10,6 +10,7 @@ package com.facebook.appevents.iap
 
 import android.content.Context
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.internal.FeatureManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -39,6 +40,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
     @Before
     fun init() {
         InAppPurchaseAutoLogger.failedToCreateWrapper.set(false)
+        ProtectedModeManager.disable()
         mockBillingClientWrapperV2_V4 = mock()
         mockBillingClientWrapperV5Plus = mock()
         mockContext = mock()
@@ -281,6 +283,68 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         assertThat(logPurchaseCallTimes).isEqualTo(2)
         assertThat(queryPurchaseCount).isEqualTo(1)
         assertThat(querySubCount).isEqualTo(1)
+        assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
+    }
+
+    @Test
+    fun testStartIapLoggingWithQuerySubsEnabledButProtectedModeOnV5_V7() {
+        ProtectedModeManager.enable()
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidIAPSubscriptionAutoLogging)).thenReturn(
+            true
+        )
+        Whitebox.setInternalState(
+            InAppPurchaseBillingClientWrapperV5V7::class.java,
+            "instance",
+            mockBillingClientWrapperV5Plus
+        )
+        var logPurchaseCallTimes = 0
+        var queryPurchaseCount = 0
+        var querySubCount = 0
+        var loggingRunnable: Runnable? = null
+        var querySubsRunnable: Runnable? = null
+        whenever(
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenAnswer {
+            logPurchaseCallTimes++
+            Unit
+        }
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchaseHistory(
+                eq(InAppPurchaseUtils.IAPProductType.INAPP),
+                any()
+            )
+        ).thenAnswer {
+            queryPurchaseCount++
+            loggingRunnable = it.getArgument(1) as Runnable
+            Unit
+        }
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchaseHistory(
+                eq(InAppPurchaseUtils.IAPProductType.SUBS),
+                any()
+            )
+        ).thenAnswer {
+            querySubCount++
+            loggingRunnable = it.getArgument(1) as Runnable
+            Unit
+        }
+
+        InAppPurchaseAutoLogger.startIapLogging(
+            mockContext,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertThat(querySubsRunnable).isNull()
+        assertThat(loggingRunnable).isNotNull
+        loggingRunnable?.run()
+        assertThat(logPurchaseCallTimes).isEqualTo(2)
+        assertThat(queryPurchaseCount).isEqualTo(1)
+        assertThat(querySubCount).isEqualTo(0)
         assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 

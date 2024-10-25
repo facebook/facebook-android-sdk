@@ -16,12 +16,12 @@ import org.json.JSONArray
 
 @AutoHandleExceptions
 object ProtectedModeManager {
-  private var enabled = false
-  private const val PROTECTED_MODE_IS_APPLIED_KEY = "pm"
-  private const val PROTECTED_MODE_IS_APPLIED_VALUE = "1"
+    private var enabled = false
+    private const val PROTECTED_MODE_IS_APPLIED_KEY = "pm"
+    private const val PROTECTED_MODE_IS_APPLIED_VALUE = "1"
 
-  val defaultStandardParameterNames: HashSet<String> by lazy {
-    hashSetOf(
+    val defaultStandardParameterNames: HashSet<String> by lazy {
+        hashSetOf(
             "_currency",
             "_valueToSum",
             "fb_availability",
@@ -161,71 +161,80 @@ object ProtectedModeManager {
             "pm",
             "_audiencePropertyIds",
             "cs_maca"
-    )
-  }
-
-  private var standardParams: HashSet<String>? = null;
-
-  @JvmStatic
-  fun enable() {
-    enabled = true
-    loadStandardParams()
-  }
-
-  @JvmStatic
-  fun disable() {
-    enabled = false
-  }
-
-  private fun loadStandardParams() {
-    val settings = FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false)
-            ?: return
-    // Load the standard params from app settings first, if it doesn't exist, then use the default
-    // one inside the class
-    standardParams = convertJSONArrayToHashSet(settings.protectedModeStandardParamsSetting) ?: defaultStandardParameterNames
-  }
-
-  private fun convertJSONArrayToHashSet(jsonArray: JSONArray?): HashSet<String>? {
-    if (jsonArray == null || jsonArray!!.length() == 0) {
-      return null
-    }
-    val hashSet: HashSet<String> = HashSet()
-    for (i in 0 until jsonArray.length()) {
-      val element: String = jsonArray.getString(i)
-      hashSet.add(element)
-    }
-    return hashSet
-  }
-
-  /** Process parameters for protected mode */
-  @JvmStatic
-  fun processParametersForProtectedMode(
-          parameters: Bundle?
-  ) {
-    if (!enabled || parameters == null || parameters.isEmpty || standardParams == null) {
-      return
+        )
     }
 
-    val paramsToRemove = mutableListOf<String>()
+    private var standardParams: HashSet<String>? = null;
 
-    parameters.keySet().forEach { param ->
-      if (param !in standardParams!!) {
-        paramsToRemove.add(param)
-      }
+    @JvmStatic
+    fun enable() {
+        enabled = true
+        loadStandardParams()
     }
 
-    paramsToRemove.forEach { paramToRemove ->
-      parameters.remove(paramToRemove)
+    @JvmStatic
+    fun disable() {
+        enabled = false
     }
 
-    parameters.putString(PROTECTED_MODE_IS_APPLIED_KEY, PROTECTED_MODE_IS_APPLIED_VALUE)
-  }
-
-  fun protectedModeIsApplied(parameters: Bundle?): Boolean {
-    if(parameters == null){
-      // if parameters aren't provided then the flag indicating core setup can't be assumed implicitly
-      return false
+    @JvmStatic
+    fun isEnabled(): Boolean {
+        return enabled
     }
-    return parameters.containsKey(PROTECTED_MODE_IS_APPLIED_KEY) && parameters.get(PROTECTED_MODE_IS_APPLIED_KEY) == PROTECTED_MODE_IS_APPLIED_VALUE
-  }
+
+    private fun loadStandardParams() {
+        val settings =
+            FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false)
+                ?: return
+        // Load the standard params from app settings first, if it doesn't exist, then use the default
+        // one inside the class
+        standardParams = convertJSONArrayToHashSet(settings.protectedModeStandardParamsSetting)
+            ?: defaultStandardParameterNames
+    }
+
+    private fun convertJSONArrayToHashSet(jsonArray: JSONArray?): HashSet<String>? {
+        if (jsonArray == null || jsonArray!!.length() == 0) {
+            return null
+        }
+        val hashSet: HashSet<String> = HashSet()
+        for (i in 0 until jsonArray.length()) {
+            val element: String = jsonArray.getString(i)
+            hashSet.add(element)
+        }
+        return hashSet
+    }
+
+    /** Process parameters for protected mode */
+    @JvmStatic
+    fun processParametersForProtectedMode(
+        parameters: Bundle?
+    ) {
+        if (!enabled || parameters == null || parameters.isEmpty || standardParams == null) {
+            return
+        }
+
+        val paramsToRemove = mutableListOf<String>()
+
+        parameters.keySet().forEach { param ->
+            if (param !in standardParams!!) {
+                paramsToRemove.add(param)
+            }
+        }
+
+        paramsToRemove.forEach { paramToRemove ->
+            parameters.remove(paramToRemove)
+        }
+
+        parameters.putString(PROTECTED_MODE_IS_APPLIED_KEY, PROTECTED_MODE_IS_APPLIED_VALUE)
+    }
+
+    fun protectedModeIsApplied(parameters: Bundle?): Boolean {
+        if (parameters == null) {
+            // if parameters aren't provided then the flag indicating core setup can't be assumed implicitly
+            return false
+        }
+        return parameters.containsKey(PROTECTED_MODE_IS_APPLIED_KEY) && parameters.get(
+            PROTECTED_MODE_IS_APPLIED_KEY
+        ) == PROTECTED_MODE_IS_APPLIED_VALUE
+    }
 }
