@@ -64,7 +64,6 @@ object FetchedAppSettingsManager {
     private const val SDK_UPDATE_MESSAGE = "sdk_update_message"
     private const val APP_SETTING_APP_EVENTS_AAM_RULE = "aam_rules"
     private const val SUGGESTED_EVENTS_SETTING = "suggested_events_setting"
-
     private const val PROTECTED_MODE_RULES = "protected_mode_rules"
     private const val STANDARD_PARAMS_KEY = "standard_params"
     private const val MACA_RULES_KEY = "maca_rules"
@@ -78,11 +77,9 @@ object FetchedAppSettingsManager {
     private const val TEST_DEDUPE_KEY = "test_keys"
     private const val KEY = "key"
     private const val VALUE = "value"
-
+    private const val DEDUPE_WINDOW = "iap_manual_and_auto_log_dedup_window_millis"
     private const val STD_PARAMS_SCHEMA_KEY = "standard_params_schema"
     private const val STD_PARAMS_BLOCKED_KEY = "standard_params_blocked"
-
-
     internal const val AUTO_LOG_APP_EVENTS_DEFAULT_FIELD = "auto_log_app_events_default"
     internal const val AUTO_LOG_APP_EVENT_ENABLED_FIELD = "auto_log_app_events_enabled"
 
@@ -363,7 +360,8 @@ object FetchedAppSettingsManager {
                     AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM
                 ),
                 parseDedupeParameters(appEventsConfig),
-                parseDedupeParameters(appEventsConfig, getTestValues = true)
+                parseDedupeParameters(appEventsConfig, getTestValues = true),
+                parseDedupeWindow(settingsJSON.optJSONObject(APP_SETTING_APP_EVENTS_CONFIG))
             )
         fetchedAppSettings[applicationId] = result
         return result
@@ -419,6 +417,14 @@ object FetchedAppSettingsManager {
             }
         }
         return dialogConfigMap
+    }
+
+    private fun parseDedupeWindow(parameters: JSONObject?): Long? {
+        try {
+            return parameters?.optLong(DEDUPE_WINDOW)
+        } catch (e: Exception) {
+            return null
+        }
     }
 
     private fun parseProtectedModeRules(

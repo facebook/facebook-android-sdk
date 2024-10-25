@@ -82,7 +82,8 @@ class SensitiveParamsManagerTest : FacebookPowerMockTestCase() {
             currencyDedupeParameters = emptyList(),
             purchaseValueDedupeParameters = emptyList(),
             prodDedupeParameters = emptyList(),
-            testDedupeParameters = emptyList()
+            testDedupeParameters = emptyList(),
+            dedupeWindow = 0L
         )
         PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
         whenever(FetchedAppSettingsManager.queryAppSettings(mockAppID, false))

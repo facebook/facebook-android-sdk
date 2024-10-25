@@ -155,9 +155,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(mockFetchedAppSettings.purchaseValueDedupeParameters).thenReturn(
             purchaseValueParameters
         )
+        whenever(mockFetchedAppSettings.dedupeWindow).thenReturn(60000L)
         val mockManager = mock(FetchedAppGateKeepersManager::class.java)
         Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
-
         whenever(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
             .thenReturn(true)
 

@@ -84,7 +84,8 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
             currencyDedupeParameters = currencyParameters,
             purchaseValueDedupeParameters = purchaseAmountParameters,
             prodDedupeParameters = dedupeParameters,
-            testDedupeParameters = emptyList()
+            testDedupeParameters = emptyList(),
+            dedupeWindow = 100L
         )
         whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(any())).thenReturn(
             mockFetchedAppSettings
@@ -110,5 +111,11 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
     fun `get purchase amount parameters`() {
         val newPurchaseAmountParams = InAppPurchaseDedupeConfig.getValueParameterEquivalents()
         assertEquals(newPurchaseAmountParams, purchaseAmountParameters)
+    }
+
+    @Test
+    fun `get dedupe window`() {
+        val dedupeWindow = InAppPurchaseDedupeConfig.getDedupeWindow()
+        assertEquals(dedupeWindow, 100L)
     }
 }

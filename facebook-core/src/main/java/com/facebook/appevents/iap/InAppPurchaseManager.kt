@@ -156,7 +156,7 @@ object InAppPurchaseManager {
             for ((index, timeBundlePair) in dedupeCandidates.withIndex()) {
                 val candidateTime = timeBundlePair.first
                 val candidateParameters = timeBundlePair.second
-                if (abs(time - candidateTime) > InAppPurchaseDedupeConfig.dedupeWindow) {
+                if (abs(time - candidateTime) > InAppPurchaseDedupeConfig.getDedupeWindow()) {
                     continue
                 }
                 if ((oldestValidTime == null || candidateTime < oldestValidTime)

@@ -51,6 +51,7 @@ class FetchedAppSettings(
     val purchaseValueDedupeParameters: List<String>?,
     val prodDedupeParameters: List<Pair<String, List<String>>>?,
     val testDedupeParameters: List<Pair<String, List<String>>>?,
+    val dedupeWindow: Long?
 ) {
 
     fun supportsImplicitLogging(): Boolean = supportsImplicitLogging

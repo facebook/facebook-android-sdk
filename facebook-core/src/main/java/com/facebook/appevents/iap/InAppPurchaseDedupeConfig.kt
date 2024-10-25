@@ -11,16 +11,15 @@ import java.util.concurrent.TimeUnit
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseDedupeConfig {
-    val dedupeWindow = TimeUnit.MINUTES.toMillis(1)
 
     /**
      * Default values when we fail to fetch from the server
      */
-
     private val defaultCurrencyParameterEquivalents =
         listOf(AppEventsConstants.EVENT_PARAM_CURRENCY)
     private val defaultValueParameterEquivalents =
         listOf(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)
+    private val defaultDedupeWindow = TimeUnit.MINUTES.toMillis(1)
 
     /**
      * Map of parameters we consider in deduplication to their equivalents.
@@ -104,5 +103,14 @@ object InAppPurchaseDedupeConfig {
             }
         }
         return null
+    }
+
+    fun getDedupeWindow(): Long {
+        val settings =
+            FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
+        if (settings?.dedupeWindow == null || settings.dedupeWindow == 0L) {
+            return defaultDedupeWindow
+        }
+        return settings.dedupeWindow
     }
 }
