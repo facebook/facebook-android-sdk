@@ -22,11 +22,13 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import org.json.JSONObject
 import kotlin.math.max
+import kotlin.math.min
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseLoggerManager {
     private lateinit var sharedPreferences: SharedPreferences
+    private const val APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME = 1730358000000L
     private const val PURCHASE_TIME = "purchaseTime"
     private const val IAP_SKU_CACHE_GPBLV1 = "com.facebook.internal.SKU_DETAILS"
     private const val IAP_PURCHASE_CACHE_GPBLV1 = "com.facebook.internal.PURCHASE"
@@ -103,7 +105,7 @@ object InAppPurchaseLoggerManager {
         for ((_, time) in cachedPurchaseMap) {
             newestPurchaseTime = max(newestPurchaseTime, time)
         }
-        return newestPurchaseTime * 1000L
+        return min(newestPurchaseTime * 1000L, APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME)
     }
 
     private fun logPurchases(

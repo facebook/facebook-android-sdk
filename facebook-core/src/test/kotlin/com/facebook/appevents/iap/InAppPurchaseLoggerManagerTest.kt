@@ -161,6 +161,50 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun testCacheDeDupPurchaseOnFirstTimeLoggingWithNewIAPImplementationAndInvalidCacheHistory() {
+        var timeAddedToCache: Long? = null
+        whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(0)
+        whenever(editor.putLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenAnswer {
+            timeAddedToCache = it.getArgument(1) as Long
+            return@thenAnswer editor
+        }
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
+        val lastClearedTime = 1_740_000_000L
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "cachedPurchaseMap",
+            mutableMapOf(
+                "otherpurchasetoken" to
+                        lastClearedTime
+            )
+        )
+        Whitebox.setInternalState(
+            InAppPurchaseLoggerManager::class.java,
+            "firstTimeLoggingIAP",
+            true
+        )
+
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(mockPurchaseDetailsMap, false)
+        Assertions.assertThat(cachedMap).isNotEmpty()
+        Assertions.assertThat(
+            Whitebox.getInternalState(
+                InAppPurchaseLoggerManager::class.java,
+                "firstTimeLoggingIAP"
+            ) as Boolean
+
+        ).isFalse()
+        Assertions.assertThat(timeAddedToCache).isEqualTo(1730358000001)
+    }
+
+    @Test
     fun testCacheDeDupPurchaseNotFirstTimeLoggingWithNewIAPImplementation() {
         var timeAddedToCache: Long? = null
         whenever(mockPrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(
