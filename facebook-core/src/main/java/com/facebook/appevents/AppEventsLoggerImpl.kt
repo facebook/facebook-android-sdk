@@ -26,6 +26,7 @@ import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
 import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.iap.InAppPurchase
+import com.facebook.appevents.iap.InAppPurchaseDedupeConfig
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.integrity.BlocklistEventsManager.isInBlocklist
 import com.facebook.appevents.integrity.MACARuleMatchingManager
@@ -94,30 +95,6 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
 
     fun logEvent(eventName: String?, valueToSum: Double, parameters: Bundle?) {
-        if (isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe)
-            && isImplicitPurchaseLoggingEnabled()
-            && (eventName == AppEventsConstants.EVENT_NAME_SUBSCRIBE
-                    || eventName == AppEventsConstants.EVENT_NAME_START_TRIAL)
-        ) {
-            val currencyCode = parameters?.getString(AppEventsConstants.EVENT_PARAM_CURRENCY)
-            if (currencyCode != null) {
-                try {
-                    val currency = Currency.getInstance(currencyCode)
-                    val purchase = InAppPurchase(eventName, valueToSum, currency)
-                    if (InAppPurchaseManager.isDuplicate(
-                            purchase,
-                            System.currentTimeMillis(),
-                            false
-                        )
-                    ) {
-                        return
-                    }
-
-                } catch (e: Exception) {
-                    /** Swallow invalid currency code */
-                }
-            }
-        }
         logEvent(eventName, valueToSum, parameters, false, getCurrentSessionGuid())
     }
 
@@ -133,36 +110,6 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
 
     fun logPurchase(purchaseAmount: BigDecimal?, currency: Currency?, parameters: Bundle? = null) {
-        if (isImplicitPurchaseLoggingEnabled()) {
-            Log.w(
-                TAG,
-                "You are logging purchase events while auto-logging of in-app purchase is " +
-                        "enabled in the SDK. Make sure you don't log duplicate events"
-            )
-            if (isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)) {
-                if (purchaseAmount == null) {
-                    notifyDeveloperError("purchaseAmount cannot be null")
-                    return
-                } else if (currency == null) {
-                    notifyDeveloperError("currency cannot be null")
-                    return
-                }
-                val purchase =
-                    InAppPurchase(
-                        AppEventsConstants.EVENT_NAME_PURCHASED,
-                        purchaseAmount.toDouble(),
-                        currency
-                    )
-                if (InAppPurchaseManager.isDuplicate(
-                        purchase,
-                        System.currentTimeMillis(),
-                        false,
-                    )
-                ) {
-                    return
-                }
-            }
-        }
         logPurchase(purchaseAmount, currency, parameters, false)
     }
 
@@ -192,7 +139,6 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             parameters = Bundle()
         }
         parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
-        // Dedupe implicitly and manually logged purchases
         logEvent(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             purchaseAmount.toDouble(),
@@ -366,8 +312,49 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         isImplicitlyLogged: Boolean,
         currentSessionId: UUID?
     ) {
-        if (eventName == null || eventName.isEmpty()) {
+        if (eventName.isNullOrEmpty()) {
             return
+        }
+
+        // Attempt implicit x manual purchase/subscription dedupe
+        if (!isImplicitlyLogged &&
+            isImplicitPurchaseLoggingEnabled() &&
+            (eventName == AppEventsConstants.EVENT_NAME_PURCHASED ||
+                    eventName == AppEventsConstants.EVENT_NAME_SUBSCRIBE
+                    || eventName == AppEventsConstants.EVENT_NAME_START_TRIAL)
+        ) {
+            Log.w(
+                TAG,
+                "You are logging purchase events while auto-logging of in-app purchase is " +
+                        "enabled in the SDK. Make sure you don't log duplicate events"
+            )
+            if ((isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe) &&
+                        eventName == AppEventsConstants.EVENT_NAME_PURCHASED) ||
+                (isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe) &&
+                        (eventName == AppEventsConstants.EVENT_NAME_SUBSCRIBE ||
+                                eventName == AppEventsConstants.EVENT_NAME_START_TRIAL))
+            ) {
+                val purchaseAmount =
+                    InAppPurchaseDedupeConfig.getValueOfManualEvent(valueToSum, parameters)
+                val currency = InAppPurchaseDedupeConfig.getCurrencyOfManualEvent(parameters)
+                if (purchaseAmount != null && currency != null) {
+                    val purchase =
+                        InAppPurchase(
+                            eventName,
+                            purchaseAmount.toDouble(),
+                            currency
+                        )
+                    if (InAppPurchaseManager.isDuplicate(
+                            purchase,
+                            System.currentTimeMillis(),
+                            false,
+                            parameters
+                        )
+                    ) {
+                        return
+                    }
+                }
+            }
         }
 
         // Kill events if kill-switch is enabled

@@ -11,11 +11,13 @@ package com.facebook.appevents.iap
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.NONE
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.FacebookSdk.getApplicationContext
+import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
@@ -32,12 +34,13 @@ import kotlin.math.max
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseManager {
-    private val timesOfManualPurchases = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
-    private val timesOfImplicitPurchases = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+    private val timesOfManualPurchases =
+        ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+    private val timesOfImplicitPurchases =
+        ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
     private var specificBillingLibraryVersion: String? = null;
     private const val GOOGLE_BILLINGCLIENT_VERSION = "com.google.android.play.billingclient.version"
     private val enabled = AtomicBoolean(false)
-    private val dedupeWindow = TimeUnit.MINUTES.toMillis(1)
 
     @JvmStatic
     fun enableAutoLogging() {
@@ -127,8 +130,12 @@ object InAppPurchaseManager {
         purchase: InAppPurchase,
         time: Long,
         isImplicitlyLogged: Boolean,
+        newPurchaseParameters: Bundle?
     ): Boolean {
-        val dedupeCandidates: MutableList<Long>?
+        if (newPurchaseParameters == null) {
+            return false
+        }
+        val dedupeCandidates: MutableList<Pair<Long, Bundle>>?
 
         // Round to two decimal places
         val roundedPurchase = InAppPurchase(
@@ -146,11 +153,19 @@ object InAppPurchaseManager {
         var indexOfOldestValidDedupe: Int? = null
         var oldestValidTime: Long? = null
         if (!dedupeCandidates.isNullOrEmpty()) {
-            for ((index, candidateTime) in dedupeCandidates.withIndex()) {
-                if (abs(time - candidateTime) > dedupeWindow) {
+            for ((index, timeBundlePair) in dedupeCandidates.withIndex()) {
+                val candidateTime = timeBundlePair.first
+                val candidateParameters = timeBundlePair.second
+                if (abs(time - candidateTime) > InAppPurchaseDedupeConfig.dedupeWindow) {
                     continue
                 }
-                if (oldestValidTime == null || candidateTime < oldestValidTime) {
+                if ((oldestValidTime == null || candidateTime < oldestValidTime)
+                    && atLeastOneEquivalentDedupeParameter(
+                        newPurchaseParameters,
+                        candidateParameters,
+                        !isImplicitlyLogged
+                    )
+                ) {
                     oldestValidTime = candidateTime
                     indexOfOldestValidDedupe = index
                 }
@@ -176,13 +191,38 @@ object InAppPurchaseManager {
             if (timesOfImplicitPurchases[roundedPurchase] == null) {
                 timesOfImplicitPurchases[roundedPurchase] = mutableListOf()
             }
-            timesOfImplicitPurchases[roundedPurchase]?.add(time)
+            timesOfImplicitPurchases[roundedPurchase]?.add(Pair(time, newPurchaseParameters))
         } else {
             if (timesOfManualPurchases[roundedPurchase] == null) {
                 timesOfManualPurchases[roundedPurchase] = mutableListOf()
             }
-            timesOfManualPurchases[roundedPurchase]?.add(time)
+            timesOfManualPurchases[roundedPurchase]?.add(Pair(time, newPurchaseParameters))
         }
         return false
+    }
+
+    fun atLeastOneEquivalentDedupeParameter(
+        newPurchaseParameters: Bundle,
+        oldPurchaseParameters: Bundle,
+        dedupingWithImplicitlyLoggedHistory: Boolean
+    ): Boolean {
+        val dedupeParameters =
+            InAppPurchaseDedupeConfig.getDedupeParameters(dedupingWithImplicitlyLoggedHistory)
+        for (parameter in dedupeParameters) {
+            val parameterInNewEvent = newPurchaseParameters.getString(parameter.first)
+            if (parameterInNewEvent.isNullOrEmpty()) {
+                continue
+            }
+            for (equivalentParameter in parameter.second) {
+                val parameterInOldEvent = oldPurchaseParameters.getString(equivalentParameter)
+                if (parameterInOldEvent.isNullOrEmpty()) {
+                    continue
+                }
+                if (parameterInOldEvent == parameterInNewEvent) {
+                    return true
+                }
+            }
+        }
+        return false;
     }
 }

@@ -20,6 +20,8 @@ import com.facebook.internal.FeatureManager
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -199,15 +201,23 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testIsDuplicate() {
-        val params = Bundle()
-        params.putCharSequence(Constants.IAP_PRODUCT_TYPE, "inapp")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             10.0,
             Currency.getInstance(Locale.US)
         )
         val time = System.currentTimeMillis()
-        assertEquals(false, InAppPurchaseManager.isDuplicate(purchase, time, true))
+        val bundle = Bundle()
+        bundle.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        assertEquals(
+            false,
+            InAppPurchaseManager.isDuplicate(
+                purchase,
+                time,
+                true,
+                bundle
+            )
+        )
         AppEventsConstants.EVENT_NAME_PURCHASED
         val purchaseWithDifferentCurrency =
             InAppPurchase(
@@ -217,19 +227,19 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(purchaseWithDifferentCurrency, time, false)
+            InAppPurchaseManager.isDuplicate(purchaseWithDifferentCurrency, time, false, bundle)
         )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(purchase, time + 60001, false)
+            InAppPurchaseManager.isDuplicate(purchase, time + 60001, false, bundle)
         )
         assertEquals(
             true,
-            InAppPurchaseManager.isDuplicate(purchase, time + 120000, true)
+            InAppPurchaseManager.isDuplicate(purchase, time + 120000, true, bundle)
         )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(purchase, time + 120000, false)
+            InAppPurchaseManager.isDuplicate(purchase, time + 120000, false, bundle)
         )
 
         val oneDollarPurchase = InAppPurchase(
@@ -237,25 +247,24 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             1.0,
             Currency.getInstance(Locale.US)
         )
-        assertEquals(false, InAppPurchaseManager.isDuplicate(oneDollarPurchase, 0, false))
+        assertEquals(false, InAppPurchaseManager.isDuplicate(oneDollarPurchase, 0, false, bundle))
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, false)
+            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, false, bundle)
         )
         assertEquals(
             true,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true)
+            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true, bundle)
         )
         assertEquals(
             true,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 120000, true)
+            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 120000, true, bundle)
         )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true)
+            InAppPurchaseManager.isDuplicate(oneDollarPurchase, 60000, true, bundle)
         )
 
-        params.putCharSequence(Constants.IAP_PRODUCT_TYPE, "subs")
         val oneDollarSubscription = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             1.0,
@@ -263,15 +272,15 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false)
+            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false, bundle)
         )
         assertEquals(
             true,
-            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, true)
+            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, true, bundle)
         )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false)
+            InAppPurchaseManager.isDuplicate(oneDollarSubscription, 60000, false, bundle)
         )
         val oneDollarStartTrial = InAppPurchase(
             AppEventsConstants.EVENT_NAME_START_TRIAL,
@@ -280,14 +289,14 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         )
         assertEquals(
             false,
-            InAppPurchaseManager.isDuplicate(oneDollarStartTrial, 60000, true)
+            InAppPurchaseManager.isDuplicate(oneDollarStartTrial, 60000, true, bundle)
         )
     }
 
     @Test
     fun testIsDuplicate_ConcurrentCalls() {
-        val params = Bundle()
-        params.putCharSequence(Constants.IAP_PRODUCT_TYPE, "inapp")
+        val bundle = Bundle()
+        bundle.putCharSequence(Constants.IAP_PRODUCT_TITLE, "productTitle")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             10.0,
@@ -298,10 +307,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var result1: Boolean? = null
         var result2: Boolean? = null
         val thread1 = Thread {
-            result1 = InAppPurchaseManager.isDuplicate(purchase, time1, true)
+            result1 = InAppPurchaseManager.isDuplicate(purchase, time1, true, bundle)
         }
         val thread2 = Thread {
-            result2 = InAppPurchaseManager.isDuplicate(purchase, time2, false)
+            result2 = InAppPurchaseManager.isDuplicate(purchase, time2, false, bundle)
         }
         thread1.start()
         thread2.start()
@@ -326,11 +335,11 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var result4: Boolean? = null
         executor1.execute {
             result3 =
-                InAppPurchaseManager.isDuplicate(purchase, time3, true);
+                InAppPurchaseManager.isDuplicate(purchase, time3, true, bundle);
             latch.countDown()
         }
         executor2.execute {
-            result4 = InAppPurchaseManager.isDuplicate(purchase, time4, false);
+            result4 = InAppPurchaseManager.isDuplicate(purchase, time4, false, bundle);
             latch.countDown()
         }
         latch.await()
@@ -342,5 +351,65 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             numDuplicates++
         }
         assertEquals(numDuplicates, 1)
+    }
+
+    @Test
+    fun testAtLeastOneEquivalentDedupeParameter() {
+        val newParams = Bundle()
+        val oldParams = Bundle()
+        newParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "productID")
+        oldParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "productID")
+        assertFalse(
+            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+                newParams,
+                oldParams,
+                false
+            )
+        )
+
+        newParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "prductID")
+        oldParams.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        assertFalse(
+            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+                newParams,
+                oldParams,
+                true
+            )
+        )
+        newParams.clear()
+        oldParams.clear()
+
+        newParams.putCharSequence(Constants.IAP_PRODUCT_DESCRIPTION, "description ")
+        oldParams.putCharSequence(Constants.IAP_PRODUCT_DESCRIPTION, "description ")
+        assertTrue(
+            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+                newParams,
+                oldParams,
+                true
+            )
+        )
+        newParams.clear()
+        oldParams.clear()
+
+        newParams.putCharSequence(Constants.EVENT_PARAM_PRODUCT_TITLE, "title ")
+        oldParams.putCharSequence(Constants.IAP_PRODUCT_TITLE, "title ")
+        assertFalse(
+            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+                newParams,
+                oldParams,
+                true
+            )
+        )
+        newParams.clear()
+        oldParams.clear()
+        newParams.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token ")
+        oldParams.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token ")
+        assertTrue(
+            InAppPurchaseManager.atLeastOneEquivalentDedupeParameter(
+                newParams,
+                oldParams,
+                true
+            )
+        )
     }
 }

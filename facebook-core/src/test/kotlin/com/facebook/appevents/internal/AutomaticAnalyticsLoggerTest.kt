@@ -404,14 +404,17 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     fun `test dedupe implicit subscription with GPBL v5 - v7`() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
-
-        val manualPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+        val parameters = Bundle()
+        parameters.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "id123")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             3.99,
             Currency.getInstance(Locale.US)
         )
-        manualPurchaseHistory[purchase] = mutableListOf(System.currentTimeMillis())
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), parameters))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",

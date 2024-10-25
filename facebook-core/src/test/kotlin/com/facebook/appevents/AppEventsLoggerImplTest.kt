@@ -48,7 +48,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.RuntimeEnvironment
-import java.lang.Double
 import java.util.concurrent.ConcurrentHashMap
 
 @PrepareForTest(
@@ -194,13 +193,18 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogManualDuplicateSubscriptionWithDedupeEnabled() {
-        val implicitPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        val implicitPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             1.0,
             Currency.getInstance(Locale.US)
         )
-        implicitPurchaseHistory[purchase] = mutableListOf(System.currentTimeMillis())
+        val params = Bundle()
+        params.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
+        params.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        implicitPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), params))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfImplicitPurchases",
@@ -213,8 +217,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             appEventCapture = it.arguments[1] as AppEvent
             Unit
         }
-        val params = Bundle()
-        params.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
+
         logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0, params)
         assertThat(appEventCapture?.name).isNull()
     }
@@ -329,13 +332,17 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogPurchaseWithDedupeEnabledAndIsADuplicate() {
-        val implicitPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        val implicitPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             1.0,
             Currency.getInstance(Locale.US)
         )
-        implicitPurchaseHistory[purchase] = mutableListOf(System.currentTimeMillis())
+        val parameters = Bundle()
+        parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        implicitPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), parameters))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfImplicitPurchases",
@@ -349,7 +356,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             Unit
         }
 
-        logger.logPurchase(BigDecimal(1.0), Currency.getInstance(Locale.US))
+        logger.logPurchase(BigDecimal(1.0), Currency.getInstance(Locale.US), parameters)
         assertThat(appEventCapture).isNull()
     }
 

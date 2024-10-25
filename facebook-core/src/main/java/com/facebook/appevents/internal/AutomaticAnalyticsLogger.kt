@@ -157,7 +157,12 @@ object AutomaticAnalyticsLogger {
             purchaseParams.purchaseAmount.toDouble(),
             purchaseParams.currency
         )
-        return InAppPurchaseManager.isDuplicate(inAppPurchase, System.currentTimeMillis(), true)
+        return InAppPurchaseManager.isDuplicate(
+            inAppPurchase,
+            System.currentTimeMillis(),
+            true,
+            purchaseParams.param
+        )
     }
 
     @Synchronized
@@ -173,7 +178,13 @@ object AutomaticAnalyticsLogger {
                     purchaseParams.purchaseAmount.toDouble(),
                     purchaseParams.currency
                 )
-            if (InAppPurchaseManager.isDuplicate(inAppPurchase, System.currentTimeMillis(), true)) {
+            if (InAppPurchaseManager.isDuplicate(
+                    inAppPurchase,
+                    System.currentTimeMillis(),
+                    true,
+                    purchaseParams.param
+                )
+            ) {
                 return true
             }
         }
