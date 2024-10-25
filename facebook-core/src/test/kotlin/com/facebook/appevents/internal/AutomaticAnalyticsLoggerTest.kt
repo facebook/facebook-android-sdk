@@ -130,7 +130,31 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
         whenever(Log.w(any(), any<String>())).then { logWarningCallCount++ }
         whenever(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
-
+        val dedupeParameters = listOf(
+            Pair(
+                "fb_iap_product_id",
+                listOf("fb_content_id", "fb_product_item_id", "fb_iap_product_id")
+            ),
+            Pair(
+                "fb_iap_product_title",
+                listOf("fb_content_title", "fb_product_title", "fb_iap_product_title")
+            ),
+            Pair(
+                "fb_iap_product_description",
+                listOf("fb_description", "fb_iap_product_description")
+            ),
+            Pair(
+                "fb_iap_purchase_token",
+                listOf("fb_iap_purchase_token", "fb_transaction_id", "fb_order_id")
+            )
+        )
+        whenever(mockFetchedAppSettings.prodDedupeParameters).thenReturn(dedupeParameters)
+        val currencyParameters = listOf("fb_currency", "fb_product_price_currency")
+        whenever(mockFetchedAppSettings.currencyDedupeParameters).thenReturn(currencyParameters)
+        val purchaseValueParameters = listOf("_valueToSum", "fb_product_price_amount")
+        whenever(mockFetchedAppSettings.purchaseValueDedupeParameters).thenReturn(
+            purchaseValueParameters
+        )
         val mockManager = mock(FetchedAppGateKeepersManager::class.java)
         Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
 
@@ -407,7 +431,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         val manualPurchaseHistory =
             ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
         val parameters = Bundle()
-        parameters.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "id123")
+        parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             3.99,

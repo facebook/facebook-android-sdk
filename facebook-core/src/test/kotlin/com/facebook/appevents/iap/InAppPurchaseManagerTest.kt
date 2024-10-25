@@ -17,6 +17,7 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.FetchedAppSettingsManager
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
@@ -42,7 +43,8 @@ import java.util.concurrent.Executors
     FeatureManager::class,
     InAppPurchaseActivityLifecycleTracker::class,
     InAppPurchaseAutoLogger::class,
-    InAppPurchaseManager::class
+    InAppPurchaseManager::class,
+    FetchedAppSettingsManager::class
 )
 class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     private lateinit var mockContext: Context
@@ -54,6 +56,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         PowerMockito.mockStatic(InAppPurchaseAutoLogger::class.java)
         PowerMockito.mockStatic(FeatureManager::class.java)
         PowerMockito.mockStatic(FacebookSdk::class.java)
+        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
+        whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(any())).thenReturn(null)
         Whitebox.setInternalState(InAppPurchaseManager::class.java, "enabled", AtomicBoolean(false))
         whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
     }

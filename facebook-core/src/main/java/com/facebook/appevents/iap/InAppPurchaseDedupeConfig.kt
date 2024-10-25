@@ -2,8 +2,10 @@ package com.facebook.appevents.iap
 
 import android.os.Bundle
 import androidx.annotation.RestrictTo
+import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.internal.Constants
+import com.facebook.internal.FetchedAppSettingsManager
 import java.util.Currency
 import java.util.concurrent.TimeUnit
 
@@ -35,18 +37,41 @@ object InAppPurchaseDedupeConfig {
         )
 
     fun getDedupeParameters(dedupingWithImplicitlyLoggedHistory: Boolean): List<Pair<String, List<String>>> {
-        // TODO: Fetch non-default parameters from server
-        return defaultDedupeParameters
+        val settings =
+            FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
+        if (settings?.prodDedupeParameters == null || settings.prodDedupeParameters.isEmpty()) {
+            return defaultDedupeParameters
+        }
+        if (!dedupingWithImplicitlyLoggedHistory) {
+            return settings.prodDedupeParameters
+        }
+        // If we are deduping with the implicitly logged purchases, we should let the values be the keys
+        val swappedParameters = ArrayList<Pair<String, List<String>>>()
+        for (item in settings.prodDedupeParameters) {
+            val values = item.second
+            for (value in values) {
+                swappedParameters.add(Pair(value, listOf(item.first)))
+            }
+        }
+        return swappedParameters
     }
 
-    private fun getCurrencyParameterEquivalents(): List<String> {
-        // TODO: Fetch non-default parameters from server
-        return defaultCurrencyParameterEquivalents
+    fun getCurrencyParameterEquivalents(): List<String> {
+        val settings =
+            FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
+        if (settings?.currencyDedupeParameters == null || settings.currencyDedupeParameters.isEmpty()) {
+            return defaultCurrencyParameterEquivalents
+        }
+        return settings.currencyDedupeParameters
     }
 
-    private fun getValueParameterEquivalents(): List<String> {
-        // TODO: Fetch non-default parameters from server
-        return defaultValueParameterEquivalents
+    fun getValueParameterEquivalents(): List<String> {
+        val settings =
+            FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
+        if (settings?.purchaseValueDedupeParameters == null || settings.purchaseValueDedupeParameters.isEmpty()) {
+            return defaultValueParameterEquivalents
+        }
+        return settings.purchaseValueDedupeParameters
     }
 
     fun getCurrencyOfManualEvent(parameters: Bundle?): Currency? {
