@@ -140,7 +140,12 @@ object FeatureManager {
             Feature.IapLogging,
             Feature.IapLoggingLib2,
             Feature.IapLoggingLib5To7,
+            Feature.AndroidManualImplicitPurchaseDedupe,
+            Feature.AndroidManualImplicitSubsDedupe,
+            Feature.AndroidIAPSubscriptionAutoLogging,
+            Feature.BannedParamFiltering,
             Feature.ProtectedMode,
+            Feature.StdParamEnforcement,
             Feature.MACARuleMatching,
             Feature.BlocklistEvents,
             Feature.FilterRedactedEvents,
@@ -175,17 +180,22 @@ object FeatureManager {
         SuggestedEvents(0x00010401),
         IntelligentIntegrity(0x00010402),
         ModelRequest(0x00010403),
-        FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
-        MACARuleMatching(0x00010405),
         ProtectedMode(0x00010404), /* filter out the params which are not supported legally */
+        MACARuleMatching(0x00010405),
         BlocklistEvents(0x00010406), /* drop the events in the blocklist */
         FilterRedactedEvents(0x00010407), /* replace the event name via the redaction string */
+        FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
+        StdParamEnforcement(0x01010409),
+        BannedParamFiltering(0x0101040a),
         EventDeactivation(0x00010500),
         OnDeviceEventProcessing(0x00010600),
         OnDevicePostInstallEventProcessing(0x00010601),
         IapLogging(0x00010700),
         IapLoggingLib2(0x00010701),
         IapLoggingLib5To7(0x0010702),
+        AndroidManualImplicitPurchaseDedupe(0x0010703),
+        AndroidManualImplicitSubsDedupe(0x0010704),
+        AndroidIAPSubscriptionAutoLogging(0x0010705),
         Instrument(0x00020000),
         CrashReport(0x00020100),
         CrashShield(0x00020101),
@@ -196,14 +206,12 @@ object FeatureManager {
         ServiceUpdateCompliance(0x00030100),
         Megatron(0x00040000),
         Elora(0x00050000),
-
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
         ChromeCustomTabsPrefetching(0x01010000),
         IgnoreAppSwitchToLoggedOut(0x01020000),
         BypassAppSwitch(0x01030000),
-
         // Features in ShareKit
         /** Essential of ShareKit */
         Share(0x02000000);
@@ -225,7 +233,9 @@ object FeatureManager {
                 PrivacyProtection -> "PrivacyProtection"
                 SuggestedEvents -> "SuggestedEvents"
                 IntelligentIntegrity -> "IntelligentIntegrity"
+                StdParamEnforcement -> "StdParamEnforcement"
                 ProtectedMode -> "ProtectedMode"
+                BannedParamFiltering -> "BannedParamFiltering"
                 MACARuleMatching -> "MACARuleMatching"
                 BlocklistEvents -> "BlocklistEvents"
                 FilterRedactedEvents -> "FilterRedactedEvents"
@@ -237,6 +247,9 @@ object FeatureManager {
                 IapLogging -> "IAPLogging"
                 IapLoggingLib2 -> "IAPLoggingLib2"
                 IapLoggingLib5To7 -> "IAPLoggingLib5To7"
+                AndroidManualImplicitPurchaseDedupe -> "AndroidManualImplicitPurchaseDedupe"
+                AndroidManualImplicitSubsDedupe -> "AndroidManualImplicitSubsDedupe"
+                AndroidIAPSubscriptionAutoLogging -> "AndroidIAPSubscriptionAutoLogging"
                 Monitoring -> "Monitoring"
                 Megatron -> "Megatron"
                 Elora -> "Elora"

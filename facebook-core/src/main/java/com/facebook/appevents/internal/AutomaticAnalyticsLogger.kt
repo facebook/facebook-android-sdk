@@ -16,9 +16,13 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.appevents.iap.InAppPurchase
+import com.facebook.appevents.iap.InAppPurchaseDedupeConfig
 import com.facebook.appevents.iap.InAppPurchaseEventManager
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
+import com.facebook.internal.FeatureManager
+import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.FetchedAppGateKeepersManager.getGateKeeperForKey
 import com.facebook.internal.FetchedAppSettingsManager.getAppSettingsWithoutQuery
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
@@ -83,13 +87,17 @@ object AutomaticAnalyticsLogger {
         purchase: String,
         skuDetails: String,
         isSubscription: Boolean,
-        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
+        billingClientVersion: InAppPurchaseUtils.BillingClientVersion?,
+        isFirstAppLaunch: Boolean = false
     ) {
         if (!isImplicitPurchaseLoggingEnabled()) {
             return
         }
-        val loggingParameters =
+        var loggingParameters =
             getPurchaseLoggingParameters(purchase, skuDetails, billingClientVersion) ?: return
+        if (loggingParameters.isEmpty()) {
+            return
+        }
         val logAsSubs =
             isSubscription &&
                     getGateKeeperForKey(
@@ -97,27 +105,105 @@ object AutomaticAnalyticsLogger {
                         FacebookSdk.getApplicationId(),
                         false
                     )
-        if (logAsSubs) {
-            val eventName =
-                if (InAppPurchaseEventManager.hasFreeTrialPeirod(skuDetails)) {
-                    AppEventsConstants.EVENT_NAME_START_TRIAL
-                } else {
-                    AppEventsConstants.EVENT_NAME_SUBSCRIBE
-                }
+        val eventName = if (logAsSubs) {
+            if (isFirstAppLaunch) {
+                Constants.EVENT_NAME_SUBSCRIPTION_RESTORED
+            } else if (InAppPurchaseEventManager.hasFreeTrialPeirod(skuDetails)) {
+                AppEventsConstants.EVENT_NAME_START_TRIAL
+            } else {
+                AppEventsConstants.EVENT_NAME_SUBSCRIBE
+            }
+        } else {
+            if (isFirstAppLaunch) {
+                Constants.EVENT_NAME_PURCHASE_RESTORED
+            } else {
+                AppEventsConstants.EVENT_NAME_PURCHASED
+            }
+        }
+        val dedupeParameters =
+            if (isSubscription &&
+                isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe)
+            ) {
+                getSubscriptionDedupeParameters(loggingParameters, eventName)
+            } else if (!isSubscription &&
+                isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe)
+            ) {
+                getPurchaseDedupeParameters(loggingParameters)
+            } else {
+                null
+            }
+        val combinedParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
+            dedupeParameters,
+            loggingParameters[0].param
+        )
+        loggingParameters[0].param = combinedParameters ?: Bundle()
+
+        if (eventName != AppEventsConstants.EVENT_NAME_PURCHASED) {
             internalAppEventsLogger.logEventImplicitly(
                 eventName,
-                loggingParameters.purchaseAmount,
-                loggingParameters.currency,
-                loggingParameters.param
+                loggingParameters[0].purchaseAmount,
+                loggingParameters[0].currency,
+                loggingParameters[0].param
             )
         } else {
             internalAppEventsLogger.logPurchaseImplicitly(
-                loggingParameters.purchaseAmount,
-                loggingParameters.currency,
-                loggingParameters.param
+                loggingParameters[0].purchaseAmount,
+                loggingParameters[0].currency,
+                loggingParameters[0].param
             )
         }
     }
+
+    @Synchronized
+    @JvmStatic
+    fun getPurchaseDedupeParameters(purchaseLoggingParametersList: List<PurchaseLoggingParameters>): Bundle? {
+        val purchaseParams = purchaseLoggingParametersList[0]
+        val inAppPurchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            purchaseParams.purchaseAmount.toDouble(),
+            purchaseParams.currency
+        )
+        val dedupeParameters = InAppPurchaseManager.performDedupe(
+            listOf(inAppPurchase),
+            System.currentTimeMillis(),
+            true,
+            listOf(purchaseParams.param)
+        )
+        return InAppPurchaseDedupeConfig.addDedupeParameters(
+            dedupeParameters.second,
+            dedupeParameters.first
+        )
+    }
+
+    @Synchronized
+    @JvmStatic
+    fun getSubscriptionDedupeParameters(
+        purchaseLoggingParametersList: List<PurchaseLoggingParameters>,
+        eventName: String
+    ): Bundle? {
+        val purchasesToDedupe = ArrayList<InAppPurchase>()
+        for (purchaseParams in purchaseLoggingParametersList) {
+            val inAppPurchase =
+                InAppPurchase(
+                    eventName,
+                    purchaseParams.purchaseAmount.toDouble(),
+                    purchaseParams.currency
+                )
+            purchasesToDedupe.add(inAppPurchase)
+        }
+        val dedupeParameters = InAppPurchaseManager.performDedupe(
+            purchasesToDedupe,
+            System.currentTimeMillis(),
+            true,
+            purchaseLoggingParametersList.map { it.param })
+        val combinedParameters =
+            InAppPurchaseDedupeConfig.addDedupeParameters(
+                dedupeParameters.first,
+                dedupeParameters.second
+            )
+        return combinedParameters
+    }
+
 
     @JvmStatic
     fun isImplicitPurchaseLoggingEnabled(): Boolean {
@@ -132,7 +218,7 @@ object AutomaticAnalyticsLogger {
         purchase: String,
         skuDetails: String,
         billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
-    ): PurchaseLoggingParameters? {
+    ): List<PurchaseLoggingParameters>? {
         return getPurchaseLoggingParameters(purchase, skuDetails, HashMap(), billingClientVersion)
     }
 
@@ -141,7 +227,7 @@ object AutomaticAnalyticsLogger {
         params: Bundle,
         purchaseJSON: JSONObject,
         skuDetailsJSON: JSONObject
-    ): PurchaseLoggingParameters? {
+    ): PurchaseLoggingParameters {
         if (type == InAppPurchaseUtils.IAPProductType.SUBS.type) {
             params.putCharSequence(
                 Constants.IAP_SUBSCRIPTION_AUTORENEWING,
@@ -196,50 +282,68 @@ object AutomaticAnalyticsLogger {
     private fun getPurchaseParametersGPBLV5V7(
         type: String,
         params: Bundle,
-        purchaseJSON: JSONObject,
         skuDetailsJSON: JSONObject
-    ): PurchaseLoggingParameters? {
+    ): List<PurchaseLoggingParameters>? {
         if (type == InAppPurchaseUtils.IAPProductType.SUBS.type) {
-            val subscriptionOfferDetailsJSON =
+            val subscriptionParametersList = mutableListOf<PurchaseLoggingParameters>()
+            val subscriptionOfferDetailsJSONArray =
                 skuDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS)
-                    .getJSONObject(0) ?: return null
+                    ?: return null
+            val numberOfBasePlans = subscriptionOfferDetailsJSONArray.length()
+            for (index in 0 until numberOfBasePlans) {
+                val subscriptionOfferDetailsJSON =
+                    skuDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS)
+                        .getJSONObject(index) ?: return null
+                val planSpecificBundle = Bundle(params)
+                val basePlanId =
+                    subscriptionOfferDetailsJSON.getString(Constants.GP_IAP_BASE_PLAN_ID)
+                planSpecificBundle.putCharSequence(Constants.IAP_BASE_PLAN, basePlanId)
 
-            val basePlanId = subscriptionOfferDetailsJSON.getString(Constants.GP_IAP_BASE_PLAN_ID)
-            params.putCharSequence(Constants.IAP_BASE_PLAN, basePlanId)
+                val pricingPhases =
+                    subscriptionOfferDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_PRICING_PHASES)
 
-            val pricingPhases =
-                subscriptionOfferDetailsJSON.getJSONArray(Constants.GP_IAP_SUBSCRIPTION_PRICING_PHASES)
+                // Get the price of the final phase, which is the price of the actual base plan
+                val subscriptionJSON =
+                    pricingPhases.getJSONObject(pricingPhases.length() - 1) ?: return null
 
-            // Get the price of the final phase, which is the price of the actual base plan
-            val subscriptionJSON =
-                pricingPhases.getJSONObject(pricingPhases.length() - 1) ?: return null
-
-            params.putCharSequence(
-                Constants.IAP_SUBSCRIPTION_PERIOD, subscriptionJSON.optString(
-                    Constants.GP_IAP_BILLING_PERIOD
+                planSpecificBundle.putCharSequence(
+                    Constants.IAP_SUBSCRIPTION_PERIOD, subscriptionJSON.optString(
+                        Constants.GP_IAP_BILLING_PERIOD
+                    )
                 )
-            )
-            if (subscriptionJSON.has(Constants.GP_IAP_RECURRENCE_MODE) && subscriptionJSON.getInt(
-                    Constants.GP_IAP_RECURRENCE_MODE
-                ) != 3
-            ) {
-                params.putCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING, true.toString())
-            } else {
-                params.putCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING, false.toString())
+                if (subscriptionJSON.has(Constants.GP_IAP_RECURRENCE_MODE) && subscriptionJSON.getInt(
+                        Constants.GP_IAP_RECURRENCE_MODE
+                    ) != 3
+                ) {
+                    planSpecificBundle.putCharSequence(
+                        Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                        true.toString()
+                    )
+                } else {
+                    planSpecificBundle.putCharSequence(
+                        Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                        false.toString()
+                    )
+                }
+                subscriptionParametersList.add(
+                    PurchaseLoggingParameters(
+                        BigDecimal(subscriptionJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
+                        Currency.getInstance(subscriptionJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
+                        planSpecificBundle
+                    )
+                )
             }
-            return PurchaseLoggingParameters(
-                BigDecimal(subscriptionJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
-                Currency.getInstance(subscriptionJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
-                params
-            )
+            return subscriptionParametersList
         } else {
             val oneTimePurchaseOfferDetailsJSON =
                 skuDetailsJSON.getJSONObject(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)
                     ?: return null
-            return PurchaseLoggingParameters(
-                BigDecimal(oneTimePurchaseOfferDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
-                Currency.getInstance(oneTimePurchaseOfferDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
-                params
+            return mutableListOf(
+                PurchaseLoggingParameters(
+                    BigDecimal(oneTimePurchaseOfferDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
+                    Currency.getInstance(oneTimePurchaseOfferDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
+                    params
+                )
             )
         }
     }
@@ -249,7 +353,7 @@ object AutomaticAnalyticsLogger {
         skuDetails: String,
         extraParameter: Map<String, String>,
         billingClientVersion: InAppPurchaseUtils.BillingClientVersion?
-    ): PurchaseLoggingParameters? {
+    ): List<PurchaseLoggingParameters>? {
         try {
             val purchaseJSON = JSONObject(purchase)
             val skuDetailsJSON = JSONObject(skuDetails)
@@ -299,15 +403,25 @@ object AutomaticAnalyticsLogger {
 
 
             return if (skuDetailsJSON.has(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V2V4)) {
-                // GPBL v2 - v4
-                getPurchaseParametersGPBLV2V4(type, params, purchaseJSON, skuDetailsJSON)
+                /**
+                 * We can get the specific base plan of in app purchases coming from GPBL v2-v4,
+                 * so we only need to return one PurchaseLoggingParameters object.
+                 */
+                mutableListOf(
+                    getPurchaseParametersGPBLV2V4(
+                        type,
+                        params,
+                        purchaseJSON,
+                        skuDetailsJSON
+                    )
+                )
 
             } else if (skuDetailsJSON.has(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS) || skuDetailsJSON.has(
                     Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS
                 )
             ) {
                 // GPBL v5 - v7
-                getPurchaseParametersGPBLV5V7(type, params, purchaseJSON, skuDetailsJSON)
+                getPurchaseParametersGPBLV5V7(type, params, skuDetailsJSON)
             } else {
                 null
             }
@@ -320,6 +434,6 @@ object AutomaticAnalyticsLogger {
         }
     }
 
-    private class PurchaseLoggingParameters
+    class PurchaseLoggingParameters
     internal constructor(var purchaseAmount: BigDecimal, var currency: Currency, var param: Bundle)
 }

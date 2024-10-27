@@ -11,6 +11,8 @@ package com.facebook.appevents.internal
 object Constants {
     const val LOG_TIME_APP_EVENT_KEY = "_logTime"
     const val EVENT_NAME_EVENT_KEY = "_eventName"
+    const val EVENT_NAME_PURCHASE_RESTORED = "fb_mobile_purchase_restored"
+    const val EVENT_NAME_SUBSCRIPTION_RESTORED = "SubscriptionRestore"
 
     // The following are for Automatic Analytics events and parameters
     const val AA_TIME_SPENT_EVENT_NAME = "fb_aa_time_spent_on_view"
@@ -33,6 +35,11 @@ object Constants {
     const val IAP_INTRO_PERIOD = "fb_intro_period"
     const val IAP_BASE_PLAN = "fb_iap_base_plan"
     const val IAP_BILLING_LIBRARY_VERSION = "fb_iap_client_library_version"
+    const val IAP_NON_DEDUPED_EVENT_TIME = "fb_iap_non_deduped_event_time"
+    const val IAP_ACTUAL_DEDUP_RESULT = "fb_iap_actual_dedup_result"
+    const val IAP_ACTUAL_DEDUP_KEY_USED = "fb_iap_actual_dedup_key_used"
+    const val IAP_TEST_DEDUP_RESULT = "fb_iap_test_dedup_result"
+    const val IAP_TEST_DEDUP_KEY_USED = "fb_iap_test_dedup_key_used"
 
     // The following are in app purchase parameters returned by Google Play
     const val GP_IAP_PRODUCT_ID = "productId"
@@ -117,6 +124,13 @@ object Constants {
      * event.
      */
     const val EVENT_PARAM_PRODUCT_PRICE_CURRENCY = "fb_product_price_currency"
+
+    /**
+     * Parameters used to let us know if an app has autologging turned on
+     */
+    const val EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED = "is_autolog_app_events_enabled"
+    const val EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED =
+        "is_implicit_purchase_logging_enabled"
 
     @JvmStatic
     fun getDefaultAppEventsSessionTimeoutInSeconds(): Int = 60

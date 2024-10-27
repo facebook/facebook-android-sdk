@@ -14,12 +14,14 @@ import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.iap.InAppPurchaseManager
+import com.facebook.appevents.integrity.BannedParamManager
 import com.facebook.appevents.integrity.BlocklistEventsManager
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.ml.ModelManager
 import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.appevents.integrity.RedactedEventsManager
 import com.facebook.appevents.integrity.SensitiveParamsManager
+import com.facebook.appevents.integrity.StdParamsEnforcementManager
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.checkFeature
@@ -31,6 +33,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @AutoHandleExceptions
 object AppEventsManager {
+
     /**
      * Start AppEvents functionality.
      *
@@ -61,9 +64,19 @@ object AppEventsManager {
                             EventDeactivationManager.enable()
                         }
                     }
+                    checkFeature(FeatureManager.Feature.BannedParamFiltering) { enabled ->
+                        if (enabled) {
+                            BannedParamManager.enable()
+                        }
+                    }
                     checkFeature(FeatureManager.Feature.IapLogging) { enabled ->
                         if (enabled && UserSettingsManager.getAutoLogAppEventsEnabled()) {
                             InAppPurchaseManager.enableAutoLogging()
+                        }
+                    }
+                    checkFeature(FeatureManager.Feature.StdParamEnforcement) { enabled ->
+                        if (enabled) {
+                            StdParamsEnforcementManager.enable()
                         }
                     }
                     checkFeature(FeatureManager.Feature.ProtectedMode) { enabled ->
@@ -97,6 +110,7 @@ object AppEventsManager {
                         }
                     }
                 }
+
 
                 override fun onError() = Unit
             })
