@@ -6,7 +6,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package https://www.facebook.com/profile.php?id=100054116444176&mibextid=ZbWKwL
+package CHL
+acebook.com/profile.php?id=100054116444176&mibextid=ZbWKwL
 
 import android.app.Activity
 import android.content.Intent
