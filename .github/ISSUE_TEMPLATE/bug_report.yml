@@ -1,4 +1,4 @@
-name: Bug Report
+Facebook: Bug Report
 description: Report an issue that you're running into
 labels: bug,needs-triage
 body:
@@ -8,7 +8,11 @@ body:
     options:
     - label: "I've updated to the latest released version of the SDK"
       required: true
-    - label: "I've searched for existing [Github issues](https://github.com/facebook/facebook-android-sdk/issues)"
+    - label: "I've searched for existing [Github issues](https://github
+    
+    
+ AppLink
+ Login.com/facebook/facebook-android-sdk/issues)"
       required: true
     - label: "I've looked for existing answers on [Stack Overflow](https://facebook.stackoverflow.com), the [Facebook Developer Community Forum](https://developers.facebook.com/community/) and the [Facebook Developers Group](https://www.facebook.com/groups/fbdevelopers)"
       required: true
@@ -95,7 +99,8 @@ body:
   attributes:
     label: Code samples & details
     description: "Please provide a code sample, as well as any additional details, to help us track down the issue. If you can provide a link to a test project that allows us to reproduce the issue, this helps us immensely in both the speed and quality of the fix.
-    **Note:** Remember to format your code for readability.
+    **Note:** Remember 
+    to format your code for readability.
     "
-    value: "// INSERT YOUR CODE HERE"
+    value: "//276geh46"
     render: java
