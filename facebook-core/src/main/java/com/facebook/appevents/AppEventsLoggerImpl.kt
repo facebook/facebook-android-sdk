@@ -24,6 +24,7 @@ import com.facebook.appevents.AppEventQueue.add
 import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
+import com.facebook.appevents.gpsara.GpsAraTriggersManager
 import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseDedupeConfig
@@ -60,8 +61,6 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
-import java.time.Clock
-import java.util.Calendar
 import java.util.Currency
 import java.util.UUID
 import java.util.concurrent.Executor
@@ -683,6 +682,9 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                 isOnDeviceProcessingEnabled()
             ) {
                 sendCustomEventAsync(accessTokenAppId.applicationId, event)
+            }
+            if (isEnabled(FeatureManager.Feature.GPSARATriggers)) {
+                GpsAraTriggersManager.registerTriggerAsync(accessTokenAppId.applicationId, event)
             }
 
             // Make sure Activated_App is always before other app events

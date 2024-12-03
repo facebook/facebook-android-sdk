@@ -39,8 +39,17 @@
             </intent-filter>
         </receiver>
 
+        <!-- Support for Google Privacy Sandbox adservices API -->
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/ad_services_config" />
+        <uses-library android:name="android.ext.adservices" android:required="false" />
     </application>
 
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+
+    <!-- Support for Google Privacy Sandbox adservices API -->
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" />
 
 </manifest>

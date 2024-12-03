@@ -110,6 +110,7 @@ object FeatureManager {
             arrayOf("com.facebook.appevents.ondeviceprocessing.")
         featureMapping[Feature.IapLogging] = arrayOf("com.facebook.appevents.iap.")
         featureMapping[Feature.Monitoring] = arrayOf("com.facebook.internal.logging.monitor")
+        featureMapping[Feature.GPSARATriggers] = arrayOf("com.facebook.appevents.gpsara.GpsARAManager")
     }
 
     private fun getGKStatus(feature: Feature): Boolean {
@@ -153,7 +154,8 @@ object FeatureManager {
             Feature.ChromeCustomTabsPrefetching,
             Feature.Monitoring,
             Feature.IgnoreAppSwitchToLoggedOut,
-            Feature.BypassAppSwitch -> false
+            Feature.BypassAppSwitch,
+            Feature.GPSARATriggers -> false
 
             else -> true
         }
@@ -206,6 +208,7 @@ object FeatureManager {
         ServiceUpdateCompliance(0x00030100),
         Megatron(0x00040000),
         Elora(0x00050000),
+        GPSARATriggers(0x00060000), /* privacy sandbox - attribution reporting API*/
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
@@ -253,6 +256,7 @@ object FeatureManager {
                 Monitoring -> "Monitoring"
                 Megatron -> "Megatron"
                 Elora -> "Elora"
+                GPSARATriggers -> "GPSARATriggers"
                 ServiceUpdateCompliance -> "ServiceUpdateCompliance"
                 Login -> "LoginKit"
                 ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
