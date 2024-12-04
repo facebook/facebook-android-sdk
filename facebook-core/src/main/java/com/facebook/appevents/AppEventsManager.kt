@@ -13,7 +13,7 @@ import com.facebook.UserSettingsManager
 import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
-import com.facebook.appevents.gpsara.GpsAraTriggersManager
+import com.facebook.appevents.gps.ara.GpsAraTriggersManager
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.integrity.BannedParamManager
 import com.facebook.appevents.integrity.BlocklistEventsManager

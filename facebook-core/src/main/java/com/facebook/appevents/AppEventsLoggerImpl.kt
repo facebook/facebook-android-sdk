@@ -24,7 +24,7 @@ import com.facebook.appevents.AppEventQueue.add
 import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
-import com.facebook.appevents.gpsara.GpsAraTriggersManager
+import com.facebook.appevents.gps.ara.GpsAraTriggersManager
 import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseDedupeConfig

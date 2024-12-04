@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.appevents.gpsara
+package com.facebook.appevents.gps.ara
 
 import android.adservices.common.AdServicesOutcomeReceiver
 import android.adservices.measurement.MeasurementManager
@@ -18,6 +18,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
 import com.facebook.appevents.AppEventsConstants
+import com.facebook.appevents.gps.GpsCapabilityChecker
 import com.facebook.appevents.internal.Constants.EVENT_NAME_EVENT_KEY
 import com.facebook.internal.AnalyticsEvents
 import org.junit.Before

@@ -1,4 +1,4 @@
-package com.facebook.appevents.gpsara
+package com.facebook.appevents.gps
 
 import android.os.Build
 
