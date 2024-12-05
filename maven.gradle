@@ -11,14 +11,14 @@ apply plugin: 'signing'
 apply plugin: 'org.jetbrains.dokka'
 
 def isSnapshot = version.endsWith('-SNAPSHOT')
-def ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : ""
-def ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : ""
+def ossrhUsername = hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : ""
+def ossrhPassword = hasProperty('ossrhToken') ? ossrhToken : ""
 
 task setVersion {
     // The version will be derived from source
     project.version = null
     def sdkVersionFile = file("${rootDir}/facebook-core/src/main/java/com/facebook/FacebookSdkVersion.kt")
-    sdkVersionFile.eachLine{
+    sdkVersionFile.eachLine {
         def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
         if (matcher.matches()) {
             project.version = matcher[0][1]
@@ -106,8 +106,8 @@ task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
 }
 
 artifacts {
-      archives androidSourcesJar
-      archives javadocJar
+    archives androidSourcesJar
+    archives javadocJar
 }
 
 afterEvaluate {
