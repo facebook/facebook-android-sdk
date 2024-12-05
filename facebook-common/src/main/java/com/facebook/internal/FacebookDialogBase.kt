@@ -192,23 +192,26 @@ abstract class FacebookDialogBase<CONTENT, RESULT> : FacebookDialog<CONTENT, RES
     get() = activity ?: fragmentWrapper?.activity
 
   protected fun startActivityForResult(intent: Intent, requestCode: Int) {
-    var error: String? = null
     val activity = activityContext
-    if (activity is ActivityResultRegistryOwner) {
-      DialogPresenter.startActivityForResultWithAndroidX(
-          (activity as ActivityResultRegistryOwner).activityResultRegistry,
-          callbackManager,
-          intent,
-          requestCode)
-    } else if (activity != null) {
-      activity.startActivityForResult(intent, requestCode)
-    } else if (fragmentWrapper != null) {
-      fragmentWrapper.startActivityForResult(intent, requestCode)
-    } else {
-      error = "Failed to find Activity or Fragment to startActivityForResult "
-    }
-    if (error != null) {
-      log(LoggingBehavior.DEVELOPER_ERRORS, Log.ERROR, this.javaClass.name, error)
+    when {
+        activity is ActivityResultRegistryOwner -> {
+            DialogPresenter.startActivityForResultWithAndroidX(
+                activity.activityResultRegistry,
+                callbackManager,
+                intent,
+                requestCode
+            )
+        }
+        activity != null -> {
+            activity.startActivityForResult(intent, requestCode)
+        }
+        fragmentWrapper != null -> {
+            fragmentWrapper.startActivityForResult(intent, requestCode)
+        }
+        else -> {
+            log(LoggingBehavior.DEVELOPER_ERRORS, Log.ERROR, this.javaClass.name, 
+                "Failed to find Activity or Fragment to startActivityForResult")
+        }
     }
   }
 
