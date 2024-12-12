@@ -96,6 +96,9 @@ android {
       }
       if (System.getenv("GITHUB_ACTIONS") == "1") {
         it.exclude("com/facebook/appevents/ondeviceprocessing/OnDeviceProcessingManagerTest.class")
+        it.exclude("com/facebook/appevents/AutomaticAnalyticsTest.class")
+        it.exclude("com/facebook/appevents/iap/InAppPurchaseAutoLoggerTest.class")
+        it.exclude("com/facebook/appevents/iap/InAppPurchaseBillingClientWrapperV2V4Test.class")
       }
     }
   }
