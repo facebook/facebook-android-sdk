@@ -354,17 +354,13 @@ class Task<TResult> {
   ): Task<TContinuationResult> {
     return continueWithTask(
         Continuation { task ->
-          if (ct != null && ct.isCancellationRequested) {
-            return@Continuation cancelled()
+          when {
+            ct?.isCancellationRequested == true -> cancelled()
+            task.isFaulted -> forError(task.error)
+            task.isCancelled -> cancelled()
+            else -> task.continueWith(continuation)
           }
-          if (task.isFaulted) {
-            forError(task.error)
-          } else if (task.isCancelled) {
-            cancelled()
-          } else {
-            task.continueWith(continuation)
-          }
-        },
+        }, 
         executor)
   }
 
