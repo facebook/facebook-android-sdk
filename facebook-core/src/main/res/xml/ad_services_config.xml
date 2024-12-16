@@ -23,4 +23,6 @@
 <ad-services-config>
     <!-- Attribution Reporting API -->
     <attribution allowAllToAccess="true" />
+    <!-- Protected Audience on Android API -->
+    <custom-audiences allowAllToAccess="true" />
 </ad-services-config>

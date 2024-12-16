@@ -25,6 +25,7 @@ import com.facebook.appevents.AppEventQueue.flush
 import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
 import com.facebook.appevents.gps.ara.GpsAraTriggersManager
+import com.facebook.appevents.gps.pa.PACustomAudienceClient
 import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseDedupeConfig
@@ -685,6 +686,9 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             }
             if (isEnabled(FeatureManager.Feature.GPSARATriggers)) {
                 GpsAraTriggersManager.registerTriggerAsync(accessTokenAppId.applicationId, event)
+            }
+            if (isEnabled(FeatureManager.Feature.GPSPACAProcessing)) {
+                PACustomAudienceClient.joinCustomAudience()
             }
 
             // Make sure Activated_App is always before other app events

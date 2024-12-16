@@ -10,7 +10,10 @@ package android.adservices.common;
 
 import androidx.annotation.NonNull;
 
-public interface AdServicesOutcomeReceiver<R, E extends Throwable> {
-    void onResult(R result);
-    default void onError(@NonNull E error) {}
+public class AdTechIdentifier {
+    @NonNull
+    public static AdTechIdentifier fromString(@NonNull String source) {
+        throw new RuntimeException("Stub!");
+    }
+
 }
