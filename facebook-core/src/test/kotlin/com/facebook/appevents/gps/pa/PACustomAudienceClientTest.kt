@@ -8,15 +8,20 @@
 
 package com.facebook.appevents.gps.pa
 
+import android.adservices.common.AdData
+import android.adservices.common.AdSelectionSignals
 import android.adservices.common.AdTechIdentifier
 import android.adservices.customaudience.CustomAudience
 import android.adservices.customaudience.CustomAudienceManager
 import android.adservices.customaudience.JoinCustomAudienceRequest
+import android.adservices.customaudience.TrustedBiddingData
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import android.os.OutcomeReceiver
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEvent
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -34,10 +39,9 @@ import java.util.concurrent.Executor
     Context::class,
     CustomAudienceManager::class,
     AdTechIdentifier::class,
-    CustomAudience.Builder::class,
     CustomAudience::class,
-    JoinCustomAudienceRequest.Builder::class,
     JoinCustomAudienceRequest::class,
+    AdSelectionSignals::class,
     PACustomAudienceClient::class
 )
 class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
@@ -55,12 +59,33 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
         mockStatic(AdTechIdentifier::class.java)
         whenever(AdTechIdentifier.fromString(any<String>())).thenReturn(adTech)
 
+        val ad = mock(AdData::class.java)
+        val adBuilder = mock(AdData.Builder::class.java)
+        whenever(adBuilder.setMetadata(any<String>())).thenReturn(adBuilder)
+        whenever(adBuilder.setRenderUri(any<Uri>())).thenReturn(adBuilder)
+        whenever(adBuilder.build()).thenReturn(ad)
+        whenNew(AdData.Builder::class.java).withAnyArguments().thenReturn(adBuilder)
+
+        val trustedBiddingData = mock(TrustedBiddingData::class.java)
+        val trustedBiddingDataBuilder = mock(TrustedBiddingData.Builder::class.java)
+        whenever(trustedBiddingDataBuilder.setTrustedBiddingUri(any<Uri>())).thenReturn(trustedBiddingDataBuilder)
+        whenever(trustedBiddingDataBuilder.setTrustedBiddingKeys(any<List<String>>())).thenReturn(trustedBiddingDataBuilder)
+        whenever(trustedBiddingDataBuilder.build()).thenReturn(trustedBiddingData)
+        whenNew(TrustedBiddingData.Builder::class.java).withAnyArguments().thenReturn(trustedBiddingDataBuilder)
+
+        val adSelectionSignals = mock(AdSelectionSignals::class.java)
+        mockStatic(AdSelectionSignals::class.java)
+        whenever(AdSelectionSignals.fromString(any<String>())).thenReturn(adSelectionSignals)
+
         val ca = mock(CustomAudience::class.java)
         val caBuilder = mock(CustomAudience.Builder::class.java)
         whenever(caBuilder.setName(any<String>())).thenReturn(caBuilder)
         whenever(caBuilder.setBuyer(any<AdTechIdentifier>())).thenReturn(caBuilder)
         whenever(caBuilder.setDailyUpdateUri(any<Uri>())).thenReturn(caBuilder)
         whenever(caBuilder.setBiddingLogicUri(any<Uri>())).thenReturn(caBuilder)
+        whenever(caBuilder.setAds(any<List<AdData>>())).thenReturn(caBuilder)
+        whenever(caBuilder.setTrustedBiddingData(any<TrustedBiddingData>())).thenReturn(caBuilder)
+        whenever(caBuilder.setUserBiddingSignals(any<AdSelectionSignals>())).thenReturn(caBuilder)
         whenever(caBuilder.build()).thenReturn(ca)
         whenNew(CustomAudience.Builder::class.java).withAnyArguments().thenReturn(caBuilder)
 
@@ -78,11 +103,13 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
         whenever(CustomAudienceManager.get(any<Context>())).thenReturn(null)
 
         PACustomAudienceClient.enable()
-        PACustomAudienceClient.joinCustomAudience()
+        PACustomAudienceClient.joinCustomAudience("1234", createEvent("test_event"))
 
-        verify(customAudienceManager, times(0))?.joinCustomAudience(any<JoinCustomAudienceRequest>(),
+        verify(customAudienceManager, times(0))?.joinCustomAudience(
+            any<JoinCustomAudienceRequest>(),
             any<Executor>(),
-            any<OutcomeReceiver<Any, Exception>>())
+            any<OutcomeReceiver<Any, Exception>>()
+        )
     }
 
     @Test
@@ -91,10 +118,35 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
         whenever(CustomAudienceManager.get(any<Context>())).thenReturn(customAudienceManager)
 
         PACustomAudienceClient.enable()
-        PACustomAudienceClient.joinCustomAudience()
-        verify(customAudienceManager, times(1))?.joinCustomAudience(any<JoinCustomAudienceRequest>(),
+        PACustomAudienceClient.joinCustomAudience("1234", createEvent("test_event"))
+        verify(customAudienceManager, times(1))?.joinCustomAudience(
+            any<JoinCustomAudienceRequest>(),
             any<Executor>(),
-            any<OutcomeReceiver<Any, Exception>>())
+            any<OutcomeReceiver<Any, Exception>>()
+        )
+    }
+
+    @Test
+    fun testInvalidCAName() {
+        mockStatic(CustomAudienceManager::class.java)
+        whenever(CustomAudienceManager.get(any<Context>())).thenReturn(customAudienceManager)
+
+        PACustomAudienceClient.enable()
+        PACustomAudienceClient.joinCustomAudience("1234", createEvent("_removed_"))
+        verify(customAudienceManager, times(0))?.joinCustomAudience(
+            any<JoinCustomAudienceRequest>(),
+            any<Executor>(),
+            any<OutcomeReceiver<Any, Exception>>()
+        )
+    }
+
+    private fun createEvent(eventName: String): AppEvent {
+        val params = Bundle()
+        return AppEvent(
+            "context_name", eventName, 0.0, params, false,
+            isInBackground = false,
+            currentSessionId = null
+        )
     }
 
 }

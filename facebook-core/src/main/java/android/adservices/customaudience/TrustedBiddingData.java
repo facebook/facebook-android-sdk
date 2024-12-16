@@ -6,24 +6,27 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package android.adservices.common;
+package android.adservices.customaudience;
 
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-public class AdData {
+import java.util.List;
+
+public class TrustedBiddingData {
     public static class Builder {
-        public AdData.Builder setMetadata(@NonNull String metadata) {
+        public Builder setTrustedBiddingUri(@NonNull Uri trustedBiddingUri) {
             throw new RuntimeException("Stub!");
         }
 
-        public AdData.Builder setRenderUri(@NonNull Uri renderUri){
+        public Builder setTrustedBiddingKeys(@NonNull List<String> trustedBiddingKeys) {
             throw new RuntimeException("Stub!");
         }
 
-        public AdData build() {
+        public TrustedBiddingData build() {
             throw new RuntimeException("Stub!");
         }
     }
+
 }

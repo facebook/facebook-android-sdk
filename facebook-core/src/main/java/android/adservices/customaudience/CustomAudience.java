@@ -9,6 +9,7 @@
 package android.adservices.customaudience;
 
 import android.adservices.common.AdData;
+import android.adservices.common.AdSelectionSignals;
 import android.adservices.common.AdTechIdentifier;
 import android.net.Uri;
 
@@ -39,6 +40,16 @@ public class CustomAudience {
             throw new RuntimeException("Stub!");
         }
         public CustomAudience.Builder setAds(@Nullable List<AdData> ads) {
+            throw new RuntimeException("Stub!");
+        }
+
+        public CustomAudience.Builder setUserBiddingSignals(
+                @Nullable AdSelectionSignals userBiddingSignals) {
+            throw new RuntimeException("Stub!");
+        }
+
+        public CustomAudience.Builder setTrustedBiddingData(
+                @Nullable TrustedBiddingData trustedBiddingData) {
             throw new RuntimeException("Stub!");
         }
 

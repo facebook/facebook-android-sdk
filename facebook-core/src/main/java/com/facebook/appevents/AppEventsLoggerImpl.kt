@@ -688,7 +688,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                 GpsAraTriggersManager.registerTriggerAsync(accessTokenAppId.applicationId, event)
             }
             if (isEnabled(FeatureManager.Feature.GPSPACAProcessing)) {
-                PACustomAudienceClient.joinCustomAudience()
+                PACustomAudienceClient.joinCustomAudience(accessTokenAppId.applicationId, event)
             }
 
             // Make sure Activated_App is always before other app events
