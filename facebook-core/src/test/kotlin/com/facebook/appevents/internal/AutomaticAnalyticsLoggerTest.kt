@@ -22,6 +22,7 @@ import com.facebook.appevents.OperationalDataEnum
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
+import com.facebook.appevents.internal.Constants.IAP_PURCHASE_TOKEN
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
@@ -796,6 +797,74 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `test actual and test dedupe implicit purchase with GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PURCHASE_TOKEN,
+            "token123"
+        )
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID, "id123"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            12.0,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_PRODUCT_ID
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_PURCHASE_TOKEN
+        )
+    }
+
+    @Test
     fun `test actual but not test dedupe implicit purchase with GPBL v5 - v7`() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
@@ -858,6 +927,74 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `test actual but not test dedupe implicit purchase with GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            IAP_PURCHASE_TOKEN,
+            "different token"
+        )
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID, "id123"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            12.0,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_PRODUCT_ID
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+    }
+
+    @Test
     fun `test not actual but test dedupe implicit purchase with GPBL v5 - v7`() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
@@ -874,6 +1011,73 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         )
         manualPurchaseHistory[purchase] =
             mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), IAP_PURCHASE_TOKEN
+        )
+    }
+
+    @Test
+    fun `test not actual but test dedupe implicit purchase with GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            IAP_PURCHASE_TOKEN, "token123"
+        )
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID, "different product id"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            12.0,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -982,6 +1186,74 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `test not actual nor test dedupe implicit purchase with GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            IAP_PURCHASE_TOKEN, "different purchase token"
+        )
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID,
+            "different product id"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_PURCHASED,
+            12.0,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+    }
+
+    @Test
     fun `test actual and test dedupe implicit subscription with GPBL v5 - v7`() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
@@ -998,6 +1270,73 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         )
         manualPurchaseHistory[purchase] =
             mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_PRODUCT_ID
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_PURCHASE_TOKEN
+        )
+    }
+
+    @Test
+    fun `test actual and test dedupe implicit subscription with GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            IAP_PURCHASE_TOKEN, "token123"
+        )
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID,
+            "id123"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -1252,6 +1591,269 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         )
         manualPurchaseHistory[purchase] =
             mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+                bundle,
+                operationalData
+            ), null
+        )
+
+    }
+
+    @Test
+    fun `test actual and test dedupe with dedupe key in only one subscription plan with GPBL v5 - v7 (operational data)`() {
+        val dedupeParameters = listOf(
+            Pair(
+                Constants.IAP_BASE_PLAN,
+                listOf(Constants.IAP_BASE_PLAN)
+            ),
+        )
+        whenever(mockFetchedAppSettings.prodDedupeParameters).thenReturn(dedupeParameters)
+        val testDedupeParameters = listOf(
+            Pair(Constants.IAP_SUBSCRIPTION_PERIOD, listOf(Constants.IAP_SUBSCRIPTION_PERIOD))
+        )
+        whenever(mockFetchedAppSettings.testDedupeParameters).thenReturn(testDedupeParameters)
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_BASE_PLAN,
+            "baseplanId"
+        )
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_PERIOD, "P1W"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_BASE_PLAN
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_SUBSCRIPTION_PERIOD
+        )
+    }
+
+    @Test
+    fun `test implicit subscription no actual dedupe but test dedupe and GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(OperationalDataEnum.IAPParameters, "fb_order_id", "token123")
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), "fb_order_id"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+
+    }
+
+    @Test
+    fun `test implicit subscription actual dedupe but no test dedupe and GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        opData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID,
+            "id123"
+        )
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+        whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+        AutomaticAnalyticsLogger.logPurchase(
+            subscriptionPurchase,
+            subscriptionDetailsGPBLV5V7,
+            true,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), Constants.IAP_PRODUCT_ID
+        )
+
+    }
+
+    @Test
+    fun `test implicit subscription neither actual dedupe nor test dedupe and GPBL v5 - v7 (operational data)`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val opData = OperationalData()
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            3.99,
+            Currency.getInstance(Locale.US)
+        )
+        manualPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, opData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",

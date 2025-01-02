@@ -79,6 +79,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     private val mockAdvertiserID = "fb_mock_advertiserID"
     private val mockAnonID = "fb_mock_anonID"
     private val APP_EVENTS_KILLSWITCH = "app_events_killswitch"
+    private var appEventCapture: AppEvent? = null
     private lateinit var mockParams: Bundle
     private lateinit var logger: AppEventsLoggerImpl
     private lateinit var mockFetchedAppSettings: FetchedAppSettings
@@ -136,8 +137,12 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
-            ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         )
+        whenever(AppEventQueue.add(any(), any())).thenAnswer {
+            appEventCapture = it.arguments[1] as AppEvent
+            Unit
+        }
     }
 
     fun createDedupeInfo() {
@@ -196,11 +201,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogEvent() {
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
         logger.logEvent(mockEventName)
         assertThat(appEventCapture?.name).isEqualTo(mockEventName)
     }
@@ -209,24 +209,21 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     fun testLogManualSubscriptionWithDedupeDisabled() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(false)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
         logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0)
         assertThat(appEventCapture?.name).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
     }
 
     @Test
     fun testLogManualSubscriptionWithDedupeEnabled() {
-        val implicitPurchaseHistory = ConcurrentHashMap<InAppPurchase, MutableList<Long>>()
+        val implicitPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             1.2,
             Currency.getInstance(Locale.US)
         )
-        implicitPurchaseHistory[purchase] = mutableListOf(System.currentTimeMillis())
+        implicitPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, null)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfImplicitPurchases",
@@ -234,11 +231,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
         val params = Bundle()
         params.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
         logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0, params)
@@ -267,12 +259,50 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
+        logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0, params)
+        val loggedParams =
+            appEventCapture?.getOperationalJSONObject(OperationalDataEnum.IAPParameters)
+        assertEquals(loggedParams?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(
+            loggedParams?.getString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), Constants.IAP_PRODUCT_ID
+        )
+        assertThat(appEventCapture?.name).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
+    }
 
+    @Test
+    fun testLogManualDuplicateSubscriptionWithDedupeEnabledAndOperationalDedupeKey() {
+        val implicitPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            1.0,
+            Currency.getInstance(Locale.US)
+        )
+        val params = Bundle()
+        params.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
+        params.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        val operationalData = OperationalData()
+        operationalData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            AppEventsConstants.EVENT_PARAM_CURRENCY,
+            "USD"
+        )
+        operationalData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID,
+            "productID"
+        )
+        implicitPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, operationalData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfImplicitPurchases",
+            implicitPurchaseHistory
+        )
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
         logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0, params)
         val loggedParams =
             appEventCapture?.getOperationalJSONObject(OperationalDataEnum.IAPParameters)
@@ -309,12 +339,62 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
+        val manualParams = Bundle()
+        manualParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
+        manualParams.putCharSequence(Constants.IAP_PRODUCT_ID, "other product id")
+        manualParams.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
+        logger.logEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, 1.0, manualParams)
+        val loggedParams =
+            appEventCapture?.getOperationalJSONObject(OperationalDataEnum.IAPParameters)
+        assertEquals(loggedParams?.optString(Constants.IAP_ACTUAL_DEDUP_RESULT), "")
+        assertEquals(
+            loggedParams?.optString(
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            ), ""
+        )
+        assertEquals(loggedParams?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
+        assertEquals(
+            loggedParams?.getString(
+                Constants.IAP_TEST_DEDUP_KEY_USED,
+            ), Constants.IAP_PURCHASE_TOKEN
+        )
+        assertThat(appEventCapture?.name).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
+    }
 
+    @Test
+    fun testLogManualDuplicateSubscriptionWithDedupeEnabledAndOnlyOperationalTestDedupe() {
+        createDedupeInfo()
+        val implicitPurchaseHistory =
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
+        val purchase = InAppPurchase(
+            AppEventsConstants.EVENT_NAME_SUBSCRIBE,
+            1.0,
+            Currency.getInstance(Locale.US)
+        )
+        val implicitParams = Bundle()
+        val operationalData = OperationalData()
+        implicitParams.putCharSequence(Constants.IAP_PRODUCT_ID, "productID")
+        implicitParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
+        implicitParams.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
+        operationalData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PURCHASE_TOKEN, "token123"
+        )
+        operationalData.addParameter(
+            OperationalDataEnum.IAPParameters,
+            Constants.IAP_PRODUCT_ID,
+            "productID"
+        )
+
+        implicitPurchaseHistory[purchase] =
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(null, operationalData)))
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfImplicitPurchases",
+            implicitPurchaseHistory
+        )
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
+            .thenReturn(true)
         val manualParams = Bundle()
         manualParams.putCharSequence(AppEventsConstants.EVENT_PARAM_CURRENCY, "USD")
         manualParams.putCharSequence(Constants.IAP_PRODUCT_ID, "other product id")
@@ -460,12 +540,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         createDedupeInfo()
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(false)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         logger.logPurchase(BigDecimal(1.0), Currency.getInstance(Locale.US))
         val parameters = Bundle()
         parameters.putString(
@@ -500,12 +574,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         logger.logPurchase(BigDecimal(1.0), Currency.getInstance(Locale.US))
         val parameters = Bundle()
         parameters.putString(
@@ -540,12 +608,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         logger.logPurchase(BigDecimal(1.0), Currency.getInstance(Locale.US), parameters)
         val loggedParams =
             appEventCapture?.getOperationalJSONObject(OperationalDataEnum.IAPParameters)
@@ -586,12 +648,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         val manualParameters = Bundle()
         manualParameters.putCharSequence(AppEventsConstants.EVENT_PARAM_CONTENT_ID, "productID")
         manualParameters.putCharSequence("fb_order_id", "token123")
@@ -616,12 +672,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogProductItemWithGtinMpnBrand() {
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         logger.logProductItem(
             "F40CEE4E-471E-45DB-8541-1526043F4B21",
             AppEventsLogger.ProductAvailability.IN_STOCK,
@@ -722,12 +772,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogPushNotificationOpen() {
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         val payload = Bundle()
         payload.putString("fb_push_payload", "{\"campaign\" : \"testCampaign\"}")
         logger.logPushNotificationOpen(payload, null)
@@ -755,12 +799,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testLogPushNotificationOpenWithAction() {
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         val payload = Bundle()
         payload.putString("fb_push_payload", "{\"campaign\" : \"testCampaign\"}")
         logger.logPushNotificationOpen(payload, "testAction")
@@ -845,12 +883,6 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     @Test
     fun testSetPushNotificationsRegistrationId() {
         val mockNotificationId = "123"
-        var appEventCapture: AppEvent? = null
-        whenever(AppEventQueue.add(any(), any())).thenAnswer {
-            appEventCapture = it.arguments[1] as AppEvent
-            Unit
-        }
-
         AppEventsLogger.setPushNotificationsRegistrationId(mockNotificationId)
         assertThat(appEventCapture?.name).isEqualTo(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED)
         assertThat(InternalAppEventsLogger.getPushNotificationsRegistrationId())
