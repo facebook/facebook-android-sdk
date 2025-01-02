@@ -103,7 +103,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
-    fun testCacheDeDupPurchaseOnFirstTimeLoggingWithNewIAPImplementation() {
+    fun testCacheDeDupPurchaseOnFirstTimeLogging() {
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -129,10 +129,13 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1730358000000L)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000L)
+
     }
 
     @Test
-    fun testCacheDeDupPurchaseOnFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+    fun testCacheDeDupPurchaseOnFirstTimeLoggingAndNewPurchase() {
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -159,10 +162,12 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1730358000001)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000)
     }
 
     @Test
-    fun testCacheDeDupPurchaseOnFirstTimeLoggingWithNewIAPImplementationAndInvalidCacheHistory() {
+    fun testCacheDeDupPurchaseOnFirstTimeLoggingAndInvalidCacheHistory() {
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -189,14 +194,13 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1730358000001)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000)
     }
 
     @Test
-    fun testCacheDeDupPurchaseNotFirstTimeLoggingWithNewIAPImplementation() {
-
-        whenever(mockNewCachePrefs.getLong(eq(TIME_OF_LAST_LOGGED_PURCHASE_KEY), any())).thenReturn(
-            1630000000000
-        )
+    fun testCacheDeDupPurchaseNotFirstTimeLogging() {
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = 1630000000000
 
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -206,7 +210,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
-
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
         // Test duplicate purchase event can be successfully removed from purchase details map
         val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
             mockPurchaseDetailsMap,
@@ -214,11 +218,14 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Assertions.assertThat(cachedMap).isEmpty()
 
-        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY]).isNull()
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(1730358000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000)
     }
 
     @Test
-    fun testCacheDeDupPurchaseNotFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+    fun testCacheDeDupPurchaseNotFirstTimeLoggingAndNewPurchase() {
 
         mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = 1620000000000
 
@@ -230,7 +237,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
-
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
         // Test duplicate purchase event can be successfully removed from purchase details map
         val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
             mockPurchaseDetailsMap,
@@ -240,10 +247,12 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1630000000000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000)
     }
 
     @Test
-    fun testCacheDeDupSubscriptionOnFirstTimeLoggingWithNewIAPImplementation() {
+    fun testCacheDeDupSubscriptionOnFirstTimeLogging() {
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -272,10 +281,12 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1730358000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000)
     }
 
     @Test
-    fun testCacheDeDupSubscriptionOnFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+    fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndNewPurchase() {
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -302,10 +313,109 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1730358000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000001)
     }
 
     @Test
-    fun testCacheDeDupSubscriptionNotFirstTimeLoggingWithNewIAPImplementation() {
+    fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndNewerPurchasesInOldCache() {
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
+        val lastClearedTime = 1_800_000_000L
+        val cachedPurchaseMap =
+            mutableMapOf(
+                "otherpurchasetoken" to
+                        lastClearedTime
+            )
+        putMapInOldCache(cachedPurchaseMap)
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
+            mockPurchaseDetailsMap,
+            true,
+        )
+        Assertions.assertThat(cachedMap).isEmpty()
+
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(1800000000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1800000000000)
+    }
+
+    @Test
+    fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndNewPurchasesInOldCache() {
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1835113600001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
+        val lastClearedTime = 1_800_000_000L
+        val cachedPurchaseMap =
+            mutableMapOf(
+                "otherpurchasetoken" to
+                        lastClearedTime
+            )
+        putMapInOldCache(cachedPurchaseMap)
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
+            mockPurchaseDetailsMap,
+            true,
+        )
+        Assertions.assertThat(cachedMap).isNotEmpty()
+
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1835113600001)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(1800000000000)
+    }
+
+    @Test
+    fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndInvalidValueInOldCache() {
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
+        // Construct purchase details map
+        val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
+        val purchaseDetailJson1 =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+            )
+        mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
+
+        // Construct cached purchase map
+        val lastClearedTime = 1_800L
+        val cachedPurchaseMap =
+            mutableMapOf(
+                "otherpurchasetoken" to
+                        lastClearedTime
+            )
+        putMapInOldCache(cachedPurchaseMap)
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
+        val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
+            mockPurchaseDetailsMap,
+            true,
+        )
+        Assertions.assertThat(cachedMap).isNotEmpty()
+
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(1730358000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000001)
+
+    }
+
+    @Test
+    fun testCacheDeDupSubscriptionNotFirstTimeLogging() {
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 1620000000002
 
         // Construct purchase details map
@@ -316,7 +426,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
-
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
         // Test duplicate purchase event can be successfully removed from purchase details map
         val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
             mockPurchaseDetailsMap,
@@ -324,11 +434,14 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Assertions.assertThat(cachedMap).isEmpty()
 
-        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY]).isNull()
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(1730358000000)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
+            .isEqualTo(1730358000000)
     }
 
     @Test
-    fun testCacheDeDupSubscriptionNotFirstTimeLoggingWithNewIAPImplementationAndNewPurchase() {
+    fun testCacheDeDupSubscriptionNotFirstTimeLoggingAndNewPurchase() {
 
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 1620000000000
 
@@ -340,7 +453,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
-
+        InAppPurchaseLoggerManager.migrateOldCacheHistory()
         // Test duplicate purchase event can be successfully removed from purchase details map
         val cachedMap = InAppPurchaseLoggerManager.cacheDeDupPurchase(
             mockPurchaseDetailsMap,
@@ -350,6 +463,8 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
             .isEqualTo(1620000000000001)
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(1730358000000)
     }
 
 
