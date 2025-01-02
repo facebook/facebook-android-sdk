@@ -14,6 +14,8 @@ import com.facebook.appevents.eventdeactivation.EventDeactivationManager.process
 import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.appevents.internal.AppEventsLoggerUtility.getJSONObjectForGraphAPICall
 import com.facebook.internal.AttributionIdentifiers
+import com.facebook.internal.FeatureManager
+import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONArray
@@ -149,7 +151,9 @@ internal class SessionEventsState(
         val requestParameters = request.parameters
         val jsonString = events.toString()
         requestParameters.putString("custom_events", jsonString)
-        requestParameters.putString("operational_parameters", operationalParameters.toString())
+        if (isEnabled(FeatureManager.Feature.IapLoggingLib5To7)) {
+            requestParameters.putString("operational_parameters", operationalParameters.toString())
+        }
         request.tag = jsonString
         request.parameters = requestParameters
     }
