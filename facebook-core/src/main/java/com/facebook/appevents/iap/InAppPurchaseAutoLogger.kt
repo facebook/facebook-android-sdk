@@ -13,8 +13,9 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.INAPP
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.facebook.appevents.iap.InAppPurchaseLoggerManager.getIsFirstAppLaunch
-import com.facebook.appevents.iap.InAppPurchaseLoggerManager.setAppHasBeenLaunched
+import com.facebook.appevents.iap.InAppPurchaseLoggerManager.getIsFirstAppLaunchWithNewIAP
+import com.facebook.appevents.iap.InAppPurchaseLoggerManager.migrateOldCacheHistory
+import com.facebook.appevents.iap.InAppPurchaseLoggerManager.setAppHasBeenLaunchedWithNewIAP
 import com.facebook.appevents.iap.InAppPurchaseUtils.IAPProductType.SUBS
 import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.internal.FeatureManager
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 object InAppPurchaseAutoLogger {
     val failedToCreateWrapper = AtomicBoolean(false)
 
+    @Synchronized
     @JvmStatic
     fun startIapLogging(
         context: Context,
@@ -68,7 +70,10 @@ object InAppPurchaseAutoLogger {
         billingClientVersion: InAppPurchaseUtils.BillingClientVersion,
         packageName: String
     ) {
-        val isFirstAppLaunch = getIsFirstAppLaunch()
+        val isFirstAppLaunch = getIsFirstAppLaunchWithNewIAP()
+        if (isFirstAppLaunch) {
+            migrateOldCacheHistory()
+        }
         if (billingClientVersion == V2_V4) {
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap,
@@ -84,7 +89,7 @@ object InAppPurchaseAutoLogger {
                 true,
                 packageName,
                 billingClientVersion,
-                isFirstAppLaunch
+                isFirstAppLaunch,
             )
             InAppPurchaseBillingClientWrapperV2V4.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV2V4.subsPurchaseDetailsMap.clear()
@@ -95,7 +100,7 @@ object InAppPurchaseAutoLogger {
                 false,
                 packageName,
                 billingClientVersion,
-                isFirstAppLaunch
+                isFirstAppLaunch,
             )
             InAppPurchaseLoggerManager.filterPurchaseLogging(
                 InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap,
@@ -103,13 +108,13 @@ object InAppPurchaseAutoLogger {
                 true,
                 packageName,
                 billingClientVersion,
-                isFirstAppLaunch
+                isFirstAppLaunch,
             )
             InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()
         }
         if (isFirstAppLaunch) {
-            setAppHasBeenLaunched()
+            setAppHasBeenLaunchedWithNewIAP()
         }
     }
 }

@@ -9,7 +9,6 @@
 package com.facebook.appevents.iap
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk.getApplicationContext
@@ -21,29 +20,82 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 import org.json.JSONObject
 import kotlin.Exception
+import kotlin.math.abs
+import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseLoggerManager {
-    private lateinit var sharedPreferences: SharedPreferences
+    // October 31, 2024 07:00:00 GMT
     private const val APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME = 1730358000000L
+    private const val MILLISECONDS_IN_SECONDS = 1000.0
     private const val PURCHASE_TIME = "purchaseTime"
     private const val IAP_SKU_CACHE_GPBLV1 = "com.facebook.internal.SKU_DETAILS"
     private const val IAP_PURCHASE_CACHE_GPBLV1 = "com.facebook.internal.PURCHASE"
     private const val IAP_CACHE_OLD = "com.facebook.internal.iap.PRODUCT_DETAILS"
-    private val cachedPurchaseSet: MutableSet<String> = CopyOnWriteArraySet()
-    private val cachedPurchaseMap: MutableMap<String, Long> = ConcurrentHashMap()
 
     private const val IAP_CACHE_GPBLV2V7 = "com.facebook.internal.iap.IAP_CACHE_GPBLV2V7"
     private const val CACHED_PURCHASES_KEY = "PURCHASE_DETAILS_SET"
     private const val APP_HAS_BEEN_LAUNCHED_KEY = "APP_HAS_BEEN_LAUNCHED_KEY"
     private const val TIME_OF_LAST_LOGGED_PURCHASE_KEY = "TIME_OF_LAST_LOGGED_PURCHASE"
     private const val TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY = "TIME_OF_LAST_LOGGED_SUBSCRIPTION"
-    private var oldCacheHistoryExists = false
 
-    private fun readOldCaches() {
+    @JvmStatic
+    fun migrateOldCacheHistory() {
+        var newestCandidateTime = APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME
+        val cachedPurchaseSet: MutableSet<String> = CopyOnWriteArraySet()
+        val sharedPreferences =
+            getApplicationContext().getSharedPreferences(
+                IAP_CACHE_OLD,
+                Context.MODE_PRIVATE
+            )
+        if (sharedPreferences.contains(CACHED_PURCHASES_KEY)) {
+            cachedPurchaseSet.addAll(
+                sharedPreferences.getStringSet(CACHED_PURCHASES_KEY, hashSetOf()) ?: hashSetOf()
+            )
+
+            // Construct purchase de-dup map.
+            for (purchaseHistory in cachedPurchaseSet) {
+                try {
+                    val splitPurchase = purchaseHistory.split(";", limit = 2)
+                    val timeInMilliseconds = splitPurchase[1].toLong() * 1000L
+
+                    // Don't migrate any invalid values in cache
+                    val digitsInTime = timeInMilliseconds.toString().length
+                    val digitsInReleaseTime =
+                        APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME.toString().length
+                    if (abs(digitsInTime - digitsInReleaseTime) >= log10(
+                            MILLISECONDS_IN_SECONDS
+                        )
+                    ) {
+                        continue
+                    }
+                    newestCandidateTime = max(newestCandidateTime, timeInMilliseconds)
+
+                } catch (e: Exception) {
+                    /* Swallow */
+                    continue
+                }
+            }
+        }
+        val iapCache =
+            getApplicationContext().getSharedPreferences(
+                IAP_CACHE_GPBLV2V7,
+                Context.MODE_PRIVATE
+            )
+        iapCache.edit()
+            .putLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, newestCandidateTime)
+            .apply()
+        iapCache.edit()
+            .putLong(TIME_OF_LAST_LOGGED_PURCHASE_KEY, newestCandidateTime)
+            .apply()
+        deleteOldCacheHistory()
+    }
+
+    @JvmStatic
+    fun deleteOldCacheHistory() {
         // clear cached purchases logged by lib 1
         val cachedSkuSharedPref =
             getApplicationContext()
@@ -54,31 +106,17 @@ object InAppPurchaseLoggerManager {
         cachedSkuSharedPref.edit().clear().apply()
         cachedPurchaseSharedPref.edit().clear().apply()
 
-        sharedPreferences =
+        // clear cached purchases logged by lib 2 - 3
+        val sharedPreferences =
             getApplicationContext().getSharedPreferences(
                 IAP_CACHE_OLD,
                 Context.MODE_PRIVATE
             )
-        if (sharedPreferences.contains(CACHED_PURCHASES_KEY)) {
-            oldCacheHistoryExists = true
-            cachedPurchaseSet.addAll(
-                sharedPreferences.getStringSet(CACHED_PURCHASES_KEY, hashSetOf()) ?: hashSetOf()
-            )
-
-            // Construct purchase de-dup map.
-            for (purchaseHistory in cachedPurchaseSet) {
-                val splitPurchase = purchaseHistory.split(";", limit = 2)
-                cachedPurchaseMap[splitPurchase[0]] = splitPurchase[1].toLong()
-            }
-        }
-
-
-        // clear cached purchases logged by lib2 - lib4 in the old implementation of IAP auto-logging
         sharedPreferences.edit().clear().apply()
     }
 
     @JvmStatic
-    fun getIsFirstAppLaunch(): Boolean {
+    fun getIsFirstAppLaunchWithNewIAP(): Boolean {
         val iapCache =
             getApplicationContext().getSharedPreferences(
                 IAP_CACHE_GPBLV2V7,
@@ -88,7 +126,7 @@ object InAppPurchaseLoggerManager {
     }
 
     @JvmStatic
-    fun setAppHasBeenLaunched() {
+    fun setAppHasBeenLaunchedWithNewIAP() {
         val iapCache =
             getApplicationContext().getSharedPreferences(
                 IAP_CACHE_GPBLV2V7,
@@ -110,9 +148,8 @@ object InAppPurchaseLoggerManager {
         isSubscription: Boolean,
         packageName: String,
         billingClientVersion: InAppPurchaseUtils.BillingClientVersion,
-        isFirstAppLaunch: Boolean
+        isFirstAppLaunch: Boolean,
     ) {
-        readOldCaches()
         val deduped = cacheDeDupPurchase(purchaseDetailsMap, isSubscription)
         val loggingReady = constructLoggingReadyMap(
             deduped,
@@ -120,18 +157,6 @@ object InAppPurchaseLoggerManager {
             packageName
         )
         logPurchases(loggingReady, isSubscription, billingClientVersion, isFirstAppLaunch)
-    }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun getTimeOfNewestPurchaseInOldCache(): Long {
-        var newestPurchaseTime = 0L
-        if (cachedPurchaseMap.isEmpty()) {
-            return newestPurchaseTime
-        }
-        for ((_, time) in cachedPurchaseMap) {
-            newestPurchaseTime = max(newestPurchaseTime, time)
-        }
-        return min(newestPurchaseTime * 1000L, APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME)
     }
 
     private fun logPurchases(
@@ -149,13 +174,12 @@ object InAppPurchaseLoggerManager {
                 isFirstAppLaunch
             )
         }
-
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun cacheDeDupPurchase(
         purchaseDetailsMap: MutableMap<String, JSONObject>,
-        isSubscription: Boolean
+        isSubscription: Boolean,
     ): Map<String, JSONObject> {
         val iapCache =
             getApplicationContext().getSharedPreferences(
@@ -163,16 +187,18 @@ object InAppPurchaseLoggerManager {
                 Context.MODE_PRIVATE
             )
         var timeOfLatestNewlyLoggedPurchase: Long = 0
-        var timeOfLastLoggedPurchase: Long = 0
-        if (oldCacheHistoryExists) {
-            timeOfLastLoggedPurchase = getTimeOfNewestPurchaseInOldCache()
-        } else {
+        val timeOfLastLoggedPurchase: Long =
             if (isSubscription) {
-                timeOfLastLoggedPurchase = iapCache.getLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, 0)
+                iapCache.getLong(
+                    TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY,
+                    APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME
+                )
             } else {
-                timeOfLastLoggedPurchase = iapCache.getLong(TIME_OF_LAST_LOGGED_PURCHASE_KEY, 0)
+                iapCache.getLong(
+                    TIME_OF_LAST_LOGGED_PURCHASE_KEY,
+                    APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME
+                )
             }
-        }
 
         val tempPurchaseDetailsMap: Map<String, JSONObject> = purchaseDetailsMap.toMap()
         for ((key, purchaseJson) in tempPurchaseDetailsMap) {
@@ -193,14 +219,7 @@ object InAppPurchaseLoggerManager {
                 /* swallow */
             }
         }
-        if (oldCacheHistoryExists) {
-            iapCache.edit()
-                .putLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, timeOfLatestNewlyLoggedPurchase)
-                .apply()
-            iapCache.edit()
-                .putLong(TIME_OF_LAST_LOGGED_PURCHASE_KEY, timeOfLatestNewlyLoggedPurchase)
-                .apply()
-        } else if (timeOfLatestNewlyLoggedPurchase >= timeOfLastLoggedPurchase) {
+        if (timeOfLatestNewlyLoggedPurchase >= timeOfLastLoggedPurchase) {
             if (isSubscription) {
                 iapCache.edit()
                     .putLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, timeOfLatestNewlyLoggedPurchase)
@@ -211,7 +230,6 @@ object InAppPurchaseLoggerManager {
                     .apply()
             }
         }
-        oldCacheHistoryExists = false
         return HashMap(purchaseDetailsMap)
     }
 
