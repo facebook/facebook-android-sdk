@@ -119,14 +119,15 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         parameters: Bundle?,
         operationalData: OperationalData? = null
     ) {
-        logPurchase(purchaseAmount, currency, parameters, true)
+        logPurchase(purchaseAmount, currency, parameters, true, operationalData)
     }
 
     fun logPurchase(
         purchaseAmount: BigDecimal?,
         currency: Currency?,
         parameters: Bundle?,
-        isImplicitlyLogged: Boolean
+        isImplicitlyLogged: Boolean,
+        operationalData: OperationalData? = null
     ) {
         var parameters = parameters
         if (purchaseAmount == null) {
@@ -145,7 +146,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             purchaseAmount.toDouble(),
             parameters,
             isImplicitlyLogged,
-            getCurrentSessionGuid()
+            getCurrentSessionGuid(),
+            operationalData
         )
         eagerFlush()
     }
@@ -389,7 +391,12 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             return
         }
 
-        addImplicitPurchaseParameters(modifiedParameters)
+        val (newParameters, newOperationalData) = addImplicitPurchaseParameters(
+            modifiedParameters,
+            modifiedOperationalData
+        )
+        modifiedParameters = newParameters
+        modifiedOperationalData = newOperationalData
 
         try {
             if (!ProtectedModeManager.protectedModeIsApplied(modifiedParameters)) {
@@ -510,32 +517,43 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         }
 
         @JvmStatic
-        fun addImplicitPurchaseParameters(params: Bundle?) {
-            if (params == null) {
-                return
-            }
-            if (isImplicitPurchaseLoggingEnabled()) {
-                params.putCharSequence(
-                    Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
-                    "1"
-                )
+        fun addImplicitPurchaseParameters(
+            params: Bundle?,
+            operationalData: OperationalData?
+        ): Pair<Bundle?, OperationalData?> {
+            var modifiedParams = params
+            var modifiedOperationalData = operationalData
+            var modifiedParamsAndData: Pair<Bundle?, OperationalData?>
+            val isImplicitPurchaseEnabled = if (isImplicitPurchaseLoggingEnabled()) {
+                "1"
             } else {
-                params.putCharSequence(
-                    Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
-                    "0"
-                )
+                "0"
             }
-            if (UserSettingsManager.getAutoLogAppEventsEnabled()) {
-                params.putCharSequence(
-                    Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
-                    "1"
-                )
+            modifiedParamsAndData = OperationalData.addParameterAndReturn(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
+                isImplicitPurchaseEnabled,
+                modifiedParams,
+                modifiedOperationalData
+            )
+            modifiedParams = modifiedParamsAndData.first
+            modifiedOperationalData = modifiedParamsAndData.second
+
+            val isAutoLoggingEnabled = if (UserSettingsManager.getAutoLogAppEventsEnabled()) {
+                "1"
             } else {
-                params.putCharSequence(
-                    Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
-                    "0"
-                )
+                "0"
             }
+            modifiedParamsAndData = OperationalData.addParameterAndReturn(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
+                isAutoLoggingEnabled,
+                modifiedParams,
+                modifiedOperationalData
+            )
+            modifiedParams = modifiedParamsAndData.first
+            modifiedOperationalData = modifiedParamsAndData.second
+            return Pair(modifiedParams, modifiedOperationalData)
         }
 
         @JvmStatic

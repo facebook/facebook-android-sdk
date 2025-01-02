@@ -99,7 +99,7 @@ object InAppPurchaseLoggerManager {
                 .putBoolean(APP_HAS_BEEN_LAUNCHED_KEY, true)
                 .apply()
         } catch (e: Exception) {
-            val x = 1
+            /* Swallow */
         }
     }
 

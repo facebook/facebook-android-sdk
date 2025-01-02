@@ -339,52 +339,118 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testAddImplicitPurchaseParameters() {
-        PowerMockito.mockStatic(UserSettingsManager::class.java)
-        val nullParams: Bundle? = null
-        addImplicitPurchaseParameters(nullParams)
-        assertThat(nullParams).isNull()
+        mockStatic(UserSettingsManager::class.java)
 
-        var params = Bundle(1)
+        var params: Bundle? = Bundle(1)
+        var operationalData: OperationalData? = OperationalData()
+        var paramsAndData: Pair<Bundle?, OperationalData?>?
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(true)
-        addImplicitPurchaseParameters(params)
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED)).isEqualTo(
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        params = paramsAndData.first
+        operationalData = paramsAndData.second
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "1"
         )
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED)).isEqualTo(
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "1"
         )
 
         params = Bundle(1)
+        operationalData = OperationalData()
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(false)
-        addImplicitPurchaseParameters(params)
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED)).isEqualTo(
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        params = paramsAndData.first
+        operationalData = paramsAndData.second
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "0"
         )
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED)).isEqualTo(
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "1"
         )
 
         params = Bundle(1)
+        operationalData = OperationalData()
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(true)
-        addImplicitPurchaseParameters(params)
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED)).isEqualTo(
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        params = paramsAndData.first
+        operationalData = paramsAndData.second
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "1"
         )
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED)).isEqualTo(
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "0"
         )
 
         params = Bundle(1)
+        operationalData = OperationalData()
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(false)
-        addImplicitPurchaseParameters(params)
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED)).isEqualTo(
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        params = paramsAndData.first
+        operationalData = paramsAndData.second
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_AUTOLOG_APP_EVENTS_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "0"
         )
-        assertThat(params.getCharSequence(Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED)).isEqualTo(
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
             "0"
         )
     }
