@@ -44,7 +44,23 @@ object InAppPurchaseLoggerManager {
 
     @JvmStatic
     fun migrateOldCacheHistory() {
-        var newestCandidateTime = APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME
+        val iapCache =
+            getApplicationContext().getSharedPreferences(
+                IAP_CACHE_GPBLV2V7,
+                Context.MODE_PRIVATE
+            )
+        var newestCandidateTime = max(
+            max(
+                iapCache.getLong(
+                    TIME_OF_LAST_LOGGED_PURCHASE_KEY,
+                    0L
+                ),
+                iapCache.getLong(
+                    TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY,
+                    0L
+                )
+            ), APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME
+        )
         val cachedPurchaseSet: MutableSet<String> = CopyOnWriteArraySet()
         val sharedPreferences =
             getApplicationContext().getSharedPreferences(
@@ -80,11 +96,6 @@ object InAppPurchaseLoggerManager {
                 }
             }
         }
-        val iapCache =
-            getApplicationContext().getSharedPreferences(
-                IAP_CACHE_GPBLV2V7,
-                Context.MODE_PRIVATE
-            )
         iapCache.edit()
             .putLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, newestCandidateTime)
             .apply()
@@ -135,6 +146,26 @@ object InAppPurchaseLoggerManager {
         try {
             iapCache.edit()
                 .putBoolean(APP_HAS_BEEN_LAUNCHED_KEY, true)
+                .apply()
+        } catch (e: Exception) {
+            /* Swallow */
+        }
+    }
+
+    @JvmStatic
+    fun updateLatestPossiblePurchaseTime() {
+        try {
+            val iapCache =
+                getApplicationContext().getSharedPreferences(
+                    IAP_CACHE_GPBLV2V7,
+                    Context.MODE_PRIVATE
+                )
+            val currTime = System.currentTimeMillis()
+            iapCache.edit()
+                .putLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, currTime)
+                .apply()
+            iapCache.edit()
+                .putLong(TIME_OF_LAST_LOGGED_PURCHASE_KEY, currTime)
                 .apply()
         } catch (e: Exception) {
             /* Swallow */

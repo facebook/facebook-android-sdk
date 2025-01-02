@@ -15,9 +15,11 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.UserSettingsManager
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.OperationalData
 import com.facebook.appevents.OperationalDataEnum
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FeatureManager
@@ -112,6 +114,11 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(anyOrNull())).thenReturn(
             mockFetchedAppSettings
         )
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "enabled",
+            AtomicBoolean(true)
+        )
     }
 
     @Before
@@ -145,7 +152,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             isStartIapLoggingCalled = true
             Unit
         }
-        InAppPurchaseManager.enableAutoLogging()
+        InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
     }
 
@@ -160,7 +167,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             isStartIapLoggingCalled = true
             Unit
         }
-        InAppPurchaseManager.enableAutoLogging()
+        InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isFalse
     }
 
@@ -176,7 +183,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             isStartIapLoggingCalled = true
             Unit
         }
-        InAppPurchaseManager.enableAutoLogging()
+        InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
     }
 
@@ -207,7 +214,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             isStartIapLoggingCalled = true
             Unit
         }
-        InAppPurchaseManager.enableAutoLogging()
+        InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
     }
 
@@ -238,7 +245,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             isStartIapLoggingCalled = true
             Unit
         }
-        InAppPurchaseManager.enableAutoLogging()
+        InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
     }
 
@@ -271,7 +278,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             isStartIapLoggingCalled = true
             Unit
         }
-        InAppPurchaseManager.enableAutoLogging()
+        InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isFalse
     }
 

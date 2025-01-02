@@ -24,6 +24,7 @@ import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.appevents.integrity.RedactedEventsManager
 import com.facebook.appevents.integrity.SensitiveParamsManager
 import com.facebook.appevents.integrity.StdParamsEnforcementManager
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.checkFeature
@@ -72,7 +73,7 @@ object AppEventsManager {
                         }
                     }
                     checkFeature(FeatureManager.Feature.IapLogging) { enabled ->
-                        if (enabled && UserSettingsManager.getAutoLogAppEventsEnabled()) {
+                        if (enabled) {
                             InAppPurchaseManager.enableAutoLogging()
                         }
                     }

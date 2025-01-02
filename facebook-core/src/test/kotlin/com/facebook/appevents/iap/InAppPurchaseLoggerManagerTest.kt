@@ -24,13 +24,14 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import java.util.concurrent.ConcurrentHashMap
 
 @PrepareForTest(FacebookSdk::class)
 class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     private val mockExecutor: Executor = FacebookSerialExecutor()
     private lateinit var mockNewCachePrefs: SharedPreferences
     private lateinit var mockOldCachePrefs: SharedPreferences
-    private var mockNewCachedMap: MutableMap<String, Any> = mutableMapOf()
+    private var mockNewCachedMap: MutableMap<String, Long> = ConcurrentHashMap()
     private lateinit var editor: SharedPreferences.Editor
     private val packageName = "sample.packagename"
     private val TIME_OF_LAST_LOGGED_PURCHASE_KEY = "TIME_OF_LAST_LOGGED_PURCHASE"
@@ -68,7 +69,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
                 any()
             )
         ).thenAnswer {
-            return@thenAnswer mockNewCachedMap[it.getArgument(0)]
+            return@thenAnswer mockNewCachedMap.getOrDefault(it.getArgument(0), it.getArgument(1))
         }
         whenever(
             mockNewCachePrefs.getLong(
@@ -76,7 +77,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
                 any()
             )
         ).thenAnswer {
-            return@thenAnswer mockNewCachedMap[it.getArgument(0)]
+            return@thenAnswer mockNewCachedMap.getOrDefault(it.getArgument(0), it.getArgument(1))
         }
         whenever(editor.putStringSet(any(), any())).thenReturn(editor)
         doNothing().whenever(editor).apply()
@@ -104,6 +105,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupPurchaseOnFirstTimeLogging() {
+        mockNewCachedMap.clear()
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -136,6 +138,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupPurchaseOnFirstTimeLoggingAndNewPurchase() {
+        mockNewCachedMap.clear()
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -168,6 +171,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupPurchaseOnFirstTimeLoggingAndInvalidCacheHistory() {
+        mockNewCachedMap.clear()
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
@@ -200,6 +204,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupPurchaseNotFirstTimeLogging() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = 1630000000000
 
         // Construct purchase details map
@@ -226,6 +231,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupPurchaseNotFirstTimeLoggingAndNewPurchase() {
+        mockNewCachedMap.clear()
 
         mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = 1620000000000
 
@@ -253,6 +259,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionOnFirstTimeLogging() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -287,6 +294,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndNewPurchase() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -319,6 +327,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndNewerPurchasesInOldCache() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -351,6 +360,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndNewPurchasesInOldCache() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -383,6 +393,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionOnFirstTimeLoggingAndInvalidValueInOldCache() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 0
         // Construct purchase details map
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
@@ -416,6 +427,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionNotFirstTimeLogging() {
+        mockNewCachedMap.clear()
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 1620000000002
 
         // Construct purchase details map
@@ -442,6 +454,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testCacheDeDupSubscriptionNotFirstTimeLoggingAndNewPurchase() {
+        mockNewCachedMap.clear()
 
         mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY] = 1620000000000
 
@@ -470,6 +483,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testConstructLoggingReadyMap() {
+        mockNewCachedMap.clear()
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val mockSkuDetailsMap: MutableMap<String, JSONObject> = HashMap()
         val skuDetailJson =

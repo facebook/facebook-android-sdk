@@ -16,8 +16,11 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.FacebookSdk.getApplicationContext
+import com.facebook.UserSettingsManager
 import com.facebook.appevents.OperationalData
 import com.facebook.appevents.OperationalDataEnum
+import com.facebook.appevents.iap.InAppPurchaseLoggerManager.updateLatestPossiblePurchaseTime
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
@@ -40,6 +43,10 @@ object InAppPurchaseManager {
 
     @JvmStatic
     fun enableAutoLogging() {
+        if (!isImplicitPurchaseLoggingEnabled()) {
+            updateLatestPossiblePurchaseTime()
+            return
+        }
         enabled.set(true)
         startTracking()
     }
