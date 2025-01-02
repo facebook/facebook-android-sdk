@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.annotation.RestrictTo
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
+import com.facebook.appevents.OperationalData
+import com.facebook.appevents.OperationalDataEnum
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FetchedAppSettingsManager
 import java.util.Currency
@@ -137,25 +139,32 @@ object InAppPurchaseDedupeConfig {
 
     fun addDedupeParameters(
         dedupeParameters: Bundle?,
-        originalParameters: Bundle?
-    ): Bundle? {
-        var result = originalParameters
+        originalParameters: Bundle?,
+        originalOperationalData: OperationalData?
+    ): Pair<Bundle?, OperationalData?> {
+        var bundle = originalParameters
+        var operationalData = originalOperationalData
         if (dedupeParameters == null) {
-            return result
+            return Pair(originalParameters, originalOperationalData)
         }
         try {
             for (key in dedupeParameters.keySet()) {
                 val value = dedupeParameters.getString(key)
                 if (value != null) {
-                    if (result == null) {
-                        result = Bundle()
-                    }
-                    result.putString(key, value)
+                    val (newBundle, newOperationalData) = OperationalData.addParameterAndReturn(
+                        OperationalDataEnum.IAPParameters,
+                        key,
+                        value,
+                        bundle,
+                        operationalData
+                    )
+                    bundle = newBundle
+                    operationalData = newOperationalData
                 }
             }
         } catch (e: Exception) {
             // If we run into an error parsing the bundle, just return the original parameters
         }
-        return result
+        return Pair(bundle, operationalData)
     }
 }

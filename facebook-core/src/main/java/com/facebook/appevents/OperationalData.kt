@@ -11,14 +11,11 @@ import com.facebook.appevents.internal.Constants.IAP_AUTOLOG_IMPLEMENTATION
 import com.facebook.appevents.internal.Constants.IAP_BASE_PLAN
 import com.facebook.appevents.internal.Constants.IAP_BILLING_LIBRARY_VERSION
 import com.facebook.appevents.internal.Constants.IAP_FREE_TRIAL_PERIOD
-import com.facebook.appevents.internal.Constants.IAP_INTRO_PERIOD
 import com.facebook.appevents.internal.Constants.IAP_INTRO_PRICE_AMOUNT_MICROS
 import com.facebook.appevents.internal.Constants.IAP_INTRO_PRICE_CYCLES
 import com.facebook.appevents.internal.Constants.IAP_NON_DEDUPED_EVENT_TIME
 import com.facebook.appevents.internal.Constants.IAP_PACKAGE_NAME
-import com.facebook.appevents.internal.Constants.IAP_PRODUCT_DESCRIPTION
 import com.facebook.appevents.internal.Constants.IAP_PRODUCT_ID
-import com.facebook.appevents.internal.Constants.IAP_PRODUCT_TITLE
 import com.facebook.appevents.internal.Constants.IAP_PRODUCT_TYPE
 import com.facebook.appevents.internal.Constants.IAP_PURCHASE_TIME
 import com.facebook.appevents.internal.Constants.IAP_PURCHASE_TOKEN
@@ -29,8 +26,20 @@ import com.facebook.appevents.internal.Constants.IAP_TEST_DEDUP_RESULT
 import org.json.JSONObject
 
 class OperationalData {
-    private val operationalData: MutableMap<String, MutableMap<String, Any>> =
+    private val operationalData: MutableMap<OperationalDataEnum, MutableMap<String, Any>> =
         mutableMapOf()
+
+    fun copy(): OperationalData {
+        val copy = OperationalData()
+        for (parameterType in operationalData.keys) {
+            val keyValPairs = operationalData[parameterType] ?: continue
+            for (key in keyValPairs.keys) {
+                val value = keyValPairs[key] ?: continue
+                copy.addParameter(parameterType, key, value)
+            }
+        }
+        return copy
+    }
 
     fun addParameter(type: OperationalDataEnum, key: String, value: Any) {
         try {
@@ -44,25 +53,26 @@ class OperationalData {
                     )
                 )
             }
-            if (type.value !in operationalData) {
-                operationalData[type.value] = mutableMapOf()
+            if (type !in operationalData) {
+                operationalData[type] = mutableMapOf()
             }
-            operationalData[type.value]?.put(key, value)
+            operationalData[type]?.put(key, value)
         } catch (e: Exception) {
             /* Swallow */
         }
     }
 
     fun getParameter(type: OperationalDataEnum, key: String): Any? {
-        if (type.value !in operationalData) {
+        if (type !in operationalData) {
             return null
         }
-        return operationalData[type.value]?.get(key)
+        return operationalData[type]?.get(key)
     }
 
     fun toJSON(): JSONObject {
         val json = try {
-            (operationalData as Map<*, *>?)?.let { JSONObject(it) }
+            val transformedMap = operationalData.mapKeys { entry -> entry.key.value }.toMap()
+            JSONObject(transformedMap)
         } catch (e: Exception) {
             null
         }
@@ -162,6 +172,70 @@ class OperationalData {
                     )
                 }
             }
+        }
+
+        fun addParameterAndReturn(
+            typeOfParameter: OperationalDataEnum,
+            key: String,
+            value: String,
+            customEventsParams: Bundle?,
+            operationalData: OperationalData?
+        ): Pair<Bundle?, OperationalData?> {
+            val classification = getParameterClassification(typeOfParameter, key)
+            var modifiedParams: Bundle? = customEventsParams
+            var modifiedOperationalData: OperationalData? = operationalData
+            when (classification) {
+                ParameterClassification.CustomData -> {
+                    if (modifiedParams == null) {
+                        modifiedParams = Bundle()
+                    }
+                    modifiedParams.putCharSequence(
+                        key,
+                        value
+                    )
+                }
+
+                ParameterClassification.OperationalData -> {
+                    if (modifiedOperationalData == null) {
+                        modifiedOperationalData = OperationalData()
+                    }
+                    modifiedOperationalData.addParameter(
+                        typeOfParameter,
+                        key,
+                        value
+                    )
+                }
+
+                ParameterClassification.CustomAndOperationalData -> {
+                    if (modifiedOperationalData == null) {
+                        modifiedOperationalData = OperationalData()
+                    }
+                    if (modifiedParams == null) {
+                        modifiedParams = Bundle()
+                    }
+                    modifiedOperationalData.addParameter(
+                        typeOfParameter,
+                        key,
+                        value
+                    )
+                    modifiedParams.putCharSequence(
+                        key,
+                        value
+                    )
+                }
+            }
+            return Pair(modifiedParams, modifiedOperationalData)
+        }
+
+        fun getParameter(
+            typeOfParameter: OperationalDataEnum,
+            key: String,
+            params: Bundle?,
+            operationalData: OperationalData?
+        ): Any? {
+            val opValue = operationalData?.getParameter(typeOfParameter, key)
+            val eventValue = params?.getCharSequence(key)
+            return opValue ?: eventValue
         }
     }
 }

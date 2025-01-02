@@ -267,10 +267,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(purchase),
                 time,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
         val purchaseWithDifferentCurrency =
             InAppPurchase(
                 AppEventsConstants.EVENT_NAME_PURCHASED,
@@ -282,40 +281,39 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(purchaseWithDifferentCurrency),
                 time,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
 
         result =
             InAppPurchaseManager.performDedupe(
                 listOf(purchase),
                 time + 60001,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
         result =
             InAppPurchaseManager.performDedupe(
                 listOf(purchase),
                 time + 120000,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            result.first?.getString(
+            result?.getString(
                 Constants.IAP_ACTUAL_DEDUP_KEY_USED,
             ), Constants.IAP_PRODUCT_ID
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_RESULT,
             ), "1"
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_KEY_USED,
             ), "other_dedup_key"
         )
@@ -324,10 +322,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(purchase),
                 time + 120000,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
 
         val oneDollarPurchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
@@ -339,39 +337,39 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarPurchase),
                 0,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
         result =
             InAppPurchaseManager.performDedupe(
                 listOf(oneDollarPurchase),
                 60000,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
         result =
             InAppPurchaseManager.performDedupe(
                 listOf(oneDollarPurchase),
                 60000,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            result.first?.getString(
+            result?.getString(
                 Constants.IAP_ACTUAL_DEDUP_KEY_USED,
             ), Constants.IAP_PRODUCT_ID
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_RESULT,
             ), "1"
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_KEY_USED,
             ), "other_dedup_key"
         )
@@ -380,21 +378,21 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarPurchase),
                 120000,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            result.first?.getString(
+            result?.getString(
                 Constants.IAP_ACTUAL_DEDUP_KEY_USED,
             ), Constants.IAP_PRODUCT_ID
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_RESULT,
             ), "1"
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_KEY_USED,
             ), "other_dedup_key"
         )
@@ -403,10 +401,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarPurchase),
                 60000,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
 
         val oneDollarSubscription = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
@@ -418,30 +416,30 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarSubscription),
                 60000,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
         result =
             InAppPurchaseManager.performDedupe(
                 listOf(oneDollarSubscription),
                 60000,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            result.first?.getString(
+            result?.getString(
                 Constants.IAP_ACTUAL_DEDUP_KEY_USED,
             ), Constants.IAP_PRODUCT_ID
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_RESULT,
             ), "1"
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_KEY_USED,
             ), "other_dedup_key"
         )
@@ -450,10 +448,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarSubscription),
                 60000,
                 false,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
         val oneDollarStartTrial = InAppPurchase(
             AppEventsConstants.EVENT_NAME_START_TRIAL,
             1.0,
@@ -464,10 +462,10 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarStartTrial),
                 60000,
                 true,
-                listOf(bundle)
+                listOf(Pair(bundle, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
 
         val bundleWithImplicitlyLoggedTestParameter = bundleOf(Pair("other_dedup_key", "value"))
         result =
@@ -475,29 +473,29 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(oneDollarStartTrial),
                 100000,
                 true,
-                listOf(bundleWithImplicitlyLoggedTestParameter)
+                listOf(Pair(bundleWithImplicitlyLoggedTestParameter, null))
             )
-        assertThat(result.first).isNull()
-        assertThat(result.second).isNull()
+        assertThat(result).isNull()
+
         val bundleWithManuallyLoggedTestParameter = bundleOf(Pair("other_dedup_key1", "value"))
         result =
             InAppPurchaseManager.performDedupe(
                 listOf(oneDollarStartTrial),
                 100000,
                 false,
-                listOf(bundleWithManuallyLoggedTestParameter)
+                listOf(Pair(bundleWithManuallyLoggedTestParameter, null))
             )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_RESULT,
             ), "1"
         )
         assertEquals(
-            result.second?.getString(
+            result?.getString(
                 Constants.IAP_TEST_DEDUP_KEY_USED,
             ), "other_dedup_key1"
         )
-        assertEquals(result.first?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
+        assertEquals(result?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
     }
 
     @Test
@@ -518,16 +516,16 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(purchase),
                 time1,
                 true,
-                listOf(bundle)
-            ).first
+                listOf(Pair(bundle, null))
+            )
         }
         val thread2 = Thread {
             result2 = InAppPurchaseManager.performDedupe(
                 listOf(purchase),
                 time2,
                 false,
-                listOf(bundle)
-            ).first
+                listOf(Pair(bundle, null))
+            )
         }
         thread1.start()
         thread2.start()
@@ -556,8 +554,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                     listOf(purchase),
                     time3,
                     true,
-                    listOf(bundle)
-                ).first
+                    listOf(Pair(bundle, null))
+                )
             latch.countDown()
         }
         executor2.execute {
@@ -565,8 +563,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
                 listOf(purchase),
                 time4,
                 false,
-                listOf(bundle)
-            ).first
+                listOf(Pair(bundle, null))
+            )
             latch.countDown()
         }
         latch.await()
@@ -589,7 +587,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var result =
             InAppPurchaseManager.getDedupeParameter(
                 newParams,
+                null,
                 oldParams,
+                null,
                 false
             )
         assertThat(result).isNull()
@@ -600,7 +600,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         result =
             InAppPurchaseManager.getDedupeParameter(
                 newParams,
+                null,
                 oldParams,
+                null,
                 true
             )
         assertThat(result).isNull()
@@ -612,7 +614,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         result =
             InAppPurchaseManager.getDedupeParameter(
                 newParams,
+                null,
                 oldParams,
+                null,
                 true
             )
         assertThat(result).isNotNull()
@@ -624,7 +628,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         result =
             InAppPurchaseManager.getDedupeParameter(
                 newParams,
+                null,
                 oldParams,
+                null,
                 true
             )
         assertThat(result).isNotNull()
@@ -635,7 +641,9 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         result =
             InAppPurchaseManager.getDedupeParameter(
                 newParams,
+                null,
                 oldParams,
+                null,
                 true
             )
         assertThat(result).isNotNull()

@@ -116,7 +116,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     fun logPurchaseImplicitly(
         purchaseAmount: BigDecimal?,
         currency: Currency?,
-        parameters: Bundle?
+        parameters: Bundle?,
+        operationalData: OperationalData? = null
     ) {
         logPurchase(purchaseAmount, currency, parameters, true)
     }
@@ -291,7 +292,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         eventName: String?,
         purchaseAmount: BigDecimal?,
         currency: Currency?,
-        parameters: Bundle?
+        parameters: Bundle?,
+        operationalData: OperationalData? = null
     ) {
         var parameters = parameters
         if (purchaseAmount == null || currency == null) {
@@ -302,7 +304,14 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             parameters = Bundle()
         }
         parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
-        logEvent(eventName, purchaseAmount.toDouble(), parameters, true, getCurrentSessionGuid())
+        logEvent(
+            eventName,
+            purchaseAmount.toDouble(),
+            parameters,
+            true,
+            getCurrentSessionGuid(),
+            operationalData
+        )
     }
 
     fun logEvent(
@@ -310,13 +319,15 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         valueToSum: Double?,
         parameters: Bundle?,
         isImplicitlyLogged: Boolean,
-        currentSessionId: UUID?
+        currentSessionId: UUID?,
+        operationalData: OperationalData? = null
     ) {
         if (eventName.isNullOrEmpty()) {
             return
         }
 
         var modifiedParameters = parameters
+        var modifiedOperationalData = operationalData
         // Attempt implicit x manual purchase/subscription dedupe
         if (!isImplicitlyLogged &&
             isImplicitPurchaseLoggingEnabled() &&
@@ -349,16 +360,15 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                         listOf(purchase),
                         System.currentTimeMillis(),
                         false,
-                        listOf(parameters)
+                        listOf(Pair(parameters, operationalData)),
                     )
-                    val combinedDedupeParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
-                        dedupeParameters.second,
-                        dedupeParameters.first
+                    val (newParameters, newOperationalData) = InAppPurchaseDedupeConfig.addDedupeParameters(
+                        dedupeParameters,
+                        modifiedParameters,
+                        operationalData
                     )
-                    modifiedParameters = InAppPurchaseDedupeConfig.addDedupeParameters(
-                        combinedDedupeParameters,
-                        modifiedParameters
-                    )
+                    modifiedParameters = newParameters
+                    modifiedOperationalData = newOperationalData
                 }
             }
         }
@@ -398,6 +408,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                     isImplicitlyLogged,
                     isInBackground(),
                     currentSessionId,
+                    modifiedOperationalData
                 )
             logEvent(event, accessTokenAppId)
         } catch (jsonException: JSONException) {

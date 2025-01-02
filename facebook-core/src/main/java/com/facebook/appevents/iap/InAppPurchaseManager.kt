@@ -16,6 +16,8 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
 import com.facebook.FacebookSdk.getApplicationContext
+import com.facebook.appevents.OperationalData
+import com.facebook.appevents.OperationalDataEnum
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
@@ -29,9 +31,9 @@ import kotlin.math.abs
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseManager {
     private val timesOfManualPurchases =
-        ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+        ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
     private val timesOfImplicitPurchases =
-        ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+        ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>>()
     private var specificBillingLibraryVersion: String? = null;
     private const val GOOGLE_BILLINGCLIENT_VERSION = "com.google.android.play.billingclient.version"
     private val enabled = AtomicBoolean(false)
@@ -125,16 +127,15 @@ object InAppPurchaseManager {
         purchases: List<InAppPurchase>,
         time: Long,
         isImplicitlyLogged: Boolean,
-        purchaseParameters: List<Bundle?>?
-    ): Pair<Bundle?, Bundle?> {
+        purchaseParameters: List<Pair<Bundle?, OperationalData?>>
+    ): Bundle? {
         if (purchaseParameters.isNullOrEmpty()) {
-            return Pair(null, null)
+            return null
         }
         if (purchases.size != purchaseParameters?.size) {
-            return Pair(null, null)
+            return null
         }
-        var actualDedupeParameters: Bundle? = null
-        var testDedupeParameters: Bundle? = null
+        var dedupeParameters: Bundle? = null
 
         /**
          * After deduplication, we will have a series of entries to remove from the cached history.
@@ -145,9 +146,9 @@ object InAppPurchaseManager {
 
         for (i in purchases.indices) {
             val purchase = purchases[i]
-            val newPurchaseParameters = purchaseParameters[i] ?: continue
+            val (newPurchaseParameters, newPurchaseOperationalData) = purchaseParameters[i]
 
-            val dedupeCandidates: MutableList<Pair<Long, Bundle>>?
+            val dedupeCandidates: MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>?
             var foundActualDuplicate = false
 
             // Round to two decimal places
@@ -169,19 +170,23 @@ object InAppPurchaseManager {
             if (!dedupeCandidates.isNullOrEmpty()) {
                 for (timeBundlePair in dedupeCandidates) {
                     val candidateTime = timeBundlePair.first
-                    val candidateParameters = timeBundlePair.second
+                    val (candidateParameters, candidateOperationalData) = timeBundlePair.second
                     if (abs(time - candidateTime) > InAppPurchaseDedupeConfig.getDedupeWindow()) {
                         continue
                     }
                     if ((oldestValidTime == null || candidateTime < oldestValidTime)) {
                         dedupeParameter = getDedupeParameter(
                             newPurchaseParameters,
+                            newPurchaseOperationalData,
                             candidateParameters,
+                            candidateOperationalData,
                             !isImplicitlyLogged
                         )
                         val potentialTestDedupeParameter = getDedupeParameter(
                             newPurchaseParameters,
+                            newPurchaseOperationalData,
                             candidateParameters,
+                            candidateOperationalData,
                             !isImplicitlyLogged,
                             withTestDedupeKeys = true
                         )
@@ -201,9 +206,11 @@ object InAppPurchaseManager {
             // If we would have deduped with the test dedupe keys,
             // we should include the relevant parameters.
             if (testDedupeParameter != null) {
-                testDedupeParameters = Bundle()
-                testDedupeParameters.putString(Constants.IAP_TEST_DEDUP_RESULT, "1")
-                testDedupeParameters.putString(
+                if (dedupeParameters == null) {
+                    dedupeParameters = Bundle()
+                }
+                dedupeParameters.putString(Constants.IAP_TEST_DEDUP_RESULT, "1")
+                dedupeParameters.putString(
                     Constants.IAP_TEST_DEDUP_KEY_USED,
                     testDedupeParameter
                 )
@@ -213,17 +220,19 @@ object InAppPurchaseManager {
             // If we found an actual duplicate,
             // we should include the relevant parameters.
             if (foundActualDuplicate) {
-                actualDedupeParameters = Bundle()
+                if (dedupeParameters == null) {
+                    dedupeParameters = Bundle()
+                }
                 val oldestValidTimeInSeconds = oldestValidTime?.div(1000) ?: 0
-                actualDedupeParameters.putString(
+                dedupeParameters.putString(
                     Constants.IAP_NON_DEDUPED_EVENT_TIME,
                     oldestValidTimeInSeconds.toString()
                 )
-                actualDedupeParameters.putString(
+                dedupeParameters.putString(
                     Constants.IAP_ACTUAL_DEDUP_RESULT,
                     "1"
                 )
-                actualDedupeParameters.putString(
+                dedupeParameters.putString(
                     Constants.IAP_ACTUAL_DEDUP_KEY_USED,
                     dedupeParameter
                 )
@@ -234,12 +243,22 @@ object InAppPurchaseManager {
                 if (timesOfImplicitPurchases[roundedPurchase] == null) {
                     timesOfImplicitPurchases[roundedPurchase] = mutableListOf()
                 }
-                timesOfImplicitPurchases[roundedPurchase]?.add(Pair(time, newPurchaseParameters))
+                timesOfImplicitPurchases[roundedPurchase]?.add(
+                    Pair(
+                        time,
+                        Pair(newPurchaseParameters, newPurchaseOperationalData)
+                    )
+                )
             } else if (!isImplicitlyLogged && !foundActualDuplicate) {
                 if (timesOfManualPurchases[roundedPurchase] == null) {
                     timesOfManualPurchases[roundedPurchase] = mutableListOf()
                 }
-                timesOfManualPurchases[roundedPurchase]?.add(Pair(time, newPurchaseParameters))
+                timesOfManualPurchases[roundedPurchase]?.add(
+                    Pair(
+                        time,
+                        Pair(newPurchaseParameters, newPurchaseOperationalData)
+                    )
+                )
             }
         }
 
@@ -275,12 +294,14 @@ object InAppPurchaseManager {
             }
         }
 
-        return Pair(actualDedupeParameters, testDedupeParameters)
+        return dedupeParameters
     }
 
     fun getDedupeParameter(
-        newPurchaseParameters: Bundle,
-        oldPurchaseParameters: Bundle,
+        newPurchaseParameters: Bundle?,
+        newPurchaseOperationalData: OperationalData?,
+        oldPurchaseParameters: Bundle?,
+        oldPurchaseOperationalData: OperationalData?,
         dedupingWithImplicitlyLoggedHistory: Boolean,
         withTestDedupeKeys: Boolean = false
     ): String? {
@@ -293,12 +314,22 @@ object InAppPurchaseManager {
             return null
         }
         for (parameter in dedupeParameters) {
-            val parameterInNewEvent = newPurchaseParameters.getString(parameter.first)
+            val parameterInNewEvent = OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                parameter.first,
+                newPurchaseParameters,
+                newPurchaseOperationalData
+            ) as? String
             if (parameterInNewEvent.isNullOrEmpty()) {
                 continue
             }
             for (equivalentParameter in parameter.second) {
-                val parameterInOldEvent = oldPurchaseParameters.getString(equivalentParameter)
+                val parameterInOldEvent = OperationalData.getParameter(
+                    OperationalDataEnum.IAPParameters,
+                    equivalentParameter,
+                    oldPurchaseParameters,
+                    oldPurchaseOperationalData
+                ) as? String
                 if (parameterInOldEvent.isNullOrEmpty()) {
                     continue
                 }

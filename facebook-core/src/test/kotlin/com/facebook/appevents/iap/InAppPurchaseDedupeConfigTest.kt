@@ -3,6 +3,10 @@ package com.facebook.appevents.iap
 import androidx.core.os.bundleOf
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.appevents.OperationalDataEnum
+import com.facebook.appevents.internal.Constants.IAP_PRODUCT_DESCRIPTION
+import com.facebook.appevents.internal.Constants.IAP_PRODUCT_ID
+import com.facebook.appevents.internal.Constants.IAP_PURCHASE_TOKEN
 import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
@@ -15,6 +19,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import kotlin.test.assertNull
 
 @PrepareForTest(
     FetchedAppSettingsManager::class,
@@ -139,37 +144,86 @@ class InAppPurchaseDedupeConfigTest : FacebookPowerMockTestCase() {
 
     @Test
     fun `add dedupe parameters`() {
-        assertEquals(InAppPurchaseDedupeConfig.addDedupeParameters(null, null), null)
+        assertEquals(
+            InAppPurchaseDedupeConfig.addDedupeParameters(null, null, null),
+            Pair(null, null)
+        )
         val originalParams = bundleOf(Pair("key", "value"))
         assertEquals(
-            InAppPurchaseDedupeConfig.addDedupeParameters(null, originalParams)?.getString("key"),
+            InAppPurchaseDedupeConfig.addDedupeParameters(null, originalParams, null)
+                .first?.getString("key"),
             "value"
         )
         assertEquals(
-            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, null)?.getString("key"),
+            InAppPurchaseDedupeConfig.addDedupeParameters(
+                originalParams,
+                null,
+                null
+            ).first?.getString("key"),
             "value"
         )
-        val dedupeParams = bundleOf(Pair("key1", "value1"))
-        val bothParams = bundleOf(Pair("key1", "value1"), Pair("key", "value"))
+        var dedupeParams = bundleOf(Pair("key1", "value1"))
         assertEquals(
-            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, dedupeParams)
-                ?.getString("key"),
+            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, dedupeParams, null)
+                .first?.getString("key"),
             "value"
         )
         assertEquals(
-            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, dedupeParams)
-                ?.getString("key1"),
+            InAppPurchaseDedupeConfig.addDedupeParameters(originalParams, dedupeParams, null)
+                .first?.getString("key1"),
             "value1"
         )
         assertEquals(
-            InAppPurchaseDedupeConfig.addDedupeParameters(dedupeParams, originalParams)
-                ?.getString("key"),
+            InAppPurchaseDedupeConfig.addDedupeParameters(dedupeParams, originalParams, null)
+                .first?.getString("key"),
             "value"
         )
         assertEquals(
-            InAppPurchaseDedupeConfig.addDedupeParameters(dedupeParams, originalParams)
+            InAppPurchaseDedupeConfig.addDedupeParameters(dedupeParams, originalParams, null).first
                 ?.getString("key1"),
             "value1"
+        )
+        dedupeParams = bundleOf(
+            Pair(IAP_PRODUCT_ID, "product_id"),
+            Pair(
+                IAP_PURCHASE_TOKEN, "purchase_token"
+            ),
+            Pair(
+                IAP_PRODUCT_DESCRIPTION, "product_description"
+            )
+        )
+        val (newParams, newOperationalData) = InAppPurchaseDedupeConfig.addDedupeParameters(
+            dedupeParams,
+            null,
+            null
+        )
+        assertEquals(
+            newParams
+                ?.getString(IAP_PRODUCT_ID),
+            "product_id"
+        )
+        assertEquals(
+            newOperationalData
+                ?.getParameter(OperationalDataEnum.IAPParameters, IAP_PRODUCT_ID),
+            "product_id"
+        )
+        assertNull(
+            newParams
+                ?.getString(IAP_PURCHASE_TOKEN)
+        )
+        assertEquals(
+            newOperationalData
+                ?.getParameter(OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN),
+            "purchase_token"
+        )
+        assertEquals(
+            newParams
+                ?.getString(IAP_PRODUCT_DESCRIPTION),
+            "product_description"
+        )
+        assertNull(
+            newOperationalData
+                ?.getParameter(OperationalDataEnum.IAPParameters, IAP_PRODUCT_DESCRIPTION)
         )
     }
 }

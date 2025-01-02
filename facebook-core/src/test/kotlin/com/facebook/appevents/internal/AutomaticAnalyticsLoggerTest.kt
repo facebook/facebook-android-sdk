@@ -17,6 +17,8 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.appevents.OperationalData
+import com.facebook.appevents.OperationalDataEnum
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.iap.InAppPurchaseUtils
@@ -86,6 +88,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     private lateinit var mockFetchedAppSettings: FetchedAppSettings
     private var eventName: String? = null
     private var bundle: Bundle? = null
+    private var operationalData: OperationalData? = null
     private var amount: BigDecimal? = null
     private var currency: Currency? = null
 
@@ -177,6 +180,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).thenAnswer {
@@ -184,6 +188,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             amount = it.getArgument(1) as BigDecimal
             currency = it.getArgument(2) as Currency
             bundle = it.getArgument(3) as Bundle
+            operationalData = it.getArgument(4) as OperationalData
             Unit
         }
         whenever(
@@ -191,11 +196,13 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 any(),
                 any(),
                 any(),
+                any()
             )
         ).thenAnswer {
             amount = it.getArgument(0) as BigDecimal
             currency = it.getArgument(1) as Currency
             bundle = it.getArgument(2) as Bundle
+            operationalData = it.getArgument(3) as OperationalData
             Unit
         }
     }
@@ -303,39 +310,102 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 eq(AppEventsConstants.EVENT_NAME_START_TRIAL),
                 any<BigDecimal>(),
                 any<Currency>(),
-                any<Bundle>()
+                any<Bundle>(), any<OperationalData>()
             )
 
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("subs")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
-            .isEqualTo("true")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_FREE_TRIAL_PERIOD))
-            .isEqualTo("P1W")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PERIOD))
-            .isEqualTo("P1W")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PRICE_AMOUNT_MICROS))
-            .isEqualTo("3590000")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
-            .isEqualTo("P1W")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("subs")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("true")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_FREE_TRIAL_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P1W")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_INTRO_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P1W")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("3590000")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P1W")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_START_TRIAL)
         Assertions.assertThat(
-            bundle?.getCharSequence(
-                Constants.IAP_BILLING_LIBRARY_VERSION,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_BILLING_LIBRARY_VERSION, bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
 
@@ -354,37 +424,95 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
                 any<BigDecimal>(),
                 any<Currency>(),
-                any<Bundle>()
+                any<Bundle>(), any<OperationalData>()
             )
 
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("subs")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
-            .isEqualTo("true")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PRICE_AMOUNT_MICROS))
-            .isEqualTo("3590000")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_INTRO_PERIOD))
-            .isEqualTo("P1W")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
-            .isEqualTo("P1W")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("subs")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("true")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("3590000")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_INTRO_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P1W")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P1W")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
         Assertions.assertThat(
-            bundle?.getCharSequence(
-                Constants.IAP_BILLING_LIBRARY_VERSION,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_BILLING_LIBRARY_VERSION, bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
     }
@@ -404,30 +532,84 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
                 any<BigDecimal>(),
                 any<Currency>(),
-                any<Bundle>()
+                any<Bundle>(), any<OperationalData>()
             )
 
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
-            .isEqualTo("Exampledescription.")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("subs")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
-            .isEqualTo("true")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
-            .isEqualTo("P2W")
-        val basePlanId = bundle?.getCharSequence(Constants.IAP_BASE_PLAN)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_DESCRIPTION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("Exampledescription.")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("subs")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("true")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P2W")
+        val basePlanId = OperationalData.getParameter(
+            OperationalDataEnum.IAPParameters, Constants.IAP_BASE_PLAN, bundle,
+            operationalData
+        )
         val validBasePlan = basePlanId == "baseplanId" || basePlanId == "basePlanId2"
         Assertions.assertThat(validBasePlan)
             .isTrue()
@@ -435,8 +617,10 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(AppEventsConstants.EVENT_NAME_SUBSCRIBE)
         Assertions.assertThat(
-            bundle?.getCharSequence(
-                Constants.IAP_BILLING_LIBRARY_VERSION,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_BILLING_LIBRARY_VERSION, bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
     }
@@ -456,30 +640,84 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 eq(Constants.EVENT_NAME_SUBSCRIPTION_RESTORED),
                 any<BigDecimal>(),
                 any<Currency>(),
-                any<Bundle>()
+                any<Bundle>(), any<OperationalData>()
             )
 
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
-            .isEqualTo("Exampledescription.")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("subs")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_AUTORENEWING))
-            .isEqualTo("true")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD))
-            .isEqualTo("P2W")
-        val basePlanId = bundle?.getCharSequence(Constants.IAP_BASE_PLAN)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_DESCRIPTION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("Exampledescription.")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("subs")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("true")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_SUBSCRIPTION_PERIOD,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("P2W")
+        val basePlanId = OperationalData.getParameter(
+            OperationalDataEnum.IAPParameters, Constants.IAP_BASE_PLAN, bundle,
+            operationalData
+        )
         val validBasePlan = basePlanId == "baseplanId" || basePlanId == "basePlanId2"
         Assertions.assertThat(validBasePlan)
             .isTrue()
@@ -487,8 +725,10 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(amount).isEqualTo(BigDecimal(3.99))
         Assertions.assertThat(eventName).isEqualTo(Constants.EVENT_NAME_SUBSCRIPTION_RESTORED)
         Assertions.assertThat(
-            bundle?.getCharSequence(
-                Constants.IAP_BILLING_LIBRARY_VERSION,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_BILLING_LIBRARY_VERSION, bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
     }
@@ -498,8 +738,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
@@ -508,7 +749,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -521,17 +762,35 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             false,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(bundle?.keySet()?.size, 14)
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
+
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PURCHASE_TOKEN
         )
     }
@@ -541,8 +800,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "different token")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
@@ -551,7 +811,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -564,17 +824,35 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             false,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(bundle?.keySet()?.size, 12)
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), null)
+
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), null
         )
     }
@@ -584,8 +862,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "different product id")
         val purchase = InAppPurchase(
@@ -594,7 +873,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -607,17 +886,35 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             false,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
             ), null
         )
-        assertEquals(bundle?.keySet()?.size, 11)
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PURCHASE_TOKEN
         )
     }
@@ -627,8 +924,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "different purchase token")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "different product id")
         val purchase = InAppPurchase(
@@ -637,7 +935,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -650,17 +948,35 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             false,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
             ), null
         )
-        assertEquals(bundle?.keySet()?.size, 9)
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), null
         )
     }
@@ -670,8 +986,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
@@ -680,7 +997,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -693,17 +1010,34 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             true,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(bundle?.keySet()?.size, 17)
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PURCHASE_TOKEN
         )
     }
@@ -724,8 +1058,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence(Constants.IAP_BASE_PLAN, "baseplanId")
         parameters.putCharSequence(Constants.IAP_SUBSCRIPTION_PERIOD, "P1W")
         val purchase = InAppPurchase(
@@ -734,7 +1069,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -747,17 +1082,35 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             true,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_BASE_PLAN
         )
-        assertEquals(bundle?.keySet()?.size, 17)
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
+
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_SUBSCRIPTION_PERIOD
         )
     }
@@ -767,8 +1120,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         parameters.putCharSequence("fb_order_id", "token123")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
@@ -776,7 +1130,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -789,19 +1143,37 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             true,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
             ), "fb_order_id"
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
             ), null
         )
-        assertEquals(bundle?.keySet()?.size, 14)
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+
     }
 
     @Test
@@ -809,7 +1181,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
@@ -817,8 +1189,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             3.99,
             Currency.getInstance(Locale.US)
         )
+        val emptyOperationalData = OperationalData()
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -831,19 +1204,37 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             true,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
             ), null
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), "1")
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), "1"
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_KEY_USED, bundle,
+                operationalData
             ), Constants.IAP_PRODUCT_ID
         )
-        assertEquals(bundle?.keySet()?.size, 15)
+
     }
 
     @Test
@@ -851,15 +1242,16 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitSubsDedupe))
             .thenReturn(true)
         val manualPurchaseHistory =
-            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Bundle>>>()
+            ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
+        val emptyOperationalData = OperationalData()
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
             3.99,
             Currency.getInstance(Locale.US)
         )
         manualPurchaseHistory[purchase] =
-            mutableListOf(Pair(System.currentTimeMillis(), parameters))
+            mutableListOf(Pair(System.currentTimeMillis(), Pair(parameters, emptyOperationalData)))
         Whitebox.setInternalState(
             InAppPurchaseManager::class.java,
             "timesOfManualPurchases",
@@ -872,19 +1264,38 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             true,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
-        assertEquals(bundle?.getString(Constants.IAP_TEST_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
-                Constants.IAP_TEST_DEDUP_KEY_USED,
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_RESULT,
+                bundle,
+                operationalData
             ), null
         )
-        assertEquals(bundle?.getString(Constants.IAP_ACTUAL_DEDUP_RESULT), null)
         assertEquals(
-            bundle?.getString(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            ), null
+        )
+        assertEquals(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
                 Constants.IAP_ACTUAL_DEDUP_KEY_USED,
+                bundle,
+                operationalData
             ), null
         )
-        assertEquals(bundle?.keySet()?.size, 12)
+
     }
 
     @Test
@@ -896,28 +1307,76 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             InAppPurchaseUtils.BillingClientVersion.V2_V4
         )
         verify(mockInternalAppEventsLogger)
-            .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+            .logPurchaseImplicitly(
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>(), any<OperationalData>()
+            )
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
-            .isEqualTo("Exampledescription.")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("inapp")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V2_V4.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_DESCRIPTION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("Exampledescription.")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("inapp")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
         Assertions.assertThat(
-            bundle?.getCharSequence(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
                 Constants.IAP_BILLING_LIBRARY_VERSION,
+                bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
     }
@@ -931,28 +1390,76 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             InAppPurchaseUtils.BillingClientVersion.V5_V7
         )
         verify(mockInternalAppEventsLogger)
-            .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
+            .logPurchaseImplicitly(
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>(), any<OperationalData>(),
+            )
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
-            .isEqualTo("Exampledescription.")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("inapp")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_DESCRIPTION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("Exampledescription.")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("inapp")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
         Assertions.assertThat(
-            bundle?.getCharSequence(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
                 Constants.IAP_BILLING_LIBRARY_VERSION,
+                bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
 
@@ -972,30 +1479,74 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 eq(Constants.EVENT_NAME_PURCHASE_RESTORED),
                 any<BigDecimal>(),
                 any<Currency>(),
-                any<Bundle>()
+                any<Bundle>(), any<OperationalData>()
             )
         Assertions.assertThat(bundle).isNotNull
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_AUTOLOG_IMPLEMENTATION))
-            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_ID)).isEqualTo("id123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TIME))
-            .isEqualTo("12345")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PURCHASE_TOKEN))
-            .isEqualTo("token123")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PACKAGE_NAME))
-            .isEqualTo("examplePackageName")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TITLE))
-            .isEqualTo("ExampleTitle")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_DESCRIPTION))
-            .isEqualTo("Exampledescription.")
-        Assertions.assertThat(bundle?.getCharSequence(Constants.IAP_PRODUCT_TYPE))
-            .isEqualTo("inapp")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_AUTOLOG_IMPLEMENTATION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7.type)
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("12345")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("examplePackageName")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TITLE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("ExampleTitle")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_DESCRIPTION,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("Exampledescription.")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.IAP_PRODUCT_TYPE,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("inapp")
         Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
         Assertions.assertThat(amount).isEqualTo(BigDecimal(12))
         Assertions.assertThat(eventName).isEqualTo(Constants.EVENT_NAME_PURCHASE_RESTORED)
         Assertions.assertThat(
-            bundle?.getCharSequence(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
                 Constants.IAP_BILLING_LIBRARY_VERSION,
+                bundle,
+                operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
 
