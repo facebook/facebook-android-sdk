@@ -397,7 +397,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                     modifiedParameters,
                     isImplicitlyLogged,
                     isInBackground(),
-                    currentSessionId
+                    currentSessionId,
                 )
             logEvent(event, accessTokenAppId)
         } catch (jsonException: JSONException) {
