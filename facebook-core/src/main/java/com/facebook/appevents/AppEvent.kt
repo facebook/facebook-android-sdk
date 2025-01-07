@@ -137,7 +137,6 @@ class AppEvent : Serializable {
         if (isImplicit) {
             eventObject.put("_implicitlyLogged", "1")
         } else {
-            eventObject.put("_implicitlyLogged", "0")
             log(
                 LoggingBehavior.APP_EVENTS,
                 "AppEvents",

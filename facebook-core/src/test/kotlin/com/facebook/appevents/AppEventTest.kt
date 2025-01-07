@@ -48,13 +48,6 @@ class AppEventTest : FacebookPowerMockTestCase() {
     }
 
     @Test
-    fun testIsImplicitlyLogged() {
-        val appEvent = AppEventTestUtilities.getTestAppEvent()
-        val json = appEvent.getJSONObject()
-        assertThat(json.getString("_implicitlyLogged")).isEqualTo("0")
-    }
-
-    @Test
     fun testAppEventSerializedChecksum() {
         val appEvent1 = AppEventTestUtilities.getTestAppEvent()
         val byteArrayOutputStream = ByteArrayOutputStream()
