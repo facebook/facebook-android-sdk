@@ -130,9 +130,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000L)
+            .isEqualTo(1736528400000L)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000L)
+            .isEqualTo(1736528400000L)
 
     }
 
@@ -143,7 +143,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
             JSONObject(
-                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1736528400001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
@@ -164,9 +164,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isNotEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000001)
+            .isEqualTo(1736528400001)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
     @Test
@@ -176,7 +176,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
             JSONObject(
-                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1736528400001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
@@ -197,9 +197,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isNotEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000001)
+            .isEqualTo(1736528400001)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
     @Test
@@ -224,9 +224,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
     @Test
@@ -254,7 +254,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
             .isEqualTo(1630000000000000)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
     @Test
@@ -287,9 +287,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
     @Test
@@ -300,7 +300,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
             JSONObject(
-                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1736528400001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
@@ -320,9 +320,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isNotEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000001)
+            .isEqualTo(1736528400001)
     }
 
     @Test
@@ -333,7 +333,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
             JSONObject(
-                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1736528400001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
@@ -399,7 +399,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         val mockPurchaseDetailsMap: MutableMap<String, JSONObject> = mutableMapOf()
         val purchaseDetailJson1 =
             JSONObject(
-                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1730358000001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1736528400001,\"developerPayload\":null,\"packageName\":\"sample.packagename\"}"
             )
         mockPurchaseDetailsMap["espresso"] = purchaseDetailJson1
 
@@ -419,9 +419,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isNotEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000001)
+            .isEqualTo(1736528400001)
 
     }
 
@@ -447,9 +447,9 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(cachedMap).isEmpty()
 
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
     @Test
@@ -477,7 +477,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY])
             .isEqualTo(1620000000000001)
         Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
-            .isEqualTo(1730358000000)
+            .isEqualTo(1736528400000)
     }
 
 

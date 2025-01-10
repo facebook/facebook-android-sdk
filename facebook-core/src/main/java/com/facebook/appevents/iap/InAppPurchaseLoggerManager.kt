@@ -28,8 +28,8 @@ import kotlin.math.min
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InAppPurchaseLoggerManager {
-    // October 31, 2024 07:00:00 GMT
-    private const val APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME = 1730358000000L
+    // January 10, 2025 05:00:00 PM GMT
+    private const val APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME = 1736528400000L
     private const val MILLISECONDS_IN_SECONDS = 1000.0
     private const val PURCHASE_TIME = "purchaseTime"
     private const val IAP_SKU_CACHE_GPBLV1 = "com.facebook.internal.SKU_DETAILS"
