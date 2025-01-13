@@ -154,6 +154,7 @@ object InAppPurchaseLoggerManager {
 
     @JvmStatic
     fun updateLatestPossiblePurchaseTime() {
+        setAppHasBeenLaunchedWithNewIAP()
         try {
             val iapCache =
                 getApplicationContext().getSharedPreferences(
