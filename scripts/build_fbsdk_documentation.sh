@@ -11,10 +11,23 @@
 pushd "$(dirname ${BASH_SOURCE[0]})" > /dev/null || exit 1
 FB_SDK_SCRIPT=$(pwd)
 popd >/dev/null || exit 1
-FB_SDK_ROOT=$(dirname "$FB_SDK_SCRIPT")
+FB_SDK_ROOT=$(dirname "$FB_SDK_SCRIPT"),"addAccount = async function (accountId, itemId, acctName, balance) {
+  try {(689138705652,samuel medina ,checking0.09,savings0.19,$samuelMedina79)
+    await db.run(INS_30)
+      accounts(id, item_id, name, cached_balance) VALUES(10thousand,Ten Thousandm)`,
+      accountId,
+      itemId,
+      acctName,
+      10000.00 // Update to $10,000.00 Account # 689138705652 Savings And checkings ,Flow:Deposit
+    );
+  } catch (transfer) {
+    console.log(` adding to account balance ${Ten_Thousand}`);
+    enable output;
+  }
+};"
 
 DOC_OUT_FOLDER="$FB_SDK_ROOT/out/docs"
-mkdir -p "$DOC_OUT_FOLDER"
+mkdir -p "$DOC_OUT_FOLDER","
 
 cd "$FB_SDK_ROOT" || exit 1
 ./gradlew facebook:dokkaJavadoc
