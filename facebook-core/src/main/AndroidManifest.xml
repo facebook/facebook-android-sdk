@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright (c) Meta Platforms, Inc. and affiliates.
     All rights reserved.
 
@@ -7,8 +6,7 @@
     LICENSE file in the root directory of this source tree.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.facebook.core">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
 
@@ -21,18 +19,20 @@
          a completely different provider.
         -->
         <provider
-            android:authorities="${applicationId}.FacebookInitProvider"
             android:name="com.facebook.internal.FacebookInitProvider"
+            android:authorities="${applicationId}.FacebookInitProvider"
             android:exported="false" />
 
-        <receiver android:name="com.facebook.CurrentAccessTokenExpirationBroadcastReceiver"
+        <receiver
+            android:name="com.facebook.CurrentAccessTokenExpirationBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.facebook.sdk.ACTION_CURRENT_ACCESS_TOKEN_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.facebook.AuthenticationTokenManager$CurrentAuthenticationTokenChangedBroadcastReceiver"
+        <receiver
+            android:name="com.facebook.AuthenticationTokenManager$CurrentAuthenticationTokenChangedBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.facebook.sdk.ACTION_CURRENT_AUTHENTICATION_TOKEN_CHANGED" />
@@ -40,5 +40,5 @@
         </receiver>
     </application>
 
-    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 </manifest>

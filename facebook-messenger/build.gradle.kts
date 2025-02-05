@@ -28,6 +28,7 @@ dependencies {
 
 android {
     buildToolsVersion = "35.0.0"
+    namespace = "com.facebook.messenger"
     compileSdkVersion(Config.compileSdk)
 
     defaultConfig {

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright (c) Meta Platforms, Inc. and affiliates.
     All rights reserved.
 
@@ -7,8 +6,7 @@
     LICENSE file in the root directory of this source tree.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.facebook.gamingservices">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application android:supportsRtl="true">
 

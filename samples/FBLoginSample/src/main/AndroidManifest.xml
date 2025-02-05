@@ -1,8 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    package="com.facebook.fbloginsample">
-
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".FBLoginSampleApp"
@@ -13,24 +11,24 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".FacebookLoginActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation">
-        </activity>
-        <activity android:name=".PostFeedActivity"/>
-        <activity android:name=".ProfileActivity"/>
-        <activity android:name=".PermissionsActivity"/>
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"></activity>
+        <activity android:name=".PostFeedActivity" />
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".PermissionsActivity" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+            android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />

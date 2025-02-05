@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright (c) Meta Platforms, Inc. and affiliates.
     All rights reserved.
 
@@ -7,8 +6,9 @@
     LICENSE file in the root directory of this source tree.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-    package="com.facebook.common">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <queries>
         <package android:name="com.facebook.katana" />
     </queries>
@@ -27,9 +27,13 @@
             tools:node="merge">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="fbconnect" android:host="cct.${applicationId}"/>
+
+                <data
+                    android:host="cct.${applicationId}"
+                    android:scheme="fbconnect" />
             </intent-filter>
         </activity>
 

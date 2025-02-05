@@ -38,6 +38,7 @@ dependencies {
 }
 
 android {
+    namespace = "com.facebook.samples.kotlinsampleapp"
     compileSdkVersion 33
     buildToolsVersion "31.0.0"
 

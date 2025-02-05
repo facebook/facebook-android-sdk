@@ -30,6 +30,7 @@ dependencies {
 
 android {
     buildToolsVersion = "35.0.0"
+    namespace = "com.facebook.share"
     compileSdkVersion(Config.compileSdk)
 
     defaultConfig {
