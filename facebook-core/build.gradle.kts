@@ -27,7 +27,6 @@ dependencies {
     // Support Dependencies
     implementation(Libs.androidx_annotation)
     implementation(Libs.androidx_legacy_support_core_utils)
-
     implementation(Libs.android_installreferrer)
     implementation(Libs.androidx_core_ktx)
     implementation(Libs.kotlin_stdlib)
@@ -103,7 +102,6 @@ android {
             }
         }
     }
-
     sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
 
     if (System.getenv("SANDCASTLE") == "1") {

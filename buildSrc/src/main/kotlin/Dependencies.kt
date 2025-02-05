@@ -1,7 +1,7 @@
 object Config {
     const val minSdk = 15
-    const val compileSdk = 33
-    const val targetSdk = 33
+    const val compileSdk = 34
+    const val targetSdk = 34
 }
 
 object Versions {
@@ -36,7 +36,7 @@ object Versions {
     const val junit = "4.13"
     const val jacoco = "0.8.7"
     const val json = "20180130"
-    const val kotlin = "1.5.20"
+    const val kotlin = "1.8.20"
     const val leakcanaryAndroid = "2.9.1"
     const val material = "1.0.0"
     const val mockitoInline = "2.26.0"

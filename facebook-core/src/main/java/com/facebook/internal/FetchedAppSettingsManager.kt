@@ -24,12 +24,12 @@ import com.facebook.core.BuildConfig
 import com.facebook.internal.FetchedAppGateKeepersManager.queryAppGateKeepers
 import com.facebook.internal.InternalSettings.isUnityApp
 import com.facebook.internal.SmartLoginOption.Companion.parseOptions
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicReference
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -264,7 +264,7 @@ object FetchedAppSettingsManager {
         if (!forceRequery && fetchedAppSettings.containsKey(applicationId)) {
             return fetchedAppSettings[applicationId]
         }
-        val response = getAppSettingsQueryResponse(applicationId) ?: return null
+        val response = getAppSettingsQueryResponse(applicationId)
         val fetchedAppSettings = parseAppSettingsFromJSON(applicationId, response)
         if (applicationId == FacebookSdk.getApplicationId()) {
             loadingState.set(FetchAppSettingState.SUCCESS)
@@ -525,18 +525,18 @@ object FetchedAppSettingsManager {
         }
 
         var values: MutableMap<String, Boolean> = HashMap()
-        if (!settingsJSON?.isNull(AUTO_LOG_APP_EVENTS_DEFAULT_FIELD)) {
+        if (!settingsJSON.isNull(AUTO_LOG_APP_EVENTS_DEFAULT_FIELD)) {
             try {
                 values[AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] =
-                    settingsJSON?.getBoolean(AUTO_LOG_APP_EVENTS_DEFAULT_FIELD)
+                    settingsJSON.getBoolean(AUTO_LOG_APP_EVENTS_DEFAULT_FIELD)
             } catch (je: JSONException) {
                 Utility.logd(Utility.LOG_TAG, je)
             }
         }
-        if (!settingsJSON?.isNull(AUTO_LOG_APP_EVENT_ENABLED_FIELD)) {
+        if (!settingsJSON.isNull(AUTO_LOG_APP_EVENT_ENABLED_FIELD)) {
             try {
                 values[AUTO_LOG_APP_EVENT_ENABLED_FIELD] =
-                    settingsJSON?.getBoolean(AUTO_LOG_APP_EVENT_ENABLED_FIELD)
+                    settingsJSON.getBoolean(AUTO_LOG_APP_EVENT_ENABLED_FIELD)
             } catch (je: JSONException) {
                 Utility.logd(Utility.LOG_TAG, je)
             }
