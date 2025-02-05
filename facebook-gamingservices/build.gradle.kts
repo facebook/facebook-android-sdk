@@ -82,7 +82,7 @@ android {
 
     testOptions {
         unitTests.all {
-            it.jvmArgs("-XX:MaxPermSize=1024m")
+
             it.maxHeapSize = "4096m"
 
             // CrashShieldHandlerDebugTest is only available on Sandcastle and Github Actions

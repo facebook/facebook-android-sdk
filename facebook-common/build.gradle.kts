@@ -80,7 +80,6 @@ android {
 
     testOptions {
         unitTests.all {
-            it.jvmArgs("-XX:MaxPermSize=1024m")
             it.maxHeapSize = "4096m"
         }
         unitTests.isIncludeAndroidResources = true
