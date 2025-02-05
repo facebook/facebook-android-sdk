@@ -15,12 +15,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion(Config.compileSdk)
+    compileSdkVersion(31)
 
     defaultConfig {
         applicationId 'com.example.hellofacebook'
         minSdkVersion(Config.minSdk)
-        targetSdkVersion(Config.targetSdk)
+        targetSdkVersion(31)
     }
 
     lintOptions {
