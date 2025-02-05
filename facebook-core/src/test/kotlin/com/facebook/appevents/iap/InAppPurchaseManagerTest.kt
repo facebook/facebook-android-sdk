@@ -15,18 +15,15 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.facebook.UserSettingsManager
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.OperationalData
 import com.facebook.appevents.OperationalDataEnum
-import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.SmartLoginOption
-import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -46,6 +43,7 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 @PrepareForTest(
     FacebookSdk::class,
@@ -150,7 +148,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var isStartIapLoggingCalled = false
         whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging(eq(InAppPurchaseUtils.BillingClientVersion.V1))).thenAnswer {
             isStartIapLoggingCalled = true
-            Unit
+            null
         }
         InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
@@ -165,7 +163,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var isStartIapLoggingCalled = false
         whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging(eq(InAppPurchaseUtils.BillingClientVersion.NONE))).thenAnswer {
             isStartIapLoggingCalled = true
-            Unit
+            null
         }
         InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isFalse
@@ -181,7 +179,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         var isStartIapLoggingCalled = false
         whenever(InAppPurchaseActivityLifecycleTracker.startIapLogging(InAppPurchaseUtils.BillingClientVersion.V2_V4)).thenAnswer {
             isStartIapLoggingCalled = true
-            Unit
+            null
         }
         InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
@@ -198,8 +196,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         whenever(mockContext.packageName).thenReturn("com.facebook.test")
         whenever(
             mockPackageManager.getApplicationInfo(
-                any(),
-                any()
+                any<String>(),
+                any<Int>()
             )
         ).thenReturn(mockApplicationInfo)
         mockApplicationInfo.metaData = metaData
@@ -212,7 +210,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             )
         ).thenAnswer {
             isStartIapLoggingCalled = true
-            Unit
+            null
         }
         InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
@@ -229,8 +227,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         whenever(mockContext.packageName).thenReturn("com.facebook.test")
         whenever(
             mockPackageManager.getApplicationInfo(
-                any(),
-                any()
+                any<String>(),
+                any<Int>()
             )
         ).thenReturn(mockApplicationInfo)
         mockApplicationInfo.metaData = metaData
@@ -243,7 +241,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             )
         ).thenAnswer {
             isStartIapLoggingCalled = true
-            Unit
+            null
         }
         InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isTrue
@@ -262,8 +260,8 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
         whenever(mockContext.packageName).thenReturn("com.facebook.test")
         whenever(
             mockPackageManager.getApplicationInfo(
-                any(),
-                any()
+                any<String>(),
+                any<Int>()
             )
         ).thenReturn(mockApplicationInfo)
         mockApplicationInfo.metaData = metaData
@@ -276,7 +274,7 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
             )
         ).thenAnswer {
             isStartIapLoggingCalled = true
-            Unit
+            null
         }
         InAppPurchaseManager.startTracking()
         assertThat(isStartIapLoggingCalled).isFalse

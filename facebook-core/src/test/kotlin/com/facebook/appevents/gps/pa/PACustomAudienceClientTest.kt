@@ -25,9 +25,9 @@ import com.facebook.appevents.AppEvent
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.whenNew
@@ -36,7 +36,6 @@ import java.util.concurrent.Executor
 
 @PrepareForTest(
     FacebookSdk::class,
-    Context::class,
     CustomAudienceManager::class,
     AdTechIdentifier::class,
     CustomAudience::class,
@@ -68,10 +67,15 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
 
         val trustedBiddingData = mock(TrustedBiddingData::class.java)
         val trustedBiddingDataBuilder = mock(TrustedBiddingData.Builder::class.java)
-        whenever(trustedBiddingDataBuilder.setTrustedBiddingUri(any<Uri>())).thenReturn(trustedBiddingDataBuilder)
-        whenever(trustedBiddingDataBuilder.setTrustedBiddingKeys(any<List<String>>())).thenReturn(trustedBiddingDataBuilder)
+        whenever(trustedBiddingDataBuilder.setTrustedBiddingUri(any<Uri>())).thenReturn(
+            trustedBiddingDataBuilder
+        )
+        whenever(trustedBiddingDataBuilder.setTrustedBiddingKeys(any<List<String>>())).thenReturn(
+            trustedBiddingDataBuilder
+        )
         whenever(trustedBiddingDataBuilder.build()).thenReturn(trustedBiddingData)
-        whenNew(TrustedBiddingData.Builder::class.java).withAnyArguments().thenReturn(trustedBiddingDataBuilder)
+        whenNew(TrustedBiddingData.Builder::class.java).withAnyArguments()
+            .thenReturn(trustedBiddingDataBuilder)
 
         val adSelectionSignals = mock(AdSelectionSignals::class.java)
         mockStatic(AdSelectionSignals::class.java)
