@@ -7,8 +7,8 @@
  */
 
 plugins {
-  id("com.android.library")
-  id("kotlin-android")
+    id("com.android.library")
+    id("kotlin-android")
 }
 
 group = "com.facebook.android"
@@ -22,34 +22,34 @@ extra["description"] = "Facebook Applinks Android SDK"
 extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
-  // Facebook Dependencies
-  api(project(":facebook-core"))
-  // Support Dependencies
-  implementation(Libs.androidx_annotation)
-  implementation(Libs.androidx_legacy_support_core_utils)
+    // Facebook Dependencies
+    api(project(":facebook-core"))
+    // Support Dependencies
+    implementation(Libs.androidx_annotation)
+    implementation(Libs.androidx_legacy_support_core_utils)
 }
 
 android {
-  compileSdkVersion(Config.compileSdk)
+    compileSdkVersion(Config.compileSdk)
 
-  defaultConfig {
-    minSdkVersion(Config.minSdk)
-    targetSdkVersion(Config.targetSdk)
-    consumerProguardFiles("proguard-rules.pro")
-  }
-
-  sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
-
-  buildTypes {
-    getByName("release") {
-      isMinifyEnabled = false
-      proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+    defaultConfig {
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
+        consumerProguardFiles("proguard-rules.pro")
     }
-  }
+
+    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+        }
+    }
 }
 
 if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
-  project.apply(from = "${rootDir}/internal/safekit-build.gradle")
+    project.apply(from = "${rootDir}/internal/safekit-build.gradle")
 }
 
-apply(from = "${rootDir}/maven.gradle")
+

@@ -7,8 +7,8 @@
  */
 
 plugins {
-  id("com.android.library")
-  id("kotlin-android")
+    id("com.android.library")
+    id("kotlin-android")
 }
 
 group = "com.facebook.android"
@@ -22,51 +22,51 @@ extra["description"] = "Facebook Android SDK Testutil"
 extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
-  implementation(Libs.kotlin_stdlib)
-  implementation(Libs.androidx_annotation)
-  implementation(Libs.androidx_core_ktx)
-  implementation(Libs.androidx_legacy_support_core_utils)
+    implementation(Libs.kotlin_stdlib)
+    implementation(Libs.androidx_annotation)
+    implementation(Libs.androidx_core_ktx)
+    implementation(Libs.androidx_legacy_support_core_utils)
 
-  // Unit Tests
-  implementation(Libs.junit)
-  implementation(Libs.robolectric)
-  implementation(Libs.androidx_test_core)
+    // Unit Tests
+    implementation(Libs.junit)
+    implementation(Libs.robolectric)
+    implementation(Libs.androidx_test_core)
 
-  implementation(Libs.mockito_inline)
-  implementation(Libs.mockito_kotlin)
+    implementation(Libs.mockito_inline)
+    implementation(Libs.mockito_kotlin)
 
-  implementation(Libs.powermock_core)
-  implementation(Libs.powermock_api_mockito2)
-  implementation(Libs.powermock_junit4)
-  implementation(Libs.powermock_junit4_rule)
-  implementation(Libs.powermock_classloading_xstream)
-  implementation(Libs.assertj_core)
+    implementation(Libs.powermock_core)
+    implementation(Libs.powermock_api_mockito2)
+    implementation(Libs.powermock_junit4)
+    implementation(Libs.powermock_junit4_rule)
+    implementation(Libs.powermock_classloading_xstream)
+    implementation(Libs.assertj_core)
 
-  implementation(Libs.android_installreferrer)
-  implementation(Libs.kotlin_test_junit)
+    implementation(Libs.android_installreferrer)
+    implementation(Libs.kotlin_test_junit)
 }
 
 android {
-  compileSdkVersion(Config.compileSdk)
+    compileSdkVersion(Config.compileSdk)
 
-  defaultConfig {
-    minSdkVersion(Config.minSdk)
-    targetSdkVersion(Config.targetSdk)
-    vectorDrawables.useSupportLibrary = true
-  }
+    defaultConfig {
+        minSdkVersion(Config.minSdk)
+        targetSdkVersion(Config.targetSdk)
+        vectorDrawables.useSupportLibrary = true
+    }
 
-  aaptOptions { additionalParameters("--no-version-vectors") }
+    aaptOptions { additionalParameters("--no-version-vectors") }
 
-  lintOptions { isAbortOnError = false }
+    lintOptions { isAbortOnError = false }
 
-  sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
 
-  compileOptions {
-    sourceCompatibility(JavaVersion.VERSION_1_8)
-    targetCompatibility(JavaVersion.VERSION_1_8)
-  }
+    compileOptions {
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
+    }
 }
 
 repositories { maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } }
 
-apply(from = "${rootDir}/maven.gradle")
+
