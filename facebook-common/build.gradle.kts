@@ -117,4 +117,7 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
 
 apply(from = "${rootDir}/jacoco.gradle.kts")
 
+apply(from = "${rootDir}/maven.gradle")
+
+
 

@@ -66,4 +66,6 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
     project.apply(from = "${rootDir}/internal/safekit-build.gradle")
 }
 
+apply(from = "${rootDir}/maven.gradle")
+
 

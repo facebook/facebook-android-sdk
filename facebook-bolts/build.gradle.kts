@@ -97,6 +97,6 @@ android {
 
 apply(from = "${rootDir}/jacoco.gradle.kts")
 
-
+apply(from = "${rootDir}/maven.gradle")
 
 repositories { mavenCentral() }

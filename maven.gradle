@@ -1,0 +1,94 @@
+import org.gradle.internal.jvm.Jvm
+
+apply plugin: 'signing'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'maven-publish'
+
+def isSnapshot = version.endsWith('-SNAPSHOT')
+def ossrhUsername = hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : ""
+def ossrhPassword = hasProperty('ossrhToken') ? ossrhToken : ""
+
+tasks.register('androidJavadocs', Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    excludes = ['**/*.kt'] // Exclude all kotlin files from javadoc file.
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    // JDK 1.8 is more strict then 1.7. Have JDK 1.8 behave like 1.7 for javadoc generation
+    if (Jvm.current().getJavaVersion() == JavaVersion.VERSION_1_8) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
+tasks.register('androidJavadocsJar', Jar) {
+    dependsOn androidJavadocs
+    classifier 'javadoc'
+    from androidJavadocs.destinationDir
+}
+tasks.register('androidSourcesJar', Jar) {
+    classifier 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+tasks.register('javadocJar', Jar) {
+    dependsOn dokkaJavadoc
+    classifier 'javadoc'
+    from dokkaJavadoc.outputDirectory
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives javadocJar
+}
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                artifactId = project.ext.artifactId
+                version = project.version
+                from components.findByName('release')
+                pom {
+                    name = project.ext.name
+                    artifactId = project.ext.artifactId
+                    packaging = 'aar'
+                    description = project.ext.description
+                    url = project.ext.url
+                    version = project.version
+
+                    scm {
+                        connection = 'scm:git@github.com:facebook/facebook-android-sdk.git'
+                        developerConnection = 'scm:git@github.com:facebook/facebook-android-sdk.git'
+                        url = 'https://github.com/facebook/facebook-android-sdk'
+                    }
+
+                    licenses {
+                        license {
+                            name = 'Facebook Platform License'
+                            url = 'https://github.com/facebook/facebook-android-sdk/blob/main/LICENSE.txt'
+                            distribution = 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            name = 'Facebook'
+                        }
+                    }
+                }
+                artifact javadocJar
+                artifact androidSourcesJar
+            }
+        }
+        repositories {
+            maven {
+                url = isSnapshot ? "https://oss.sonatype.org/content/repositories/snapshots/" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+        }
+    }
+    signing {
+        required { !isSnapshot }
+        sign publishing.publications.release
+    }
+    androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompileProvider.get().classpath
+}

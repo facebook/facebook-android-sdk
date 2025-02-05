@@ -71,4 +71,5 @@ android {
 
 repositories { maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } }
 
+apply(from = "${rootDir}/maven.gradle")
 

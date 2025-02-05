@@ -121,3 +121,5 @@ tasks.dokkaJavadoc.configure {
     }
 }
 
+apply(from = "${rootDir}/maven.gradle")
+
