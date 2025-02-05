@@ -52,9 +52,9 @@ dependencies {
 }
 
 android {
+    buildToolsVersion = "35.0.0"
     compileSdkVersion(Config.compileSdk)
-    // The version of Jacoco used by the android gradle plugin
-    jacoco { version = "0.8.7" }
+
 
     defaultConfig {
         minSdkVersion(Config.minSdk)

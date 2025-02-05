@@ -10,6 +10,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
+    buildToolsVersion = "35.0.0"
     compileSdkVersion(31)
     defaultConfig {
         applicationId "com.facebook.fbloginsample"

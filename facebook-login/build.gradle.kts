@@ -32,6 +32,7 @@ dependencies {
 }
 
 android {
+    buildToolsVersion = "35.0.0"
     compileSdkVersion(Config.compileSdk)
 
     defaultConfig {
@@ -53,7 +54,6 @@ android {
     sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
 
     buildTypes {
-        getByName("debug") { isDebuggable = true }
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")

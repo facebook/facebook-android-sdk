@@ -1,7 +1,7 @@
 object Config {
     const val minSdk = 15
-    const val compileSdk = 31
-    const val targetSdk = 31
+    const val compileSdk = 33
+    const val targetSdk = 33
 }
 
 object Versions {
@@ -30,13 +30,13 @@ object Versions {
     const val fresco = "2.6.0"
     const val glide = "4.13.0"
     const val googleServices = "4.3.5"
-    const val gradle = "4.2.0" // Android gradle plugin version
+    const val gradle = "7.4.0" // Android gradle plugin version
     const val gson = "2.8.8"
     const val guava = "18.0"
     const val junit = "4.13"
     const val jacoco = "0.8.7"
     const val json = "20180130"
-    const val kotlin = "1.5.10"
+    const val kotlin = "1.5.20"
     const val leakcanaryAndroid = "2.9.1"
     const val material = "1.0.0"
     const val mockitoInline = "2.26.0"
