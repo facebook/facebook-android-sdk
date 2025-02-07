@@ -17,15 +17,18 @@ import android.adservices.customaudience.CustomAudienceManager
 import android.adservices.customaudience.JoinCustomAudienceRequest
 import android.adservices.customaudience.TrustedBiddingData
 import android.annotation.TargetApi
-import android.net.Uri
+import android.os.Bundle
 import android.os.OutcomeReceiver
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
+import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.appevents.internal.Constants
-import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.Executors
+import kotlin.toString
+import androidx.core.net.toUri
+import kotlin.random.Random
 
 @AutoHandleExceptions
 object PACustomAudienceClient {
@@ -33,26 +36,44 @@ object PACustomAudienceClient {
     private const val BUYER = "facebook.com"
     private const val BASE_URI = "https://www.facebook.com/privacy_sandbox/pa/logic"
     private const val DELIMITER = "@"
+    private const val GPS_PREFIX = "gps"
+    private const val LOGGING_SAMPLING_RATE = 0.0001
+
     // Sync with RestrictiveDataManager.REPLACEMENT_STRING
     private const val REPLACEMENT_STRING = "_removed_"
+
+    private val shouldLog = Random.nextDouble() <= LOGGING_SAMPLING_RATE
     private var enabled = false
     private var customAudienceManager: CustomAudienceManager? = null
+    private lateinit var internalAppEventsLogger: InternalAppEventsLogger
 
     @JvmStatic
     @TargetApi(34)
     fun enable() {
         val context = FacebookSdk.getApplicationContext()
+        internalAppEventsLogger = InternalAppEventsLogger(context)
+
+        var errorMsg: String? = null
         try {
             customAudienceManager = CustomAudienceManager.get(context)
             if (customAudienceManager != null) {
                 enabled = true
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to get CustomAudienceManager: " + e.message)
+            errorMsg = e.toString()
+            Log.w(TAG, "Failed to get CustomAudienceManager: $e")
         } catch (e: NoClassDefFoundError) {
-            Log.w(TAG, "Failed to get CustomAudienceManager: " + e.message)
+            errorMsg = e.toString()
+            Log.w(TAG, "Failed to get CustomAudienceManager: $e")
         } catch (e: NoSuchMethodError) {
-            Log.w(TAG, "Failed to get CustomAudienceManager: " + e.message)
+            errorMsg = e.toString()
+            Log.w(TAG, "Failed to get CustomAudienceManager: $e")
+        }
+
+        if (enabled == false && shouldLog) {
+            internalAppEventsLogger.logEventImplicitly(
+                Constants.GPS_PA_FAILED,
+                Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, errorMsg) })
         }
     }
 
@@ -64,10 +85,25 @@ object PACustomAudienceClient {
             object : OutcomeReceiver<Any, Exception> {
                 override fun onResult(result: Any) {
                     Log.i(TAG, "Successfully joined custom audience")
+                    if (shouldLog) {
+                        internalAppEventsLogger.logEventImplicitly(Constants.GPS_PA_SUCCEED)
+                    }
+
                 }
 
                 override fun onError(error: Exception) {
                     Log.e(TAG, error.toString())
+
+                    if (shouldLog) {
+                        internalAppEventsLogger.logEventImplicitly(
+                            Constants.GPS_PA_FAILED,
+                            Bundle().apply {
+                                putString(
+                                    Constants.GPS_PA_FAILED_REASON,
+                                    error.toString()
+                                )
+                            })
+                    }
                 }
             }
 
@@ -76,11 +112,11 @@ object PACustomAudienceClient {
 
             // Each custom audience has to be attached with at least one ad to be valid, so we need to create a dummy ad and attach it to the ca.
             val dummyAd = AdData.Builder()
-                .setRenderUri(Uri.parse("$BASE_URI/ad"))
+                .setRenderUri("$BASE_URI/ad".toUri())
                 .setMetadata("{'isRealAd': false}")
                 .build()
             val trustedBiddingData = TrustedBiddingData.Builder()
-                .setTrustedBiddingUri(Uri.parse("$BASE_URI?trusted_bidding"))
+                .setTrustedBiddingUri("$BASE_URI?trusted_bidding".toUri())
                 .setTrustedBiddingKeys(listOf(""))
                 .build()
 
@@ -88,8 +124,8 @@ object PACustomAudienceClient {
                 CustomAudience.Builder()
                     .setName(caName)
                     .setBuyer(AdTechIdentifier.fromString(BUYER))
-                    .setDailyUpdateUri(Uri.parse("$BASE_URI?daily"))
-                    .setBiddingLogicUri(Uri.parse("$BASE_URI?bidding"))
+                    .setDailyUpdateUri("$BASE_URI?daily&app_id=$appId".toUri())
+                    .setBiddingLogicUri("$BASE_URI?bidding".toUri())
                     .setTrustedBiddingData(trustedBiddingData)
                     .setUserBiddingSignals(AdSelectionSignals.fromString("{}"))
                     .setAds(listOf(dummyAd)).build()
@@ -102,13 +138,18 @@ object PACustomAudienceClient {
                 callback
             )
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to join Custom Audience: " + e.message)
+            Log.w(TAG, "Failed to join Custom Audience: $e")
+            if (shouldLog) {
+                internalAppEventsLogger.logEventImplicitly(
+                    Constants.GPS_PA_FAILED,
+                    Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, e.toString()) })
+            }
         }
     }
 
     private fun validateAndCreateCAName(appId: String, event: AppEvent): String? {
-        val eventName = event.getJSONObject().get(Constants.EVENT_NAME_EVENT_KEY)
-        if (eventName == REPLACEMENT_STRING) {
+        val eventName = event.getJSONObject().getString(Constants.EVENT_NAME_EVENT_KEY)
+        if (eventName == REPLACEMENT_STRING || eventName.contains(GPS_PREFIX)) {
             return null
         }
 

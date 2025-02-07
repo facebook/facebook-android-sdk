@@ -132,6 +132,11 @@ object Constants {
     const val EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED =
         "is_implicit_purchase_logging_enabled"
 
+    // Events to monitor GPS APIs performance.
+    const val GPS_PA_SUCCEED = "gps_pa_succeed"
+    const val GPS_PA_FAILED = "gps_pa_failed"
+    const val GPS_PA_FAILED_REASON = "gps_pa_failed_reason"
+
     @JvmStatic
     fun getDefaultAppEventsSessionTimeoutInSeconds(): Int = 60
 }

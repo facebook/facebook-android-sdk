@@ -20,12 +20,15 @@ import com.facebook.appevents.gps.GpsCapabilityChecker
 import com.facebook.internal.AnalyticsEvents
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.net.URLEncoder
+import com.facebook.appevents.internal.Constants
 
 @AutoHandleExceptions
 object GpsAraTriggersManager {
     private var enabled = false
     private val TAG = GpsAraTriggersManager::class.java.toString()
     private const val SERVER_URI = "https://www.facebook.com/privacy_sandbox/mobile/register/trigger"
+    private const val GPS_PREFIX = "gps"
+    private const val REPLACEMENT_STRING = "_removed_"
 
     @JvmStatic
     fun enable() {
@@ -40,7 +43,7 @@ object GpsAraTriggersManager {
 
     @TargetApi(34)
     fun registerTrigger(applicationId: String, event: AppEvent) {
-        if (applicationId == null) return
+        if (applicationId == null || !isValidEvent(event)) return
         if (!canRegisterTrigger()) return
 
         val context = FacebookSdk.getApplicationContext()
@@ -144,5 +147,11 @@ object GpsAraTriggersManager {
             }
         }
             .joinToString("&")
+    }
+
+
+    private fun isValidEvent(event: AppEvent): Boolean {
+        val eventName = event.getJSONObject().getString(Constants.EVENT_NAME_EVENT_KEY)
+        return !(eventName == REPLACEMENT_STRING || eventName.contains(GPS_PREFIX))
     }
 }
