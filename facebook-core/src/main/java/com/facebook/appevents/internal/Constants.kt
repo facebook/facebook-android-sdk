@@ -136,6 +136,9 @@ object Constants {
     const val GPS_PA_SUCCEED = "gps_pa_succeed"
     const val GPS_PA_FAILED = "gps_pa_failed"
     const val GPS_PA_FAILED_REASON = "gps_pa_failed_reason"
+    const val GPS_ARA_SUCCEED = "gps_ara_succeed"
+    const val GPS_ARA_FAILED = "gps_ara_failed"
+    const val GPS_ARA_FAILED_REASON = "gps_ara_failed_reason"
 
     @JvmStatic
     fun getDefaultAppEventsSessionTimeoutInSeconds(): Int = 60

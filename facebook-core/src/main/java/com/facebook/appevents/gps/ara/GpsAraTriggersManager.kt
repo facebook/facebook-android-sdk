@@ -12,11 +12,13 @@ import android.adservices.common.AdServicesOutcomeReceiver
 import android.adservices.measurement.MeasurementManager
 import android.annotation.TargetApi
 import android.net.Uri
+import android.os.Bundle
 import android.os.OutcomeReceiver
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
 import com.facebook.appevents.gps.GpsCapabilityChecker
+import com.facebook.appevents.gps.GpsDebugLogger
 import com.facebook.internal.AnalyticsEvents
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.net.URLEncoder
@@ -24,15 +26,18 @@ import com.facebook.appevents.internal.Constants
 
 @AutoHandleExceptions
 object GpsAraTriggersManager {
-    private var enabled = false
-    private val TAG = GpsAraTriggersManager::class.java.toString()
-    private const val SERVER_URI = "https://www.facebook.com/privacy_sandbox/mobile/register/trigger"
     private const val GPS_PREFIX = "gps"
     private const val REPLACEMENT_STRING = "_removed_"
+    private val TAG = GpsAraTriggersManager::class.java.toString()
+    private var enabled = false
+    private lateinit var gpsDebugLogger: GpsDebugLogger
+    private lateinit var serverUri: String
 
     @JvmStatic
     fun enable() {
         enabled = true
+        gpsDebugLogger = GpsDebugLogger(FacebookSdk.getApplicationContext())
+        serverUri = "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/mobile/register/trigger"
     }
 
     fun registerTriggerAsync(applicationId: String, event: AppEvent) {
@@ -61,13 +66,21 @@ object GpsAraTriggersManager {
 
             if (measurementManager == null) {
                 Log.w(TAG, "FAILURE_GET_MEASUREMENT_MANAGER")
+                gpsDebugLogger.log(
+                    Constants.GPS_ARA_FAILED,
+                    Bundle().apply {
+                        putString(
+                            Constants.GPS_ARA_FAILED_REASON,
+                            "Failed to get measurement manager"
+                        )
+                    })
                 return
             }
 
             val params = getEventParameters(event)
             val appIdKey = AnalyticsEvents.PARAMETER_APP_ID
             val attributionTriggerUri: Uri =
-                Uri.parse("$SERVER_URI?$appIdKey=$applicationId&$params")
+                Uri.parse("$serverUri?$appIdKey=$applicationId&$params")
 
             // On Android 12 and above, MeasurementManager.registerTrigger() takes an OutcomeReceiver and the
             // rest takes an AdServicesOutcomeReceiver.
@@ -76,10 +89,22 @@ object GpsAraTriggersManager {
                     object : OutcomeReceiver<Any, Exception> {
                         override fun onResult(result: Any) {
                             Log.d(TAG, "OUTCOME_RECEIVER_TRIGGER_SUCCESS")
+                            gpsDebugLogger.log(
+                                Constants.GPS_ARA_SUCCEED,
+                                null
+                            )
                         }
 
                         override fun onError(error: Exception) {
                             Log.d(TAG, "OUTCOME_RECEIVER_TRIGGER_FAILURE")
+                            gpsDebugLogger.log(
+                                Constants.GPS_ARA_FAILED,
+                                Bundle().apply {
+                                    putString(
+                                        Constants.GPS_ARA_FAILED_REASON,
+                                        error.toString()
+                                    )
+                                })
                         }
                     }
 
@@ -91,10 +116,22 @@ object GpsAraTriggersManager {
                     object : AdServicesOutcomeReceiver<Any, Exception> {
                         override fun onResult(result: Any) {
                             Log.d(TAG, "AD_SERVICE_OUTCOME_RECEIVER_TRIGGER_SUCCESS")
+                            gpsDebugLogger.log(
+                                Constants.GPS_ARA_SUCCEED,
+                                null
+                            )
                         }
 
                         override fun onError(error: Exception) {
                             Log.d(TAG, "AD_SERVICE_OUTCOME_RECEIVER_TRIGGER_FAILURE")
+                            gpsDebugLogger.log(
+                                Constants.GPS_ARA_FAILED,
+                                Bundle().apply {
+                                    putString(
+                                        Constants.GPS_ARA_FAILED_REASON,
+                                        error.toString()
+                                    )
+                                })
                         }
                     }
 
@@ -102,13 +139,21 @@ object GpsAraTriggersManager {
                     attributionTriggerUri, FacebookSdk.getExecutor(), adServicesOutcomeReceiver
                 )
             }
-
         } catch (e: Exception) {
             Log.w(TAG, "FAILURE_TRIGGER_REGISTRATION_FAILED")
+            gpsDebugLogger.log(
+                Constants.GPS_ARA_FAILED,
+                Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
         } catch (e: NoClassDefFoundError) {
             Log.w(TAG, "FAILURE_TRIGGER_REGISTRATION_NO_CLASS_FOUND")
+            gpsDebugLogger.log(
+                Constants.GPS_ARA_FAILED,
+                Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
         } catch (e: NoSuchMethodError) {
             Log.w(TAG, "FAILURE_TRIGGER_REGISTRATION_NO_METHOD_FOUND")
+            gpsDebugLogger.log(
+                Constants.GPS_ARA_FAILED,
+                Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
         }
     }
 
@@ -122,9 +167,15 @@ object GpsAraTriggersManager {
             return true
         } catch (e: Exception) {
             Log.i(TAG, "FAILURE_NO_MEASUREMENT_MANAGER_CLASS")
+            gpsDebugLogger.log(
+                Constants.GPS_ARA_FAILED,
+                Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
             return false
         } catch (e: NoClassDefFoundError) {
             Log.i(TAG, "FAILURE_NO_MEASUREMENT_MANAGER_CLASS_DEF")
+            gpsDebugLogger.log(
+                Constants.GPS_ARA_FAILED,
+                Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
             return false
         }
     }
@@ -148,7 +199,6 @@ object GpsAraTriggersManager {
         }
             .joinToString("&")
     }
-
 
     private fun isValidEvent(event: AppEvent): Boolean {
         val eventName = event.getJSONObject().getString(Constants.EVENT_NAME_EVENT_KEY)

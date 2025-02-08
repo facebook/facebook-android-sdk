@@ -22,14 +22,14 @@ import android.os.OutcomeReceiver
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
-import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.appevents.gps.GpsDebugLogger
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.whenNew
@@ -47,7 +47,7 @@ import java.util.concurrent.Executor
 )
 class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
     private var customAudienceManager: CustomAudienceManager? = null
-    private lateinit var mockLogger: InternalAppEventsLogger
+    private lateinit var mockLogger: GpsDebugLogger
 
     @Before
     fun setUp() {
@@ -103,8 +103,8 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
         whenever(requestBuilder.setCustomAudience(any<CustomAudience>())).thenReturn(requestBuilder)
         whenever(requestBuilder.build()).thenReturn(request)
 
-        mockLogger = org.mockito.kotlin.mock()
-        whenNew(InternalAppEventsLogger::class.java)
+        mockLogger = mock()
+        whenNew(GpsDebugLogger::class.java)
             .withAnyArguments()
             .thenReturn(mockLogger)
     }

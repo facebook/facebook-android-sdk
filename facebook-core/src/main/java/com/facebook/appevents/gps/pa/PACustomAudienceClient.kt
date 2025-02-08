@@ -22,36 +22,33 @@ import android.os.OutcomeReceiver
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
-import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.Executors
 import kotlin.toString
 import androidx.core.net.toUri
-import kotlin.random.Random
+import com.facebook.appevents.gps.GpsDebugLogger
 
 @AutoHandleExceptions
 object PACustomAudienceClient {
     private val TAG = "Fledge: " + PACustomAudienceClient::class.java.simpleName
     private const val BUYER = "facebook.com"
-    private const val BASE_URI = "https://www.facebook.com/privacy_sandbox/pa/logic"
     private const val DELIMITER = "@"
     private const val GPS_PREFIX = "gps"
-    private const val LOGGING_SAMPLING_RATE = 0.0001
 
     // Sync with RestrictiveDataManager.REPLACEMENT_STRING
     private const val REPLACEMENT_STRING = "_removed_"
-
-    private val shouldLog = Random.nextDouble() <= LOGGING_SAMPLING_RATE
     private var enabled = false
     private var customAudienceManager: CustomAudienceManager? = null
-    private lateinit var internalAppEventsLogger: InternalAppEventsLogger
+    private lateinit var gpsDebugLogger: GpsDebugLogger
+    private lateinit var baseUri: String
 
     @JvmStatic
     @TargetApi(34)
     fun enable() {
         val context = FacebookSdk.getApplicationContext()
-        internalAppEventsLogger = InternalAppEventsLogger(context)
+        gpsDebugLogger = GpsDebugLogger(context)
+        baseUri = "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/pa/logic"
 
         var errorMsg: String? = null
         try {
@@ -70,8 +67,8 @@ object PACustomAudienceClient {
             Log.w(TAG, "Failed to get CustomAudienceManager: $e")
         }
 
-        if (enabled == false && shouldLog) {
-            internalAppEventsLogger.logEventImplicitly(
+        if (enabled == false) {
+            gpsDebugLogger.log(
                 Constants.GPS_PA_FAILED,
                 Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, errorMsg) })
         }
@@ -85,25 +82,19 @@ object PACustomAudienceClient {
             object : OutcomeReceiver<Any, Exception> {
                 override fun onResult(result: Any) {
                     Log.i(TAG, "Successfully joined custom audience")
-                    if (shouldLog) {
-                        internalAppEventsLogger.logEventImplicitly(Constants.GPS_PA_SUCCEED)
-                    }
-
+                    gpsDebugLogger.log(Constants.GPS_PA_SUCCEED, null)
                 }
 
                 override fun onError(error: Exception) {
                     Log.e(TAG, error.toString())
-
-                    if (shouldLog) {
-                        internalAppEventsLogger.logEventImplicitly(
-                            Constants.GPS_PA_FAILED,
-                            Bundle().apply {
-                                putString(
-                                    Constants.GPS_PA_FAILED_REASON,
-                                    error.toString()
-                                )
-                            })
-                    }
+                    gpsDebugLogger.log(
+                        Constants.GPS_PA_FAILED,
+                        Bundle().apply {
+                            putString(
+                                Constants.GPS_PA_FAILED_REASON,
+                                error.toString()
+                            )
+                        })
                 }
             }
 
@@ -112,11 +103,11 @@ object PACustomAudienceClient {
 
             // Each custom audience has to be attached with at least one ad to be valid, so we need to create a dummy ad and attach it to the ca.
             val dummyAd = AdData.Builder()
-                .setRenderUri("$BASE_URI/ad".toUri())
+                .setRenderUri("$baseUri/ad".toUri())
                 .setMetadata("{'isRealAd': false}")
                 .build()
             val trustedBiddingData = TrustedBiddingData.Builder()
-                .setTrustedBiddingUri("$BASE_URI?trusted_bidding".toUri())
+                .setTrustedBiddingUri("$baseUri?trusted_bidding".toUri())
                 .setTrustedBiddingKeys(listOf(""))
                 .build()
 
@@ -124,8 +115,8 @@ object PACustomAudienceClient {
                 CustomAudience.Builder()
                     .setName(caName)
                     .setBuyer(AdTechIdentifier.fromString(BUYER))
-                    .setDailyUpdateUri("$BASE_URI?daily&app_id=$appId".toUri())
-                    .setBiddingLogicUri("$BASE_URI?bidding".toUri())
+                    .setDailyUpdateUri("$baseUri?daily&app_id=$appId".toUri())
+                    .setBiddingLogicUri("$baseUri?bidding".toUri())
                     .setTrustedBiddingData(trustedBiddingData)
                     .setUserBiddingSignals(AdSelectionSignals.fromString("{}"))
                     .setAds(listOf(dummyAd)).build()
@@ -139,11 +130,9 @@ object PACustomAudienceClient {
             )
         } catch (e: Exception) {
             Log.w(TAG, "Failed to join Custom Audience: $e")
-            if (shouldLog) {
-                internalAppEventsLogger.logEventImplicitly(
-                    Constants.GPS_PA_FAILED,
-                    Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, e.toString()) })
-            }
+            gpsDebugLogger.log(
+                Constants.GPS_PA_FAILED,
+                Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, e.toString()) })
         }
     }
 

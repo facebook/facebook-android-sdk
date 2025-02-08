@@ -19,12 +19,15 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.gps.GpsCapabilityChecker
+import com.facebook.appevents.gps.GpsDebugLogger
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
+import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
 import java.util.concurrent.Executor
 
@@ -40,10 +43,17 @@ class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
     //    private lateinit var context: Context
     private var registerTriggerCalledTimes = 0
     private lateinit var triggerUri: Uri
+    private lateinit var mockLogger: GpsDebugLogger
 
     @Before
     fun setUp() {
         registerTriggerCalledTimes = 0
+
+        mockLogger = mock()
+        whenNew(GpsDebugLogger::class.java)
+            .withAnyArguments()
+            .thenReturn(mockLogger)
+
         val measurementManager = PowerMockito.mock(MeasurementManager::class.java)
         whenever(
             measurementManager.registerTrigger(
