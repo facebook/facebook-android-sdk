@@ -6,8 +6,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import org.gradle.kotlin.dsl.`kotlin-dsl`
 
-plugins { `kotlin-dsl` }
+@file:Suppress("UnstableApiUsage")
+plugins {
+    `kotlin-dsl`
+}
 
 repositories { mavenCentral() }

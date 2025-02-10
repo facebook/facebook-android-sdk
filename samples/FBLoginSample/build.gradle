@@ -15,7 +15,7 @@ android {
     compileSdkVersion(31)
     defaultConfig {
         applicationId "com.facebook.fbloginsample"
-        minSdkVersion(Config.minSdk)
+        minSdk = Config.minSdk
         targetSdkVersion(31)
         versionCode 1
         versionName "0.1"

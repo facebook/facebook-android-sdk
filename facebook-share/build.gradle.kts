@@ -6,6 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     id("com.android.library")
     id("kotlin-android")
@@ -31,11 +34,12 @@ dependencies {
 android {
     buildToolsVersion = "35.0.0"
     namespace = "com.facebook.share"
-    compileSdkVersion(Config.compileSdk)
+    compileSdk = Config.compileSdk
+
 
     defaultConfig {
-        minSdkVersion(Config.minSdk)
-        targetSdkVersion(Config.targetSdk)
+        minSdk = Config.minSdk
+        targetSdk = Config.targetSdk
         consumerProguardFiles("proguard-rules.pro")
         vectorDrawables.useSupportLibrary = true
     }
