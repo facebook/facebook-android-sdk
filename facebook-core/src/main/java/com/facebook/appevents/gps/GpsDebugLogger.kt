@@ -9,11 +9,16 @@ class GpsDebugLogger(context: Context) {
     private val internalAppEventsLogger: InternalAppEventsLogger = InternalAppEventsLogger(context)
 
     fun log(eventName: String?, parameters: Bundle?) {
-        if (shouldLog) internalAppEventsLogger.logEventImplicitly(eventName, parameters)
+        if (shouldLog && isGPSDebugEvent(eventName)) internalAppEventsLogger.logEventImplicitly(eventName, parameters)
+    }
+
+    private fun isGPSDebugEvent(eventName: String?): Boolean {
+        return eventName?.contains(GPS_PREFIX) ?: false
     }
 
     companion object {
         private const val LOGGING_SAMPLING_RATE = 0.0001
+        private const val GPS_PREFIX = "gps"
         private val shouldLog = Random.nextDouble() <= LOGGING_SAMPLING_RATE
     }
 }
