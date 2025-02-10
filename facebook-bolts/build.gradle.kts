@@ -50,7 +50,7 @@ dependencies {
 }
 
 android {
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = Config.buildToolsVersion
     namespace = "com.facebook.bolts"
     compileSdk = Config.compileSdk
 
@@ -63,11 +63,11 @@ android {
 
     buildTypes {
         getByName("debug") {
-            isTestCoverageEnabled = true
+            enableUnitTestCoverage = true
         }
     }
 
-    lintOptions { isAbortOnError = false }
+    lint { abortOnError = false }
 
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_1_8)
@@ -81,7 +81,10 @@ android {
         }
     }
 
-    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+    sourceSets {
+        getByName("test")
+        { java.srcDir("src/test/kotlin") }
+    }
 
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {

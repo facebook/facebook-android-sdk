@@ -60,7 +60,7 @@ dependencies {
 }
 
 android {
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = Config.buildToolsVersion
     namespace = "com.facebook.common"
     compileSdk = Config.compileSdk
 
@@ -73,9 +73,9 @@ android {
         multiDexEnabled = true
     }
 
-    aaptOptions { additionalParameters("--no-version-vectors") }
+    androidResources { additionalParameters("--no-version-vectors") }
 
-    lintOptions { isAbortOnError = false }
+    lint { abortOnError = false }
 
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_1_8)
@@ -89,10 +89,13 @@ android {
         unitTests.isIncludeAndroidResources = true
     }
 
-    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+    sourceSets {
+        getByName("test")
+        { java.srcDir("src/test/kotlin") }
+    }
 
     buildTypes {
-        getByName("debug") { isTestCoverageEnabled = true }
+        getByName("debug") { enableUnitTestCoverage = true }
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")

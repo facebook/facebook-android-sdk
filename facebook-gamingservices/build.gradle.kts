@@ -55,7 +55,7 @@ dependencies {
 }
 
 android {
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = Config.buildToolsVersion
     namespace = "com.facebook.gamingservices"
     compileSdk = Config.compileSdk
 
@@ -67,9 +67,9 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
-    aaptOptions { additionalParameters("--no-version-vectors") }
+    androidResources { additionalParameters("--no-version-vectors") }
 
-    lintOptions { isAbortOnError = false }
+    lint { abortOnError = false }
 
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_1_8)
@@ -77,7 +77,7 @@ android {
     }
 
     buildTypes {
-        getByName("debug") { isTestCoverageEnabled = true }
+        getByName("debug") { enableUnitTestCoverage = true }
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
@@ -98,7 +98,10 @@ android {
         }
     }
 
-    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+    sourceSets {
+        getByName("test")
+        { java.srcDir("src/test/kotlin") }
+    }
 
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {

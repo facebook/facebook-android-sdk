@@ -35,7 +35,7 @@ dependencies {
 }
 
 android {
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = Config.buildToolsVersion
     namespace = "com.facebook.login"
     compileSdk = Config.compileSdk
 
@@ -47,16 +47,19 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
-    aaptOptions { additionalParameters("--no-version-vectors") }
+    androidResources { additionalParameters("--no-version-vectors") }
 
-    lintOptions { isAbortOnError = false }
+    lint { abortOnError = false }
 
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_1_8)
         targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
-    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+    sourceSets {
+        getByName("test")
+        { java.srcDir("src/test/kotlin") }
+    }
 
     buildTypes {
         getByName("release") {

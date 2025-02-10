@@ -33,7 +33,7 @@ dependencies {
 }
 
 android {
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = Config.buildToolsVersion
     namespace = "com.facebook.applinks"
     compileSdk = Config.compileSdk
 
@@ -44,7 +44,10 @@ android {
         consumerProguardFiles("proguard-rules.pro")
     }
 
-    sourceSets { named("test") { java.srcDir("src/test/kotlin") } }
+    sourceSets {
+        getByName("test")
+        { java.srcDir("src/test/kotlin") }
+    }
 
     buildTypes {
         getByName("release") {
