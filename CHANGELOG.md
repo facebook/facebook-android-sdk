@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [18.0.2]
+### Changed
+- Upgraded a variety of dependencies including Kotlin, Gradle, and the Android Gradle Plugin
+### Added
+- Added permissions ACCESS_ADSERVICES_ATTRIBUTION, ACCESS_ADSERVICES_AD_ID and ACCESS_ADSERVICES_CUSTOM_AUDIENCE to access [Google Privacy Sandbox AdServices API](https://developers.google.com/privacy-sandbox/overview/android). If you need to disable any of the permissions, please include the [tools:node="remove" node marker](https://developer.android.com/build/manage-manifests#node_markers) for the particular permissions.
+
 ## [18.0.1]
 
 ### Fixed
