@@ -19,10 +19,10 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
 import com.facebook.appevents.gps.GpsCapabilityChecker
 import com.facebook.appevents.gps.GpsDebugLogger
+import com.facebook.appevents.internal.Constants
 import com.facebook.internal.AnalyticsEvents
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.net.URLEncoder
-import com.facebook.appevents.internal.Constants
 
 @AutoHandleExceptions
 object GpsAraTriggersManager {
@@ -37,7 +37,8 @@ object GpsAraTriggersManager {
     fun enable() {
         enabled = true
         gpsDebugLogger = GpsDebugLogger(FacebookSdk.getApplicationContext())
-        serverUri = "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/mobile/register/trigger"
+        serverUri =
+            "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/mobile/register/trigger"
     }
 
     fun registerTriggerAsync(applicationId: String, event: AppEvent) {

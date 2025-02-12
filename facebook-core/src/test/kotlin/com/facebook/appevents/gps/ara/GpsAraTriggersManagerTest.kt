@@ -20,6 +20,8 @@ import com.facebook.appevents.AppEvent
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.gps.GpsCapabilityChecker
 import com.facebook.appevents.gps.GpsDebugLogger
+import com.facebook.appevents.internal.Constants.EVENT_NAME_EVENT_KEY
+import com.facebook.internal.AnalyticsEvents
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -29,18 +31,21 @@ import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.robolectric.annotation.Config
 import java.util.concurrent.Executor
 
 @PrepareForTest(
     FacebookSdk::class,
     MeasurementManager::class,
-    GpsCapabilityChecker::class
+    GpsCapabilityChecker::class,
+    GpsAraTriggersManager::class
 )
+@Config(sdk = [23])
 class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
     private val applicationId = "app_id"
     private val contentId = "product_id_123"
 
-    //    private lateinit var context: Context
+    private lateinit var context: Context
     private var registerTriggerCalledTimes = 0
     private lateinit var triggerUri: Uri
     private lateinit var mockLogger: GpsDebugLogger
@@ -49,7 +54,7 @@ class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
     fun setUp() {
         registerTriggerCalledTimes = 0
 
-        mockLogger = mock()
+        mockLogger = PowerMockito.mock(GpsDebugLogger::class.java)
         whenNew(GpsDebugLogger::class.java)
             .withAnyArguments()
             .thenReturn(mockLogger)
@@ -78,16 +83,20 @@ class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
             null
         }
 
-//        context = PowerMockito.mock(Context::class.java)
-//        doReturn(measurementManager).whenever(context)
-//            .getSystemService(MeasurementManager::class.java)
+        context = mock()
+        whenever(context.applicationContext).thenReturn(context)
+        whenever(context.getSystemService(MeasurementManager::class.java)).thenReturn(
+            measurementManager
+        )
 
         PowerMockito.mockStatic(MeasurementManager::class.java)
         whenever(MeasurementManager.get(any<Context>())).thenReturn(measurementManager)
 
         PowerMockito.mockStatic(FacebookSdk::class.java)
-//        whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
+        whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
         whenever(FacebookSdk.getExecutor()).thenCallRealMethod()
+        whenever(FacebookSdk.getFacebookDomain()).thenCallRealMethod()
+        whenever(FacebookSdk.isInitialized()).thenReturn(true)
 
         PowerMockito.mockStatic(GpsCapabilityChecker::class.java)
 
@@ -96,44 +105,42 @@ class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
 
     @Test
     fun testRegisterTriggerWithOutcomeReceiver() {
-        assertEquals(0, 0)
-        // TODO: Update tests to not rely on mocked context
-//        whenever(GpsCapabilityChecker.useOutcomeReceiver()).thenReturn(true)
-//
-//        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
-//        GpsAraTriggersManager.registerTrigger(applicationId, event)
-//
-//        assertEquals(registerTriggerCalledTimes, 1)
-//
-//        assertEquals(triggerUri.getQueryParameter(AnalyticsEvents.PARAMETER_APP_ID), applicationId)
-//        assertEquals(
-//            triggerUri.getQueryParameter(AppEventsConstants.EVENT_PARAM_CONTENT_ID),
-//            contentId
-//        )
-//        assertEquals(
-//            triggerUri.getQueryParameter(EVENT_NAME_EVENT_KEY),
-//            AppEventsConstants.EVENT_NAME_VIEWED_CONTENT
-//        )
-//    }
-//
-//    @Test
-//    fun testRegisterTriggerWithAdsOutcomeReceiver() {
-//        whenever(GpsCapabilityChecker.useOutcomeReceiver()).thenReturn(false)
-//
-//        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
-//        GpsAraTriggersManager.registerTrigger(applicationId, event)
-//
-//        assertEquals(registerTriggerCalledTimes, 1)
-//
-//        assertEquals(triggerUri.getQueryParameter(AnalyticsEvents.PARAMETER_APP_ID), applicationId)
-//        assertEquals(
-//            triggerUri.getQueryParameter(AppEventsConstants.EVENT_PARAM_CONTENT_ID),
-//            contentId
-//        )
-//        assertEquals(
-//            triggerUri.getQueryParameter(EVENT_NAME_EVENT_KEY),
-//            AppEventsConstants.EVENT_NAME_VIEWED_CONTENT
-//        )
+        whenever(GpsCapabilityChecker.useOutcomeReceiver()).thenReturn(true)
+
+        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
+        GpsAraTriggersManager.registerTrigger(applicationId, event)
+
+        assertEquals(registerTriggerCalledTimes, 1)
+
+        assertEquals(triggerUri.getQueryParameter(AnalyticsEvents.PARAMETER_APP_ID), applicationId)
+        assertEquals(
+            triggerUri.getQueryParameter(AppEventsConstants.EVENT_PARAM_CONTENT_ID),
+            contentId
+        )
+        assertEquals(
+            triggerUri.getQueryParameter(EVENT_NAME_EVENT_KEY),
+            AppEventsConstants.EVENT_NAME_VIEWED_CONTENT
+        )
+    }
+
+    @Test
+    fun testRegisterTriggerWithAdsOutcomeReceiver() {
+        whenever(GpsCapabilityChecker.useOutcomeReceiver()).thenReturn(false)
+
+        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
+        GpsAraTriggersManager.registerTrigger(applicationId, event)
+
+        assertEquals(registerTriggerCalledTimes, 1)
+
+        assertEquals(triggerUri.getQueryParameter(AnalyticsEvents.PARAMETER_APP_ID), applicationId)
+        assertEquals(
+            triggerUri.getQueryParameter(AppEventsConstants.EVENT_PARAM_CONTENT_ID),
+            contentId
+        )
+        assertEquals(
+            triggerUri.getQueryParameter(EVENT_NAME_EVENT_KEY),
+            AppEventsConstants.EVENT_NAME_VIEWED_CONTENT
+        )
     }
 
     private fun createEvent(eventName: String): AppEvent {
