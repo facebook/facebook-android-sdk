@@ -39,6 +39,7 @@ object PACustomAudienceClient {
     // Sync with RestrictiveDataManager.REPLACEMENT_STRING
     private const val REPLACEMENT_STRING = "_removed_"
     private var enabled = false
+    private var isInitialized = false
     private var customAudienceManager: CustomAudienceManager? = null
     private lateinit var gpsDebugLogger: GpsDebugLogger
     private lateinit var baseUri: String
@@ -46,6 +47,7 @@ object PACustomAudienceClient {
     @JvmStatic
     @TargetApi(34)
     fun enable() {
+        isInitialized = true
         val context = FacebookSdk.getApplicationContext()
         gpsDebugLogger = GpsDebugLogger(context)
         baseUri = "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/pa/logic"
@@ -75,6 +77,10 @@ object PACustomAudienceClient {
     }
 
     fun joinCustomAudience(appId: String?, eventName: String?) {
+        if (!isInitialized) {
+            enable()
+        }
+
         if (!enabled) return
 
         joinCustomAudienceImpl(appId, eventName)
@@ -82,6 +88,10 @@ object PACustomAudienceClient {
 
 
     fun joinCustomAudience(appId: String?, event: AppEvent?) {
+        if (!isInitialized) {
+            enable()
+        }
+
         if (!enabled) return
 
         var eventName: String? = null
