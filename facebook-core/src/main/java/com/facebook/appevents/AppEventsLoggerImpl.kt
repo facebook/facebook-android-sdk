@@ -514,6 +514,10 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             // Will do nothing in case AutoLogAppEventsEnabled is true, as we already started the
             // tracking as part of sdkInitialize() flow
             startTracking(application, applicationId)
+
+            if (isEnabled(FeatureManager.Feature.GPSPACAProcessing)) {
+                PACustomAudienceClient.joinCustomAudience(applicationId, "fb_mobile_app_install")
+            }
         }
 
         @JvmStatic

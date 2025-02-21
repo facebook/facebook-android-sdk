@@ -20,14 +20,14 @@ import android.annotation.TargetApi
 import android.os.Bundle
 import android.os.OutcomeReceiver
 import android.util.Log
+import androidx.core.net.toUri
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEvent
+import com.facebook.appevents.gps.GpsDebugLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import org.json.JSONException
 import java.util.concurrent.Executors
-import kotlin.toString
-import androidx.core.net.toUri
-import com.facebook.appevents.gps.GpsDebugLogger
 
 @AutoHandleExceptions
 object PACustomAudienceClient {
@@ -74,9 +74,32 @@ object PACustomAudienceClient {
         }
     }
 
-    @TargetApi(34)
-    fun joinCustomAudience(appId: String, event: AppEvent) {
+    fun joinCustomAudience(appId: String?, eventName: String?) {
         if (!enabled) return
+
+        joinCustomAudienceImpl(appId, eventName)
+    }
+
+
+    fun joinCustomAudience(appId: String?, event: AppEvent?) {
+        if (!enabled) return
+
+        var eventName: String? = null
+        try {
+            eventName = event?.getJSONObject()?.getString(Constants.EVENT_NAME_EVENT_KEY)
+        } catch (e: JSONException) {
+            Log.w(TAG, "Failed to get event name from event.")
+        }
+
+        joinCustomAudienceImpl(appId, eventName)
+    }
+
+    @TargetApi(34)
+    private fun joinCustomAudienceImpl(appId: String?, eventName: String?) {
+        val caName = validateAndCreateCAName(appId, eventName)
+        if (caName == null) {
+            return
+        }
 
         val callback: OutcomeReceiver<Any, Exception> =
             object : OutcomeReceiver<Any, Exception> {
@@ -99,8 +122,6 @@ object PACustomAudienceClient {
             }
 
         try {
-            val caName = validateAndCreateCAName(appId, event) ?: return
-
             // Each custom audience has to be attached with at least one ad to be valid, so we need to create a dummy ad and attach it to the ca.
             val dummyAd = AdData.Builder()
                 .setRenderUri("$baseUri/ad".toUri())
@@ -136,8 +157,10 @@ object PACustomAudienceClient {
         }
     }
 
-    private fun validateAndCreateCAName(appId: String, event: AppEvent): String? {
-        val eventName = event.getJSONObject().getString(Constants.EVENT_NAME_EVENT_KEY)
+    private fun validateAndCreateCAName(appId: String?, eventName: String?): String? {
+        if (appId == null || eventName == null) {
+            return null
+        }
         if (eventName == REPLACEMENT_STRING || eventName.contains(GPS_PREFIX)) {
             return null
         }
