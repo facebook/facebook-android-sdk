@@ -64,7 +64,7 @@ space only install the modules that you intend to use. To get started, see the I
 below.
 
 Any Facebook SDK initialization must occur only in the main process of the app. Use of Facebook SDK
-in processes other than the main process is not supported and will likely cause problems.
+in processes other than the main  process is not supported and will likely cause problems.
 
 
 INSTALLATION
