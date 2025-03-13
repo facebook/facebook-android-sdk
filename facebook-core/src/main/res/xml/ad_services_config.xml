@@ -25,4 +25,6 @@
     <attribution allowAllToAccess="true" />
     <!-- Protected Audience on Android API -->
     <custom-audiences allowAllToAccess="true" />
+    <!-- Topics API -->
+    <topics allowAllToAccess="true" />
 </ad-services-config>
