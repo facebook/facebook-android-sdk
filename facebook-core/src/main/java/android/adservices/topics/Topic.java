@@ -17,8 +17,15 @@ public final class Topic {
         throw new RuntimeException("Stub!");
     }
 
-    @NonNull
-    public List<Topic> getTopics() {
+    public long getModelVersion() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public long getTaxonomyVersion() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getTopicId() {
         throw new RuntimeException("Stub!");
     }
 
