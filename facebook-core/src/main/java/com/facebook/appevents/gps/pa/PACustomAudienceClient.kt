@@ -61,10 +61,7 @@ object PACustomAudienceClient {
         } catch (e: Exception) {
             errorMsg = e.toString()
             Log.w(TAG, "Failed to get CustomAudienceManager: $e")
-        } catch (e: NoClassDefFoundError) {
-            errorMsg = e.toString()
-            Log.w(TAG, "Failed to get CustomAudienceManager: $e")
-        } catch (e: NoSuchMethodError) {
+        } catch (e: Error) {
             errorMsg = e.toString()
             Log.w(TAG, "Failed to get CustomAudienceManager: $e")
         }
@@ -111,27 +108,27 @@ object PACustomAudienceClient {
             return
         }
 
-        val callback: OutcomeReceiver<Any, Exception> =
-            object : OutcomeReceiver<Any, Exception> {
-                override fun onResult(result: Any) {
-                    Log.i(TAG, "Successfully joined custom audience")
-                    gpsDebugLogger.log(Constants.GPS_PA_SUCCEED, null)
-                }
-
-                override fun onError(error: Exception) {
-                    Log.e(TAG, error.toString())
-                    gpsDebugLogger.log(
-                        Constants.GPS_PA_FAILED,
-                        Bundle().apply {
-                            putString(
-                                Constants.GPS_PA_FAILED_REASON,
-                                error.toString()
-                            )
-                        })
-                }
-            }
-
         try {
+            val callback: OutcomeReceiver<Any, Exception> =
+                object : OutcomeReceiver<Any, Exception> {
+                    override fun onResult(result: Any) {
+                        Log.i(TAG, "Successfully joined custom audience")
+                        gpsDebugLogger.log(Constants.GPS_PA_SUCCEED, null)
+                    }
+
+                    override fun onError(error: Exception) {
+                        Log.e(TAG, error.toString())
+                        gpsDebugLogger.log(
+                            Constants.GPS_PA_FAILED,
+                            Bundle().apply {
+                                putString(
+                                    Constants.GPS_PA_FAILED_REASON,
+                                    error.toString()
+                                )
+                            })
+                    }
+                }
+
             // Each custom audience has to be attached with at least one ad to be valid, so we need to create a dummy ad and attach it to the ca.
             val dummyAd = AdData.Builder()
                 .setRenderUri("$baseUri/ad".toUri())
@@ -160,6 +157,11 @@ object PACustomAudienceClient {
                 callback
             )
         } catch (e: Exception) {
+            Log.w(TAG, "Failed to join Custom Audience: $e")
+            gpsDebugLogger.log(
+                Constants.GPS_PA_FAILED,
+                Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, e.toString()) })
+        } catch (e: Error) {
             Log.w(TAG, "Failed to join Custom Audience: $e")
             gpsDebugLogger.log(
                 Constants.GPS_PA_FAILED,
