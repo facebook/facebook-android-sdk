@@ -19,12 +19,19 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 @AutoHandleExceptions
 object GpsTopicsManager {
     private const val RECORD_OBSERVATION = true
     private val TAG = GpsTopicsManager::class.java.toString()
     private val executor: Executor by lazy { Executors.newCachedThreadPool() }
+    private val isTopicsObservationEnabled = AtomicBoolean(false)
+
+    @JvmStatic
+    fun enableTopicsObservation() {
+        isTopicsObservationEnabled.set(true)
+    }
 
     @JvmStatic
     @TargetApi(34)
@@ -41,16 +48,16 @@ object GpsTopicsManager {
                     override fun onResult(response: GetTopicsResponse) {
                         try {
                             futureResult.complete(processObservedTopics(response))
-                        } catch (error: Exception) {
+                        } catch (error: Throwable) {
                             // TODO - customized error handling
-                            Log.w(TAG, "GPS_TOPICS_PROCESSING_FAILED")
+                            Log.w(TAG, "GPS_TOPICS_PROCESSING_FAILURE", error)
                             futureResult.completeExceptionally(error)
                         }
                     }
 
                     override fun onError(error: Exception) {
                         // TODO - customized error handling
-                        Log.w(TAG, "GPS_TOPICS_OBSERVATION_ERROR")
+                        Log.w(TAG, "GPS_TOPICS_OBSERVATION_FAILURE", error)
                         futureResult.completeExceptionally(error)
                     }
                 }
@@ -64,9 +71,9 @@ object GpsTopicsManager {
                 executor,
                 callback,
             )
-        } catch (error: Exception) {
+        } catch (error: Throwable) {
             // TODO - customized error handling
-            Log.w(TAG, "GPS_TOPICS_OBSERVATION_FAILED")
+            Log.w(TAG, "GPS_TOPICS_OBSERVATION_FAILURE", error)
             futureResult.completeExceptionally(error)
         }
         return futureResult
@@ -74,16 +81,22 @@ object GpsTopicsManager {
 
     @JvmStatic
     fun shouldObserveTopics(): Boolean {
-        // TODO - default in false for fetcher skeleton
-        return false
+        if (!isTopicsObservationEnabled.get()) {
+            return false
+        }
+
+        try {
+            Class.forName("android.adservices.topics.TopicsManager")
+        } catch (error: Throwable) {
+            // TODO - customized error handling
+            Log.w(TAG, "GPS_TOPICS_DEPENDENCY_FAILURE", error)
+            return false
+        }
+        return true
     }
 
     @TargetApi(34)
     private fun processObservedTopics(response: GetTopicsResponse): List<TopicData> {
-        if (response == null) {
-            return emptyList()
-        }
-
         return response.topics.map { topic ->
             TopicData(
                 taxonomyVersion = topic.taxonomyVersion,

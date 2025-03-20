@@ -112,6 +112,7 @@ object FeatureManager {
         featureMapping[Feature.Monitoring] = arrayOf("com.facebook.internal.logging.monitor")
         featureMapping[Feature.GPSARATriggers] = arrayOf("com.facebook.appevents.gps.ara.GpsARAManager")
         featureMapping[Feature.GPSPACAProcessing] = arrayOf("com.facebook.appevents.gps.pa.PACustomAudienceClient")
+        featureMapping[Feature.GPSTopicsObservation] = arrayOf("com.facebook.appevents.gps.topics.GpsTopicsManager")
     }
 
     private fun getGKStatus(feature: Feature): Boolean {
@@ -157,7 +158,8 @@ object FeatureManager {
             Feature.IgnoreAppSwitchToLoggedOut,
             Feature.BypassAppSwitch,
             Feature.GPSARATriggers,
-            Feature.GPSPACAProcessing -> false
+            Feature.GPSPACAProcessing,
+            Feature.GPSTopicsObservation -> false
 
             else -> true
         }
@@ -212,6 +214,7 @@ object FeatureManager {
         Elora(0x00050000),
         GPSARATriggers(0x00060000), /* privacy sandbox - attribution reporting API*/
         GPSPACAProcessing(0x00070000), /* privacy sandbox - protected audience API*/
+        GPSTopicsObservation(0x00080000), /* privacy sandbox - topics API*/
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
@@ -261,6 +264,7 @@ object FeatureManager {
                 Elora -> "Elora"
                 GPSARATriggers -> "GPSARATriggers"
                 GPSPACAProcessing-> "GPSPACAProcessing"
+                GPSTopicsObservation -> "GPSTopicsObservation"
                 ServiceUpdateCompliance -> "ServiceUpdateCompliance"
                 Login -> "LoginKit"
                 ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"

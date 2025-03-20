@@ -29,6 +29,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.robolectric.annotation.Config
 import kotlin.test.assertNotNull
 import kotlin.test.fail
+import com.facebook.internal.FeatureManager
 
 @PrepareForTest(
     FacebookSdk::class,
@@ -37,6 +38,7 @@ import kotlin.test.fail
     GetTopicsRequest::class,
     GetTopicsResponse::class,
     Topic::class,
+    FeatureManager::class,
 )
 @Config(sdk = [23])
 class GpsTopicsManagerTest : FacebookPowerMockTestCase() {
@@ -224,6 +226,44 @@ class GpsTopicsManagerTest : FacebookPowerMockTestCase() {
                 assertEquals(topicTestDataList[i].modelVersion, topicDataFetched.modelVersion)
                 assertEquals(topicTestDataList[i].topicId, topicDataFetched.topicId)
             }
+        } catch (e: Exception) {
+            fail("[Topics] execution error occurred: $e")
+        }
+    }
+
+    @Test
+    fun testGetTopicsForFeatureEnablementFastReturnCase() {
+        val topic: Topic = mock(Topic::class.java)
+        whenever(topic.taxonomyVersion).thenReturn(2L)
+        whenever(topic.modelVersion).thenReturn(5L)
+        whenever(topic.topicId).thenReturn(10111)
+
+        mockStatic(GetTopicsResponse::class.java)
+        val getTopicsResponse: GetTopicsResponse = mock(GetTopicsResponse::class.java)
+        whenever(getTopicsResponse.topics).thenReturn(listOf(topic))
+        whenever(mockTopicsManager.getTopics(any(), any(), any())).thenAnswer { invocation ->
+            val callback = invocation.getArgument<OutcomeReceiver<GetTopicsResponse, Exception>>(2)
+            callback.onResult(getTopicsResponse)
+        }
+
+        mockStatic(GetTopicsRequest.Builder::class.java)
+        val getTopicsRequest: GetTopicsRequest = mock(GetTopicsRequest::class.java)
+        val getTopicsRequestBuilder: GetTopicsRequest.Builder = mock(GetTopicsRequest.Builder::class.java)
+        whenNew(GetTopicsRequest.Builder::class.java)
+            .withNoArguments()
+            .thenReturn(getTopicsRequestBuilder)
+
+        whenever(getTopicsRequestBuilder.setAdsSdkName(any())).thenReturn(getTopicsRequestBuilder)
+        whenever(getTopicsRequestBuilder.setShouldRecordObservation(any())).thenReturn(getTopicsRequestBuilder)
+        whenever(getTopicsRequestBuilder.build()).thenReturn(getTopicsRequest)
+
+        try {
+            mockStatic(FeatureManager::class.java)
+            whenever(FeatureManager.isEnabled(FeatureManager.Feature.GPSTopicsObservation)).thenReturn(false)
+            val future = GpsTopicsManager.getTopics()
+            val topics = future.get()
+            assertNotNull(topics)
+            assertEquals(0, topics.size)
         } catch (e: Exception) {
             fail("[Topics] execution error occurred: $e")
         }

@@ -15,6 +15,7 @@ import com.facebook.appevents.cloudbridge.AppEventsCAPIManager
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.gps.ara.GpsAraTriggersManager
 import com.facebook.appevents.gps.pa.PACustomAudienceClient
+import com.facebook.appevents.gps.topics.GpsTopicsManager
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.integrity.BannedParamManager
 import com.facebook.appevents.integrity.BlocklistEventsManager
@@ -120,6 +121,11 @@ object AppEventsManager {
                     checkFeature(FeatureManager.Feature.GPSPACAProcessing) { enabled ->
                         if (enabled) {
                             PACustomAudienceClient.enable()
+                        }
+                    }
+                    checkFeature(FeatureManager.Feature.GPSTopicsObservation) { enabled ->
+                        if (enabled) {
+                            GpsTopicsManager.enableTopicsObservation()
                         }
                     }
                 }
