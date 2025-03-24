@@ -16,7 +16,6 @@ import com.facebook.appevents.internal.AppEventsLoggerUtility.getJSONObjectForGr
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.isEnabled
-import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONArray
 import org.json.JSONException
@@ -76,13 +75,9 @@ internal class SessionEventsState(
             jsonArray = JSONArray()
             operationalJsonArray = JSONArray()
             for (event in inFlightEvents) {
-                if (event.isChecksumValid) {
-                    if (includeImplicitEvents || !event.isImplicit) {
-                        jsonArray.put(event.jsonObject)
-                        operationalJsonArray.put(event.operationalJsonObject)
-                    }
-                } else {
-                    logd(TAG, "Event with invalid checksum: $event")
+                if (includeImplicitEvents || !event.isImplicit) {
+                    jsonArray.put(event.jsonObject)
+                    operationalJsonArray.put(event.operationalJsonObject)
                 }
             }
             if (jsonArray.length() == 0) {

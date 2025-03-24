@@ -8,7 +8,6 @@
 
 package com.facebook.appevents
 
-import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RestrictTo
 import com.facebook.FacebookException
@@ -16,19 +15,14 @@ import com.facebook.LoggingBehavior
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager.processDeprecatedParameters
 import com.facebook.appevents.integrity.IntegrityManager
 import com.facebook.appevents.integrity.RedactedEventsManager
-import com.facebook.appevents.internal.AppEventUtility.bytesToHex
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processEvent
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager.processParameters
 import com.facebook.internal.Logger.Companion.log
-import com.facebook.internal.Utility.logd
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.ObjectStreamException
 import java.io.Serializable
-import java.io.UnsupportedEncodingException
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.util.Locale
 import java.util.UUID
 
@@ -39,7 +33,6 @@ class AppEvent : Serializable {
     val isImplicit: Boolean
     private val inBackground: Boolean
     val name: String
-    private val checksum: String?
 
     @Throws(JSONException::class, FacebookException::class)
     constructor(
@@ -64,7 +57,6 @@ class AppEvent : Serializable {
                 parameters,
                 currentSessionId
             )
-        checksum = calculateChecksum()
     }
 
     private constructor(
@@ -72,13 +64,11 @@ class AppEvent : Serializable {
         operationalJsonString: String,
         isImplicit: Boolean,
         inBackground: Boolean,
-        checksum: String?
     ) {
         jsonObject = JSONObject(jsonString)
         operationalJsonObject = JSONObject(operationalJsonString)
         this.isImplicit = isImplicit
         name = jsonObject.optString(Constants.EVENT_NAME_EVENT_KEY)
-        this.checksum = checksum
         this.inBackground = inBackground
     }
 
@@ -91,14 +81,6 @@ class AppEvent : Serializable {
     fun getOperationalJSONObject(type: OperationalDataEnum): JSONObject? {
         return operationalJsonObject.optJSONObject(type.value)
     }
-
-    // for old events we don't have a checksum
-    val isChecksumValid: Boolean
-        get() =
-            if (checksum == null) {
-                // for old events we don't have a checksum
-                true
-            } else calculateChecksum() == checksum
 
     private fun getJSONObjectForAppEvent(
         contextName: String,
@@ -174,17 +156,15 @@ class AppEvent : Serializable {
         return paramMap
     }
 
-    internal class SerializationProxyV2
-    constructor(
+    internal class SerializationProxyV2(
         private val jsonString: String,
         private val operationalJsonString: String,
         private val isImplicit: Boolean,
         private val inBackground: Boolean,
-        private val checksum: String?
     ) : Serializable {
         @Throws(JSONException::class, ObjectStreamException::class)
         private fun readResolve(): Any {
-            return AppEvent(jsonString, operationalJsonString, isImplicit, inBackground, checksum)
+            return AppEvent(jsonString, operationalJsonString, isImplicit, inBackground)
         }
 
         companion object {
@@ -199,7 +179,6 @@ class AppEvent : Serializable {
             operationalJsonObject.toString(),
             isImplicit,
             inBackground,
-            checksum
         )
     }
 
@@ -212,26 +191,6 @@ class AppEvent : Serializable {
         )
     }
 
-    private fun calculateChecksum(): String {
-        // jsonObject.toString() doesn't guarantee order of the keys on KitKat
-        // (API Level 19) and below as JSONObject used HashMap internally,
-        // starting Android API Level 20+, JSONObject changed to use LinkedHashMap
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            return md5Checksum(jsonObject.toString())
-        }
-        val keys = arrayListOf<String>()
-        val iterator = jsonObject.keys()
-        while (iterator.hasNext()) {
-            keys.add(iterator.next())
-        }
-        keys.sort()
-        val sb = StringBuilder()
-        for (key in keys) {
-            sb.append(key).append(" = ").append(jsonObject.optString(key)).append('\n')
-        }
-        return md5Checksum(sb.toString())
-    }
-
     companion object {
         private const val serialVersionUID = 1L
         private val validatedIdentifiers = HashSet<String>()
@@ -242,12 +201,8 @@ class AppEvent : Serializable {
 
             // Identifier should be 40 chars or less, and only have 0-9A-Za-z, underscore, hyphen,
             // and space (but no hyphen or space in the first position).
-            var identifier: String? = identifier
             val regex = "^[0-9a-zA-Z_]+[0-9a-zA-Z _-]*$"
-            if (identifier == null || identifier.isEmpty() || identifier.length > MAX_IDENTIFIER_LENGTH) {
-                if (identifier == null) {
-                    identifier = "<None Provided>"
-                }
+            if (identifier.isEmpty() || identifier.length > MAX_IDENTIFIER_LENGTH) {
                 throw FacebookException(
                     String.format(
                         Locale.ROOT,
@@ -275,24 +230,6 @@ class AppEvent : Serializable {
                     )
                 }
             }
-        }
-
-        private fun md5Checksum(toHash: String): String {
-            val hash: String
-            try {
-                val digest = MessageDigest.getInstance("MD5")
-                var bytes = toHash.toByteArray(charset("UTF-8"))
-                digest.update(bytes, 0, bytes.size)
-                bytes = digest.digest()
-                hash = bytesToHex(bytes)
-            } catch (e: NoSuchAlgorithmException) {
-                logd("Failed to generate checksum: ", e)
-                return "0"
-            } catch (e: UnsupportedEncodingException) {
-                logd("Failed to generate checksum: ", e)
-                return "1"
-            }
-            return hash
         }
     }
 }

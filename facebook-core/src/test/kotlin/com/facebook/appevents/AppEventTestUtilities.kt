@@ -10,8 +10,8 @@ package com.facebook.appevents
 
 import android.os.Bundle
 import com.facebook.FacebookTestUtility.assertEqualContentsWithoutOrder
-import java.util.UUID
 import org.mockito.ArgumentMatcher
+import java.util.UUID
 
 object AppEventTestUtilities {
     fun getTestAppEvent(): AppEvent {
@@ -33,7 +33,6 @@ object AppEventTestUtilities {
                 UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"),
                 operationalParams
             )
-        appEvent.isChecksumValid
         return appEvent
     }
 
