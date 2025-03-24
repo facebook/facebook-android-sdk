@@ -176,18 +176,4 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
         )
             .isEqualTo(fbMobileTimeBetweenSessions)
     }
-
-    @Test
-    fun `test logActivateApp will log EVENT_NAME_ACTIVATED_APP event and package checksum`() {
-        SessionLogger.logActivateApp(activityName, null, appId, mockContext)
-
-        verify(mockInternalAppEventsLogger)
-            .logEvent(
-                eq(AppEventsConstants.EVENT_NAME_ACTIVATED_APP),
-                bundleArgumentCaptor.capture()
-            )
-        val capturedBundle = bundleArgumentCaptor.firstValue
-        assertThat(capturedBundle.getString(AppEventsConstants.EVENT_PARAM_PACKAGE_FP))
-            .isEqualTo(mockChecksum)
-    }
 }

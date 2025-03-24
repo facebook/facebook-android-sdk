@@ -11,19 +11,16 @@ package com.facebook.appevents.internal
 import android.content.Context
 import android.os.Bundle
 import android.text.format.DateUtils
-import com.facebook.FacebookSdk
 import com.facebook.LoggingBehavior
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.InternalAppEventsLogger
-import com.facebook.appevents.internal.HashUtils.computeChecksum
 import com.facebook.internal.Logger.Companion.log
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.Locale
 
 @AutoHandleExceptions
 internal object SessionLogger {
-    private const val PACKAGE_CHECKSUM = "PCKGCHKSUM"
     private val TAG = SessionLogger::class.java.canonicalName
     private val INACTIVE_SECONDS_QUANTA =
         longArrayOf(
@@ -58,9 +55,6 @@ internal object SessionLogger {
         val sourAppInfoStr = sourceApplicationInfo?.toString() ?: "Unclassified"
         val eventParams = Bundle()
         eventParams.putString(AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION, sourAppInfoStr)
-        eventParams.putString(
-            AppEventsConstants.EVENT_PARAM_PACKAGE_FP, computePackageChecksum(context)
-        )
         val logger = InternalAppEventsLogger.createInstance(activityName, appId, null)
         logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams)
         if (InternalAppEventsLogger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
@@ -123,38 +117,5 @@ internal object SessionLogger {
             ++quantaIndex
         }
         return quantaIndex
-    }
-
-    private fun computePackageChecksum(context: Context): String? {
-        return try {
-            // First, try to check if package hash already computed
-            val pm = context.packageManager
-            val packageVersion = pm.getPackageInfo(context.packageName, 0).versionName
-            val packageHashSharedPrefKey = PACKAGE_CHECKSUM + ";" + packageVersion
-            val preferences =
-                context.getSharedPreferences(
-                    FacebookSdk.APP_EVENT_PREFERENCES,
-                    Context.MODE_PRIVATE
-                )
-            var packageHash = preferences.getString(packageHashSharedPrefKey, null)
-            if (packageHash != null && packageHash.length == 32) {
-                return packageHash
-            }
-            // Second, try to get the checksum through Android S checksum API
-            val androidPackageManagerChecksum =
-                HashUtils.computeChecksumWithPackageManager(context, null)
-            packageHash =
-                if (androidPackageManagerChecksum != null) {
-                    androidPackageManagerChecksum
-                } else {
-                    // Finally, compute checksum and cache it.
-                    val ai = pm.getApplicationInfo(context.packageName, 0)
-                    computeChecksum(ai.sourceDir)
-                }
-            preferences.edit().putString(packageHashSharedPrefKey, packageHash).apply()
-            packageHash
-        } catch (e: Exception) {
-            null
-        }
     }
 }
