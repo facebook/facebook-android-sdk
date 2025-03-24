@@ -18,7 +18,6 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.MockSharedPreference
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.InternalAppEventsLogger
-import com.facebook.internal.security.CertificateUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
 import org.junit.Before
@@ -37,7 +36,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import java.util.Locale
 
-@PrepareForTest(HashUtils::class, CertificateUtil::class)
+@PrepareForTest(HashUtils::class)
 class SessionLoggerTest : FacebookPowerMockTestCase() {
     private lateinit var mockSessionInfo: SessionInfo
     private lateinit var mockInternalAppEventsLogger: InternalAppEventsLogger
@@ -86,8 +85,6 @@ class SessionLoggerTest : FacebookPowerMockTestCase() {
         PowerMockito.mockStatic(HashUtils::class.java)
         whenever(HashUtils.computeChecksumWithPackageManager(eq(mockContext), anyOrNull()))
             .thenReturn(mockChecksum)
-        PowerMockito.mockStatic(CertificateUtil::class.java)
-        whenever(CertificateUtil.getCertificateHash(mockContext)).thenReturn("")
     }
 
     @Test
