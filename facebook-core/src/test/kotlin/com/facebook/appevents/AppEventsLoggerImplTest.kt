@@ -28,10 +28,6 @@ import com.facebook.internal.FeatureManager
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
-import java.math.BigDecimal
-import java.util.Currency
-import java.util.Locale
-import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -52,7 +48,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.RuntimeEnvironment
+import java.math.BigDecimal
+import java.util.Currency
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
 
 @PrepareForTest(
     AppEventQueue::class,
@@ -125,11 +125,11 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             "anonymousAppDeviceGUID",
             mockAnonID
         )
-        PowerMockito.mockStatic(AutomaticAnalyticsLogger::class.java)
+        mockStatic(AutomaticAnalyticsLogger::class.java)
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
 
         // Disable AppEventUtility.isMainThread since executor now runs in main thread
-        PowerMockito.mockStatic(AppEventUtility::class.java)
+        mockStatic(AppEventUtility::class.java)
         whenever(AppEventUtility.assertIsNotMainThread()).doAnswer {}
 
         // Spy on InAppPurchaseManager to test dedupe functionality
@@ -141,7 +141,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         )
         whenever(AppEventQueue.add(any(), any())).thenAnswer {
             appEventCapture = it.arguments[1] as AppEvent
-            Unit
+            null
         }
     }
 
@@ -422,11 +422,12 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         mockStatic(UserSettingsManager::class.java)
 
         var params: Bundle? = Bundle(1)
+        params?.putCharSequence(Constants.IAP_PRODUCT_ID, "test_product_id")
         var operationalData: OperationalData? = OperationalData()
         var paramsAndData: Pair<Bundle?, OperationalData?>?
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(true)
-        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData, false)
         params = paramsAndData.first
         operationalData = paramsAndData.second
         assertThat(
@@ -442,6 +443,27 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters,
+                Constants.ANDROID_DYNAMIC_ADS_CONTENT_ID,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
+            "client_manual"
+        )
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_CONTENT_ID,
+                params,
+                operationalData
+            )
+        ).isEqualTo(
+            "test_product_id"
+        )
+
+        assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
                 Constants.EVENT_PARAM_IS_IMPLICIT_PURCHASE_LOGGING_ENABLED,
                 params,
                 operationalData
@@ -454,7 +476,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         operationalData = OperationalData()
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(true)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(false)
-        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData, true)
         params = paramsAndData.first
         operationalData = paramsAndData.second
         assertThat(
@@ -482,7 +504,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         operationalData = OperationalData()
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(true)
-        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData, false)
         params = paramsAndData.first
         operationalData = paramsAndData.second
         assertThat(
@@ -510,7 +532,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         operationalData = OperationalData()
         whenever(AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()).thenReturn(false)
         whenever(UserSettingsManager.getAutoLogAppEventsEnabled()).thenReturn(false)
-        paramsAndData = addImplicitPurchaseParameters(params, operationalData)
+        paramsAndData = addImplicitPurchaseParameters(params, operationalData, false)
         params = paramsAndData.first
         operationalData = paramsAndData.second
         assertThat(
@@ -833,7 +855,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         val expectedEvent = "MOBILE_APP_INSTALL"
         val expectedUrl = "$mockAppID/activities"
         val captor = ArgumentCaptor.forClass(JSONObject::class.java)
-        PowerMockito.mockStatic(OnDeviceProcessingManager::class.java)
+        mockStatic(OnDeviceProcessingManager::class.java)
         whenever(OnDeviceProcessingManager.isOnDeviceProcessingEnabled()).thenReturn(true)
         var sendInstallEventTimes = 0
         whenever(OnDeviceProcessingManager.sendInstallEventAsync(eq(mockAppID), any())).thenAnswer {
@@ -865,7 +887,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
         val captor = ArgumentCaptor.forClass(JSONObject::class.java)
 
         // Should not publish install event given that app_events_killswitch is turned on
-        PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
+        mockStatic(FetchedAppGateKeepersManager::class.java)
         PowerMockito.`when`(
             FetchedAppGateKeepersManager.getGateKeeperForKey(
                 eq(APP_EVENTS_KILLSWITCH), any(), any()
@@ -896,7 +918,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             appEventQueueCalledTimes++
             Unit
         }
-        PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
+        mockStatic(FetchedAppGateKeepersManager::class.java)
         PowerMockito.`when`(
             FetchedAppGateKeepersManager.getGateKeeperForKey(
                 eq(APP_EVENTS_KILLSWITCH), any(), any()
@@ -935,7 +957,7 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             appEventQueueCalledTimes++
             Unit
         }
-        PowerMockito.mockStatic(FetchedAppGateKeepersManager::class.java)
+        mockStatic(FetchedAppGateKeepersManager::class.java)
         PowerMockito.`when`(
             FetchedAppGateKeepersManager.getGateKeeperForKey(
                 eq(APP_EVENTS_KILLSWITCH), any(), any()

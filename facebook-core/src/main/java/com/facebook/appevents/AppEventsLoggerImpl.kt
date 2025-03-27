@@ -26,17 +26,16 @@ import com.facebook.appevents.AppEventQueue.getKeySet
 import com.facebook.appevents.AppEventQueue.persistToDisk
 import com.facebook.appevents.gps.ara.GpsAraTriggersManager
 import com.facebook.appevents.gps.pa.PACustomAudienceClient
-import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseDedupeConfig
 import com.facebook.appevents.iap.InAppPurchaseManager
+import com.facebook.appevents.integrity.BannedParamManager.processFilterBannedParams
 import com.facebook.appevents.integrity.BlocklistEventsManager.isInBlocklist
 import com.facebook.appevents.integrity.MACARuleMatchingManager
 import com.facebook.appevents.integrity.ProtectedModeManager
 import com.facebook.appevents.integrity.ProtectedModeManager.processParametersForProtectedMode
 import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.integrity.StdParamsEnforcementManager.processFilterParamSchemaBlocking
-
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
@@ -393,7 +392,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
 
         val (newParameters, newOperationalData) = addImplicitPurchaseParameters(
             modifiedParameters,
-            modifiedOperationalData
+            modifiedOperationalData,
+            isImplicitlyLogged
         )
         modifiedParameters = newParameters
         modifiedOperationalData = newOperationalData
@@ -523,7 +523,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         @JvmStatic
         fun addImplicitPurchaseParameters(
             params: Bundle?,
-            operationalData: OperationalData?
+            operationalData: OperationalData?,
+            isImplicitlyLogged: Boolean
         ): Pair<Bundle?, OperationalData?> {
             var modifiedParams = params
             var modifiedOperationalData = operationalData
@@ -540,6 +541,31 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                 modifiedParams,
                 modifiedOperationalData
             )
+            val productId = OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_PRODUCT_ID,
+                modifiedParams,
+                modifiedOperationalData
+            ) as? String
+            if (!isImplicitlyLogged && modifiedParams?.getString(AppEventsConstants.EVENT_PARAM_CONTENT_ID) == null && productId != null) {
+                modifiedParamsAndData = OperationalData.addParameterAndReturn(
+                    OperationalDataEnum.IAPParameters,
+                    AppEventsConstants.EVENT_PARAM_CONTENT_ID,
+                    productId,
+                    modifiedParams,
+                    modifiedOperationalData
+                )
+                modifiedParams = modifiedParamsAndData.first
+                modifiedOperationalData = modifiedParamsAndData.second
+                modifiedParamsAndData = OperationalData.addParameterAndReturn(
+                    OperationalDataEnum.IAPParameters,
+                    Constants.ANDROID_DYNAMIC_ADS_CONTENT_ID,
+                    "client_manual",
+                    modifiedParams,
+                    modifiedOperationalData
+                )
+            }
+
             modifiedParams = modifiedParamsAndData.first
             modifiedOperationalData = modifiedParamsAndData.second
 
