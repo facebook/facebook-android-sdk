@@ -18,6 +18,9 @@ object Constants {
     const val AA_TIME_SPENT_EVENT_NAME = "fb_aa_time_spent_on_view"
     const val AA_TIME_SPENT_SCREEN_PARAMETER_NAME = "fb_aa_time_spent_view_name"
 
+    // Used to measure rollout of dynamic ads support
+    const val ANDROID_DYNAMIC_ADS_CONTENT_ID = "android_dynamic_ads_content_id"
+
     // The following are in app purchase related parameters.
     const val IAP_PRODUCT_ID = "fb_iap_product_id"
     const val IAP_PURCHASE_TIME = "fb_iap_purchase_time"

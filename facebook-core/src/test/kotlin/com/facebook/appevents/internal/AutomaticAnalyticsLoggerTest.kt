@@ -28,8 +28,6 @@ import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import org.assertj.core.api.Assertions
-import java.math.BigDecimal
-import java.util.Currency
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -41,13 +39,14 @@ import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.spy
-import org.powermock.api.mockito.PowerMockito.verifyNew
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.Robolectric
 import org.robolectric.RuntimeEnvironment
+import java.math.BigDecimal
+import java.util.Currency
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
@@ -190,7 +189,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             currency = it.getArgument(2) as Currency
             bundle = it.getArgument(3) as Bundle
             operationalData = it.getArgument(4) as OperationalData
-            Unit
+            null
         }
         whenever(
             mockInternalAppEventsLogger.logPurchaseImplicitly(
@@ -204,7 +203,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             currency = it.getArgument(1) as Currency
             bundle = it.getArgument(2) as Bundle
             operationalData = it.getArgument(3) as OperationalData
-            Unit
+            null
         }
     }
 
@@ -258,7 +257,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             actualName = it.getArgument(0)
             actualValue = it.getArgument(1)
             actualBundle = it.getArgument(2)
-            Unit
+            null
         }
         whenever(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
         AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
@@ -331,6 +330,20 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("id123")
         Assertions.assertThat(
             OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, AppEventsConstants.EVENT_PARAM_CONTENT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("id123")
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, Constants.ANDROID_DYNAMIC_ADS_CONTENT_ID,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("client_implicit")
+        Assertions.assertThat(
+            OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TIME,
                 bundle,
                 operationalData
@@ -338,7 +351,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )
@@ -452,7 +465,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )
@@ -560,7 +573,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )
@@ -668,7 +681,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )
@@ -742,7 +755,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
         val emptyOperationalData = OperationalData()
-        parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
+        parameters.putCharSequence(IAP_PURCHASE_TOKEN, "token123")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
@@ -792,7 +805,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 OperationalDataEnum.IAPParameters,
                 Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
                 operationalData
-            ), Constants.IAP_PURCHASE_TOKEN
+            ), IAP_PURCHASE_TOKEN
         )
     }
 
@@ -805,7 +818,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         val opData = OperationalData()
         opData.addParameter(
             OperationalDataEnum.IAPParameters,
-            Constants.IAP_PURCHASE_TOKEN,
+            IAP_PURCHASE_TOKEN,
             "token123"
         )
         opData.addParameter(
@@ -860,7 +873,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 OperationalDataEnum.IAPParameters,
                 Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
                 operationalData
-            ), Constants.IAP_PURCHASE_TOKEN
+            ), IAP_PURCHASE_TOKEN
         )
     }
 
@@ -872,7 +885,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
         val emptyOperationalData = OperationalData()
-        parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "different token")
+        parameters.putCharSequence(IAP_PURCHASE_TOKEN, "different token")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
@@ -1002,7 +1015,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
         val emptyOperationalData = OperationalData()
-        parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
+        parameters.putCharSequence(IAP_PURCHASE_TOKEN, "token123")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "different product id")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
@@ -1119,7 +1132,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 OperationalDataEnum.IAPParameters,
                 Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
                 operationalData
-            ), Constants.IAP_PURCHASE_TOKEN
+            ), IAP_PURCHASE_TOKEN
         )
     }
 
@@ -1131,7 +1144,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
         val emptyOperationalData = OperationalData()
-        parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "different purchase token")
+        parameters.putCharSequence(IAP_PURCHASE_TOKEN, "different purchase token")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "different product id")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
@@ -1261,7 +1274,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             ConcurrentHashMap<InAppPurchase, MutableList<Pair<Long, Pair<Bundle, OperationalData>>>>()
         val parameters = Bundle()
         val emptyOperationalData = OperationalData()
-        parameters.putCharSequence(Constants.IAP_PURCHASE_TOKEN, "token123")
+        parameters.putCharSequence(IAP_PURCHASE_TOKEN, "token123")
         parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_SUBSCRIBE,
@@ -1310,7 +1323,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 OperationalDataEnum.IAPParameters,
                 Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
                 operationalData
-            ), Constants.IAP_PURCHASE_TOKEN
+            ), IAP_PURCHASE_TOKEN
         )
     }
 
@@ -1377,7 +1390,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 OperationalDataEnum.IAPParameters,
                 Constants.IAP_TEST_DEDUP_KEY_USED, bundle,
                 operationalData
-            ), Constants.IAP_PURCHASE_TOKEN
+            ), IAP_PURCHASE_TOKEN
         )
     }
 
@@ -1938,7 +1951,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )
@@ -2021,7 +2034,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )
@@ -2107,7 +2120,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         ).isEqualTo("12345")
         Assertions.assertThat(
             OperationalData.getParameter(
-                OperationalDataEnum.IAPParameters, Constants.IAP_PURCHASE_TOKEN,
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
                 bundle,
                 operationalData
             )

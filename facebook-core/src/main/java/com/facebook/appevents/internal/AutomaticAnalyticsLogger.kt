@@ -28,10 +28,10 @@ import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.FetchedAppGateKeepersManager.getGateKeeperForKey
 import com.facebook.internal.FetchedAppSettingsManager.getAppSettingsWithoutQuery
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
-import java.math.BigDecimal
-import java.util.Currency
 import org.json.JSONException
 import org.json.JSONObject
+import java.math.BigDecimal
+import java.util.Currency
 
 /**
  * com.facebook.appevents.internal is solely for the use of other packages within the Facebook SDK
@@ -405,6 +405,20 @@ object AutomaticAnalyticsLogger {
                 IAPParameters,
                 Constants.IAP_PRODUCT_ID,
                 purchaseJSON.getString(Constants.GP_IAP_PRODUCT_ID),
+                params,
+                operationalData
+            )
+            OperationalData.addParameter(
+                IAPParameters,
+                AppEventsConstants.EVENT_PARAM_CONTENT_ID,
+                purchaseJSON.getString(Constants.GP_IAP_PRODUCT_ID),
+                params,
+                operationalData
+            )
+            OperationalData.addParameter(
+                IAPParameters,
+                Constants.ANDROID_DYNAMIC_ADS_CONTENT_ID,
+                "client_implicit",
                 params,
                 operationalData
             )
