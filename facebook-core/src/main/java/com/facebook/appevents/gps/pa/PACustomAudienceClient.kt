@@ -35,6 +35,7 @@ object PACustomAudienceClient {
     private const val BUYER = "facebook.com"
     private const val DELIMITER = "@"
     private const val GPS_PREFIX = "gps"
+    private const val EVENT_NAME_CONFIG_VERSION = "1"
 
     // Sync with RestrictiveDataManager.REPLACEMENT_STRING
     private const val REPLACEMENT_STRING = "_removed_"
@@ -177,6 +178,8 @@ object PACustomAudienceClient {
             return null
         }
 
-        return appId + DELIMITER + eventName
+        // It is ok to use a different ts from the log time, since we only need to differentiate the events with the same event name.
+        val timestamp = System.currentTimeMillis() / 1000
+        return "$appId$DELIMITER$eventName$DELIMITER$timestamp$DELIMITER$EVENT_NAME_CONFIG_VERSION"
     }
 }
