@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [18.0.3]
+### Changed
+- Modified how we pass the content id of purchases in custom events
+### Added
+- Added permissions ACCESS_ADSERVICES_TOPICS to access Google Privacy Sandbox AdServices API. If you need to disable any of the permissions, please include the tools:node="remove" node marker for the particular permissions.
 
 ## [18.0.2]
 ### Changed
