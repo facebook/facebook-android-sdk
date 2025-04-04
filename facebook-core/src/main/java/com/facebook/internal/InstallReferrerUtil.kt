@@ -36,28 +36,31 @@ object InstallReferrerUtil {
           override fun onInstallReferrerSetupFinished(responseCode: Int) {
             when (responseCode) {
               InstallReferrerResponse.OK -> {
-                val response: ReferrerDetails =
+                // referrerClient.installReferrer results in a binder call,
+                // which should not be made on the main thread
+                Thread {
+                  val response: ReferrerDetails? =
                     try {
                       referrerClient.installReferrer
                     } catch (e: RemoteException) {
-                      return
+                      null
+                    } finally {
+                      referrerClient.endConnection()
                     }
-                val referrerUrl = response.installReferrer
-                if (referrerUrl != null &&
-                    (referrerUrl.contains("fb") || referrerUrl.contains("facebook"))) {
-                  callback.onReceiveReferrerUrl(referrerUrl)
-                }
-                // Even if we are not interested in the url, there is no reason to update again
-                updateReferrer()
+                  if (response == null) return@Thread
+                  val referrerUrl = response.installReferrer
+                  if (referrerUrl != null &&
+                    (referrerUrl.contains("fb") || referrerUrl.contains("facebook"))
+                  ) {
+                    callback.onReceiveReferrerUrl(referrerUrl)
+                  }
+                  // Even if we are not interested in the url, there is no reason to update again
+                  updateReferrer()
+                }.start()
               }
               InstallReferrerResponse.FEATURE_NOT_SUPPORTED ->
                   updateReferrer() // No point retrying if feature not supported
               InstallReferrerResponse.SERVICE_UNAVAILABLE -> {}
-            }
-            try {
-              referrerClient.endConnection()
-            } catch (e: Exception) {
-              // Silent endConnection errors for unit test and else
             }
           }
 
