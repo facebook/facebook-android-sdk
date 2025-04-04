@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [18.0.3]
 ### Changed
 - Modified how we pass the content id of purchases in custom events
+- Moved referrerClient.installReferrer to its own thread to avoid blocking the main thread with slow binder calls [Issue: com.android.installreferrer is called in the main thread which leads to ANR](https://github.com/facebook/facebook-android-sdk/issues/1039)
 ### Added
 - Added permissions ACCESS_ADSERVICES_TOPICS to access Google Privacy Sandbox AdServices API. If you need to disable any of the permissions, please include the tools:node="remove" node marker for the particular permissions.
 
