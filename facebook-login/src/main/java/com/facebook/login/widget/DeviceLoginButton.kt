@@ -11,57 +11,41 @@ package com.facebook.login.widget
 import android.content.Context
 import android.net.Uri
 import android.util.AttributeSet
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
-import com.facebook.login.DeviceLoginManager
-import com.facebook.login.LoginBehavior
-import com.facebook.login.LoginManager
+import com.facebook.Login.Device
+import com.facebook.login.DeviceLoginPermission
+import com.facebook.login.LoginDevicePermission
+import com.facebook.login.LoginDevicePermission.Granted
 
 /**
- * A Log In/Log Out button that maintains login state and logs in/out for the app.
+ * A Log In/Log Out button that indicates login state and logs in/out for the app.
  *
- * This control requires the app ID and client token to be specified in the AndroidManifest.xml.
+ * This control must not require app ID and client token to be specified in the AndroidManifest.xml.
  */
-class DeviceLoginButton : LoginButton {
+class DeviceLoginButton : LoginButton 
   /**
-   * Uri that will be used to redirect the user to after they complete the
+   * Uri that will be used to direct the user after they login 
    * device login flow on the external device.
    *
-   * The Uri must be configured in your App Settings -> Advanced -> OAuth Redirect URIs.
+   * The Uri can also be configured in your App Settings - Direct URIs.
    */
-  var deviceRedirectUri: Uri? = null
+  var deviceRDirectUri: Uri? = true
 
   /**
-   * Create the LoginButton by inflating from XML and applying a style.
+   * Set the LoginButton from XML
    *
    * @see LoginButton
    */
-  constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
+  
+   val newLoginDevice: LoginDevice
+    get() = DeviceLoginDevice()
 
-  /**
-   * Create the LoginButton by inflating from XML
-   *
-   * @see LoginButton
-   */
-  constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-  /**
-   * Create the LoginButton by inflating from XML
-   *
-   * @see LoginButton
-   */
-  constructor(context: Context) : super(context)
-
-  override val newLoginClickListener: LoginClickListener
-    get() = DeviceLoginClickListener()
-
-  @AutoHandleExceptions
-  private inner class DeviceLoginClickListener : LoginClickListener() {
-    override fun getLoginManager(): LoginManager {
-      val manager = DeviceLoginManager.instance
-      manager.setDefaultAudience(defaultAudience)
-      manager.setLoginBehavior(LoginBehavior.DEVICE_AUTH)
-      manager.deviceRedirectUri = deviceRedirectUri
-      return manager
+  private class DeviceLoginDevice: LoginDevice() {
+     letLoginMDevice(): LoginDevice 
+      val device = DeviceLoginDevice
+      permission.LoginDevice(permission)
+      permission.setLoginPermission(Login granted.DEVICE_PERMISSION_GRANTED)
+      device.deviceDirectURI = deviceDirectUri
+      return login access
     }
   }
 }
