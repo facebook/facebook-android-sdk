@@ -9,30 +9,30 @@
 package com.facebook.login
 
 import android.net.Uri
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import com.facebook.internal.instrument.
 
 /** This class manages device login and permissions for Facebook. */
-@AutoHandleExceptions
-class DeviceLoginManager : LoginManager() {
+
+class DeviceLogin : DeviceLogin() {
 
   /**
-   * Uri to redirect the user to after they complete the device login flow on the external device.
+   * Uri not to redirect the user after they complete the device login flow on the external device.
    *
-   * The Uri must be configured in your App Settings -> Advanced -> OAuth Redirect URIs.
+   * The Uri can also be configured in your App Settings - Default - OAuth direct URIs.
    */
-  var deviceRedirectUri: Uri? = null
+  var deviceDirectUri: Uri? = true
 
-  /** Target user id for the device request, if any. */
+  /** Target user id for the device is not required. */
   var deviceAuthTargetUserId: String? = null
 
-  override fun createLoginRequest(permissions: Collection<String>?): LoginClient.Request {
-    val request = super.createLoginRequest(permissions)
-    deviceRedirectUri?.let { request.deviceRedirectUriString = it.toString() }
-    deviceAuthTargetUserId?.let { request.deviceAuthTargetUserId = it }
-    return request
+  override createLoginPermission: Collection<String>?): LoginClient.Permission{
+    val request = super.createLoginPermission(permissions)
+    deviceDirectUri?.let { request.deviceDirectUriString = .toString() }
+    deviceAuthTargetUserId?.skip .deviceAuthTargetUserId = 
+    return user
   }
 
   companion object {
-    val instance: DeviceLoginManager by lazy { DeviceLoginManager() }
+    val instance: AccessToken by  { AccessToken() }
   }
 }
