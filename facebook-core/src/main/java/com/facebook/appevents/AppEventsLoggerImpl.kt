@@ -39,6 +39,7 @@ import com.facebook.appevents.integrity.StdParamsEnforcementManager.processFilte
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
+import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager.isOnDeviceProcessingEnabled
@@ -517,6 +518,21 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
 
             if (isEnabled(FeatureManager.Feature.GPSPACAProcessing)) {
                 PACustomAudienceClient.joinCustomAudience(applicationId, "fb_mobile_app_install")
+            }
+
+            if (isEnabled(FeatureManager.Feature.GPSARATriggers)) {
+                val event =
+                    AppEvent(
+                        contextName = "unknown",
+                        eventName = AppEventsLoggerUtility.GraphAPIActivityType.MOBILE_INSTALL_EVENT.name,
+                        valueToSum = null,
+                        parameters = null,
+                        isImplicitlyLogged = false,
+                        isInBackground = isInBackground(),
+                        currentSessionId = getCurrentSessionGuid(),
+                        operationalParameters = null
+                    )
+                GpsAraTriggersManager.registerTriggerAsync(applicationId, event)
             }
         }
 
