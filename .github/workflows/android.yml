@@ -1,0 +1,76 @@
+name: Android APK Build (Buildozer)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  build_apk:
+    runs-on: ubuntu-latest # Use a fresh Ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch full history for Buildozer to work correctly, especially with git submodules if any
+        fetch-depth: 0
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9' # Kivy/Buildozer often work well with specific Python versions
+
+    - name: Install Buildozer dependencies
+      # Buildozer requires specific system dependencies to build Android APKs.
+      # This command installs them on a fresh Ubuntu environment.
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libssl-dev build-essential patch libffi-dev python3-dev python3-setuptools python3-venv
+        sudo apt-get install -y default-jdk # Ensure a JDK is installed for Android SDK
+        # For Android SDK/NDK, Buildozer will download them automatically on first run.
+
+    - name: Install Python dependencies
+      # Install project-specific Python dependencies, including Buildozer itself.
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython kivy==2.3.0 pyjnius # Install core build tools
+        pip install -r requirements.txt # Install other project dependencies
+
+    - name: Configure Buildozer (Optional - for first run setup)
+      # This step can be used for initial setup or to ensure buildozer.spec is valid.
+      # Buildozer will download SDK/NDK and other tools on its first run.
+      # It's crucial to run this command at least once to set up the build environment.
+      # We use 'debug' build for CI to avoid signing complexities initially.
+      run: |
+        buildozer android debug clean # Clean previous builds and prepare for debug build
+      env:
+        # Set environment variables for Buildozer if needed, e.g., for specific SDK versions
+        # ANDROID_SDK_HOME: /usr/local/lib/android/sdk
+        # ANDROID_NDK_HOME: /usr/local/lib/android/ndk
+
+    - name: Build Android APK
+      # This is the main build step. Buildozer will compile the Python app into an Android APK.
+      # The output APK will be in the 'bin/' directory relative to the project root.
+      run: |
+        buildozer android debug # Build the debug APK
+      env:
+        # Ensure that the buildozer.spec file has the correct package.name and package.domain
+        # and that all required permissions are listed.
+        # For release builds, you would use 'buildozer android release' and ensure signing config is in buildozer.spec.
+        # Example for signing:
+        # P4A_RELEASE_KEYSTORE: /path/to/your/keystore.jks
+        # P4A_RELEASE_KEYSTORE_PASSWD: ${{ secrets.KEYSTORE_PASS }}
+        # P4A_RELEASE_KEYSTORE_ALIAS: your_alias
+        # P4A_RELEASE_KEYSTORE_ALIAS_PASSWD: ${{ secrets.ALIAS_PASS }}
+
+    - name: Upload APK artifact
+      # Upload the generated APK file as a workflow artifact.
+      # This allows you to download the APK directly from the GitHub Actions run.
+      uses: actions/upload-artifact@v4
+      with:
+        name: ghost-sentinel-apk
+        path: bin/*.apk # Buildozer outputs APKs into the 'bin' directory
+        retention-days: 7 # How long to keep the artifact
