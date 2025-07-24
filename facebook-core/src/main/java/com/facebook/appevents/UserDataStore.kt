@@ -49,6 +49,7 @@ object UserDataStore {
   const val STATE = "st"
   const val ZIP = "zp"
   const val COUNTRY = "country"
+  const val EXTERNAL_ID= "external_id"
   @JvmStatic
   fun initStore() {
     if (initialized.get()) {
@@ -90,7 +91,8 @@ object UserDataStore {
       city: String?,
       state: String?,
       zip: String?,
-      country: String?
+      country: String?,
+      externalId: String? = null
   ) {
     val ud = Bundle()
     if (email != null) {
@@ -122,6 +124,9 @@ object UserDataStore {
     }
     if (country != null) {
       ud.putString(COUNTRY, country)
+    }
+    if (externalId != null) {
+      ud.putString(EXTERNAL_ID, externalId)
     }
     setUserDataAndHash(ud)
   }

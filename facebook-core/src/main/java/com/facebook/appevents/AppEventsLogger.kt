@@ -512,6 +512,41 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
      */
     @JvmStatic
     fun setUserData(
+      email: String?,
+      firstName: String?,
+      lastName: String?,
+      phone: String?,
+      dateOfBirth: String?,
+      gender: String?,
+      city: String?,
+      state: String?,
+      zip: String?,
+      country: String?
+    ) {
+      UserDataStore.setUserDataAndHash(
+        email, firstName, lastName, phone, dateOfBirth, gender, city, state, zip, country)
+    }
+
+    /**
+     * Sets user data to associate with all app events. All user data are hashed and used to match
+     * Facebook user from this instance of an application.
+     *
+     * The user data will be persisted between application instances.
+     *
+     * @param email user's email
+     * @param firstName user's first name
+     * @param lastName user's last name
+     * @param phone user's phone
+     * @param dateOfBirth user's date of birth
+     * @param gender user's gender
+     * @param city user's city
+     * @param state user's state
+     * @param zip user's zip
+     * @param country user's country
+     * @param externalId an ID representing the user
+     */
+    @JvmStatic
+    fun setUserData(
         email: String?,
         firstName: String?,
         lastName: String?,
@@ -521,10 +556,11 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
         city: String?,
         state: String?,
         zip: String?,
-        country: String?
+        country: String?,
+        externalId: String?
     ) {
       UserDataStore.setUserDataAndHash(
-          email, firstName, lastName, phone, dateOfBirth, gender, city, state, zip, country)
+          email, firstName, lastName, phone, dateOfBirth, gender, city, state, zip, country, externalId)
     }
 
     /** Returns the set user data else null. */
