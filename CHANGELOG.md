@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [18.1.3]
+### Added
+- Added the support for external ID
+
 ## [18.0.3]
 ### Changed
 - Modified how we pass the content id of purchases in custom events
@@ -509,7 +514,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.2...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.1.3...HEAD
+[18.1.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.0.3...sdk-version-18.1.3
 [17.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.1...sdk-version-17.0.2
 [17.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.0...sdk-version-17.0.1
 [17.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.3.0...sdk-version-17.0.0
@@ -578,3 +584,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+
