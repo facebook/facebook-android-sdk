@@ -5,8 +5,8 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
 
 def isSnapshot = version.endsWith('-SNAPSHOT')
-def ossrhUsername = hasProperty('ossrhTokenUsername') ? ossrhTokenUsername : ""
-def ossrhPassword = hasProperty('ossrhToken') ? ossrhToken : ""
+def centralUsername = hasProperty('centralTokenUsername') ? centralTokenUsername : ""
+def centralPassword = hasProperty('centralToken') ? centralToken : ""
 
 tasks.register('androidJavadocs', Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -77,11 +77,11 @@ afterEvaluate {
         }
         repositories {
             maven {
-                url = isSnapshot ? "https://oss.sonatype.org/content/repositories/snapshots/" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                url = isSnapshot ? "https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/" : "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
 
                 credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
+                    username = centralUsername
+                    password = centralPassword
                 }
             }
         }
