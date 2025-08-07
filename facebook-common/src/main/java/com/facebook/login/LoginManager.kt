@@ -35,6 +35,7 @@ import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.FacebookSdk.getApplicationId
+import com.facebook.FacebookSdk.getRedirectURI
 import com.facebook.FacebookSdk.getGraphApiVersion
 import com.facebook.GraphResponse
 import com.facebook.LoginStatusCallback
@@ -941,7 +942,8 @@ open class LoginManager() {
             loginConfig.nonce,
             loginConfig.codeVerifier,
             codeChallenge,
-            codeChallengeMethod)
+            codeChallengeMethod,
+            getRedirectURI())
     request.isRerequest = AccessToken.isCurrentAccessTokenActive()
     request.messengerPageId = messengerPageId
     request.resetMessengerState = resetMessengerState
@@ -959,7 +961,8 @@ open class LoginManager() {
             authType,
             getApplicationId(),
             UUID.randomUUID().toString(),
-            loginTargetApp)
+            loginTargetApp,
+            redirectURI = getRedirectURI().toString())
     request.isRerequest = AccessToken.isCurrentAccessTokenActive()
     request.messengerPageId = messengerPageId
     request.resetMessengerState = resetMessengerState
@@ -977,7 +980,8 @@ open class LoginManager() {
             "reauthorize",
             getApplicationId(),
             UUID.randomUUID().toString(),
-            loginTargetApp)
+            loginTargetApp,
+            redirectURI = getRedirectURI().toString())
     request.isFamilyLogin = isFamilyLogin
     request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication)
     return request
@@ -1126,6 +1130,7 @@ open class LoginManager() {
       toastDurationMs: Long
   ) {
     val applicationId = getApplicationId()
+    val redirectURI = getRedirectURI()
     val loggerRef = UUID.randomUUID().toString()
     val logger = LoginLogger(context ?: getApplicationContext(), applicationId)
     if (!isExpressLoginAllowed) {
@@ -1137,6 +1142,7 @@ open class LoginManager() {
         LoginStatusClient.newInstance(
             context,
             applicationId,
+          redirectURI.toString(),
             loggerRef,
             getGraphApiVersion(),
             toastDurationMs,

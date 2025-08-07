@@ -36,6 +36,7 @@ class PlatformServiceClientTest : FacebookPowerMockTestCase() {
     private const val REQUEST_MESSAGE = 0x7E37
     private const val REPLY_MESSAGE = 0x7E38
     private const val PROTOCOL_VERSION = NativeProtocol.PROTOCOL_VERSION_20121101
+    private const val HTTPS_REDIRECT_URI = "https://example.com/my/redirect"
   }
 
   override fun setup() {
@@ -60,6 +61,7 @@ class PlatformServiceClientTest : FacebookPowerMockTestCase() {
                 REPLY_MESSAGE,
                 PROTOCOL_VERSION,
                 APPLICATION_ID,
+                HTTPS_REDIRECT_URI,
                 NONCE) {
           override fun populateRequestBundle(data: Bundle) {
             data.putString("TEST", "TEST_DATA")

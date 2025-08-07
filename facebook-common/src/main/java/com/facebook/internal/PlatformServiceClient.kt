@@ -32,6 +32,7 @@ abstract class PlatformServiceClient(
     replyMessage: Int,
     protocolVersion: Int,
     applicationId: String,
+    redirectURI: String,
     nonce: String?
 ) : ServiceConnection {
   protected val context: Context
@@ -42,6 +43,7 @@ abstract class PlatformServiceClient(
   private val requestMessage: Int
   private val replyMessage: Int
   private val applicationId: String
+  private val redirectURI: String?
   private val protocolVersion: Int
   val nonce: String?
 
@@ -96,6 +98,9 @@ abstract class PlatformServiceClient(
     if (nonce != null) {
       data.putString(NativeProtocol.EXTRA_NONCE, nonce)
     }
+    if (redirectURI != null) {
+      data.putString(NativeProtocol.EXTRA_REDIRECT_URI, redirectURI)
+    }
     populateRequestBundle(data)
     val request = Message.obtain(null, requestMessage)
     request.arg1 = protocolVersion
@@ -145,6 +150,7 @@ abstract class PlatformServiceClient(
     this.requestMessage = requestMessage
     this.replyMessage = replyMessage
     this.applicationId = applicationId
+    this.redirectURI = redirectURI
     this.protocolVersion = protocolVersion
     this.nonce = nonce
     handler =

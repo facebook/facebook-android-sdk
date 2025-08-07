@@ -16,6 +16,7 @@ import com.facebook.internal.PlatformServiceClient
 internal class LoginStatusClient(
     context: Context,
     applicationId: String,
+    redirectURI: String,
     private val loggerRef: String,
     private val graphApiVersion: String,
     private val toastDurationMs: Long,
@@ -27,6 +28,7 @@ internal class LoginStatusClient(
         NativeProtocol.MESSAGE_GET_LOGIN_STATUS_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20170411,
         applicationId,
+        redirectURI,
         nonce) {
   override fun populateRequestBundle(data: Bundle) {
     data.putString(NativeProtocol.EXTRA_LOGGER_REF, loggerRef)
@@ -39,12 +41,13 @@ internal class LoginStatusClient(
     internal fun newInstance(
         context: Context,
         applicationId: String,
+        redirectURI: String,
         loggerRef: String,
         graphApiVersion: String,
         toastDurationMs: Long,
         nonce: String?
     ): LoginStatusClient =
         LoginStatusClient(
-            context, applicationId, loggerRef, graphApiVersion, toastDurationMs, nonce)
+            context, applicationId, redirectURI, loggerRef, graphApiVersion, toastDurationMs, nonce)
   }
 }

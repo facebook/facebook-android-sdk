@@ -592,7 +592,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         val mockLoginStatusClient: LoginStatusClient = mock()
         whenever(
             mockLoginStatusClientCompanion.newInstance(
-                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()
+                eq(mockApplicationContext), any(), any(),any(), any(), any(), anyOrNull()
             )
         )
             .thenReturn(mockLoginStatusClient)
@@ -614,7 +614,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         val mockLoginStatusClient: LoginStatusClient = mock()
         whenever(
             mockLoginStatusClientCompanion.newInstance(
-                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()
+                eq(mockApplicationContext), any(),any(), any(), any(), any(), anyOrNull()
             )
         )
             .thenReturn(mockLoginStatusClient)
@@ -659,7 +659,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         val mockLoginStatusClient: LoginStatusClient = mock()
         whenever(
             mockLoginStatusClientCompanion.newInstance(
-                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()
+                eq(mockApplicationContext), any(), any(),any(), any(), any(), anyOrNull()
             )
         )
             .thenReturn(mockLoginStatusClient)
@@ -697,7 +697,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         val mockLoginStatusClient: LoginStatusClient = mock()
         whenever(
             mockLoginStatusClientCompanion.newInstance(
-                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()
+                eq(mockApplicationContext), any(), any(),any(), any(), any(), anyOrNull()
             )
         )
             .thenReturn(mockLoginStatusClient)
@@ -718,7 +718,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         val mockLoginStatusClient: LoginStatusClient = mock()
         whenever(
             mockLoginStatusClientCompanion.newInstance(
-                eq(mockApplicationContext), any(), any(), any(), any(), anyOrNull()
+                eq(mockApplicationContext), any(), any(),any(), any(), any(), anyOrNull()
             )
         )
             .thenReturn(mockLoginStatusClient)

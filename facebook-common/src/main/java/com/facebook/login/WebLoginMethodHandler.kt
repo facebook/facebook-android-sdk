@@ -123,6 +123,11 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
           ServerProtocol.DIALOG_PARAM_RESET_MESSENGER_STATE,
           if (request.resetMessengerState) "1" else "0")
     }
+
+    // Set HTTP Redirect URI param if it was configured in the application
+    if(!request.redirectURI.isNullOrEmpty()) {
+      parameters.putString("https_redirect_uri", request.redirectURI)
+    }
     return parameters
   }
 

@@ -68,6 +68,7 @@ object FacebookSdk {
     private var applicationId: String? = null
     @Volatile
     private var applicationName: String? = null
+    private var redirectURI: String? = null
     @Volatile
     private var appClientToken: String? = null
     @Volatile
@@ -97,6 +98,9 @@ object FacebookSdk {
 
     /** The key for the application ID in the Android manifest. */
     const val APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId"
+
+    /** The key for the HTTPS Redirect URI in the Android manifest. */
+    const val APPLICATION_REDIRECT_URI = "com.facebook.sdk.RedirectURI"
 
     /** The key for the application name in the Android manifest. */
     const val APPLICATION_NAME_PROPERTY = "com.facebook.sdk.ApplicationName"
@@ -813,6 +817,8 @@ object FacebookSdk {
                 )
             }
         }
+        redirectURI = ai.metaData.getString(APPLICATION_REDIRECT_URI)
+
         if (applicationName == null) {
             applicationName = ai.metaData.getString(APPLICATION_NAME_PROPERTY)
         }
@@ -879,6 +885,19 @@ object FacebookSdk {
                         "AndroidManifest.xml or set by calling FacebookSdk.setApplicationId " +
                         "before initializing the sdk."
             )
+    }
+
+    /**
+     * Gets the the https redirectURI configured by the application. This is a secure method
+     * to pass the login token to a verified receiver.
+     *
+     * @return the redirectURI
+     */
+    @JvmStatic
+    fun getRedirectURI(): String {
+        Validate.sdkInitialized()
+        return this.redirectURI.orEmpty()
+
     }
 
     /**

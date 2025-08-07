@@ -42,7 +42,8 @@ abstract class LoginHandlerTestCase : FacebookPowerMockTestCase() {
         AuthenticationTokenTestUtil.NONCE,
         CODE_VERIFIER,
         CODE_CHALLENGE,
-        CodeChallengeMethod.S256)
+        CodeChallengeMethod.S256,
+        "https://example.com/redirect/my_uri")
   }
 
   protected open fun createIGAppRequest(): LoginClient.Request {

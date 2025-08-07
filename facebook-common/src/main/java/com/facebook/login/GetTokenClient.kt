@@ -20,6 +20,7 @@ internal class GetTokenClient(context: Context, request: LoginClient.Request) :
         NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REPLY,
         NativeProtocol.PROTOCOL_VERSION_20121101,
         request.applicationId,
+        request.redirectURI.toString(),
         request.nonce) {
   override fun populateRequestBundle(data: Bundle) = Unit
 }
