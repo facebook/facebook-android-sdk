@@ -80,3 +80,6 @@ lint/tmp/
 # Keystore files
 *.jks
 *.keystore
+
+# AI Assitance
+CLAUDE.md

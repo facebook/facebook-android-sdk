@@ -65,6 +65,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
             .setLoginTargetApp(request.loginTargetApp)
             .setFamilyLogin(request.isFamilyLogin)
             .setShouldSkipDedupe(request.shouldSkipAccountDeduplication())
+            .setHttpsRedirectURI(request.redirectURI)
             .setOnCompleteListener(listener)
     loginDialog = builder.build()
 
@@ -91,6 +92,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     private var targetApp = LoginTargetApp.FACEBOOK
     private var isFamilyLogin = false
     private var shouldSkipDedupe = false
+    private var httpsRedirectURI: String? = null
 
     lateinit var e2e: String
     lateinit var authType: String
@@ -144,6 +146,11 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
       return this
     }
 
+    fun setHttpsRedirectURI(httpsRedirectURI: String?): AuthDialogBuilder {
+      this.httpsRedirectURI = httpsRedirectURI
+      return this
+    }
+
     override fun build(): WebDialog {
       val parameters = this.parameters as Bundle
       parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, this.redirect_uri)
@@ -163,6 +170,11 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
       }
       if (this.shouldSkipDedupe) {
         parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true")
+      }
+
+      // Set HTTP Redirect URI param if it was configured in the application
+      if (!this.httpsRedirectURI.isNullOrEmpty()) {
+        parameters.putString("https_redirect_uri", this.httpsRedirectURI)
       }
 
       return WebDialog.newInstance(
