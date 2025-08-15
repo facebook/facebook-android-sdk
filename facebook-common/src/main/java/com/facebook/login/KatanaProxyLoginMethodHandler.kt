@@ -47,7 +47,8 @@ class KatanaProxyLoginMethodHandler : NativeAppLoginMethodHandler {
             request.shouldSkipAccountDeduplication(),
             request.nonce,
             request.codeChallenge,
-            request.codeChallengeMethod?.name)
+            request.codeChallengeMethod?.name,
+            request.redirectURI)
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e)
     for ((i, intent) in intents.withIndex()) {
       val launchedIntent = tryIntent(intent, LoginClient.getLoginRequestCode())

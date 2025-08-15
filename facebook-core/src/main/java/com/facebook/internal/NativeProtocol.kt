@@ -300,7 +300,9 @@ object NativeProtocol {
             shouldSkipAccountDedupe,
             "",
             null,
-            null)
+            null,
+            null,
+            )
     intent = validateActivityIntent(context, intent, appInfo)
     return intent
   }
@@ -322,7 +324,8 @@ object NativeProtocol {
       shouldSkipAccountDedupe: Boolean,
       nonce: String?,
       codeChallenge: String?,
-      codeChallengeMethod: String?
+      codeChallengeMethod: String?,
+      redirectURI: String?
   ): Intent? {
     val activityName = appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
@@ -371,6 +374,10 @@ object NativeProtocol {
     if (shouldSkipAccountDedupe) {
       intent.putExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, true)
     }
+
+    if(!redirectURI.isNullOrEmpty()) {
+      intent.putExtra(ServerProtocol.DIALOG_HTTPS_REDIRECT_URI, redirectURI)
+    }
     return intent
   }
 
@@ -392,7 +399,8 @@ object NativeProtocol {
       shouldSkipAccountDedupe: Boolean,
       nonce: String?,
       codeChallenge: String?,
-      codeChallengeMethod: String? = "S256"
+      codeChallengeMethod: String? = "S256",
+      redirectURI: String?
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
@@ -412,7 +420,8 @@ object NativeProtocol {
           shouldSkipAccountDedupe,
           nonce,
           codeChallenge,
-          codeChallengeMethod)
+          codeChallengeMethod,
+          redirectURI)
     }
   }
 

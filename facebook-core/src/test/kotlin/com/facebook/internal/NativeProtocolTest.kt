@@ -208,7 +208,8 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
                 false, // shouldSkipAccountDedupe
                 AuthenticationTokenTestUtil.NONCE,
                 "codeChallenge",
-                "S256"
+                "S256",
+                null
             )
 
         assertThat(intents.size).isEqualTo(2)
@@ -296,6 +297,8 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
                 false, // isFamilyLogin
                 false, // shouldSkipAccountDedupe
                 AuthenticationTokenTestUtil.NONCE,
+                null,
+                null,
                 null
             )
 
