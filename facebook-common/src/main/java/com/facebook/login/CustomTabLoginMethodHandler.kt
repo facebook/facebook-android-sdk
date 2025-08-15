@@ -93,6 +93,18 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
       return currentPackage
     }
 
+  override fun addExtraParameters(parameters: Bundle, request: Request): Bundle {
+    // Call parent implementation to get all standard parameters including redirect_uri
+    val updatedParameters = super.addExtraParameters(parameters, request)
+
+    // Ensure redirect_uri is explicitly set for CustomTab flow
+    if (!request.redirectURI.isNullOrEmpty()) {
+      updatedParameters.putString("https_redirect_uri", request.redirectURI)
+    }
+
+    return updatedParameters
+  }
+
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
     if (data != null) {
       val hasNoBrowserException =
