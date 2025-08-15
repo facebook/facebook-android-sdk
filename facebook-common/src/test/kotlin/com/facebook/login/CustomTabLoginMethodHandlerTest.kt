@@ -269,6 +269,120 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
         assertThat(handler.onActivityResult(1, Activity.RESULT_OK, null)).isTrue
     }
 
+    @Test
+    fun testAddExtraParametersWithRedirectURI() {
+        mockCustomTabRedirectActivity(true)
+        val handler = CustomTabLoginMethodHandler(mockLoginClient)
+        val testRedirectURI = "https://example.com/redirect"
+
+        // Create a request with redirect URI
+        val requestWithRedirectURI = createRequestWithRedirectURI(testRedirectURI)
+
+        // Create initial parameters bundle
+        val initialParameters = Bundle()
+        initialParameters.putString("existing_param", "existing_value")
+
+        // Call addExtraParameters using reflection to access protected method
+        val updatedParameters = Whitebox.invokeMethod<Bundle>(
+            handler,
+            "addExtraParameters",
+            initialParameters,
+            requestWithRedirectURI
+        )
+
+        // Verify that https_redirect_uri parameter is included
+        assertThat(updatedParameters.getString("https_redirect_uri")).isEqualTo(testRedirectURI)
+        // Verify existing parameters are preserved
+        assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
+    }
+
+    @Test
+    fun testAddExtraParametersWithoutRedirectURI() {
+        mockCustomTabRedirectActivity(true)
+        val handler = CustomTabLoginMethodHandler(mockLoginClient)
+
+        // Create a request without redirect URI (passing null as the redirectURI parameter)
+        val requestWithoutRedirectURI = createRequestWithRedirectURI(null)
+
+        // Create initial parameters bundle
+        val initialParameters = Bundle()
+        initialParameters.putString("existing_param", "existing_value")
+
+        // Call addExtraParameters using reflection to access protected method
+        val updatedParameters = Whitebox.invokeMethod<Bundle>(
+            handler,
+            "addExtraParameters",
+            initialParameters,
+            requestWithoutRedirectURI
+        )
+
+        // Verify that https_redirect_uri parameter is NOT included
+        assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
+        // Verify existing parameters are preserved
+        assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
+    }
+
+    @Test
+    fun testAddExtraParametersWithEmptyRedirectURI() {
+        mockCustomTabRedirectActivity(true)
+        val handler = CustomTabLoginMethodHandler(mockLoginClient)
+
+        // Create a request with empty redirect URI
+        val requestWithEmptyRedirectURI = createRequestWithRedirectURI("")
+
+        // Create initial parameters bundle
+        val initialParameters = Bundle()
+        initialParameters.putString("existing_param", "existing_value")
+
+        // Call addExtraParameters using reflection to access protected method
+        val updatedParameters = Whitebox.invokeMethod<Bundle>(
+            handler,
+            "addExtraParameters",
+            initialParameters,
+            requestWithEmptyRedirectURI
+        )
+
+        // Verify that https_redirect_uri parameter is NOT included
+        assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
+        // Verify existing parameters are preserved
+        assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
+    }
+
+    @Test
+    fun testTryAuthorizeWithRedirectURI() {
+        mockCustomTabRedirectActivity(true)
+        mockChromeCustomTabsSupported(true, CHROME_PACKAGE)
+        val handler = CustomTabLoginMethodHandler(mockLoginClient)
+        val testRedirectURI = "https://example.com/custom/redirect"
+
+        // Create a request with redirect URI
+        val requestWithRedirectURI = createRequestWithRedirectURI(testRedirectURI)
+
+        // Call tryAuthorize - this should process the redirect URI through addExtraParameters
+        val result = handler.tryAuthorize(requestWithRedirectURI)
+
+        // Verify that the operation completed successfully (should return 1 for success)
+        assertThat(result).isEqualTo(1)
+        // Verify that the request's redirect URI is preserved
+        assertThat(requestWithRedirectURI.redirectURI).isEqualTo(testRedirectURI)
+    }
+
+    private fun createRequestWithRedirectURI(redirectURI: String?): LoginClient.Request {
+        return LoginClient.Request(
+            LoginBehavior.NATIVE_WITH_FALLBACK,
+            HashSet(PERMISSIONS),
+            DefaultAudience.FRIENDS,
+            "rerequest",
+            "1234",
+            "5678",
+            LoginTargetApp.FACEBOOK,
+            AuthenticationTokenTestUtil.NONCE,
+            CODE_VERIFIER,
+            CODE_CHALLENGE,
+            CodeChallengeMethod.S256,
+            redirectURI)
+    }
+
     companion object {
         private const val SIGNED_REQUEST_STR =
             "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJjb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0"
