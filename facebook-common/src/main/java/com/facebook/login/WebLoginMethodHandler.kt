@@ -136,9 +136,43 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
 
   @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
   open fun onComplete(request: LoginClient.Request, values: Bundle?, error: FacebookException?) {
-    var outcome: LoginClient.Result
     val loginClient = loginClient
     e2e = null
+
+    // If a custom redirect URI is provided, don't process the response as a standard Facebook callback.
+    // Instead, let the web dialog handle the redirect to the custom URI properly.
+    if (!request.redirectURI.isNullOrEmpty() && request.redirectURI != getRedirectUrl()) {
+      // For custom redirect URIs, we don't intercept or process the response.
+      // The web dialog will handle the redirect and the app should handle the result
+      // through its own means (e.g., deep links, URL schemes).
+      
+      // Only handle explicit errors and cancellations - don't interfere with successful redirects
+      if (error is FacebookOperationCanceledException) {
+        val outcome = LoginClient.Result.createCancelResult(
+            loginClient.pendingRequest, USER_CANCELED_LOG_IN_ERROR_MESSAGE)
+        loginClient.completeAndValidate(outcome)
+      } else if (error != null) {
+        // Handle errors normally
+        e2e = null
+        var errorCode: String? = null
+        var errorMessage = error.message
+        if (error is FacebookServiceException) {
+          val requestError = error.requestError
+          errorCode = requestError.errorCode.toString()
+          errorMessage = requestError.toString()
+        }
+        val outcome = LoginClient.Result.createErrorResult(
+            loginClient.pendingRequest, null, errorMessage, errorCode)
+        loginClient.completeAndValidate(outcome)
+      }
+      // For successful custom redirect URI cases (values != null, error == null), 
+      // do nothing - let the web dialog handle the redirect without calling completion callbacks.
+      // The app will handle the result through its own URL scheme handling.
+      return
+    }
+
+    // Standard Facebook redirect URI - process normally
+    var outcome: LoginClient.Result
     if (values != null) {
       // Actual e2e we got from the dialog should be used for logging.
       if (values.containsKey(ServerProtocol.DIALOG_PARAM_E2E)) {

@@ -62,7 +62,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     val isChromeOS = Utility.isChromeOS(fragmentActivity)
 
     val builder =
-        AuthDialogBuilder(fragmentActivity, request.applicationId, parameters)
+        AuthDialogBuilder(fragmentActivity, request.applicationId, parameters, request)
             .setE2E(e2e as String)
             .setIsChromeOS(isChromeOS)
             .setAuthType(request.authType)
@@ -96,6 +96,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     private var targetApp = LoginTargetApp.FACEBOOK
     private var isFamilyLogin = false
     private var shouldSkipDedupe = false
+    private var originalRequest: LoginClient.Request
 
     lateinit var e2e: String
     lateinit var authType: String
@@ -103,8 +104,11 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     constructor(
         context: Context,
         applicationId: String,
-        parameters: Bundle
-    ) : super(context, applicationId, OAUTH_DIALOG, parameters)
+        parameters: Bundle,
+        request: LoginClient.Request
+    ) : super(context, applicationId, OAUTH_DIALOG, parameters) {
+      this.originalRequest = request
+    }
 
     fun setE2E(e2e: String): AuthDialogBuilder {
       this.e2e = e2e
@@ -152,8 +156,8 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     override fun build(): WebDialog {
       val parameters = this.parameters as Bundle
 
-      // Check if custom redirect URI was provided
-      val customRedirectUri = parameters.getString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)
+      // Check if the original request had a custom redirect URI (non-empty)
+      val hasCustomRedirectUri = !originalRequest.redirectURI.isNullOrEmpty()
 
       // Only set redirect_uri if it wasn't already provided (preserves custom redirect URI from addExtraParameters)
       if (!parameters.containsKey(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)) {
@@ -178,8 +182,9 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
         parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true")
       }
 
-      // Create a custom WebDialog that respects our redirect URI
-      return if (!customRedirectUri.isNullOrEmpty() && customRedirectUri != ServerProtocol.DIALOG_REDIRECT_URI) {
+      // Create WebDialog - use custom one only if original request had a non-empty custom redirect URI
+      return if (hasCustomRedirectUri) {
+        val customRedirectUri = originalRequest.redirectURI!!
         CustomRedirectWebDialog.create(this.context as Context, OAUTH_DIALOG, parameters, theme, this.targetApp, listener, customRedirectUri)
       } else {
         WebDialog.newInstance(this.context as Context, OAUTH_DIALOG, parameters, theme, this.targetApp, listener)
@@ -188,7 +193,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
   }
 
   /**
-   * Custom WebDialog that properly handles custom redirect URIs
+   * Custom WebDialog that handles custom redirect URIs by launching intents instead of parsing Facebook responses
    */
   private class CustomRedirectWebDialog(
       context: Context,
@@ -196,9 +201,25 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
       private val customRedirectUri: String
   ) : WebDialog(context, url) {
 
-    init {
-      // Set the custom redirect URI as the expected one
-      setExpectedRedirectUrl(customRedirectUri)
+    override fun parseResponseUri(urlString: String?): Bundle {
+      // If this is our custom redirect URI, launch it as an intent instead of parsing
+      // Make sure customRedirectUri is not empty to avoid matching everything
+      if (urlString != null && customRedirectUri.isNotEmpty() && urlString.startsWith(customRedirectUri)) {
+        try {
+          val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(urlString))
+          intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+          context.startActivity(intent)
+          dismiss()
+        } catch (e: Exception) {
+          // If we can't launch the intent, treat it as an error
+          sendErrorToListener(com.facebook.FacebookDialogException("Failed to launch custom redirect: ${e.message}", -1, urlString))
+        }
+        // Return empty bundle since we're handling this ourselves
+        return Bundle()
+      }
+      
+      // For non-custom redirect URIs, use normal parsing
+      return super.parseResponseUri(urlString)
     }
 
     companion object {
@@ -210,8 +231,8 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
           targetApp: LoginTargetApp,
           listener: OnCompleteListener?,
           customRedirectUri: String
-      ): CustomRedirectWebDialog {
-        // Build the URL with our custom parameters
+      ): WebDialog {
+        // Build the URL with our custom parameters (same as normal WebDialog)
         val modifiedParameters = Bundle(parameters ?: Bundle())
         modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, customRedirectUri)
         modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, "touch")
@@ -234,9 +255,6 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
         }
 
         val dialog = CustomRedirectWebDialog(context, uri.toString(), customRedirectUri)
-        if (theme != 0) {
-          // Note: Custom theme handling would need to be implemented if needed
-        }
         dialog.onCompleteListener = listener
         return dialog
       }

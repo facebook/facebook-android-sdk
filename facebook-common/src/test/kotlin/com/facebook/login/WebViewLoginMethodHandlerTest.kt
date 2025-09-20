@@ -18,8 +18,10 @@ import com.facebook.internal.FacebookDialogFragment
 import java.util.Date
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -48,7 +50,8 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    val request = createRequest()
+    // Use a request without custom redirect URI so normal completion flow is used
+    val request = createRequestWithRedirectURI(null)
     handler.onWebDialogComplete(request, bundle, null)
 
     val resultArgumentCaptor = argumentCaptor<LoginClient.Result>()
@@ -97,9 +100,11 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
   @Test
   fun testWebViewHandlesCancel() {
+    mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    val request = createRequest()
+    // Use a request without custom redirect URI so normal completion flow is used
+    val request = createRequestWithRedirectURI(null)
     handler.onWebDialogComplete(request, null, FacebookOperationCanceledException())
 
     val resultArgumentCaptor = argumentCaptor<LoginClient.Result>()
@@ -114,9 +119,11 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
   @Test
   fun testWebViewHandlesError() {
+    mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    val request = createRequest()
+    // Use a request without custom redirect URI so normal completion flow is used
+    val request = createRequestWithRedirectURI(null)
     handler.onWebDialogComplete(request, null, FacebookException(ERROR_MESSAGE))
 
     val resultArgumentCaptor = argumentCaptor<LoginClient.Result>()
@@ -210,8 +217,8 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     // Simulate the parameters that would be passed from addExtraParameters
     val bundle = Bundle()
     bundle.putString("redirect_uri", testRedirectURI) // This simulates addExtraParameters setting it
-    
-    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
+
+    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle, request)
 
     // Build the dialog and verify it can be created without errors
     val dialog = builder
@@ -230,9 +237,10 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    // Create AuthDialogBuilder without custom redirect URI
+    // Create AuthDialogBuilder without custom redirect URI (null)
+    val request = createRequestWithRedirectURI(null)
     val bundle = Bundle()
-    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
+    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle, request)
 
     // Build the dialog and verify it can be created without errors
     val dialog = builder
@@ -252,9 +260,10 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
     // Create AuthDialogBuilder with null redirect URI in bundle
+    val request = createRequestWithRedirectURI(null)
     val bundle = Bundle()
     bundle.putString("redirect_uri", null)
-    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
+    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle, request)
 
     // Build the dialog and verify it can be created without errors
     val dialog = builder
@@ -274,9 +283,10 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
     // Create AuthDialogBuilder with empty redirect URI in bundle
+    val request = createRequestWithRedirectURI("")
     val bundle = Bundle()
     bundle.putString("redirect_uri", "")
-    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
+    val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle, request)
 
     // Build the dialog and verify it can be created without errors
     val dialog = builder
@@ -304,10 +314,72 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
     // Verify that the request contains the redirect URI
     assertThat(request.redirectURI).isEqualTo(testRedirectURI)
-    
+
     // The integration test verifies that tryAuthorize properly processes the redirect URI
     // through the entire flow including addExtraParameters and AuthDialogBuilder
     // The successful execution without errors confirms the integration works correctly
+  }
+
+  @Test
+  fun testCustomRedirectURISuccessDoesNotCallComplete() {
+    mockTryAuthorize()
+    val handler = WebViewLoginMethodHandler(mockLoginClient)
+    val testRedirectURI = "https://example.com/custom/redirect"
+
+    val bundle = Bundle()
+    bundle.putString("access_token", ACCESS_TOKEN)
+    bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA))
+    bundle.putString("signed_request", SIGNED_REQUEST_STR)
+
+    // Create a request with custom redirect URI
+    val request = createRequestWithRedirectURI(testRedirectURI)
+
+    // For custom redirect URIs with successful results, completeAndValidate should NOT be called
+    handler.onWebDialogComplete(request, bundle, null)
+
+    // Verify that completeAndValidate was NOT called for successful custom redirect
+    verify(mockLoginClient, never()).completeAndValidate(any())
+  }
+
+  @Test
+  fun testCustomRedirectURICancelCallsComplete() {
+    mockTryAuthorize()
+    val handler = WebViewLoginMethodHandler(mockLoginClient)
+    val testRedirectURI = "https://example.com/custom/redirect"
+
+    // Create a request with custom redirect URI
+    val request = createRequestWithRedirectURI(testRedirectURI)
+
+    // For custom redirect URIs with cancellation, completeAndValidate SHOULD be called
+    handler.onWebDialogComplete(request, null, FacebookOperationCanceledException())
+
+    val resultArgumentCaptor = argumentCaptor<LoginClient.Result>()
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture())
+    val result = resultArgumentCaptor.firstValue
+
+    assertThat(result).isNotNull
+    assertThat(result.code).isEqualTo(LoginClient.Result.Code.CANCEL)
+  }
+
+  @Test
+  fun testCustomRedirectURIErrorCallsComplete() {
+    mockTryAuthorize()
+    val handler = WebViewLoginMethodHandler(mockLoginClient)
+    val testRedirectURI = "https://example.com/custom/redirect"
+
+    // Create a request with custom redirect URI
+    val request = createRequestWithRedirectURI(testRedirectURI)
+
+    // For custom redirect URIs with errors, completeAndValidate SHOULD be called
+    handler.onWebDialogComplete(request, null, FacebookException(ERROR_MESSAGE))
+
+    val resultArgumentCaptor = argumentCaptor<LoginClient.Result>()
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture())
+    val result = resultArgumentCaptor.firstValue
+
+    assertThat(result).isNotNull
+    assertThat(result.code).isEqualTo(LoginClient.Result.Code.ERROR)
+    assertThat(result.errorMessage).isEqualTo(ERROR_MESSAGE)
   }
 
   @Test
@@ -323,7 +395,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
 
     // Verify that the request doesn't have a redirect URI
     assertThat(request.redirectURI).isNull()
-    
+
     // The successful execution confirms default behavior works correctly
   }
 
@@ -347,6 +419,8 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
     whenever(FacebookSdk.getApplicationId()).thenReturn(AuthenticationTokenTestUtil.APP_ID)
+    whenever(FacebookSdk.getRedirectURI()).thenReturn("https://example.com/redirect")
+    whenever(FacebookSdk.getGraphApiVersion()).thenReturn("v18.0")
 
     val mockCompanion = mock<AccessToken.Companion>()
     WhiteboxImpl.setInternalState(AccessToken::class.java, "Companion", mockCompanion)
