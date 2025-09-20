@@ -199,7 +199,7 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
   }
 
   @Test
-  fun testAuthDialogBuilderWithHttpsRedirectURI() {
+  fun testAuthDialogBuilderWithCustomRedirectURI() {
     mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
     val testRedirectURI = "https://example.com/redirect"
@@ -207,82 +207,91 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     // Create a request with redirect URI
     val request = createRequestWithRedirectURI(testRedirectURI)
 
-    // Create AuthDialogBuilder and verify setHttpsRedirectURI works
+    // Simulate the parameters that would be passed from addExtraParameters
     val bundle = Bundle()
+    bundle.putString("redirect_uri", testRedirectURI) // This simulates addExtraParameters setting it
+    
     val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
-    builder.setHttpsRedirectURI(testRedirectURI)
 
-    // Build the dialog and verify the https_redirect_uri parameter is included
+    // Build the dialog and verify it can be created without errors
     val dialog = builder
         .setE2E("test-e2e")
         .setAuthType("rerequest")
         .build()
 
-    val parameters = WhiteboxImpl.getInternalState<Bundle>(dialog, "parameters")
-    assertThat(parameters.getString("https_redirect_uri")).isEqualTo(testRedirectURI)
+    // Verify that the dialog was created successfully
+    assertThat(dialog).isNotNull()
+    // Verify that we got a CustomRedirectWebDialog for custom redirect URI
+    assertThat(dialog.javaClass.simpleName).contains("CustomRedirect")
   }
 
   @Test
-  fun testAuthDialogBuilderWithoutHttpsRedirectURI() {
+  fun testAuthDialogBuilderWithoutCustomRedirectURI() {
     mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    // Create AuthDialogBuilder without redirect URI
+    // Create AuthDialogBuilder without custom redirect URI
     val bundle = Bundle()
     val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
 
-    // Build the dialog and verify the https_redirect_uri parameter is NOT included
+    // Build the dialog and verify it can be created without errors
     val dialog = builder
         .setE2E("test-e2e")
         .setAuthType("rerequest")
         .build()
 
-    val parameters = WhiteboxImpl.getInternalState<Bundle>(dialog, "parameters")
-    assertThat(parameters.containsKey("https_redirect_uri")).isFalse()
+    // Verify that the dialog was created successfully
+    assertThat(dialog).isNotNull()
+    // Verify that we got a standard WebDialog (not custom) for default redirect URI
+    assertThat(dialog.javaClass.simpleName).isEqualTo("WebDialog")
   }
 
   @Test
-  fun testAuthDialogBuilderWithNullHttpsRedirectURI() {
+  fun testAuthDialogBuilderWithNullCustomRedirectURI() {
     mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    // Create AuthDialogBuilder with null redirect URI
+    // Create AuthDialogBuilder with null redirect URI in bundle
     val bundle = Bundle()
+    bundle.putString("redirect_uri", null)
     val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
-    builder.setHttpsRedirectURI(null)
 
-    // Build the dialog and verify the https_redirect_uri parameter is NOT included
+    // Build the dialog and verify it can be created without errors
     val dialog = builder
         .setE2E("test-e2e")
         .setAuthType("rerequest")
         .build()
 
-    val parameters = WhiteboxImpl.getInternalState<Bundle>(dialog, "parameters")
-    assertThat(parameters.containsKey("https_redirect_uri")).isFalse()
+    // Verify that the dialog was created successfully
+    assertThat(dialog).isNotNull()
+    // Verify that we got a standard WebDialog since null means use default
+    assertThat(dialog.javaClass.simpleName).isEqualTo("WebDialog")
   }
 
   @Test
-  fun testAuthDialogBuilderWithEmptyHttpsRedirectURI() {
+  fun testAuthDialogBuilderWithEmptyCustomRedirectURI() {
     mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
 
-    // Create AuthDialogBuilder with empty redirect URI
+    // Create AuthDialogBuilder with empty redirect URI in bundle
     val bundle = Bundle()
+    bundle.putString("redirect_uri", "")
     val builder = handler.AuthDialogBuilder(activity, "test-app-id", bundle)
-    builder.setHttpsRedirectURI("")
 
-    // Build the dialog and verify the https_redirect_uri parameter is NOT included
+    // Build the dialog and verify it can be created without errors
     val dialog = builder
         .setE2E("test-e2e")
         .setAuthType("rerequest")
         .build()
 
-    val parameters = WhiteboxImpl.getInternalState<Bundle>(dialog, "parameters")
-    assertThat(parameters.containsKey("https_redirect_uri")).isFalse()
+    // Verify that the dialog was created successfully
+    assertThat(dialog).isNotNull()
+    // Verify that we got a standard WebDialog since empty string means use default
+    assertThat(dialog.javaClass.simpleName).isEqualTo("WebDialog")
   }
 
   @Test
-  fun testTryAuthorizePassesRedirectURIToBuilder() {
+  fun testTryAuthorizeWithCustomRedirectURI() {
     mockTryAuthorize()
     val handler = WebViewLoginMethodHandler(mockLoginClient)
     val testRedirectURI = "https://example.com/custom/redirect"
@@ -290,30 +299,35 @@ class WebViewLoginMethodHandlerTest : LoginHandlerTestCase() {
     // Create a request with redirect URI
     val request = createRequestWithRedirectURI(testRedirectURI)
 
-    // Mock the AuthDialogBuilder to capture the redirect URI that gets set
-    val mockBuilder = mock<WebViewLoginMethodHandler.AuthDialogBuilder>()
-    whenever(mockBuilder.setE2E(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setIsChromeOS(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setAuthType(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setLoginBehavior(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setLoginTargetApp(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setFamilyLogin(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setShouldSkipDedupe(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setHttpsRedirectURI(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.setOnCompleteListener(org.mockito.kotlin.any())).thenReturn(mockBuilder)
-    whenever(mockBuilder.build()).thenReturn(mock())
-
-    // Call tryAuthorize - this would normally create and configure the builder
-    // The actual verification is that setHttpsRedirectURI is called with the request's redirect URI
-    // This test verifies the integration between the tryAuthorize method and the builder
+    // Call tryAuthorize which should call addExtraParameters and pass the redirect URI
     handler.tryAuthorize(request)
 
-    // The main assertion is that the redirect URI from the request gets properly handled
-    // This is verified by the successful execution of tryAuthorize without errors
+    // Verify that the request contains the redirect URI
     assertThat(request.redirectURI).isEqualTo(testRedirectURI)
+    
+    // The integration test verifies that tryAuthorize properly processes the redirect URI
+    // through the entire flow including addExtraParameters and AuthDialogBuilder
+    // The successful execution without errors confirms the integration works correctly
   }
 
-  private fun createRequestWithRedirectURI(redirectURI: String): LoginClient.Request {
+  @Test
+  fun testTryAuthorizeWithoutCustomRedirectURI() {
+    mockTryAuthorize()
+    val handler = WebViewLoginMethodHandler(mockLoginClient)
+
+    // Create a request without redirect URI (null) - use the createRequestWithRedirectURI helper with null
+    val request = createRequestWithRedirectURI(null)
+
+    // Call tryAuthorize which should handle the null redirect URI case
+    handler.tryAuthorize(request)
+
+    // Verify that the request doesn't have a redirect URI
+    assertThat(request.redirectURI).isNull()
+    
+    // The successful execution confirms default behavior works correctly
+  }
+
+  private fun createRequestWithRedirectURI(redirectURI: String?): LoginClient.Request {
     return LoginClient.Request(
         LoginBehavior.NATIVE_WITH_FALLBACK,
         HashSet(PERMISSIONS),

@@ -71,7 +71,14 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
   }
 
   protected open fun addExtraParameters(parameters: Bundle, request: LoginClient.Request): Bundle {
-    parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, getRedirectUrl())
+    // Use provided redirectURI if available, otherwise use default redirect URL
+    val redirectUri = if (!request.redirectURI.isNullOrEmpty()) {
+      request.redirectURI
+    } else {
+      getRedirectUrl()
+    }
+    parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, redirectUri)
+
     if (request.isInstagramLogin) {
       parameters.putString(ServerProtocol.DIALOG_PARAM_APP_ID, request.applicationId)
     } else {
@@ -124,10 +131,6 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
           if (request.resetMessengerState) "1" else "0")
     }
 
-    // Set HTTP Redirect URI param if it was configured in the application
-    if(!request.redirectURI.isNullOrEmpty()) {
-      parameters.putString("https_redirect_uri", request.redirectURI)
-    }
     return parameters
   }
 

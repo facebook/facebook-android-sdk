@@ -1138,11 +1138,16 @@ open class LoginManager() {
       responseCallback.onFailure()
       return
     }
+    if (redirectURI == null) {
+      logger.logLoginStatusFailure(loggerRef)
+      responseCallback.onFailure()
+      return
+    }
     val client =
         LoginStatusClient.newInstance(
             context,
             applicationId,
-          redirectURI.toString(),
+          redirectURI,
             loggerRef,
             getGraphApiVersion(),
             toastDurationMs,

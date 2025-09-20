@@ -109,6 +109,7 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         whenever(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext)
         whenever(FacebookSdk.getExecutor()).thenReturn(threadExecutor)
         whenever(FacebookSdk.getGraphApiVersion()).thenReturn(ServerProtocol.getDefaultAPIVersion())
+        whenever(FacebookSdk.getRedirectURI()).thenReturn("https://example.com/redirect")
         whenever(mockFragment.activity).thenReturn(mockFragmentActivity)
         whenever(mockActivity.applicationContext).thenReturn(mockApplicationContext)
         whenever(FacebookSdk.getApplicationContext().getSharedPreferences(any<String>(), any()))

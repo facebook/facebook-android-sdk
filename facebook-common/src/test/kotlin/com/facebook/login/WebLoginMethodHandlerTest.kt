@@ -56,6 +56,13 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
       return super.getRedirectUrl()
     }
 
+    public override fun addExtraParameters(
+        parameters: Bundle,
+        request: LoginClient.Request
+    ): Bundle {
+      return super.addExtraParameters(parameters, request)
+    }
+
     public override fun onComplete(
         request: LoginClient.Request,
         values: Bundle?,
@@ -125,5 +132,104 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
     val capturedOutcome = outcomeCaptor.firstValue
     val outcomeErrorMessage = checkNotNull(capturedOutcome.errorMessage)
     assertThat(outcomeErrorMessage).isEqualTo(requestError.toString())
+  }
+
+  @Test
+  fun `test addExtraParameters with custom redirect URI overrides default redirect_uri`() {
+    val customRedirectURI = "https://example.com/custom/redirect"
+    val requestWithCustomRedirectURI = LoginClient.Request(
+        LoginBehavior.DIALOG_ONLY,
+        setOf("email", "public_profile"),
+        DefaultAudience.EVERYONE,
+        "testAuthType",
+        "123456789",
+        "testAuthId",
+        LoginTargetApp.FACEBOOK,
+        "testNonce",
+        "testCodeVerifier",
+        "testCodeChallenge",
+        CodeChallengeMethod.S256,
+        customRedirectURI)
+
+    val initialParameters = Bundle()
+    initialParameters.putString("existing_param", "existing_value")
+    
+    val updatedParameters = testHandler.addExtraParameters(initialParameters, requestWithCustomRedirectURI)
+    
+    // Verify that redirect_uri is overridden with custom URI
+    assertThat(updatedParameters.getString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI))
+        .isEqualTo(customRedirectURI)
+    // Verify https_redirect_uri parameter is NOT present (old behavior removed)
+    assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
+    // Verify existing parameters are preserved
+    assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
+  }
+
+  @Test
+  fun `test addExtraParameters without custom redirect URI uses default`() {
+    val initialParameters = Bundle()
+    initialParameters.putString("existing_param", "existing_value")
+    
+    val updatedParameters = testHandler.addExtraParameters(initialParameters, testRequest)
+    
+    // Verify that redirect_uri uses default value from getRedirectUrl()
+    assertThat(updatedParameters.getString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI))
+        .isEqualTo(testHandler.getRedirectUrl())
+    // Verify https_redirect_uri parameter is NOT present
+    assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
+    // Verify existing parameters are preserved
+    assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
+  }
+
+  @Test
+  fun `test addExtraParameters with null redirect URI uses default`() {
+    val requestWithNullRedirectURI = LoginClient.Request(
+        LoginBehavior.DIALOG_ONLY,
+        setOf("email", "public_profile"),
+        DefaultAudience.EVERYONE,
+        "testAuthType",
+        "123456789",
+        "testAuthId",
+        LoginTargetApp.FACEBOOK,
+        "testNonce",
+        "testCodeVerifier",
+        "testCodeChallenge",
+        CodeChallengeMethod.S256,
+        null) // null redirect URI
+
+    val initialParameters = Bundle()
+    val updatedParameters = testHandler.addExtraParameters(initialParameters, requestWithNullRedirectURI)
+    
+    // Verify that redirect_uri uses default value when null is provided
+    assertThat(updatedParameters.getString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI))
+        .isEqualTo(testHandler.getRedirectUrl())
+    // Verify https_redirect_uri parameter is NOT present
+    assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
+  }
+
+  @Test
+  fun `test addExtraParameters with empty redirect URI uses default`() {
+    val requestWithEmptyRedirectURI = LoginClient.Request(
+        LoginBehavior.DIALOG_ONLY,
+        setOf("email", "public_profile"),
+        DefaultAudience.EVERYONE,
+        "testAuthType",
+        "123456789",
+        "testAuthId",
+        LoginTargetApp.FACEBOOK,
+        "testNonce",
+        "testCodeVerifier",
+        "testCodeChallenge",
+        CodeChallengeMethod.S256,
+        "") // empty redirect URI
+
+    val initialParameters = Bundle()
+    val updatedParameters = testHandler.addExtraParameters(initialParameters, requestWithEmptyRedirectURI)
+    
+    // Verify that redirect_uri uses default value when empty string is provided
+    assertThat(updatedParameters.getString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI))
+        .isEqualTo(testHandler.getRedirectUrl())
+    // Verify https_redirect_uri parameter is NOT present
+    assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
   }
 }

@@ -15,9 +15,13 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.facebook.AccessTokenSource
 import com.facebook.FacebookException
+import com.facebook.FacebookSdk
 import com.facebook.internal.FacebookDialogFragment
 import com.facebook.internal.ServerProtocol
+import com.facebook.internal.ServerProtocol.getDialogAuthority
+import com.facebook.internal.ServerProtocol.getInstagramDialogAuthority
 import com.facebook.internal.Utility
+import com.facebook.internal.Utility.buildUri
 import com.facebook.internal.WebDialog
 
 /** This class is for internal use. SDK users should not access it directly. */
@@ -42,7 +46,8 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
   }
 
   override fun tryAuthorize(request: LoginClient.Request): Int {
-    val parameters = getParameters(request)
+    var parameters = getParameters(request)
+    parameters = addExtraParameters(parameters, request)
 
     val listener =
         object : WebDialog.OnCompleteListener {
@@ -65,7 +70,6 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
             .setLoginTargetApp(request.loginTargetApp)
             .setFamilyLogin(request.isFamilyLogin)
             .setShouldSkipDedupe(request.shouldSkipAccountDeduplication())
-            .setHttpsRedirectURI(request.redirectURI)
             .setOnCompleteListener(listener)
     loginDialog = builder.build()
 
@@ -92,7 +96,6 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     private var targetApp = LoginTargetApp.FACEBOOK
     private var isFamilyLogin = false
     private var shouldSkipDedupe = false
-    private var httpsRedirectURI: String? = null
 
     lateinit var e2e: String
     lateinit var authType: String
@@ -146,14 +149,17 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
       return this
     }
 
-    fun setHttpsRedirectURI(httpsRedirectURI: String?): AuthDialogBuilder {
-      this.httpsRedirectURI = httpsRedirectURI
-      return this
-    }
-
     override fun build(): WebDialog {
       val parameters = this.parameters as Bundle
-      parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, this.redirect_uri)
+
+      // Check if custom redirect URI was provided
+      val customRedirectUri = parameters.getString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)
+
+      // Only set redirect_uri if it wasn't already provided (preserves custom redirect URI from addExtraParameters)
+      if (!parameters.containsKey(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)) {
+        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, this.redirect_uri)
+      }
+
       parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId)
       parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, this.e2e)
       parameters.putString(
@@ -172,13 +178,68 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
         parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true")
       }
 
-      // Set HTTP Redirect URI param if it was configured in the application
-      if (!this.httpsRedirectURI.isNullOrEmpty()) {
-        parameters.putString("https_redirect_uri", this.httpsRedirectURI)
+      // Create a custom WebDialog that respects our redirect URI
+      return if (!customRedirectUri.isNullOrEmpty() && customRedirectUri != ServerProtocol.DIALOG_REDIRECT_URI) {
+        CustomRedirectWebDialog.create(this.context as Context, OAUTH_DIALOG, parameters, theme, this.targetApp, listener, customRedirectUri)
+      } else {
+        WebDialog.newInstance(this.context as Context, OAUTH_DIALOG, parameters, theme, this.targetApp, listener)
       }
+    }
+  }
 
-      return WebDialog.newInstance(
-          this.context as Context, OAUTH_DIALOG, parameters, theme, this.targetApp, listener)
+  /**
+   * Custom WebDialog that properly handles custom redirect URIs
+   */
+  private class CustomRedirectWebDialog(
+      context: Context,
+      url: String,
+      private val customRedirectUri: String
+  ) : WebDialog(context, url) {
+
+    init {
+      // Set the custom redirect URI as the expected one
+      setExpectedRedirectUrl(customRedirectUri)
+    }
+
+    companion object {
+      fun create(
+          context: Context,
+          action: String?,
+          parameters: Bundle?,
+          theme: Int,
+          targetApp: LoginTargetApp,
+          listener: OnCompleteListener?,
+          customRedirectUri: String
+      ): CustomRedirectWebDialog {
+        // Build the URL with our custom parameters
+        val modifiedParameters = Bundle(parameters ?: Bundle())
+        modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, customRedirectUri)
+        modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, "touch")
+        modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, FacebookSdk.getApplicationId())
+        modifiedParameters.putString(
+            ServerProtocol.DIALOG_PARAM_SDK_VERSION,
+            "android-${FacebookSdk.getSdkVersion()}")
+
+        val uri = when (targetApp) {
+          LoginTargetApp.INSTAGRAM ->
+              buildUri(
+                  getInstagramDialogAuthority(),
+                  ServerProtocol.INSTAGRAM_OAUTH_PATH,
+                  modifiedParameters)
+          else ->
+              buildUri(
+                  getDialogAuthority(),
+                  FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+                  modifiedParameters)
+        }
+
+        val dialog = CustomRedirectWebDialog(context, uri.toString(), customRedirectUri)
+        if (theme != 0) {
+          // Note: Custom theme handling would need to be implemented if needed
+        }
+        dialog.onCompleteListener = listener
+        return dialog
+      }
     }
   }
 

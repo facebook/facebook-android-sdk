@@ -290,8 +290,10 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
             requestWithRedirectURI
         )
 
-        // Verify that https_redirect_uri parameter is included
-        assertThat(updatedParameters.getString("https_redirect_uri")).isEqualTo(testRedirectURI)
+        // Verify that redirect_uri parameter is overridden with custom URI
+        assertThat(updatedParameters.getString("redirect_uri")).isEqualTo(testRedirectURI)
+        // Verify https_redirect_uri parameter is NOT included (old behavior)
+        assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
         // Verify existing parameters are preserved
         assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
     }
@@ -316,7 +318,11 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
             requestWithoutRedirectURI
         )
 
-        // Verify that https_redirect_uri parameter is NOT included
+        // Verify that redirect_uri uses the default value when no custom URI provided
+        // The default should be the handler's getRedirectUrl() which is typically fb{appid}://authorize/
+        assertThat(updatedParameters.getString("redirect_uri")).isNotNull()
+        assertThat(updatedParameters.getString("redirect_uri")).isNotEqualTo("")
+        // Verify https_redirect_uri parameter is NOT included (old behavior)
         assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
         // Verify existing parameters are preserved
         assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
@@ -342,7 +348,11 @@ class CustomTabLoginMethodHandlerTest : LoginHandlerTestCase() {
             requestWithEmptyRedirectURI
         )
 
-        // Verify that https_redirect_uri parameter is NOT included
+        // Verify that redirect_uri uses the default value when empty string provided
+        // The default should be the handler's getRedirectUrl() which is typically fb{appid}://authorize/
+        assertThat(updatedParameters.getString("redirect_uri")).isNotNull()
+        assertThat(updatedParameters.getString("redirect_uri")).isNotEqualTo("")
+        // Verify https_redirect_uri parameter is NOT included (old behavior)
         assertThat(updatedParameters.containsKey("https_redirect_uri")).isFalse()
         // Verify existing parameters are preserved
         assertThat(updatedParameters.getString("existing_param")).isEqualTo("existing_value")
