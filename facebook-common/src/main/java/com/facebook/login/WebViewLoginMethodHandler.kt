@@ -193,13 +193,19 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
   }
 
   /**
-   * Custom WebDialog that handles custom redirect URIs by launching intents instead of parsing Facebook responses
+   * Custom WebDialog that properly handles custom redirect URIs while maintaining
+   * identical sizing behavior to WebDialog.newInstance()
    */
   private class CustomRedirectWebDialog(
       context: Context,
       url: String,
       private val customRedirectUri: String
   ) : WebDialog(context, url) {
+
+    init {
+      // Set the custom redirect URI as the expected one
+      setExpectedRedirectUrl(customRedirectUri)
+    }
 
     override fun parseResponseUri(urlString: String?): Bundle {
       // If this is our custom redirect URI, launch it as an intent instead of parsing
@@ -217,7 +223,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
         // Return empty bundle since we're handling this ourselves
         return Bundle()
       }
-      
+
       // For non-custom redirect URIs, use normal parsing
       return super.parseResponseUri(urlString)
     }
@@ -232,27 +238,37 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
           listener: OnCompleteListener?,
           customRedirectUri: String
       ): WebDialog {
-        // Build the URL with our custom parameters (same as normal WebDialog)
-        val modifiedParameters = Bundle(parameters ?: Bundle())
-        modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, customRedirectUri)
-        modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, "touch")
-        modifiedParameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, FacebookSdk.getApplicationId())
-        modifiedParameters.putString(
+        // Replicate exact parameter setup from WebDialog.newInstance() for proper sizing
+        val dialogParameters = Bundle(parameters ?: Bundle())
+
+        // Critical: Set display=touch for proper mobile WebView sizing (same as WebDialog)
+        dialogParameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, "touch")
+
+        // Set our custom redirect URI instead of the default one
+        dialogParameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, customRedirectUri)
+
+        // Set required parameters exactly like WebDialog.newInstance() does
+        dialogParameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, FacebookSdk.getApplicationId())
+        dialogParameters.putString(
             ServerProtocol.DIALOG_PARAM_SDK_VERSION,
             "android-${FacebookSdk.getSdkVersion()}")
 
+        // Build URI using same logic as WebDialog (from WebDialog.kt lines 200-212)
         val uri = when (targetApp) {
           LoginTargetApp.INSTAGRAM ->
               buildUri(
                   getInstagramDialogAuthority(),
                   ServerProtocol.INSTAGRAM_OAUTH_PATH,
-                  modifiedParameters)
+                  dialogParameters)
           else ->
               buildUri(
                   getDialogAuthority(),
                   FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-                  modifiedParameters)
+                  dialogParameters)
         }
+
+        // Initialize default theme first (same as WebDialog.newInstance())
+        WebDialog.initDefaultTheme(context)
 
         val dialog = CustomRedirectWebDialog(context, uri.toString(), customRedirectUri)
         dialog.onCompleteListener = listener
