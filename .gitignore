@@ -83,3 +83,5 @@ lint/tmp/
 
 # AI Assitance
 CLAUDE.md
+AGENTS.md
+.claude/settings.local.json
