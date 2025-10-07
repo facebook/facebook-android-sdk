@@ -22,6 +22,8 @@ object BannedParamManager {
 
     /* the parameters will be filtered out based on the param key */
     private var bannedParamsConfig: HashSet<String> = HashSet()
+    /* Banned param names will be sent back to Meta */
+    private const val BANNED_PARAMS_KEY = "_bannedParams"
 
     @JvmStatic
     fun enable() {
@@ -58,8 +60,15 @@ object BannedParamManager {
         if (!enabled || parameters == null) {
             return
         }
+        val bannedParamsJSON = JSONArray()
         bannedParamsConfig.forEach { paramToRemove ->
-            parameters?.remove(paramToRemove)
+            if (parameters.containsKey(paramToRemove)) {
+                parameters.remove(paramToRemove)
+                bannedParamsJSON.put(paramToRemove)
+            }
+        }
+        if (bannedParamsJSON.length() > 0) {
+            parameters.putString(BANNED_PARAMS_KEY, bannedParamsJSON.toString())
         }
     }
 

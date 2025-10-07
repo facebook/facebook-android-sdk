@@ -94,7 +94,9 @@ class BannedParamsManagerTest : FacebookPowerMockTestCase() {
         val mockParameters = Bundle().apply {
             putString("blocked_param_1", "block_me")
         }
-        val expectedParameters = Bundle().apply {}
+        val expectedParameters = Bundle().apply {
+            putString("_bannedParams", "[\"blocked_param_1\"]")
+        }
 
         processFilterBannedParams(mockParameters)
         assertEqual(mockParameters, expectedParameters)
