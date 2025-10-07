@@ -270,6 +270,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             putString("standard_param_from_server_1", "value_1")
             putString("standard_param_from_server_2", "value_2")
             putString("pm", "1")
+            putString("pm_metadata", "{\"cd\":false}")
         }
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
@@ -290,6 +291,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             putString("standard_param_from_server_1", "value_1")
             putString("standard_param_from_server_2", "value_2")
             putString("pm", "1")
+            putString("pm_metadata", "{\"cd\":true}")
         }
 
         ProtectedModeManager.processParametersForProtectedMode(mockParameters)
@@ -313,6 +315,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             putString("fb_currency", "USD")
             putString("fb_price", "0.99")
             putString("pm", "1")
+            putString("pm_metadata", "{\"cd\":true}")
         }
 
         // We use static standard params list defined in FB SDK.
@@ -334,6 +337,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             putString("fb_currency", "USD")
             putString("fb_price", "0.99")
             putString("pm", "1")
+            putString("pm_metadata", "{\"cd\":true}")
         }
 
         // We use static standard params list defined in FB SDK.

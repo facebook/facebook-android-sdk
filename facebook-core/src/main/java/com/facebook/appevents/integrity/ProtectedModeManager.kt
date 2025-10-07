@@ -19,6 +19,7 @@ object ProtectedModeManager {
     private var enabled = false
     private const val PROTECTED_MODE_IS_APPLIED_KEY = "pm"
     private const val PROTECTED_MODE_IS_APPLIED_VALUE = "1"
+    private const val PROTECTED_MODE_METADATA_KEY = "pm_metadata"
 
     val defaultStandardParameterNames: HashSet<String> by lazy {
         hashSetOf(
@@ -221,10 +222,17 @@ object ProtectedModeManager {
             }
         }
 
+        var anyRemoved = false
         paramsToRemove.forEach { paramToRemove ->
-            parameters.remove(paramToRemove)
+            if (parameters.containsKey(paramToRemove)) {
+                parameters.remove(paramToRemove)
+                anyRemoved = true
+            }
         }
-
+        val pmMetadata = org.json.JSONObject().apply {
+            put("cd", anyRemoved)
+        }
+        parameters.putString(PROTECTED_MODE_METADATA_KEY, pmMetadata.toString())
         parameters.putString(PROTECTED_MODE_IS_APPLIED_KEY, PROTECTED_MODE_IS_APPLIED_VALUE)
     }
 
