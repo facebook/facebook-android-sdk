@@ -29,7 +29,8 @@ class AppEventStoreTest : FacebookPowerMockTestCase() {
 
   private val accessTokenAppIdPair = AccessTokenAppIdPair("swagtoken", "yoloapplication")
   private val appevent = AppEvent("ctxName", "eventName", 0.0, Bundle(), true, true, null)
-  private val accessTokenAppIdPair2 = AccessTokenAppIdPair("anothertoken1337", "yoloapplication")
+  // Use a different application ID to ensure unique keys after serialization (when access tokens become null)
+  private val accessTokenAppIdPair2 = AccessTokenAppIdPair("anothertoken1337", "anotherapplication")
   private val sessionEventsState = SessionEventsState(AttributionIdentifiers(), "anonGUID")
 
   @Before

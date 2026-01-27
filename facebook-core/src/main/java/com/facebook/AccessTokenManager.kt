@@ -18,6 +18,8 @@ import android.os.Looper
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.facebook.AccessToken.Companion.isCurrentAccessTokenActive
+import com.facebook.appevents.AppEventQueue
+import com.facebook.appevents.FlushReason
 import com.facebook.internal.Utility.areObjectsEqual
 import com.facebook.internal.Utility.clearFacebookCookies
 import com.facebook.internal.Utility.isNullOrEmpty
@@ -76,6 +78,13 @@ internal constructor(
 
   private fun setCurrentAccessToken(currentAccessToken: AccessToken?, saveToCache: Boolean) {
     val oldAccessToken = this.currentAccessTokenField
+
+    val oldUserId = oldAccessToken?.userId
+    val newUserId = currentAccessToken?.userId
+    if (oldUserId != null && oldUserId != newUserId) {
+      AppEventQueue.flushAndWait(FlushReason.EAGER_FLUSHING_EVENT)
+    }
+
     this.currentAccessTokenField = currentAccessToken
     tokenRefreshInProgress.set(false)
     lastAttemptedTokenExtendDate = Date(0)

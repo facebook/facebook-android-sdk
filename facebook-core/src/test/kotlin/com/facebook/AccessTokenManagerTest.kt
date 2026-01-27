@@ -17,6 +17,8 @@ import android.content.IntentFilter
 import android.os.Bundle
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
+import com.facebook.appevents.AppEventQueue
+import com.facebook.appevents.FlushReason
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.Utility
 import com.facebook.util.common.mockLocalBroadcastManager
@@ -47,7 +49,8 @@ import org.robolectric.annotation.Config
     AccessTokenCache::class,
     Utility::class,
     LocalBroadcastManager::class,
-    FeatureManager::class)
+    FeatureManager::class,
+    AppEventQueue::class)
 class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   companion object {
     private const val TOKEN_STRING = "A token of my esteem"
@@ -397,6 +400,101 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     accessTokenManager.currentAccessToken = mockAccessToken
     accessTokenManager.extendAccessTokenIfNeeded()
     verify(mockGraphRequestCompanionObject, never()).executeBatchAsync(any<GraphRequestBatch>())
+  }
+
+  @Test
+  fun `test user change triggers flush`() {
+    var flushCallCount = 0
+    var capturedFlushReason: FlushReason? = null
+    PowerMockito.mockStatic(AppEventQueue::class.java)
+    whenever(AppEventQueue.flushAndWait(any())).thenAnswer {
+      flushCallCount++
+      capturedFlushReason = it.getArgument(0) as FlushReason
+      Unit
+    }
+
+    val accessTokenManager = createAccessTokenManager()
+    val oldAccessToken = createAccessToken(userId = "user1")
+    val newAccessToken = createAccessToken(userId = "user2")
+
+    accessTokenManager.currentAccessToken = oldAccessToken
+    accessTokenManager.currentAccessToken = newAccessToken
+
+    assertThat(flushCallCount).isEqualTo(1)
+    assertThat(capturedFlushReason).isEqualTo(FlushReason.EAGER_FLUSHING_EVENT)
+  }
+
+  @Test
+  fun `test same user token refresh does not trigger flush`() {
+    var flushCallCount = 0
+    PowerMockito.mockStatic(AppEventQueue::class.java)
+    whenever(AppEventQueue.flushAndWait(any())).thenAnswer {
+      flushCallCount++
+      Unit
+    }
+
+    val accessTokenManager = createAccessTokenManager()
+    val oldAccessToken = createAccessToken(tokenString = "old_token", userId = "user1")
+    val newAccessToken = createAccessToken(tokenString = "new_token", userId = "user1")
+
+    accessTokenManager.currentAccessToken = oldAccessToken
+    accessTokenManager.currentAccessToken = newAccessToken
+
+    assertThat(flushCallCount).isEqualTo(0)
+  }
+
+  @Test
+  fun `test first login does not trigger flush`() {
+    var flushCallCount = 0
+    PowerMockito.mockStatic(AppEventQueue::class.java)
+    whenever(AppEventQueue.flushAndWait(any())).thenAnswer {
+      flushCallCount++
+      Unit
+    }
+
+    val accessTokenManager = createAccessTokenManager()
+    val accessToken = createAccessToken()
+
+    accessTokenManager.currentAccessToken = accessToken
+
+    assertThat(flushCallCount).isEqualTo(0)
+  }
+
+  @Test
+  fun `test logout does not trigger flush when no old token`() {
+    var flushCallCount = 0
+    PowerMockito.mockStatic(AppEventQueue::class.java)
+    whenever(AppEventQueue.flushAndWait(any())).thenAnswer {
+      flushCallCount++
+      Unit
+    }
+
+    val accessTokenManager = createAccessTokenManager()
+
+    accessTokenManager.currentAccessToken = null
+
+    assertThat(flushCallCount).isEqualTo(0)
+  }
+
+  @Test
+  fun `test logout triggers flush when there was a previous user`() {
+    var flushCallCount = 0
+    var capturedFlushReason: FlushReason? = null
+    PowerMockito.mockStatic(AppEventQueue::class.java)
+    whenever(AppEventQueue.flushAndWait(any())).thenAnswer {
+      flushCallCount++
+      capturedFlushReason = it.getArgument(0) as FlushReason
+      Unit
+    }
+
+    val accessTokenManager = createAccessTokenManager()
+    val accessToken = createAccessToken(userId = "user1")
+
+    accessTokenManager.currentAccessToken = accessToken
+    accessTokenManager.currentAccessToken = null
+
+    assertThat(flushCallCount).isEqualTo(1)
+    assertThat(capturedFlushReason).isEqualTo(FlushReason.EAGER_FLUSHING_EVENT)
   }
 
   private fun createAccessTokenManager(): AccessTokenManager {

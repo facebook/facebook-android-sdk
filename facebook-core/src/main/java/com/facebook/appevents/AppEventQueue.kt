@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.facebook.AccessToken
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.GraphRequest.Companion.newPostRequest
@@ -178,7 +179,10 @@ internal object AppEventQueue {
     if (requestParameters == null) {
       requestParameters = Bundle()
     }
-    requestParameters.putString("access_token", accessTokenAppId.accessTokenString)
+    val accessToken = accessTokenAppId.accessTokenString ?: AccessToken.getCurrentAccessToken()?.token
+    if (accessToken != null) {
+      requestParameters.putString("access_token", accessToken)
+    }
     val pushNotificationsRegistrationId = getPushNotificationsRegistrationId()
     if (pushNotificationsRegistrationId != null) {
       requestParameters.putString("device_token", pushNotificationsRegistrationId)

@@ -47,7 +47,7 @@ class AccessTokenAppIdPair(accessTokenString: String?, val applicationId: String
   }
   @Throws(ObjectStreamException::class)
   private fun writeReplace(): Any {
-    return SerializationProxyV1(accessTokenString, applicationId)
+    return SerializationProxyV1(null, applicationId)
   }
 
   companion object {
