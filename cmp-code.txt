@@ -1,0 +1,5 @@
+
+    CMP-ID: 55194
+    Code-ID: d755558fc996
+    Server-Domain: delivery.consentmanager.net
+    
