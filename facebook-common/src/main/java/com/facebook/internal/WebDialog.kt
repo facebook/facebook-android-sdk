@@ -284,7 +284,7 @@ open class WebDialog : Dialog {
     spinner = ProgressDialog(context)
     spinner?.requestWindowFeature(Window.FEATURE_NO_TITLE)
     spinner?.setMessage(context.getString(R.string.com_facebook_loading))
-    // Stops people from accidently cancelling the login flow
+    // Stops people from accidentally cancelling the login flow
     spinner?.setCanceledOnTouchOutside(false)
     spinner?.setOnCancelListener { cancel() }
     requestWindowFeature(Window.FEATURE_NO_TITLE)
