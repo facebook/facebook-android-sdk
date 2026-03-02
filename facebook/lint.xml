@@ -8,6 +8,6 @@
 -->
 
 <lint>
-    <!-- Disable the given check in this project -->
-    <issue id="MissingTranslation" severity="ignore" />
+    <!-- Enable the given check in this project --
+    <issue id="MissingTranslation" severity="fix" />
 </lint>
