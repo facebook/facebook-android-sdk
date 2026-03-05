@@ -13,6 +13,8 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.gatekeeper.GateKeeper
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 import org.assertj.core.api.Assertions.assertThat
@@ -208,6 +210,77 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     assertThat(gk).isFalse
     assertThat(gk1).isTrue
     assertThat(asyncTaskExecutedTimes).isEqualTo(2)
+  }
+
+  @Test
+  fun `parseAppGateKeepersFromJSON creates new JSONObject instead of mutating existing one`() {
+    // First parse populates the map
+    FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, JSONObject(VALID_JSON))
+
+    // Get a reference to the stored JSONObject
+    val fetchedMap = Whitebox.getInternalState<MutableMap<String, JSONObject>>(
+        FetchedAppGateKeepersManager::class.java, "fetchedAppGateKeepers")
+    val firstObj = fetchedMap[APPLICATION_NAME]!!
+
+    // Parse again — should replace with a new object, not mutate firstObj
+    FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, JSONObject(VALID_JSON))
+    val secondObj = fetchedMap[APPLICATION_NAME]!!
+
+    // Key assertion: different object instances (copy-on-write, not mutate-in-place)
+    assertThat(secondObj).isNotSameAs(firstObj)
+    // Original object should not have been modified after the second parse
+    assertThat(firstObj.getBoolean(GK1)).isTrue
+    assertThat(firstObj.getBoolean(GK2)).isFalse
+    // New object should also have correct values
+    assertThat(secondObj.getBoolean(GK1)).isTrue
+    assertThat(secondObj.getBoolean(GK2)).isFalse
+  }
+
+  @Test
+  fun `concurrent read and parse does not throw ConcurrentModificationException`() {
+    // Pre-populate the map with gatekeepers
+    FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, JSONObject(VALID_JSON))
+
+    val errors = ConcurrentLinkedQueue<Throwable>()
+    val startLatch = CountDownLatch(1)
+    val threads = mutableListOf<Thread>()
+
+    // Reader threads that iterate the JSONObject via getGateKeepersForApplication
+    repeat(10) {
+      threads.add(Thread {
+        startLatch.await()
+        try {
+          repeat(100) {
+            // Reset cache so readers go through the JSONObject iteration path
+            FetchedAppGateKeepersManager.resetRuntimeGateKeeperCache()
+            FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+          }
+        } catch (e: Throwable) {
+          errors.add(e)
+        }
+      })
+    }
+
+    // Writer threads that parse and update the map
+    repeat(5) {
+      threads.add(Thread {
+        startLatch.await()
+        try {
+          repeat(100) {
+            FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(
+                APPLICATION_NAME, JSONObject(VALID_JSON))
+          }
+        } catch (e: Throwable) {
+          errors.add(e)
+        }
+      })
+    }
+
+    threads.forEach { it.start() }
+    startLatch.countDown()
+    threads.forEach { it.join(5000) }
+
+    assertThat(errors).isEmpty()
   }
 
   @Test

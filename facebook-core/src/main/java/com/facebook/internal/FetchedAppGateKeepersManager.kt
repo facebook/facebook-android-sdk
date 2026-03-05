@@ -49,10 +49,20 @@ object FetchedAppGateKeepersManager {
     private val callbacks = ConcurrentLinkedQueue<Callback>()
     private val fetchedAppGateKeepers: MutableMap<String, JSONObject> = ConcurrentHashMap()
     private const val APPLICATION_GATEKEEPER_CACHE_TIMEOUT = 60 * 60 * 1000.toLong()
-    private var timestamp: Long? = null
+    @Volatile private var timestamp: Long? = null
 
     // GateKeeper values in runtime. It may be changed through the UI.
-    private var gateKeeperRuntimeCache: GateKeeperRuntimeCache? = null
+    @Volatile private var gateKeeperRuntimeCache: GateKeeperRuntimeCache? = null
+
+    @Synchronized
+    private fun getGateKeepersForAppId(applicationId: String): JSONObject? {
+        return fetchedAppGateKeepers[applicationId]
+    }
+
+    @Synchronized
+    private fun setGateKeepersForAppId(applicationId: String, json: JSONObject) {
+        fetchedAppGateKeepers[applicationId] = json
+    }
 
     fun loadAppGateKeepersAsync() {
         loadAppGateKeepersAsync(null)
@@ -65,7 +75,7 @@ object FetchedAppGateKeepersManager {
             callbacks.add(callback)
         }
         val applicationId = FacebookSdk.getApplicationId()
-        if (isTimestampValid(timestamp) && fetchedAppGateKeepers.containsKey(applicationId)) {
+        if (isTimestampValid(timestamp) && getGateKeepersForAppId(applicationId) != null) {
             pollCallbacks()
             return
         }
@@ -128,9 +138,11 @@ object FetchedAppGateKeepersManager {
     // timeout is long.
     @JvmStatic
     fun queryAppGateKeepers(applicationId: String, forceRequery: Boolean): JSONObject {
-        // Cache the last app checked results.
-        if (!forceRequery && fetchedAppGateKeepers.containsKey(applicationId)) {
-            return fetchedAppGateKeepers[applicationId] ?: JSONObject()
+        if (!forceRequery) {
+            val cached = getGateKeepersForAppId(applicationId)
+            if (cached != null) {
+                return cached
+            }
         }
         val response = getAppGateKeepersQueryResponse(applicationId)
         val context = FacebookSdk.getApplicationContext()
@@ -149,7 +161,7 @@ object FetchedAppGateKeepersManager {
      */
     fun getGateKeepersForApplication(applicationId: String?): Map<String, Boolean> {
         loadAppGateKeepersAsync()
-        if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
+        if (applicationId == null || getGateKeepersForAppId(applicationId) == null) {
             return HashMap()
         }
         val cacheList = gateKeeperRuntimeCache?.dumpGateKeepers(applicationId)
@@ -159,7 +171,7 @@ object FetchedAppGateKeepersManager {
             cacheMap
         } else {
             val output: MutableMap<String, Boolean> = HashMap()
-            val jsonObject: JSONObject = fetchedAppGateKeepers[applicationId] ?: JSONObject()
+            val jsonObject: JSONObject = getGateKeepersForAppId(applicationId) ?: JSONObject()
             val jsonIterator = jsonObject.keys()
             while (jsonIterator.hasNext()) {
                 val key = jsonIterator.next()
@@ -229,7 +241,8 @@ object FetchedAppGateKeepersManager {
         applicationId: String,
         gateKeepersJSON: JSONObject?
     ): JSONObject {
-        val result = fetchedAppGateKeepers[applicationId] ?: JSONObject()
+        val existing = getGateKeepersForAppId(applicationId)
+        val result = if (existing != null) JSONObject(existing.toString()) else JSONObject()
         val gateKeepers =
             gateKeepersJSON?.optJSONArray(APPLICATION_GRAPH_DATA)?.optJSONObject(0) ?: JSONObject()
         // If there does exist a valid JSON object in arr, initialize result with this JSON object
@@ -242,7 +255,7 @@ object FetchedAppGateKeepersManager {
                 Utility.logd(Utility.LOG_TAG, je)
             }
         }
-        fetchedAppGateKeepers[applicationId] = result
+        setGateKeepersForAppId(applicationId, result)
         return result
     }
 
