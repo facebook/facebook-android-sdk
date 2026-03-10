@@ -28,45 +28,45 @@ dependencies {
     api(project(":facebook-bolts"))
 
     // Support Dependencies
-    implementation(Libs.androidx_annotation)
-    implementation(Libs.androidx_legacy_support_core_utils)
-    implementation(Libs.android_installreferrer)
-    implementation(Libs.androidx_core_ktx)
-    implementation(Libs.kotlin_stdlib)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.legacy.support.core.utils)
+    implementation(libs.android.installreferrer)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlin.stdlib)
 
     // Unit Tests
     testImplementation(project(":facebook-testutil"))
-    testImplementation(Libs.junit)
-    testImplementation(Libs.robolectric)
-    testImplementation(Libs.androidx_test_core)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 
-    testImplementation(Libs.mockito_inline)
-    testImplementation(Libs.mockito_kotlin)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
 
-    testImplementation(Libs.powermock_core)
-    testImplementation(Libs.powermock_api_mockito2)
-    testImplementation(Libs.powermock_junit4)
-    testImplementation(Libs.powermock_junit4_rule)
-    testImplementation(Libs.powermock_classloading_xstream)
-    testImplementation(Libs.assertj_core)
+    testImplementation(libs.powermock.core)
+    testImplementation(libs.powermock.api.mockito2)
+    testImplementation(libs.powermock.junit4)
+    testImplementation(libs.powermock.junit4.rule)
+    testImplementation(libs.powermock.classloading.xstream)
+    testImplementation(libs.assertj.core)
 
-    testImplementation(Libs.mockwebserver)
+    testImplementation(libs.mockwebserver)
 
-    testImplementation(Libs.android_installreferrer)
-    testImplementation(Libs.kotlin_stdlib)
-    testImplementation(Libs.kotlin_test_junit)
-    testImplementation(Libs.play_services_gcm)
+    testImplementation(libs.android.installreferrer)
+    testImplementation(libs.kotlin.stdlib)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.play.services.gcm)
 }
 
 android {
-    buildToolsVersion = Config.buildToolsVersion
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook.core"
-    compileSdk = Config.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
 
     defaultConfig {
-        minSdk = Config.minSdk
-        targetSdk = Config.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         consumerProguardFiles("proguard-rules.pro")
         multiDexEnabled = true
     }

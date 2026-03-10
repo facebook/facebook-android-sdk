@@ -25,39 +25,39 @@ extra["description"] = "Facebook Android SDK Testutil"
 extra["url"] = "https://github.com/facebook/facebook-android-sdk"
 
 dependencies {
-    implementation(Libs.kotlin_stdlib)
-    implementation(Libs.androidx_annotation)
-    implementation(Libs.androidx_core_ktx)
-    implementation(Libs.androidx_legacy_support_core_utils)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.legacy.support.core.utils)
 
     // Unit Tests
-    implementation(Libs.junit)
-    implementation(Libs.robolectric)
-    implementation(Libs.androidx_test_core)
+    implementation(libs.junit)
+    implementation(libs.robolectric)
+    implementation(libs.androidx.test.core)
 
-    implementation(Libs.mockito_inline)
-    implementation(Libs.mockito_kotlin)
+    implementation(libs.mockito.inline)
+    implementation(libs.mockito.kotlin)
 
-    implementation(Libs.powermock_core)
-    implementation(Libs.powermock_api_mockito2)
-    implementation(Libs.powermock_junit4)
-    implementation(Libs.powermock_junit4_rule)
-    implementation(Libs.powermock_classloading_xstream)
-    implementation(Libs.assertj_core)
+    implementation(libs.powermock.core)
+    implementation(libs.powermock.api.mockito2)
+    implementation(libs.powermock.junit4)
+    implementation(libs.powermock.junit4.rule)
+    implementation(libs.powermock.classloading.xstream)
+    implementation(libs.assertj.core)
 
-    implementation(Libs.android_installreferrer)
-    implementation(Libs.kotlin_test_junit)
+    implementation(libs.android.installreferrer)
+    implementation(libs.kotlin.test.junit)
 }
 
 android {
-    buildToolsVersion = Config.buildToolsVersion
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook"
-    compileSdk = Config.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
 
     defaultConfig {
-        minSdk = Config.minSdk
-        targetSdk = Config.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         vectorDrawables.useSupportLibrary = true
     }
 

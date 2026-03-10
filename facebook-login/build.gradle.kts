@@ -29,20 +29,20 @@ dependencies {
     api(project(":facebook-core"))
     api(project(":facebook-common"))
     // Support Dependencies
-    implementation(Libs.androidx_appcompat)
+    implementation(libs.androidx.appcompat)
 
-    implementation(Libs.kotlin_stdlib)
+    implementation(libs.kotlin.stdlib)
 }
 
 android {
-    buildToolsVersion = Config.buildToolsVersion
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook.login"
-    compileSdk = Config.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
 
     defaultConfig {
-        minSdk = Config.minSdk
-        targetSdk = Config.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         consumerProguardFiles("proguard-rules.pro")
         vectorDrawables.useSupportLibrary = true
     }

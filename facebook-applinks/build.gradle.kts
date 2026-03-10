@@ -28,19 +28,19 @@ dependencies {
     // Facebook Dependencies
     api(project(":facebook-core"))
     // Support Dependencies
-    implementation(Libs.androidx_annotation)
-    implementation(Libs.androidx_legacy_support_core_utils)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.legacy.support.core.utils)
 }
 
 android {
-    buildToolsVersion = Config.buildToolsVersion
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook.applinks"
-    compileSdk = Config.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
 
     defaultConfig {
-        minSdk = Config.minSdk
-        targetSdk = Config.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         consumerProguardFiles("proguard-rules.pro")
     }
 

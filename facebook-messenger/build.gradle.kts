@@ -30,14 +30,14 @@ dependencies {
 }
 
 android {
-    buildToolsVersion = Config.buildToolsVersion
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook.messenger"
-    compileSdk = Config.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
 
     defaultConfig {
-        minSdk = Config.minSdk
-        targetSdk = Config.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         consumerProguardFiles("proguard-rules.pro")
         vectorDrawables.useSupportLibrary = true
     }

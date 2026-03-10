@@ -36,40 +36,40 @@ dependencies {
     api(project(":facebook-gamingservices"))
     testImplementation(project(":facebook-testutil"))
 
-    implementation(Libs.kotlin_stdlib)
+    implementation(libs.kotlin.stdlib)
 
     // Unit Tests
-    testImplementation(Libs.junit)
-    testImplementation(Libs.robolectric)
-    testImplementation(Libs.androidx_test_core)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 
-    testImplementation(Libs.mockito_inline)
-    testImplementation(Libs.mockito_kotlin)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
 
-    testImplementation(Libs.powermock_core)
-    testImplementation(Libs.powermock_api_mockito2)
-    testImplementation(Libs.powermock_junit4)
-    testImplementation(Libs.powermock_junit4_rule)
-    testImplementation(Libs.powermock_classloading_xstream)
-    testImplementation(Libs.assertj_core)
+    testImplementation(libs.powermock.core)
+    testImplementation(libs.powermock.api.mockito2)
+    testImplementation(libs.powermock.junit4)
+    testImplementation(libs.powermock.junit4.rule)
+    testImplementation(libs.powermock.classloading.xstream)
+    testImplementation(libs.assertj.core)
 
     // Connected Tests
-    androidTestImplementation(Libs.dexmaker)
-    androidTestImplementation(Libs.dexmaker_mockito)
+    androidTestImplementation(libs.dexmaker)
+    androidTestImplementation(libs.dexmaker.mockito)
 
-    testImplementation(Libs.android_installreferrer)
-    testImplementation(Libs.kotlin_test_junit)
+    testImplementation(libs.android.installreferrer)
+    testImplementation(libs.kotlin.test.junit)
 }
 
 android {
-    buildToolsVersion = Config.buildToolsVersion
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook"
-    compileSdk = Config.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
 
     defaultConfig {
-        minSdk = Config.minSdk
-        targetSdk = Config.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         consumerProguardFiles("proguard-project.txt")
         vectorDrawables.useSupportLibrary = true
     }
