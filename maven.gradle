@@ -19,16 +19,16 @@ tasks.register('androidJavadocs', Javadoc) {
 }
 tasks.register('androidJavadocsJar', Jar) {
     dependsOn androidJavadocs
-    classifier 'javadoc'
+    archiveClassifier.set('javadoc')
     from androidJavadocs.destinationDir
 }
 tasks.register('androidSourcesJar', Jar) {
-    classifier 'sources'
+    archiveClassifier.set('sources')
     from android.sourceSets.main.java.srcDirs
 }
 tasks.register('javadocJar', Jar) {
     dependsOn dokkaJavadoc
-    classifier 'javadoc'
+    archiveClassifier.set('javadoc')
     from dokkaJavadoc.outputDirectory
 }
 

@@ -16,10 +16,10 @@ buildscript {
   }
 
   dependencies {
-    classpath("com.android.tools.build:gradle:7.4.0")
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20")
-    classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.30")
-    classpath("org.jacoco:org.jacoco.core:0.8.7")
+    classpath(libs.android.gradle.plugin)
+    classpath(libs.kotlin.gradle.plugin)
+    classpath(libs.dokka.gradle.plugin)
+    classpath(libs.jacoco.core)
   }
 }
 

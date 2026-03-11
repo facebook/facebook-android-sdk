@@ -5,8 +5,8 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20"
+        classpath libs.android.gradle.plugin
+        classpath libs.kotlin.gradle.plugin
     }
 }
 
@@ -70,6 +70,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose true

@@ -51,6 +51,10 @@ android {
         targetCompatibility(JavaVersion.VERSION_1_8)
     }
 
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     sourceSets {
         getByName("test")
         { java.srcDir("src/test/kotlin") }
@@ -69,6 +73,3 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
 }
 
 apply(from = "${rootDir}/maven.gradle")
-
-
-
