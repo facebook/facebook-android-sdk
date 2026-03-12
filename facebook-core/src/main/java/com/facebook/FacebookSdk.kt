@@ -445,7 +445,14 @@ object FacebookSdk {
 
         // Don't throw for these validations here, just log an error. We'll throw when we actually
         // need them
-        Validate.hasFacebookActivity(applicationContext, false)
+        // Only warn about missing FacebookActivity if facebook-common module is on the classpath,
+        // since FacebookActivity is provided by that module and not needed for core-only usage.
+        try {
+            Class.forName("com.facebook.FacebookActivity")
+            Validate.hasFacebookActivity(applicationContext, false)
+        } catch (e: ClassNotFoundException) {
+            // facebook-common module is not present, no need to check for FacebookActivity
+        }
         Validate.hasInternetPermissions(applicationContext, false)
         FacebookSdk.applicationContext = applicationContext.applicationContext
 
