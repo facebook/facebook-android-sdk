@@ -15,6 +15,7 @@ import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.HttpMethod
 import java.security.MessageDigest
+import java.security.SecureRandom
 
 internal object PKCEUtil {
 
@@ -40,9 +41,10 @@ internal object PKCEUtil {
    */
   @JvmStatic
   fun generateCodeVerifier(): String {
-    val random43to128 = (43..128).random()
+    val secureRandom = SecureRandom()
+    val random43to128 = secureRandom.nextInt(86) + 43
     val allowedCharSet = ('a'..'z') + ('A'..'Z') + ('0'..'9') + ('-') + ('.') + ('_') + ('~')
-    return List(random43to128) { allowedCharSet.random() }.joinToString("")
+    return List(random43to128) { allowedCharSet[secureRandom.nextInt(allowedCharSet.size)] }.joinToString("")
   }
 
   /**

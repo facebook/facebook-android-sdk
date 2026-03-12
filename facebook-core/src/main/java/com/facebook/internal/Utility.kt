@@ -58,7 +58,7 @@ import java.security.NoSuchAlgorithmException
 import java.text.DecimalFormat
 import java.util.Date
 import java.util.Locale
-import java.util.Random
+import java.security.SecureRandom
 import java.util.TimeZone
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
@@ -1131,7 +1131,7 @@ object Utility {
 
   @JvmStatic
   fun generateRandomString(length: Int): String {
-    val r = Random()
+    val r = SecureRandom()
     return BigInteger(length * 5, r).toString(32)
   }
 

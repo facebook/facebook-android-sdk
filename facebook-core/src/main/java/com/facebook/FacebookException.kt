@@ -11,7 +11,7 @@ package com.facebook
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.FeatureManager.checkFeature
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler.save
-import java.util.Random
+import java.security.SecureRandom
 
 /** Represents an error condition specific to the Facebook SDK for Android. */
 open class FacebookException : RuntimeException {
@@ -24,7 +24,6 @@ open class FacebookException : RuntimeException {
    * @param message the detail message of this exception
    */
   constructor(message: String?) : super(message) {
-    val rand = Random()
     if (message != null && FacebookSdk.isInitialized() && rand.nextInt(100) > 50) {
       checkFeature(FeatureManager.Feature.ErrorReport) { enabled ->
         if (enabled) {
@@ -69,5 +68,6 @@ open class FacebookException : RuntimeException {
 
   companion object {
     const val serialVersionUID: Long = 1
+    private val rand = SecureRandom()
   }
 }
