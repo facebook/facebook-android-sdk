@@ -287,7 +287,7 @@ object ImageDownloader {
       var isEqual = false
       if (o != null && o is RequestKey) {
         val compareTo = o
-        isEqual = compareTo.uri === uri && compareTo.tag === tag
+        isEqual = compareTo.uri == uri && compareTo.tag == tag
       }
       return isEqual
     }
