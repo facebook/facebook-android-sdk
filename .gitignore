@@ -81,7 +81,13 @@ lint/tmp/
 *.jks
 *.keystore
 
-# AI Assitance
-CLAUDE.md
+# AI Assistance — personal files (not tracked)
+/CLAUDE.md
 AGENTS.md
 .claude/settings.local.json
+
+# AI Assistance — project config (tracked)
+!.claude/CLAUDE.md
+!.claude/settings.json
+!.claude/hooks/
+!.llms/
