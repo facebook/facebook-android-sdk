@@ -114,7 +114,7 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
         return null
       }
       val headerContentTag = header.optString(HEADER_CACHE_CONTENT_TAG_KEY, null)
-      if (contentTag == null && contentTag != headerContentTag) {
+      if (contentTag != null && contentTag != headerContentTag) {
         return null
       }
       val accessTime = Date().time
