@@ -260,7 +260,7 @@ class AttributionIdentifiers {
     @get:Throws(InterruptedException::class)
     val binder: IBinder
       get() {
-        check(!consumed.compareAndSet(true, true)) { "Binder already consumed" }
+        check(consumed.compareAndSet(false, true)) { "Binder already consumed" }
         return queue.take()
       }
   }
