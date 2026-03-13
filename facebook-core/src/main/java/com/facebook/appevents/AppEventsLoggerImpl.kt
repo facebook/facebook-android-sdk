@@ -461,7 +461,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         }
 
         private val staticLock = Any()
-        private var anonymousAppDeviceGUID: String? = null
+        @Volatile private var anonymousAppDeviceGUID: String? = null
         private var isActivateAppEventRequested = false
 
         // Log implicit push token event and flush logger immediately
