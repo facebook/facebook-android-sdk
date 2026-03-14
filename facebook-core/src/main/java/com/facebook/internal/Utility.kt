@@ -314,7 +314,9 @@ object Utility {
           value = convertJSONObjectToHashMap(value)
         }
         map[key] = value
-      } catch (e: JSONException) {}
+      } catch (e: JSONException) {
+        Log.d(LOG_TAG, "Failed to convert JSONObject to HashMap", e)
+      }
     }
     return map
   }
@@ -1003,7 +1005,9 @@ object Utility {
       if (cpuFiles != null) {
         numCPUCores = cpuFiles.size
       }
-    } catch (e: Exception) {}
+    } catch (e: Exception) {
+      Log.d(LOG_TAG, "Failed to enumerate CPU cores", e)
+    }
 
     // If enumerating and counting the CPU cores fails, use the runtime. Fallback to 1 if
     // that returns bogus values.
@@ -1032,7 +1036,9 @@ object Utility {
       deviceTimeZoneName = tz.id
     } catch (e: AssertionError) {
       // Workaround for a bug in Android that can cause crashes on Android 8.0 and 8.1
-    } catch (e: Exception) {}
+    } catch (e: Exception) {
+      Log.d(LOG_TAG, "Failed to refresh timezone", e)
+    }
   }
 
   /**
@@ -1046,7 +1052,9 @@ object Utility {
         val telephonyManager =
             appContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         carrierName = telephonyManager.networkOperatorName
-      } catch (e: Exception) {}
+      } catch (e: Exception) {
+        Log.d(LOG_TAG, "Failed to refresh carrier name", e)
+      }
     }
   }
 
@@ -1253,7 +1261,9 @@ object Utility {
       if (data != null) {
         try {
           return JSONObject(data)
-        } catch (e: JSONException) {}
+        } catch (e: JSONException) {
+          Log.d(LOG_TAG, "Failed to parse data processing options", e)
+        }
       }
       return null
     }
@@ -1271,7 +1281,9 @@ object Utility {
             return true
           }
         }
-      } catch (e: Exception) {}
+      } catch (e: Exception) {
+        Log.d(LOG_TAG, "Failed to check data processing restriction", e)
+      }
       return false
     }
 
