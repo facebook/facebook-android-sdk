@@ -126,7 +126,7 @@ tasks.dokkaJavadoc.configure {
             sourceRoots.from(file("../facebook-share/src/main"))
             sourceRoots.from(file("../facebook-applinks/src/main"))
             sourceRoots.from(file("../facebook-messenger/src/main"))
-            sourceRoots.from(file("../facebook-gameservices/src/main"))
+            sourceRoots.from(file("../facebook-gamingservices/src/main"))
             includes.from("../facebook-core/src/main/java/com/facebook/internal/package-info.md")
         }
     }
