@@ -608,7 +608,9 @@ object NativeProtocol {
     if (callIdString != null) {
       try {
         callId = UUID.fromString(callIdString)
-      } catch (exception: IllegalArgumentException) {}
+      } catch (exception: IllegalArgumentException) {
+        Log.d(TAG, "Failed to parse call ID from string: $callIdString", exception)
+      }
     }
     return callId
   }
