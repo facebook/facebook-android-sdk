@@ -15,6 +15,7 @@ import android.content.pm.PackageManager
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -694,7 +695,9 @@ open class LoginClient : Parcelable {
       val e2e = JSONObject()
       try {
         e2e.put("init", System.currentTimeMillis())
-      } catch (e: JSONException) {}
+      } catch (e: JSONException) {
+        Log.d("LoginClient", "Failed to create e2e JSON", e)
+      }
       return e2e.toString()
     }
 
