@@ -308,7 +308,11 @@ constructor(context: Context, cacheKey: String? = null) {
         val enumClass = Class.forName(enumType) as Class<out Enum<*>>
         val enumValue = java.lang.Enum.valueOf(enumClass, json.getString(JSON_VALUE))
         bundle.putSerializable(key, enumValue)
-      } catch (e: ClassNotFoundException) {} catch (e: IllegalArgumentException) {}
+      } catch (e: ClassNotFoundException) {
+        Log.d(TAG, "Failed to deserialize enum type", e)
+      } catch (e: IllegalArgumentException) {
+        Log.d(TAG, "Failed to deserialize enum value", e)
+      }
     }
   }
 
