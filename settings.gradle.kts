@@ -20,9 +20,9 @@ include(
     ":facebook-applinks",
     ":facebook-messenger")
 
-include(":facebook-livestreaming") // @fb-only
+// @fb-only: include(":facebook-livestreaming")
 
-include(":facebook-beta") // @fb-only
+// @fb-only: include(":facebook-beta")
 
 include(":facebook-gamingservices")
 
@@ -33,7 +33,7 @@ include(":samples:HelloFacebookSample")
 
 include(":samples:Iconicus")
 
-include(":samples:LoginSample") // @fb-only
+// @fb-only: include(":samples:LoginSample")
 
 include(":samples:Scrumptious")
 
@@ -49,4 +49,4 @@ if (file("local.gradle").exists()) {
   apply("local.gradle")
 }
 
-project(":facebook-beta").projectDir = File("internal/facebook-beta") // @fb-only
+// @fb-only: project(":facebook-beta").projectDir = File("internal/facebook-beta")
