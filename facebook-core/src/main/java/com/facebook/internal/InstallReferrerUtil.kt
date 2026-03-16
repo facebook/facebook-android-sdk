@@ -16,9 +16,12 @@ import com.android.installreferrer.api.InstallReferrerStateListener
 import com.android.installreferrer.api.ReferrerDetails
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 object InstallReferrerUtil {
   private const val IS_REFERRER_UPDATED = "is_referrer_updated"
+  private const val REFERRER_FETCH_TIMEOUT = 5L
 
   @JvmStatic
   fun tryUpdateReferrerInfo(callback: Callback) {
@@ -27,45 +30,63 @@ object InstallReferrerUtil {
     }
   }
 
-  private fun tryConnectReferrerInfo(callback: Callback) {
+  @JvmStatic
+  fun tryUpdateReferrerInfoBlocking(callback: Callback) {
+    if (!isUpdated) {
+      val latch = CountDownLatch(1)
+      tryConnectReferrerInfo(callback, latch)
+      try {
+        latch.await(REFERRER_FETCH_TIMEOUT, TimeUnit.SECONDS)
+      } catch (e: InterruptedException) { /* proceed with whatever we have */ }
+    }
+  }
+
+  private fun tryConnectReferrerInfo(callback: Callback, latch: CountDownLatch? = null) {
     val referrerClient =
         InstallReferrerClient.newBuilder(FacebookSdk.getApplicationContext()).build()
     val installReferrerStateListener =
         object : InstallReferrerStateListener {
           @AutoHandleExceptions
           override fun onInstallReferrerSetupFinished(responseCode: Int) {
-            when (responseCode) {
-              InstallReferrerResponse.OK -> {
-                val response: ReferrerDetails =
-                    try {
-                      referrerClient.installReferrer
-                    } catch (e: RemoteException) {
-                      return
-                    }
-                val referrerUrl = response.installReferrer
-                if (referrerUrl != null &&
-                    (referrerUrl.contains("fb") || referrerUrl.contains("facebook"))) {
-                  callback.onReceiveReferrerUrl(referrerUrl)
-                }
-                // Even if we are not interested in the url, there is no reason to update again
-                updateReferrer()
-              }
-              InstallReferrerResponse.FEATURE_NOT_SUPPORTED ->
-                  updateReferrer() // No point retrying if feature not supported
-              InstallReferrerResponse.SERVICE_UNAVAILABLE -> {}
-            }
             try {
-              referrerClient.endConnection()
-            } catch (e: Exception) {
-              // Silent endConnection errors for unit test and else
+              when (responseCode) {
+                InstallReferrerResponse.OK -> {
+                  val response: ReferrerDetails =
+                      try {
+                        referrerClient.installReferrer
+                      } catch (e: RemoteException) {
+                        return
+                      }
+                  val referrerUrl = response.installReferrer
+                  if (referrerUrl != null &&
+                      (referrerUrl.contains("fb") || referrerUrl.contains("facebook"))) {
+                    callback.onReceiveReferrerUrl(referrerUrl)
+                  }
+                  // Even if we are not interested in the url, there is no reason to update again
+                  updateReferrer()
+                }
+                InstallReferrerResponse.FEATURE_NOT_SUPPORTED ->
+                    updateReferrer() // No point retrying if feature not supported
+                InstallReferrerResponse.SERVICE_UNAVAILABLE -> {}
+              }
+              try {
+                referrerClient.endConnection()
+              } catch (e: Exception) {
+                // Silent endConnection errors for unit test and else
+              }
+            } finally {
+              latch?.countDown()
             }
           }
 
-          override fun onInstallReferrerServiceDisconnected() = Unit
+          override fun onInstallReferrerServiceDisconnected() {
+            latch?.countDown()
+          }
         }
     try {
       referrerClient.startConnection(installReferrerStateListener)
     } catch (e: Exception) {
+      latch?.countDown()
       return
     }
   }

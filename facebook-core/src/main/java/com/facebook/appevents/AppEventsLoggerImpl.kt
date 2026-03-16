@@ -51,6 +51,7 @@ import com.facebook.internal.FetchedAppGateKeepersManager.getGateKeeperForKey
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.facebook.internal.InstallReferrerUtil
 import com.facebook.internal.InstallReferrerUtil.tryUpdateReferrerInfo
+import com.facebook.internal.InstallReferrerUtil.tryUpdateReferrerInfoBlocking
 import com.facebook.internal.Logger.Companion.log
 import com.facebook.internal.Utility.getActivityName
 import com.facebook.internal.Utility.getMetadataApplicationId
@@ -679,15 +680,22 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         // Should not be a problem as subsequent calls will have the data if it exists.
         @JvmStatic
         fun getInstallReferrer(): String? {
-            tryUpdateReferrerInfo(
-                object : InstallReferrerUtil.Callback {
-                    // will make async connection to try retrieve data. First time we might return null
-                    // instead of actual result.
-                    // Should not be a problem as subsequent calls will have the data if it exists.
-                    override fun onReceiveReferrerUrl(s: String?) {
-                        setInstallReferrer(s)
-                    }
-                })
+            tryUpdateReferrerInfo(installReferrerCallback)
+            return readInstallReferrerFromPrefs()
+        }
+
+        // will make a blocking call and wait until we actually get a result (or timeout) when
+        // fetching the referrer.
+        @JvmStatic
+        fun getInstallReferrerBlocking(): String? {
+            tryUpdateReferrerInfoBlocking(installReferrerCallback)
+            return readInstallReferrerFromPrefs()
+        }
+
+        private val installReferrerCallback =
+            InstallReferrerUtil.Callback { s -> setInstallReferrer(s) }
+
+        private fun readInstallReferrerFromPrefs(): String? {
             val ctx = FacebookSdk.getApplicationContext()
             val preferences = ctx.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
             return preferences.getString("install_referrer", null)

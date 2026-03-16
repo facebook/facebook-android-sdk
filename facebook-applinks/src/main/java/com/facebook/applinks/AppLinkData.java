@@ -20,7 +20,9 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.AppEventsLoggerImpl;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
@@ -149,6 +151,13 @@ public class AppLinkData {
       Utility.setAppEventExtendedDeviceInfoParameters(
           deferredApplinkParams, FacebookSdk.getApplicationContext());
       deferredApplinkParams.put("application_package_name", context.getPackageName());
+
+      if (FeatureManager.isEnabled(FeatureManager.Feature.ReferrerForDeepLink)) {
+        String installReferrer = AppEventsLoggerImpl.getInstallReferrerBlocking();
+        if (installReferrer != null) {
+          deferredApplinkParams.put("install_referrer", installReferrer);
+        }
+      }
     } catch (JSONException e) {
       throw new FacebookException("An error occurred while preparing deferred app link", e);
     }

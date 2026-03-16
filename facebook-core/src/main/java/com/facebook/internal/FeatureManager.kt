@@ -159,7 +159,8 @@ object FeatureManager {
             Feature.BypassAppSwitch,
             Feature.GPSARATriggers,
             Feature.GPSPACAProcessing,
-            Feature.GPSTopicsObservation -> false
+            Feature.GPSTopicsObservation,
+            Feature.ReferrerForDeepLink -> false
 
             else -> true
         }
@@ -215,6 +216,7 @@ object FeatureManager {
         GPSARATriggers(0x00060000), /* privacy sandbox - attribution reporting API*/
         GPSPACAProcessing(0x00070000), /* privacy sandbox - protected audience API*/
         GPSTopicsObservation(0x00080000), /* privacy sandbox - topics API*/
+        ReferrerForDeepLink(0x00090000), /* include install_referrer in DDL requests */
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
@@ -265,6 +267,7 @@ object FeatureManager {
                 GPSARATriggers -> "GPSARATriggers"
                 GPSPACAProcessing-> "GPSPACAProcessing"
                 GPSTopicsObservation -> "GPSTopicsObservation"
+                ReferrerForDeepLink -> "ReferrerForDeepLink"
                 ServiceUpdateCompliance -> "ServiceUpdateCompliance"
                 Login -> "LoginKit"
                 ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
