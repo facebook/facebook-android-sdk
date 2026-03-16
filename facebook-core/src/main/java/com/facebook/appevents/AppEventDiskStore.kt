@@ -31,13 +31,13 @@ internal object AppEventDiskStore {
   @JvmStatic
   fun readAndClearStore(): PersistedEvents {
     assertIsNotMainThread()
-    var ois: MovedClassObjectInputStream? = null
     var persistedEvents: PersistedEvents? = null
     val context = FacebookSdk.getApplicationContext()
     try {
       val inputStream: InputStream = context.openFileInput(PERSISTED_EVENTS_FILENAME)
-      ois = MovedClassObjectInputStream(BufferedInputStream(inputStream))
-      persistedEvents = ois.readObject() as PersistedEvents
+      MovedClassObjectInputStream(BufferedInputStream(inputStream)).use { ois ->
+        persistedEvents = ois.readObject() as PersistedEvents
+      }
     } catch (e: FileNotFoundException) {
       // Expected if we never persisted any events.
     } catch (e: IOException) {
@@ -45,7 +45,6 @@ internal object AppEventDiskStore {
     } catch (e: ClassNotFoundException) {
       Log.w(TAG, "Got unexpected exception while reading events: ", e)
     } finally {
-      closeQuietly(ois)
       try {
         // Note: We delete the store before we store the events; this means we'd
         // prefer to lose some events in the case of exception rather than
@@ -57,10 +56,7 @@ internal object AppEventDiskStore {
         Log.w(TAG, "Got unexpected exception when removing events file: ", ex)
       }
     }
-    if (persistedEvents == null) {
-      persistedEvents = PersistedEvents()
-    }
-    return persistedEvents
+    return persistedEvents ?: PersistedEvents()
   }
 
   // Only call from singleThreadExecutor
