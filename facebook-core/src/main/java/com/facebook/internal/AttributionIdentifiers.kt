@@ -252,7 +252,9 @@ class AttributionIdentifiers {
         if (service != null) {
           queue.put(service)
         }
-      } catch (e: InterruptedException) {}
+      } catch (e: InterruptedException) {
+        logd(TAG, "Service connection interrupted", e)
+      }
     }
 
     override fun onServiceDisconnected(name: ComponentName?) = Unit
