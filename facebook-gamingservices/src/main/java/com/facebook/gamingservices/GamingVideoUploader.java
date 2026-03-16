@@ -69,7 +69,7 @@ public class GamingVideoUploader {
   }
 
   /**
-   * Uploads an image to a player's Gaming Media Library.
+   * Uploads a video to a player's Gaming Media Library.
    *
    * <p>After uploading the player will receive a notification that a new item on their media
    * library is ready to share. If shouldLaunchMediaDialog is set to true this will also trigger the
