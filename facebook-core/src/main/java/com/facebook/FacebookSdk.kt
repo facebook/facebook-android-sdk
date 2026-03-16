@@ -91,7 +91,7 @@ object FacebookSdk {
                 "Call FacebookSdk.setCallbackRequestCodeOffset inside your Application.onCreate method"
     const val CALLBACK_OFFSET_NEGATIVE = "The callback request code offset can't be negative."
 
-    /** The key for AppEvent perfernece setting. */
+    /** The key for AppEvent preference setting. */
     const val APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences"
 
     /** The key for the data processing options preference setting. */
@@ -423,7 +423,7 @@ object FacebookSdk {
     /**
      * This function initializes the Facebook SDK. This function is called automatically on app start
      * up if the proper entries are listed in the AndroidManifest, such as the facebook app id. This
-     * method can bee called manually if needed. The behavior of Facebook SDK functions are
+     * method can be called manually if needed. The behavior of Facebook SDK functions are
      * undetermined if this function is not called. It should be called as early as possible. As part
      * of SDK initialization basic auto logging of app events will occur, this can be controlled via
      * 'com.facebook.sdk.AutoLogAppEventsEnabled' manifest setting
@@ -478,11 +478,11 @@ object FacebookSdk {
                         "before initializing the sdk."
             )
         }
-        // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
+        // Set sdkInitialized to true now so the below async tasks don't throw not initialized
         // exceptions.
         sdkInitialized.set(true)
 
-        // Set sdkFullyInitialzed if auto init enabled.
+        // Set sdkFullyInitialized if auto init enabled.
         if (getAutoInitEnabled()) {
             fullyInitialize()
         }
