@@ -394,11 +394,8 @@ object Utility {
   @Throws(IOException::class)
   @JvmStatic
   fun readStreamToString(inputStream: InputStream?): String {
-    var bufferedInputStream: BufferedInputStream? = null
-    var reader: InputStreamReader? = null
-    return try {
-      bufferedInputStream = BufferedInputStream(inputStream)
-      reader = InputStreamReader(bufferedInputStream)
+    val bufferedInputStream = BufferedInputStream(inputStream)
+    return InputStreamReader(bufferedInputStream).use { reader ->
       val stringBuilder = StringBuilder()
       val bufferSize = 1024 * 2
       val buffer = CharArray(bufferSize)
@@ -407,28 +404,20 @@ object Utility {
         stringBuilder.append(buffer, 0, n)
       }
       stringBuilder.toString()
-    } finally {
-      closeQuietly(bufferedInputStream)
-      closeQuietly(reader)
     }
   }
 
   @Throws(IOException::class)
   @JvmStatic
   fun copyAndCloseInputStream(inputStream: InputStream?, outputStream: OutputStream): Int {
-    var bufferedInputStream: BufferedInputStream? = null
     var totalBytes = 0
-    try {
-      bufferedInputStream = BufferedInputStream(inputStream)
+    BufferedInputStream(inputStream).use { bufferedInputStream ->
       val buffer = ByteArray(8192)
       var bytesRead: Int
       while (bufferedInputStream.read(buffer).also { bytesRead = it } != -1) {
         outputStream.write(buffer, 0, bytesRead)
         totalBytes += bytesRead
       }
-    } finally {
-      bufferedInputStream?.close()
-      inputStream?.close()
     }
     return totalBytes
   }
