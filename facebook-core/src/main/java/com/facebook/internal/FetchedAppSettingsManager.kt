@@ -108,9 +108,9 @@ object FetchedAppSettingsManager {
     private val fetchedAppSettings: MutableMap<String, FetchedAppSettings> = ConcurrentHashMap()
     private val loadingState = AtomicReference(FetchAppSettingState.NOT_LOADED)
     private val fetchedAppSettingsCallbacks = ConcurrentLinkedQueue<FetchedAppSettingsCallback>()
-    private var printedSDKUpdatedMessage = false
-    private var isUnityInit = false
-    private var unityEventBindings: JSONArray? = null
+    @Volatile private var printedSDKUpdatedMessage = false
+    @Volatile private var isUnityInit = false
+    @Volatile private var unityEventBindings: JSONArray? = null
 
     @JvmStatic
     fun loadAppSettingsAsync() {
