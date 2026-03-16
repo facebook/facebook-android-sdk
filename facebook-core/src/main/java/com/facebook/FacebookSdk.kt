@@ -354,7 +354,7 @@ object FacebookSdk {
      * callbackRequestCodeOffset can be set in the AndroidManifest as a meta data entry with the name
      * [CALLBACK_OFFSET_PROPERTY].
      */
-    @Deprecated("")
+    @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(applicationContext: Context, callbackRequestCodeOffset: Int) {
@@ -380,7 +380,7 @@ object FacebookSdk {
      * callbackRequestCodeOffset can be set in the AndroidManifest as a meta data entry with the name
      * [CALLBACK_OFFSET_PROPERTY].
      */
-    @Deprecated("")
+    @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(
@@ -413,7 +413,7 @@ object FacebookSdk {
      * logging from 'activateApp' can be controlled via the 'com.facebook.sdk.AutoLogAppEventsEnabled'
      * manifest setting.
      */
-    @Deprecated("")
+    @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(applicationContext: Context) {
@@ -434,7 +434,7 @@ object FacebookSdk {
      * called automatically on application start. Automatic event logging from 'activateApp' can be
      * controlled via the 'com.facebook.sdk.AutoLogAppEventsEnabled' manifest setting.
      */
-    @Deprecated("")
+    @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(applicationContext: Context, callback: InitializeCallback?) {
