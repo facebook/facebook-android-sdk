@@ -130,6 +130,6 @@ public class SDKConstants {
   public static final String PARAM_DEBUG_MESSAGE_SEVERITY = "severity";
   public static final String PARAM_DEBUG_MESSAGE_TIMESTAMP = "timestamp";
 
-  // Tournamet
+  // Tournament
   public static final String PARAM_TOURNAMENT_ID = "tournamentId";
 }
