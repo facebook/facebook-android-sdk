@@ -35,7 +35,7 @@ public class CloudGameLoginHandler {
   private static SDKLogger mLogger = null;
 
   /**
-   * Fetch Game Login information from Cloud and initalize current AccessToken
+   * Fetch Game Login information from Cloud and initialize current AccessToken
    *
    * @param context application context
    * @throws FacebookException
@@ -45,7 +45,7 @@ public class CloudGameLoginHandler {
   }
 
   /**
-   * Fetch Game Login information from Cloud and initalize current AccessToken with timeout
+   * Fetch Game Login information from Cloud and initialize current AccessToken with timeout
    *
    * @param context application context
    * @param timeoutInSec timeout in second
