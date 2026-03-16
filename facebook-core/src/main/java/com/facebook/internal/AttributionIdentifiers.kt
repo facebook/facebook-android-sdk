@@ -72,6 +72,7 @@ class AttributionIdentifiers {
     private const val IDENTIFIER_REFRESH_INTERVAL_MILLIS = (3600 * 1000).toLong()
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @Volatile
     @JvmField
     internal var cachedIdentifiers: AttributionIdentifiers? = null
 
