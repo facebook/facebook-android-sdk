@@ -40,7 +40,9 @@ internal object AppEventDiskStore {
       persistedEvents = ois.readObject() as PersistedEvents
     } catch (e: FileNotFoundException) {
       // Expected if we never persisted any events.
-    } catch (e: Exception) {
+    } catch (e: IOException) {
+      Log.w(TAG, "Got unexpected exception while reading events: ", e)
+    } catch (e: ClassNotFoundException) {
       Log.w(TAG, "Got unexpected exception while reading events: ", e)
     } finally {
       closeQuietly(ois)
@@ -71,7 +73,7 @@ internal object AppEventDiskStore {
           ObjectOutputStream(
               BufferedOutputStream(context.openFileOutput(PERSISTED_EVENTS_FILENAME, 0)))
       oos.writeObject(eventsToPersist)
-    } catch (t: Throwable) {
+    } catch (t: IOException) {
       Log.w(TAG, "Got unexpected exception while persisting events: ", t)
       try {
         context.getFileStreamPath(PERSISTED_EVENTS_FILENAME).delete()
