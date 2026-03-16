@@ -101,7 +101,7 @@ public class GamingGroupIntegration
   }
 
   /*
-   * Describes the result of a Friend Finder Dialog.
+   * Describes the result of a Gaming Group Integration.
    * This class is intentionally empty.
    */
   public static class Result {}
