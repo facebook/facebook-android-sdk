@@ -91,7 +91,7 @@ public class GamingPayload {
   }
 
   /**
-   * Retireves any Gaming Payload bundled in the start arguments for a Game running on Facebook
+   * Retrieves any Gaming Payload bundled in the start arguments for a Game running on Facebook
    * Cloud. This is called automatically by the Cloud Init handler.
    *
    * @param payloadString JSON Encoded payload.
@@ -113,7 +113,7 @@ public class GamingPayload {
   /**
    * Retrieves any Gaming Payload bundled within the Intent that launched the Game.
    *
-   * @param intent Intent that lanched this Game.
+   * @param intent Intent that launched this Game.
    */
   public static void loadPayloadFromIntent(Intent intent) {
     Map<String, String> loadedPayload = new HashMap<>();
