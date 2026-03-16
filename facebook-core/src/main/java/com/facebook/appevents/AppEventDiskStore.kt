@@ -11,7 +11,6 @@ package com.facebook.appevents
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.internal.AppEventUtility.assertIsNotMainThread
-import com.facebook.internal.Utility.closeQuietly
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.FileNotFoundException
@@ -62,13 +61,12 @@ internal object AppEventDiskStore {
   // Only call from singleThreadExecutor
   @JvmStatic
   internal fun saveEventsToDisk(eventsToPersist: PersistedEvents?) {
-    var oos: ObjectOutputStream? = null
     val context = FacebookSdk.getApplicationContext()
     try {
-      oos =
-          ObjectOutputStream(
-              BufferedOutputStream(context.openFileOutput(PERSISTED_EVENTS_FILENAME, 0)))
-      oos.writeObject(eventsToPersist)
+      ObjectOutputStream(
+          BufferedOutputStream(context.openFileOutput(PERSISTED_EVENTS_FILENAME, 0))).use { oos ->
+        oos.writeObject(eventsToPersist)
+      }
     } catch (t: IOException) {
       Log.w(TAG, "Got unexpected exception while persisting events: ", t)
       try {
@@ -76,8 +74,6 @@ internal object AppEventDiskStore {
       } catch (innerException: Exception) {
         // ignore
       }
-    } finally {
-      closeQuietly(oos)
     }
   }
 
