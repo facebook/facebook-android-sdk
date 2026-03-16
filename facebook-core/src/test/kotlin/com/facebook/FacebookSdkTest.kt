@@ -190,10 +190,10 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
         val expectedDataProcessingOptions = arrayOf("option1", "option2")
         val expectedDataProcessingOptionsJSONObject = JSONObject()
         expectedDataProcessingOptionsJSONObject.put(
-            FacebookSdk.DATA_PROCESSION_OPTIONS, JSONArray(expectedDataProcessingOptions.toList())
+            FacebookSdk.DATA_PROCESSING_OPTIONS, JSONArray(expectedDataProcessingOptions.toList())
         )
-        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_COUNTRY, 1)
-        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_STATE, 10)
+        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSING_OPTIONS_COUNTRY, 1)
+        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSING_OPTIONS_STATE, 10)
         val applicationContext = mock<Context>()
         val mockSharedPreference = MockSharedPreference()
         whenever(applicationContext.getSharedPreferences(any<String>(), any<Int>()))
@@ -203,7 +203,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
 
         FacebookSdk.setDataProcessingOptions(expectedDataProcessingOptions, 1, 10)
 
-        assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, ""))
+        assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSING_OPTIONS, ""))
             .isEqualTo(expectedDataProcessingOptionsJSONObject.toString())
     }
 
@@ -211,11 +211,11 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
     fun `test set data processing options to null`() {
         val expectedDataProcessingOptionsJSONObject = JSONObject()
         expectedDataProcessingOptionsJSONObject.put(
-            FacebookSdk.DATA_PROCESSION_OPTIONS,
+            FacebookSdk.DATA_PROCESSING_OPTIONS,
             JSONArray()
         )
-        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_COUNTRY, 0)
-        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSION_OPTIONS_STATE, 0)
+        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSING_OPTIONS_COUNTRY, 0)
+        expectedDataProcessingOptionsJSONObject.put(FacebookSdk.DATA_PROCESSING_OPTIONS_STATE, 0)
         val applicationContext = mock<Context>()
         val mockSharedPreference = MockSharedPreference()
         whenever(applicationContext.getSharedPreferences(any<String>(), any<Int>()))
@@ -225,7 +225,7 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
 
         FacebookSdk.setDataProcessingOptions(null)
 
-        assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, ""))
+        assertThat(mockSharedPreference.getString(FacebookSdk.DATA_PROCESSING_OPTIONS, ""))
             .isEqualTo(expectedDataProcessingOptionsJSONObject.toString())
     }
 

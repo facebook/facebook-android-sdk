@@ -1246,7 +1246,7 @@ object Utility {
           context
               .getSharedPreferences(
                   FacebookSdk.DATA_PROCESSING_OPTIONS_PREFERENCES, Context.MODE_PRIVATE)
-              .getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null)
+              .getString(FacebookSdk.DATA_PROCESSING_OPTIONS, null)
       if (data != null) {
         try {
           return JSONObject(data)

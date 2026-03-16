@@ -68,7 +68,7 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
     mockStatic(FacebookSdk::class.java)
     val mockContext = mock(Context::class.java)
     val mockSharedPreferences = mock(SharedPreferences::class.java)
-    whenever(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null))
+    whenever(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSING_OPTIONS, null))
         .thenReturn(null)
     whenever(
             mockContext.getSharedPreferences(

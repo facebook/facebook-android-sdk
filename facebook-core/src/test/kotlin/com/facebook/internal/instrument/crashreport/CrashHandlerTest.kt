@@ -51,7 +51,7 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
 
         val mockContext: Context = mock()
         val mockSharedPreferences: SharedPreferences = mock()
-        whenever(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null))
+        whenever(mockSharedPreferences.getString(FacebookSdk.DATA_PROCESSING_OPTIONS, null))
             .thenReturn(getDataProcessingOptions())
         whenever(mockContext.cacheDir).thenReturn(root)
         PowerMockito.`when`(
@@ -137,9 +137,9 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
                 mockRequest
             }
         CrashHandler.enable()
-        val options = crashLogs?.get(FacebookSdk.DATA_PROCESSION_OPTIONS) as JSONArray
-        val country = crashLogs?.get(FacebookSdk.DATA_PROCESSION_OPTIONS_COUNTRY) as Int
-        val state = crashLogs?.get(FacebookSdk.DATA_PROCESSION_OPTIONS_STATE) as Int
+        val options = crashLogs?.get(FacebookSdk.DATA_PROCESSING_OPTIONS) as JSONArray
+        val country = crashLogs?.get(FacebookSdk.DATA_PROCESSING_OPTIONS_COUNTRY) as Int
+        val state = crashLogs?.get(FacebookSdk.DATA_PROCESSING_OPTIONS_STATE) as Int
         val tokener = JSONTokener(crashLogs?.get("crash_reports") as String)
         val logArray = JSONArray(tokener)
         val crashLogsTimeStamps =
@@ -154,9 +154,9 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
 
     fun getDataProcessingOptions(): String {
         val dataProcessingOptions = JSONObject()
-        dataProcessingOptions.put(FacebookSdk.DATA_PROCESSION_OPTIONS, JSONArray("[\"ABC\"]"))
-        dataProcessingOptions.put(FacebookSdk.DATA_PROCESSION_OPTIONS_COUNTRY, 1)
-        dataProcessingOptions.put(FacebookSdk.DATA_PROCESSION_OPTIONS_STATE, 100)
+        dataProcessingOptions.put(FacebookSdk.DATA_PROCESSING_OPTIONS, JSONArray("[\"ABC\"]"))
+        dataProcessingOptions.put(FacebookSdk.DATA_PROCESSING_OPTIONS_COUNTRY, 1)
+        dataProcessingOptions.put(FacebookSdk.DATA_PROCESSING_OPTIONS_STATE, 100)
         return dataProcessingOptions.toString()
     }
 }

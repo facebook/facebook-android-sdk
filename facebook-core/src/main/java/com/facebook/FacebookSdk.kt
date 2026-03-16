@@ -135,13 +135,13 @@ object FacebookSdk {
     const val MONITOR_ENABLED_PROPERTY = "com.facebook.sdk.MonitorEnabled"
 
     /** The key for modes in data processing options. */
-    const val DATA_PROCESSION_OPTIONS = "data_processing_options"
+    const val DATA_PROCESSING_OPTIONS = "data_processing_options"
 
     /** The key for country in data processing options. */
-    const val DATA_PROCESSION_OPTIONS_COUNTRY = "data_processing_options_country"
+    const val DATA_PROCESSING_OPTIONS_COUNTRY = "data_processing_options_country"
 
     /** The key for state in data processing options. */
-    const val DATA_PROCESSION_OPTIONS_STATE = "data_processing_options_state"
+    const val DATA_PROCESSING_OPTIONS_STATE = "data_processing_options_state"
     @JvmField
     var hasCustomTabsPrefetching = false
     @JvmField
@@ -1101,13 +1101,13 @@ object FacebookSdk {
         try {
             val dataProcessingOptions = JSONObject()
             val array = JSONArray(optionsNotNull.toList())
-            dataProcessingOptions.put(DATA_PROCESSION_OPTIONS, array)
-            dataProcessingOptions.put(DATA_PROCESSION_OPTIONS_COUNTRY, country)
-            dataProcessingOptions.put(DATA_PROCESSION_OPTIONS_STATE, state)
+            dataProcessingOptions.put(DATA_PROCESSING_OPTIONS, array)
+            dataProcessingOptions.put(DATA_PROCESSING_OPTIONS_COUNTRY, country)
+            dataProcessingOptions.put(DATA_PROCESSING_OPTIONS_STATE, state)
             applicationContext
                 .getSharedPreferences(DATA_PROCESSING_OPTIONS_PREFERENCES, Context.MODE_PRIVATE)
                 .edit()
-                .putString(DATA_PROCESSION_OPTIONS, dataProcessingOptions.toString())
+                .putString(DATA_PROCESSING_OPTIONS, dataProcessingOptions.toString())
                 .apply()
         } catch (e: JSONException) {
         }
