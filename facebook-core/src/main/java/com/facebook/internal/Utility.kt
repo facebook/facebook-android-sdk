@@ -90,15 +90,15 @@ object Utility {
   // Refresh extended device info every 30 minutes
   private const val REFRESH_TIME_FOR_EXTENDED_DEVICE_INFO_MILLIS = 30 * 60 * 1000
   private const val NO_CARRIER = "NoCarrier"
-  private var numCPUCores = 0
-  private var timestampOfLastCheck: Long = -1
-  private var totalExternalStorageGB: Long = -1
-  var availableExternalStorageGB: Long = -1
-  private var deviceTimezoneAbbreviation = ""
-  var deviceTimeZoneName = ""
-  var carrierName = NO_CARRIER
-  var versionName: String? = ""
-  var locale: Locale? = null
+  @Volatile private var numCPUCores = 0
+  @Volatile private var timestampOfLastCheck: Long = -1
+  @Volatile private var totalExternalStorageGB: Long = -1
+  @Volatile var availableExternalStorageGB: Long = -1
+  @Volatile private var deviceTimezoneAbbreviation = ""
+  @Volatile var deviceTimeZoneName = ""
+  @Volatile var carrierName = NO_CARRIER
+  @Volatile var versionName: String? = ""
+  @Volatile var locale: Locale? = null
 
   // https://stackoverflow.com/questions/39784415/how-to-detect-programmatically-if-android-app-is-running-in-chrome-book-or-in
   private const val ARC_DEVICE_PATTERN = ".+_cheets|cheets_.+"
