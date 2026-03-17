@@ -17,7 +17,7 @@ dependencies {
 android {
     buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.example.hellofacebook"
-    compileSdkVersion(31)
+    compileSdk = libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
         applicationId 'com.example.hellofacebook'
