@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
@@ -96,6 +97,7 @@ public class GamingPayload {
    *
    * @param payloadString JSON Encoded payload.
    */
+  @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
   public static void loadPayloadFromCloudGame(String payloadString) {
     Map<String, String> loadedPayload = new HashMap<>();
     try {
@@ -115,6 +117,7 @@ public class GamingPayload {
    *
    * @param intent Intent that launched this Game.
    */
+  @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
   public static void loadPayloadFromIntent(Intent intent) {
     Map<String, String> loadedPayload = new HashMap<>();
     if (intent == null) {
