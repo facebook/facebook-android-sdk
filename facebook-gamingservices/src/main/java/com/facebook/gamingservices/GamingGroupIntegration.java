@@ -41,7 +41,9 @@ public class GamingGroupIntegration
    * Constructs a new GamingGroupIntegration.
    *
    * @param fragment fragment to use to trigger this Dialog.
+   * @deprecated Use {@link #GamingGroupIntegration(Fragment)} with AndroidX Fragment instead.
    */
+  @Deprecated
   public GamingGroupIntegration(final android.app.Fragment fragment) {
     super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
   }
