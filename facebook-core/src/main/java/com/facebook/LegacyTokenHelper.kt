@@ -26,15 +26,14 @@ constructor(context: Context, cacheKey: String? = null) {
   private val cache: SharedPreferences
 
   init {
-    var context = context
     this.cacheKey = if (cacheKey == null || cacheKey.isEmpty()) DEFAULT_CACHE_KEY else cacheKey
 
     // If the application context is available, use that. However, if it isn't
     // available (possibly because of a context that was created manually), use
     // the passed in context directly.
     val applicationContext = context.applicationContext
-    context = applicationContext ?: context
-    cache = context.getSharedPreferences(this.cacheKey, Context.MODE_PRIVATE)
+    val effectiveContext = applicationContext ?: context
+    cache = effectiveContext.getSharedPreferences(this.cacheKey, Context.MODE_PRIVATE)
   }
 
   fun load(): Bundle? {
