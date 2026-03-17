@@ -17,6 +17,7 @@ import android.adservices.customaudience.CustomAudienceManager
 import android.adservices.customaudience.JoinCustomAudienceRequest
 import android.adservices.customaudience.TrustedBiddingData
 import android.annotation.TargetApi
+import android.os.Build
 import android.os.Bundle
 import android.os.OutcomeReceiver
 import android.util.Log
@@ -104,6 +105,10 @@ object PACustomAudienceClient {
 
     @TargetApi(34)
     private fun joinCustomAudienceImpl(appId: String?, eventName: String?) {
+        // OutcomeReceiver was added in API 31.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return
+        }
         val caName = validateAndCreateCAName(appId, eventName)
         if (caName == null) {
             return

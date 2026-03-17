@@ -12,6 +12,7 @@ import android.adservices.topics.GetTopicsRequest
 import android.adservices.topics.GetTopicsResponse
 import android.adservices.topics.TopicsManager
 import android.annotation.TargetApi
+import android.os.Build
 import android.os.OutcomeReceiver
 import android.util.Log
 import com.facebook.FacebookSdk
@@ -81,6 +82,10 @@ object GpsTopicsManager {
 
     @JvmStatic
     fun shouldObserveTopics(): Boolean {
+        // OutcomeReceiver was added in API 31.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return false
+        }
         if (!isTopicsObservationEnabled.get()) {
             return false
         }

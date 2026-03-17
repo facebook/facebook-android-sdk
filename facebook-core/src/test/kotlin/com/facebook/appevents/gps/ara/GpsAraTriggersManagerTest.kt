@@ -37,7 +37,7 @@ import java.util.concurrent.Executor
     MeasurementManager::class,
     GpsAraTriggersManager::class
 )
-@Config(sdk = [23])
+@Config(sdk = [31])
 class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
     private val applicationId = "app_id"
     private val contentId = "product_id_123"
@@ -85,6 +85,14 @@ class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
         whenever(FacebookSdk.isInitialized()).thenReturn(true)
 
         GpsAraTriggersManager.enable()
+    }
+
+    @Test
+    @Config(sdk = [23])
+    fun testRegisterTriggerReturnsEarlyOnApiBelow31() {
+        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
+        GpsAraTriggersManager.registerTrigger(applicationId, event)
+        assertEquals(0, registerTriggerCalledTimes)
     }
 
     @Test
