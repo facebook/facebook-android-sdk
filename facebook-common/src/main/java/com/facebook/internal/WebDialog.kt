@@ -542,13 +542,9 @@ open class WebDialog : Dialog {
     }
 
     override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
-      if (DISABLE_SSL_CHECK_FOR_TESTING) {
-        handler.proceed()
-      } else {
-        super.onReceivedSslError(view, handler, error)
-        handler.cancel()
-        sendErrorToListener(FacebookDialogException(null, ERROR_FAILED_SSL_HANDSHAKE, null))
-      }
+      super.onReceivedSslError(view, handler, error)
+      handler.cancel()
+      sendErrorToListener(FacebookDialogException(null, ERROR_FAILED_SSL_HANDSHAKE, null))
     }
 
     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
@@ -776,7 +772,6 @@ open class WebDialog : Dialog {
     private const val DISPLAY_TOUCH = "touch"
     private const val PLATFORM_DIALOG_PATH_REGEX = "^/(v\\d+\\.\\d+/)??dialog/.*"
     private const val API_EC_DIALOG_CANCEL = 4201
-    const val DISABLE_SSL_CHECK_FOR_TESTING = false
 
     // width below which there are no extra margins
     private const val NO_PADDING_SCREEN_WIDTH = 480
