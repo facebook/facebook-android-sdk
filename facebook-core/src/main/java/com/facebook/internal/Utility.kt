@@ -673,7 +673,13 @@ object Utility {
     // Locale
     locale =
         try {
-          appContext.resources.configuration.locale
+          val configuration = appContext.resources.configuration
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            configuration.locales[0]
+          } else {
+            @Suppress("DEPRECATION")
+            configuration.locale
+          }
         } catch (e: Exception) {
           Locale.getDefault()
         }
