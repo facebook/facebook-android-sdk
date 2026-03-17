@@ -26,8 +26,6 @@ public class GamingVideoUploader {
    * @param context Android Context for the activity launching initiating an upload.
    */
   public GamingVideoUploader(Context context) {
-    // we don't use the Context yet but may need it to provide a callback
-    // similar to the Image Uploader.
     this.context = context;
   }
 
