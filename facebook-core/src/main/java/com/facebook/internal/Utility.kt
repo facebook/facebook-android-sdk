@@ -438,10 +438,11 @@ object Utility {
   }
 
   private fun clearCookiesForDomain(context: Context, domain: String) {
-    // This is to work around a bug where CookieManager may fail to instantiate if
-    // CookieSyncManager has never been created.
-    val syncManager = CookieSyncManager.createInstance(context)
-    syncManager.sync()
+    // CookieSyncManager is needed before CookieManager on pre-Lollipop devices
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      @Suppress("DEPRECATION")
+      CookieSyncManager.createInstance(context).sync()
+    }
     val cookieManager = CookieManager.getInstance()
     val cookies = cookieManager.getCookie(domain) ?: return
     val splitCookies = cookies.split(";").toTypedArray()
@@ -453,7 +454,12 @@ object Utility {
         cookieManager.setCookie(domain, newCookie)
       }
     }
-    cookieManager.removeExpiredCookie()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      cookieManager.flush()
+    } else {
+      @Suppress("DEPRECATION")
+      CookieSyncManager.getInstance().sync()
+    }
   }
 
   @JvmStatic
