@@ -34,6 +34,7 @@ import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.robolectric.annotation.Config
 import java.util.concurrent.Executor
 
 @PrepareForTest(
@@ -45,6 +46,7 @@ import java.util.concurrent.Executor
     AdSelectionSignals::class,
     PACustomAudienceClient::class
 )
+@Config(sdk = [31])
 class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
     private var customAudienceManager: CustomAudienceManager? = null
     private lateinit var mockLogger: GpsDebugLogger
@@ -107,6 +109,22 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
         whenNew(GpsDebugLogger::class.java)
             .withAnyArguments()
             .thenReturn(mockLogger)
+    }
+
+    @Test
+    @Config(sdk = [23])
+    fun testJoinCustomAudienceReturnsEarlyOnApiBelow31() {
+        mockStatic(CustomAudienceManager::class.java)
+        whenever(CustomAudienceManager.get(any<Context>())).thenReturn(customAudienceManager)
+
+        PACustomAudienceClient.enable()
+        PACustomAudienceClient.joinCustomAudience("1234", createEvent("test_event"))
+
+        verify(customAudienceManager, times(0))?.joinCustomAudience(
+            any<JoinCustomAudienceRequest>(),
+            any<Executor>(),
+            any<OutcomeReceiver<Any, Exception>>()
+        )
     }
 
     @Test

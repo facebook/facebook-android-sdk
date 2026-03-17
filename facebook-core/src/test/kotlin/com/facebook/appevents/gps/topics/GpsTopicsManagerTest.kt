@@ -40,7 +40,7 @@ import com.facebook.internal.FeatureManager
     Topic::class,
     FeatureManager::class,
 )
-@Config(sdk = [23])
+@Config(sdk = [31])
 class GpsTopicsManagerTest : FacebookPowerMockTestCase() {
     private lateinit var mockTopicsManager: TopicsManager
 
