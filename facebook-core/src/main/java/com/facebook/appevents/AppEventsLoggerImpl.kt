@@ -63,6 +63,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.Currency
 import java.util.UUID
 import java.util.concurrent.Executor
@@ -240,7 +241,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         parameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, title)
         parameters.putString(
             Constants.EVENT_PARAM_PRODUCT_PRICE_AMOUNT,
-            priceAmount.setScale(3, BigDecimal.ROUND_HALF_UP).toString()
+            priceAmount.setScale(3, RoundingMode.HALF_UP).toString()
         )
         parameters.putString(Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY, currency.currencyCode)
         if (gtin != null) {
