@@ -370,7 +370,6 @@ object Utility {
       key: String?,
       nonJSONPropertyKey: String?
   ): Any? {
-    var jsonObject = jsonObject
     var value = jsonObject.opt(key)
     if (value != null && value is String) {
       val tokener = JSONTokener(value)
@@ -382,9 +381,9 @@ object Utility {
         // literal "true" or "false" as a result.
         // If we got something like that, we present it to the caller as a JSONObject
         // with a single property. We only do this if the caller wants that behavior.
-        jsonObject = JSONObject()
-        jsonObject.putOpt(nonJSONPropertyKey, value)
-        jsonObject
+        val result = JSONObject()
+        result.putOpt(nonJSONPropertyKey, value)
+        result
       } else {
         throw FacebookException("Got an unexpected non-JSON object.")
       }
