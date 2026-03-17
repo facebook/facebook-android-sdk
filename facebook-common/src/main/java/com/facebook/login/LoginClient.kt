@@ -15,7 +15,6 @@ import android.content.pm.PackageManager
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -27,6 +26,7 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.common.R
 import com.facebook.internal.CallbackManagerImpl
+import com.facebook.internal.Utility.logd
 import com.facebook.internal.Utility.readNonnullStringMapFromParcel
 import com.facebook.internal.Utility.writeNonnullStringMapToParcel
 import com.facebook.internal.Validate
@@ -687,6 +687,8 @@ open class LoginClient : Parcelable {
   }
 
   companion object {
+    private val TAG = LoginClient::class.java.simpleName
+
     @JvmStatic
     fun getLoginRequestCode(): Int = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
 
@@ -696,7 +698,7 @@ open class LoginClient : Parcelable {
       try {
         e2e.put("init", System.currentTimeMillis())
       } catch (e: JSONException) {
-        Log.d("LoginClient", "Failed to create e2e JSON", e)
+        logd(TAG, "Failed to create e2e JSON", e)
       }
       return e2e.toString()
     }

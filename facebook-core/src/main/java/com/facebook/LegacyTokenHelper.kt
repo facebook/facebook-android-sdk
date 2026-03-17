@@ -13,6 +13,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import com.facebook.internal.Logger.Companion.log
+import com.facebook.internal.Utility.logd
 import java.util.Date
 import kotlin.collections.ArrayList
 import org.json.JSONArray
@@ -308,9 +309,9 @@ constructor(context: Context, cacheKey: String? = null) {
         val enumValue = java.lang.Enum.valueOf(enumClass, json.getString(JSON_VALUE))
         bundle.putSerializable(key, enumValue)
       } catch (e: ClassNotFoundException) {
-        Log.d(TAG, "Failed to deserialize enum type", e)
+        logd(TAG, "Failed to deserialize enum type", e)
       } catch (e: IllegalArgumentException) {
-        Log.d(TAG, "Failed to deserialize enum value", e)
+        logd(TAG, "Failed to deserialize enum value", e)
       }
     }
   }

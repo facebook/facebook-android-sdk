@@ -11,6 +11,7 @@ package com.facebook.internal
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.AccessToken
@@ -47,6 +48,7 @@ import org.powermock.reflect.Whitebox
     GraphRequest::class,
     FeatureManager::class,
     GoogleApiAvailability::class,
+    Log::class,
 )
 class UtilityTest : FacebookPowerMockTestCase() {
 
@@ -343,5 +345,29 @@ class UtilityTest : FacebookPowerMockTestCase() {
         params, mockIdentifiers, mockAnonId, false, mockContext)
     assertNull(params["anon_id"])
     assertNull(params["attribution"])
+  }
+
+  @Test
+  fun `test logd emits Log_d when debug is enabled`() {
+    PowerMockito.mockStatic(Log::class.java)
+    whenever(FacebookSdk.isDebugEnabled()).thenReturn(true)
+    var callCount = 0
+    whenever(Log.d(any(), any(), anyOrNull())).then { callCount++ }
+
+    Utility.logd("TestTag", "test message", RuntimeException("test"))
+
+    assertEquals(1, callCount)
+  }
+
+  @Test
+  fun `test logd suppresses Log_d when debug is disabled`() {
+    PowerMockito.mockStatic(Log::class.java)
+    whenever(FacebookSdk.isDebugEnabled()).thenReturn(false)
+    var callCount = 0
+    whenever(Log.d(any(), any(), anyOrNull())).then { callCount++ }
+
+    Utility.logd("TestTag", "test message", RuntimeException("test"))
+
+    assertEquals(0, callCount)
   }
 }

@@ -22,6 +22,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import com.facebook.login.DefaultAudience
+import com.facebook.internal.Utility.logd
 import com.facebook.login.LoginTargetApp
 import java.util.TreeSet
 import java.util.UUID
@@ -609,7 +610,7 @@ object NativeProtocol {
       try {
         callId = UUID.fromString(callIdString)
       } catch (exception: IllegalArgumentException) {
-        Log.d(TAG, "Failed to parse call ID from string: $callIdString", exception)
+        logd(TAG, "Failed to parse call ID from string: $callIdString", exception)
       }
     }
     return callId
