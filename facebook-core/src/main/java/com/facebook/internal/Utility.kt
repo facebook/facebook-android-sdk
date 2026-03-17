@@ -337,7 +337,7 @@ object Utility {
 
   @JvmStatic
   fun convertJSONArrayToHashSet(jsonArray: JSONArray?): HashSet<String>? {
-      if (jsonArray == null || jsonArray?.length() == 0) {
+      if (jsonArray == null || jsonArray.length() == 0) {
           return null
       }
       val hashSet: HashSet<String> = HashSet()
