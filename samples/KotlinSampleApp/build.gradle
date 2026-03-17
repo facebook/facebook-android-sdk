@@ -39,8 +39,8 @@ dependencies {
 
 android {
     namespace = "com.facebook.samples.kotlinsampleapp"
-    compileSdkVersion 33
-    buildToolsVersion "31.0.0"
+    compileSdk = libs.versions.compileSdk.get().toInteger()
+    buildToolsVersion = libs.versions.buildToolsVersion.get()
 
     defaultConfig {
         applicationId "com.facebook.samples.kotlinsampleapp"
