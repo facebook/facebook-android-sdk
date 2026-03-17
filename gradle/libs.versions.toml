@@ -9,7 +9,7 @@ buildToolsVersion = "35.0.0"
 acra = "5.5.0"
 analytics = "4.+"
 android-billingclient = "7.0.0"
-android-installreferrer = "1.0"
+android-installreferrer = "2.2"
 androidx = "1.1.0"
 androidxActivity = "1.2.0"
 androidxAnnotation = "1.1.0"
@@ -41,6 +41,7 @@ leakcanaryAndroid = "2.9.1"
 material = "1.0.0"
 mockitoInline = "2.26.0"
 mockitoKotlin = "2.2.11"
+mockk = "1.13.5"
 mockwebserver = "4.9.0"
 playServicesAuth = "16.0.0"
 playServicesGcm = "17.0.0"
@@ -103,6 +104,7 @@ leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", ve
 leakcanary-object-watcher = { module = "com.squareup.leakcanary:leakcanary-object-watcher-android", version.ref = "leakcanaryAndroid" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
 powermock-core = { module = "org.powermock:powermock-core", version.ref = "powerMock" }
 powermock-api-mockito2 = { module = "org.powermock:powermock-api-mockito2", version.ref = "powerMock" }

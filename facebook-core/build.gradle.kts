@@ -42,6 +42,7 @@ dependencies {
 
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockk)
 
     testImplementation(libs.powermock.core)
     testImplementation(libs.powermock.api.mockito2)
