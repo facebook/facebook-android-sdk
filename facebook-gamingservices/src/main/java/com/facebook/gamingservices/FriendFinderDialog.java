@@ -49,7 +49,9 @@ public class FriendFinderDialog extends FacebookDialogBase<Void, FriendFinderDia
    * Constructs a new FriendFinderDialog.
    *
    * @param fragment fragment to use to trigger this Dialog.
+   * @deprecated Use {@link #FriendFinderDialog(androidx.fragment.app.Fragment)} instead.
    */
+  @Deprecated
   public FriendFinderDialog(final Fragment fragment) {
     super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
   }
