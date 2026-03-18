@@ -34,7 +34,7 @@ import org.json.JSONObject
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FetchedAppGateKeepersManager {
-    private val TAG = FetchedAppGateKeepersManager::class.simpleName
+    private const val TAG = "FetchedAppGateKeepersManager"
     private const val APP_GATEKEEPERS_PREFS_STORE =
         "com.facebook.internal.preferences.APP_GATEKEEPERS"
     private const val APP_GATEKEEPERS_PREFS_KEY_FORMAT = "com.facebook.internal.APP_GATEKEEPERS.%s"
