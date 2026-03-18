@@ -11,6 +11,7 @@ package com.facebook.appevents.gps.ara
 import android.adservices.measurement.MeasurementManager
 import android.annotation.TargetApi
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.OutcomeReceiver
 import android.util.Log
@@ -122,6 +123,10 @@ object GpsAraTriggersManager {
 
     private fun canRegisterTrigger(): Boolean {
         if (!enabled) {
+            return false
+        }
+
+        if (Build.VERSION.SDK_INT < 33) {
             return false
         }
 

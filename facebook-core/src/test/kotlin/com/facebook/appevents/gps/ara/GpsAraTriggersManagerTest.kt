@@ -37,7 +37,7 @@ import java.util.concurrent.Executor
     MeasurementManager::class,
     GpsAraTriggersManager::class
 )
-@Config(sdk = [23])
+@Config(sdk = [33])
 class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
     private val applicationId = "app_id"
     private val contentId = "product_id_123"
