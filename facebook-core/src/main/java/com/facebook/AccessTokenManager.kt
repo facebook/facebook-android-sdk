@@ -192,94 +192,118 @@ internal constructor(
     val expiredPermissions: MutableSet<String?> = HashSet()
     val permissionsCallSucceeded = AtomicBoolean(false)
     val refreshResult = RefreshResult()
-    val batch =
-        GraphRequestBatch(
-            createGrantedPermissionsRequest(
-                accessToken,
-                GraphRequest.Callback { response ->
-                  val result = response.jsonObject ?: return@Callback
-                  val permissionsArray = result.optJSONArray("data") ?: return@Callback
-                  permissionsCallSucceeded.set(true)
-                  for (i in 0 until permissionsArray.length()) {
-                    val permissionEntry = permissionsArray.optJSONObject(i) ?: continue
-                    val permission = permissionEntry.optString("permission")
-                    var status = permissionEntry.optString("status")
-                    if (!isNullOrEmpty(permission) && !isNullOrEmpty(status)) {
-                      status = status.toLowerCase(Locale.US)
-                      when (status) {
-                        "granted" -> permissions.add(permission)
-                        "declined" -> declinedPermissions.add(permission)
-                        "expired" -> expiredPermissions.add(permission)
-                        else -> Log.w(TAG, "Unexpected status: $status")
-                      }
-                    }
-                  }
-                }),
-            createExtendAccessTokenRequest(
-                accessToken,
-                GraphRequest.Callback { response ->
-                  val data = response.jsonObject ?: return@Callback
-                  refreshResult.accessToken = data.optString("access_token")
-                  refreshResult.expiresAt = data.optInt("expires_at")
-                  refreshResult.expiresIn = data.optInt("expires_in")
-                  refreshResult.dataAccessExpirationTime =
-                      data.optLong("data_access_expiration_time")
-                  refreshResult.graphDomain = data.optString("graph_domain", null)
-                }))
-    batch.addCallback(
-        GraphRequestBatch.Callback {
-          var newAccessToken: AccessToken? = null
-          val returnAccessToken = refreshResult.accessToken
-          val returnExpiresAt = refreshResult.expiresAt
-          val returnDataAccessExpirationTime = refreshResult.dataAccessExpirationTime
-          val returnGraphDomain = refreshResult.graphDomain
 
-          try {
-            if (getInstance().currentAccessToken == null ||
-                getInstance().currentAccessToken?.userId !== accessToken.userId) {
-              callback?.OnTokenRefreshFailed(
-                  FacebookException("No current access token to refresh"))
-              return@Callback
-            }
-            if (!permissionsCallSucceeded.get() &&
-                returnAccessToken == null &&
-                returnExpiresAt == 0) {
-              callback?.OnTokenRefreshFailed(FacebookException("Failed to refresh access token"))
-              return@Callback
-            }
-            var expirationTime = accessToken.expires
-            if (refreshResult.expiresAt != 0) {
-              expirationTime = Date(refreshResult.expiresAt * 1000L)
-            } else if (refreshResult.expiresIn != 0) {
-              val now = Date().time
-              expirationTime = Date(refreshResult.expiresIn * 1000L + now)
-            }
-            newAccessToken =
-                AccessToken(
-                    returnAccessToken ?: accessToken.token,
-                    accessToken.applicationId,
-                    accessToken.userId,
-                    if (permissionsCallSucceeded.get()) permissions else accessToken.permissions,
-                    if (permissionsCallSucceeded.get()) declinedPermissions
-                    else accessToken.declinedPermissions,
-                    if (permissionsCallSucceeded.get()) expiredPermissions
-                    else accessToken.expiredPermissions,
-                    accessToken.source,
-                    expirationTime,
-                    Date(),
-                    if (returnDataAccessExpirationTime != null) {
-                      Date(returnDataAccessExpirationTime * 1000L)
-                    } else accessToken.dataAccessExpirationTime,
-                    returnGraphDomain ?: accessToken.graphDomain)
-            getInstance().currentAccessToken = newAccessToken
-          } finally {
-            tokenRefreshInProgress.set(false)
-            if (callback != null && newAccessToken != null) {
-              callback.OnTokenRefreshed(newAccessToken)
-            }
+    val permissionsCallback = GraphRequest.Callback { response ->
+      val result = response.jsonObject ?: return@Callback
+      val permissionsArray = result.optJSONArray("data") ?: return@Callback
+      permissionsCallSucceeded.set(true)
+      for (i in 0 until permissionsArray.length()) {
+        val permissionEntry = permissionsArray.optJSONObject(i) ?: continue
+        val permission = permissionEntry.optString("permission")
+        var status = permissionEntry.optString("status")
+        if (!isNullOrEmpty(permission) && !isNullOrEmpty(status)) {
+          status = status.toLowerCase(Locale.US)
+          when (status) {
+            "granted" -> permissions.add(permission)
+            "declined" -> declinedPermissions.add(permission)
+            "expired" -> expiredPermissions.add(permission)
+            else -> Log.w(TAG, "Unexpected status: $status")
           }
-        })
-    batch.executeAsync()
+        }
+      }
+    }
+
+    val extendCallback = GraphRequest.Callback { response ->
+      val data = response.jsonObject ?: return@Callback
+      refreshResult.accessToken = data.optString("access_token")
+      refreshResult.expiresAt = data.optInt("expires_at")
+      refreshResult.expiresIn = data.optInt("expires_in")
+      refreshResult.dataAccessExpirationTime =
+          data.optLong("data_access_expiration_time")
+      refreshResult.graphDomain = data.optString("graph_domain", null)
+    }
+
+    val onAllCompleted = Runnable {
+      var newAccessToken: AccessToken? = null
+      val returnAccessToken = refreshResult.accessToken
+      val returnExpiresAt = refreshResult.expiresAt
+      val returnDataAccessExpirationTime = refreshResult.dataAccessExpirationTime
+      val returnGraphDomain = refreshResult.graphDomain
+
+      try {
+        if (getInstance().currentAccessToken == null ||
+            getInstance().currentAccessToken?.userId !== accessToken.userId) {
+          callback?.OnTokenRefreshFailed(
+              FacebookException("No current access token to refresh"))
+          return@Runnable
+        }
+        if (!permissionsCallSucceeded.get() &&
+            returnAccessToken == null &&
+            returnExpiresAt == 0) {
+          callback?.OnTokenRefreshFailed(FacebookException("Failed to refresh access token"))
+          return@Runnable
+        }
+        var expirationTime = accessToken.expires
+        if (refreshResult.expiresAt != 0) {
+          expirationTime = Date(refreshResult.expiresAt * 1000L)
+        } else if (refreshResult.expiresIn != 0) {
+          val now = Date().time
+          expirationTime = Date(refreshResult.expiresIn * 1000L + now)
+        }
+        newAccessToken =
+            AccessToken(
+                returnAccessToken ?: accessToken.token,
+                accessToken.applicationId,
+                accessToken.userId,
+                if (permissionsCallSucceeded.get()) permissions else accessToken.permissions,
+                if (permissionsCallSucceeded.get()) declinedPermissions
+                else accessToken.declinedPermissions,
+                if (permissionsCallSucceeded.get()) expiredPermissions
+                else accessToken.expiredPermissions,
+                accessToken.source,
+                expirationTime,
+                Date(),
+                if (returnDataAccessExpirationTime != null) {
+                  Date(returnDataAccessExpirationTime * 1000L)
+                } else accessToken.dataAccessExpirationTime,
+                returnGraphDomain ?: accessToken.graphDomain)
+        getInstance().currentAccessToken = newAccessToken
+      } finally {
+        tokenRefreshInProgress.set(false)
+        if (callback != null && newAccessToken != null) {
+          callback.OnTokenRefreshed(newAccessToken)
+        }
+      }
+    }
+
+    val permissionsRequest = createGrantedPermissionsRequest(accessToken, permissionsCallback)
+    val extendRequest = createExtendAccessTokenRequest(accessToken, extendCallback)
+
+    if (accessToken.graphDomain == FacebookSdk.GAMING) {
+      // Gaming Graph (graph.fb.gg) does not support batch requests.
+      // Execute each request individually and run completion after both finish.
+      val completedCount = java.util.concurrent.atomic.AtomicInteger(0)
+      val wrappedPermissionsCallback = GraphRequest.Callback { response ->
+        permissionsCallback.onCompleted(response)
+        if (completedCount.incrementAndGet() == 2) {
+          onAllCompleted.run()
+        }
+      }
+      val wrappedExtendCallback = GraphRequest.Callback { response ->
+        extendCallback.onCompleted(response)
+        if (completedCount.incrementAndGet() == 2) {
+          onAllCompleted.run()
+        }
+      }
+      permissionsRequest.callback = wrappedPermissionsCallback
+      extendRequest.callback = wrappedExtendCallback
+      permissionsRequest.executeAsync()
+      extendRequest.executeAsync()
+    } else {
+      val batch = GraphRequestBatch(permissionsRequest, extendRequest)
+      batch.addCallback(GraphRequestBatch.Callback { onAllCompleted.run() })
+      batch.executeAsync()
+    }
   }
 
   companion object {

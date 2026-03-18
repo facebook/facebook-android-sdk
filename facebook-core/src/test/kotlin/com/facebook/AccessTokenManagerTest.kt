@@ -30,6 +30,7 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -288,6 +289,71 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
           }
         })
     assertThat(capturedException).isNotNull
+  }
+
+  @Test
+  fun `test refreshing gaming access token executes requests individually`() {
+    val accessTokenManager = createAccessTokenManager()
+    val accessToken = createAccessToken(graphDomain = "gaming")
+    val mockPermissionsRequest = mock<GraphRequest>()
+    val mockExtendRequest = mock<GraphRequest>()
+
+    // Capture the wrapped callbacks set by the gaming path
+    var wrappedPermissionsCallback: GraphRequest.Callback? = null
+    var wrappedExtendCallback: GraphRequest.Callback? = null
+    doAnswer { invocation ->
+          wrappedPermissionsCallback = invocation.getArgument<GraphRequest.Callback>(0)
+          null
+        }
+        .`when`(mockPermissionsRequest)
+        .callback = anyOrNull()
+    doAnswer { invocation ->
+          wrappedExtendCallback = invocation.getArgument<GraphRequest.Callback>(0)
+          null
+        }
+        .`when`(mockExtendRequest)
+        .callback = anyOrNull()
+
+    whenever(
+            mockGraphRequestCompanionObject.newGraphPathRequest(
+                any(), eq("me/permissions"), any()))
+        .thenReturn(mockPermissionsRequest)
+    whenever(
+            mockGraphRequestCompanionObject.newGraphPathRequest(
+                any(), eq("oauth/access_token"), any()))
+        .thenReturn(mockExtendRequest)
+
+    accessTokenManager.currentAccessToken = accessToken
+    accessTokenManager.refreshCurrentAccessToken(null)
+
+    // Verify batch is NOT used for gaming tokens
+    verify(mockGraphRequestCompanionObject, never())
+        .executeBatchAsync(any<GraphRequestBatch>())
+    // Verify individual executeAsync() was called on each request
+    verify(mockPermissionsRequest).executeAsync()
+    verify(mockExtendRequest).executeAsync()
+
+    // Simulate responses via the wrapped callbacks
+    val mockPermissionsResponse = mock<GraphResponse>()
+    whenever(mockPermissionsResponse.jsonObject)
+        .thenReturn(
+            JSONObject(
+                """{"data":[{"permission":"walk","status":"granted"},{"permission":"chew gum","status":"declined"}]}"""))
+    checkNotNull(wrappedPermissionsCallback).onCompleted(mockPermissionsResponse)
+
+    val mockExtendResponse = mock<GraphResponse>()
+    whenever(mockExtendResponse.jsonObject)
+        .thenReturn(
+            JSONObject(
+                """{"access_token":"new token string","expires_at":${EXPIRES.time},"graph_domain":"gaming"}"""))
+    checkNotNull(wrappedExtendCallback).onCompleted(mockExtendResponse)
+
+    // After both callbacks complete, the token should be refreshed
+    val currentAccessToken = checkNotNull(accessTokenManager.currentAccessToken)
+    assertThat(currentAccessToken.token).isEqualTo("new token string")
+    assertThat(currentAccessToken.permissions).containsExactlyInAnyOrder("walk")
+    assertThat(currentAccessToken.declinedPermissions).containsExactlyInAnyOrder("chew gum")
+    assertThat(currentAccessToken.graphDomain).isEqualTo("gaming")
   }
 
   @Test
