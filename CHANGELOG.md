@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added redirect_uri support for secure login flows across WebView, CustomTab, and native app (Katana) handlers
+- Added intent_uri_package_target parameter support for CustomTab and Katana login flows
+- Added protected data metadata flag for Integrity
+- Added banned params manager to send banned param names for Integrity
+- Added referrer for Deep Link requests
+- Added Build.VERSION.SDK_INT check before using AdServices APIs
+
+### Fixed
+- Fixed ConcurrentModificationException in FetchedAppGateKeepersManager
+- Avoided Kotlin reflection during FetchedAppGateKeepersManager static init
+- Fixed AtomicBoolean misuse in AttributionIdentifiers
+- Fixed identity comparison in ImageDownloader RequestKey.equals
+- Fixed logic bug in FileLruCache content tag check
+- Fixed thread safety by adding @Volatile to shared mutable fields across multiple classes
+- Fixed variable shadowing in LegacyTokenHelper and Utility
+- Fixed CustomRedirectWebDialog WebView sizing regression
+- Fixed token refresh to execute requests individually for Gaming Graph tokens
+- Only warn about missing FacebookActivity when facebook-common is present
+
+### Changed
+- Updated to Gradle 8.5
+- Updated install-referrer dependency
+- Replaced deprecated CookieSyncManager and removeExpiredCookie usage
+- Replaced deprecated BigDecimal.ROUND_HALF_UP with RoundingMode.HALF_UP
+- Replaced java.util.Random with SecureRandom for security compliance
+- Removed SSL bypass flag code path in WebDialog
+- Stopped persisting Access Token with Events
+- Used debug-gated logd() instead of Log.d() in catch block logging
+- Improved resource management with Kotlin .use{} for I/O operations
+- Added logging to previously empty catch blocks
+
 ## [18.1.3]
 ### Added
 - Added the support for external ID
