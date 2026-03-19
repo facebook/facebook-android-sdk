@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [18.2.3]
+
 ### Added
 - Added redirect_uri support for secure login flows across WebView, CustomTab, and native app (Katana) handlers
 - Added intent_uri_package_target parameter support for CustomTab and Katana login flows
@@ -546,7 +548,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.1.3...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.2.3...HEAD
+[18.2.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.1.3...sdk-version-18.2.3
 [18.1.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.0.3...sdk-version-18.1.3
 [17.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.1...sdk-version-17.0.2
 [17.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.0...sdk-version-17.0.1
@@ -616,4 +619,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+
 
