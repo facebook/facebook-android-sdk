@@ -132,6 +132,9 @@ object GpsAraTriggersManager {
 
         try {
             Class.forName("android.adservices.measurement.MeasurementManager")
+            // Also verify OutcomeReceiver exists (API 31+) to prevent NoClassDefFoundError
+            // in MeasurementCompatibleManager on devices with backported AdServices
+            Class.forName("android.os.OutcomeReceiver")
             return true
         } catch (e: Exception) {
             Log.i(TAG, "FAILURE_NO_MEASUREMENT_MANAGER_CLASS")
