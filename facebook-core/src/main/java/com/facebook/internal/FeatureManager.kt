@@ -223,6 +223,7 @@ object FeatureManager {
         ChromeCustomTabsPrefetching(0x01010000),
         IgnoreAppSwitchToLoggedOut(0x01020000),
         BypassAppSwitch(0x01030000),
+        LoginSSO(0x01040000),
         // Features in ShareKit
         /** Essential of ShareKit */
         Share(0x02000000);
@@ -273,6 +274,7 @@ object FeatureManager {
                 ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
                 IgnoreAppSwitchToLoggedOut -> "IgnoreAppSwitchToLoggedOut"
                 BypassAppSwitch -> "BypassAppSwitch"
+                LoginSSO -> "LoginSSO"
                 Share -> "ShareKit"
                 else -> "unknown"
             }

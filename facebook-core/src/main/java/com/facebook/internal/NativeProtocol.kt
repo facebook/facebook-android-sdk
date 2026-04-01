@@ -42,6 +42,7 @@ object NativeProtocol {
   const val NO_PROTOCOL_AVAILABLE = -1
   private val TAG = NativeProtocol::class.java.name
   private const val FACEBOOK_PROXY_AUTH_ACTIVITY = "com.facebook.katana.ProxyAuth"
+  private const val FACEBOOK_SSO_LOGIN_ACTIVITY = "com.facebook.katana.FBLoginSSOActivity"
   private const val FACEBOOK_TOKEN_REFRESH_ACTIVITY =
       "com.facebook.katana.platform.TokenRefreshService"
   const val FACEBOOK_PROXY_AUTH_PERMISSIONS_KEY = "scope"
@@ -328,9 +329,10 @@ object NativeProtocol {
       codeChallenge: String?,
       codeChallengeMethod: String?,
       redirectURI: String?,
-      intentUriPackageTarget: String?
+      intentUriPackageTarget: String?,
+      activityNameOverride: String? = null
   ): Intent? {
-    val activityName = appInfo.getLoginActivity() ?: return null
+    val activityName = activityNameOverride ?: appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
     val intent =
         Intent()
@@ -445,6 +447,53 @@ object NativeProtocol {
           codeChallengeMethod,
           redirectURI,
           intentUriPackageTarget)
+    }
+  }
+
+  @JvmStatic
+  fun createFBLoginSSOIntents(
+      context: Context?,
+      applicationId: String,
+      permissions: Collection<String?>,
+      e2e: String,
+      isRerequest: Boolean,
+      isForPublish: Boolean,
+      defaultAudience: DefaultAudience,
+      clientState: String,
+      authType: String,
+      ignoreAppSwitchToLoggedOut: Boolean,
+      messengerPageId: String?,
+      resetMessengerState: Boolean,
+      isFamilyLogin: Boolean,
+      shouldSkipAccountDedupe: Boolean,
+      nonce: String?,
+      codeChallenge: String?,
+      codeChallengeMethod: String? = "S256",
+      redirectURI: String?,
+      intentUriPackageTarget: String?
+  ): List<Intent> {
+    return facebookAppInfoList.mapNotNull {
+      createNativeAppIntent(
+          it,
+          applicationId,
+          permissions,
+          e2e,
+          isForPublish,
+          defaultAudience,
+          clientState,
+          authType,
+          ignoreAppSwitchToLoggedOut,
+          messengerPageId,
+          resetMessengerState,
+          LoginTargetApp.FACEBOOK,
+          isFamilyLogin,
+          shouldSkipAccountDedupe,
+          nonce,
+          codeChallenge,
+          codeChallengeMethod,
+          redirectURI,
+          intentUriPackageTarget,
+          FACEBOOK_SSO_LOGIN_ACTIVITY)
     }
   }
 
