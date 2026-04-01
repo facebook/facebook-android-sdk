@@ -21,6 +21,7 @@ import java.util.WeakHashMap
 object CrashShieldHandler {
   private val crashingObjects = Collections.newSetFromMap(WeakHashMap<Any, Boolean>())
   private var enabled = false
+  private var debugCrashScheduled = false
 
   @JvmStatic
   fun enable() {
@@ -56,6 +57,7 @@ object CrashShieldHandler {
   @JvmStatic
   fun reset() {
     resetCrashingObjects()
+    debugCrashScheduled = false
     isDebug = BuildConfig.DEBUG
   }
 
@@ -69,7 +71,8 @@ object CrashShieldHandler {
   @VisibleForTesting
   @JvmStatic
   fun scheduleCrashInDebug(e: Throwable?) {
-    if (isDebug) {
+    if (isDebug && !debugCrashScheduled) {
+      debugCrashScheduled = true
       Handler(Looper.getMainLooper())
           .post(
               object : Runnable {
