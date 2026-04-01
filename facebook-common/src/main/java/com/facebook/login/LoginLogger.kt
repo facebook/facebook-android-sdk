@@ -13,6 +13,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.TextUtils
 import com.facebook.appevents.InternalAppEventsLogger
+import com.facebook.internal.Utility
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.lang.Exception
 import java.util.concurrent.Executors
@@ -25,6 +26,16 @@ import org.json.JSONObject
 internal class LoginLogger(context: Context, val applicationId: String) {
   private val logger: InternalAppEventsLogger = InternalAppEventsLogger(context, applicationId)
   private var facebookVersion: String? = null
+
+  private fun logAndEmit(eventName: String?, bundle: Bundle) {
+    Utility.logd(TAG, "Event: $eventName | " +
+        "auth_logger_id=${bundle.getString(EVENT_PARAM_AUTH_LOGGER_ID)} | " +
+        "result=${bundle.getString(EVENT_PARAM_LOGIN_RESULT)} | " +
+        "method=${bundle.getString(EVENT_PARAM_METHOD)} | " +
+        "extras=${bundle.getString(EVENT_PARAM_EXTRAS)}")
+    logger.logEventImplicitly(eventName, bundle)
+  }
+
   @JvmOverloads
   fun logStartLogin(
       pendingLoginRequest: LoginClient.Request,
@@ -48,7 +59,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
       }
       bundle.putString(EVENT_PARAM_EXTRAS, extras.toString())
     } catch (e: JSONException) {}
-    logger.logEventImplicitly(eventName, bundle)
+    logAndEmit(eventName, bundle)
   }
 
   @JvmOverloads
@@ -88,7 +99,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
     if (jsonObject != null) {
       bundle.putString(EVENT_PARAM_EXTRAS, jsonObject.toString())
     }
-    logger.logEventImplicitly(eventName, bundle)
+    logAndEmit(eventName, bundle)
     if (result == LoginClient.Result.Code.SUCCESS) {
       logHeartbeatEvent(loginRequestId)
     }
@@ -96,7 +107,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
 
   private fun logHeartbeatEvent(loginRequestId: String?) {
     val bundle = newAuthorizationLoggingBundle(loginRequestId)
-    val runnable = Runnable { logger.logEventImplicitly(EVENT_NAME_LOGIN_HEARTBEAT, bundle) }
+    val runnable = Runnable { logAndEmit(EVENT_NAME_LOGIN_HEARTBEAT, bundle) }
     worker.schedule(runnable, 5, TimeUnit.SECONDS)
   }
 
@@ -108,7 +119,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
   ) {
     val bundle = newAuthorizationLoggingBundle(authId)
     bundle.putString(EVENT_PARAM_METHOD, method)
-    logger.logEventImplicitly(eventName, bundle)
+    logAndEmit(eventName, bundle)
   }
 
   @JvmOverloads
@@ -136,7 +147,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
       bundle.putString(EVENT_PARAM_EXTRAS, jsonObject.toString())
     }
     bundle.putString(EVENT_PARAM_METHOD, method)
-    logger.logEventImplicitly(eventName, bundle)
+    logAndEmit(eventName, bundle)
   }
 
   @JvmOverloads
@@ -147,31 +158,31 @@ internal class LoginLogger(context: Context, val applicationId: String) {
   ) {
     val bundle = newAuthorizationLoggingBundle(authId)
     bundle.putString(EVENT_PARAM_METHOD, method)
-    logger.logEventImplicitly(eventName, bundle)
+    logAndEmit(eventName, bundle)
   }
 
   fun logLoginStatusStart(loggerRef: String?) {
     val bundle = newAuthorizationLoggingBundle(loggerRef)
-    logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_START, bundle)
+    logAndEmit(EVENT_NAME_LOGIN_STATUS_START, bundle)
   }
 
   fun logLoginStatusSuccess(loggerRef: String?) {
     val bundle = newAuthorizationLoggingBundle(loggerRef)
     bundle.putString(EVENT_PARAM_LOGIN_RESULT, LoginClient.Result.Code.SUCCESS.loggingValue)
-    logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle)
+    logAndEmit(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle)
   }
 
   fun logLoginStatusFailure(loggerRef: String?) {
     val bundle = newAuthorizationLoggingBundle(loggerRef)
     bundle.putString(EVENT_PARAM_LOGIN_RESULT, EVENT_EXTRAS_FAILURE)
-    logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle)
+    logAndEmit(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle)
   }
 
   fun logLoginStatusError(loggerRef: String?, exception: Exception) {
     val bundle = newAuthorizationLoggingBundle(loggerRef)
     bundle.putString(EVENT_PARAM_LOGIN_RESULT, LoginClient.Result.Code.ERROR.loggingValue)
     bundle.putString(EVENT_PARAM_ERROR_MESSAGE, exception.toString())
-    logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle)
+    logAndEmit(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle)
   }
 
   @JvmOverloads
@@ -180,10 +191,12 @@ internal class LoginLogger(context: Context, val applicationId: String) {
     bundle.putString(EVENT_PARAM_LOGIN_RESULT, LoginClient.Result.Code.ERROR.loggingValue)
     bundle.putString(EVENT_PARAM_ERROR_MESSAGE, errorMessage)
     bundle.putString(EVENT_PARAM_METHOD, method)
-    logger.logEventImplicitly(eventName, bundle)
+    logAndEmit(eventName, bundle)
   }
 
   companion object {
+    private const val TAG = "LoginLogger"
+
     // Constants for logging login-related data.
     const val EVENT_NAME_LOGIN_METHOD_START = "fb_mobile_login_method_start"
     const val EVENT_NAME_LOGIN_METHOD_COMPLETE = "fb_mobile_login_method_complete"
@@ -194,6 +207,13 @@ internal class LoginLogger(context: Context, val applicationId: String) {
     const val EVENT_NAME_LOGIN_STATUS_START = "fb_mobile_login_status_start"
     const val EVENT_NAME_LOGIN_STATUS_COMPLETE = "fb_mobile_login_status_complete"
     const val EVENT_NAME_LOGIN_HEARTBEAT = "fb_mobile_login_heartbeat"
+    const val EVENT_NAME_SSO_LAUNCH_ATTEMPTED = "sso_launch_attempted"
+    const val EVENT_NAME_SSO_DELEGATED_TO_FB4A = "sso_delegated_to_fb4a"
+    const val EVENT_NAME_SSO_SHOWN = "sso_dialog_shown"
+    const val EVENT_NAME_SSO_NOT_SHOWN = "sso_dialog_not_shown"
+    const val EVENT_NAME_SSO_DISMISSED = "sso_dismissed"
+    const val EVENT_NAME_SSO_CONTINUE_CLICKED = "sso_continue_clicked"
+    const val EVENT_EXTRAS_FROM_SSO = "from_sso"
     const val EVENT_NAME_FOA_LOGIN_METHOD_START = "foa_mobile_login_method_start"
     const val EVENT_NAME_FOA_LOGIN_METHOD_COMPLETE = "foa_mobile_login_method_complete"
     const val EVENT_NAME_FOA_LOGIN_METHOD_NOT_TRIED = "foa_mobile_login_method_not_tried"

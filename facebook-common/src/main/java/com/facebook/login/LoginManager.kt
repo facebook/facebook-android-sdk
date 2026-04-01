@@ -1023,6 +1023,7 @@ open class LoginManager() {
       request: LoginClient.Request
   ) {
     logStartLogin(startActivityDelegate.activityContext, request)
+    Utility.logd(TAG, "auth_logger_id: ${request.authId}")
 
     // Make sure the static handler for login is registered if there isn't an explicit callback
     registerStaticCallback(CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()) {
@@ -1077,6 +1078,7 @@ open class LoginManager() {
       pendingLoggingExtras[LoginLogger.EVENT_EXTRAS_TRY_LOGIN_ACTIVITY] =
           if (wasLoginActivityTried) AppEventsConstants.EVENT_PARAM_VALUE_YES
           else AppEventsConstants.EVENT_PARAM_VALUE_NO
+      pendingLoggingExtras[LoginLogger.EVENT_EXTRAS_FROM_SSO] = "false"
       loginLogger.logCompleteLogin(
           request.authId,
           pendingLoggingExtras,

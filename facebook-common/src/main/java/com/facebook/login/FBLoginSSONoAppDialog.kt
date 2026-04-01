@@ -34,6 +34,8 @@ class FBLoginSSONoAppDialog : DialogFragment() {
   /** Called when the user taps "Continue with Facebook". */
   var onContinueListener: (() -> Unit)? = null
 
+  private var continueClicked = false
+
   companion object {
     const val TAG = "FBLoginSSONoAppDialog"
 
@@ -60,6 +62,7 @@ class FBLoginSSONoAppDialog : DialogFragment() {
 
     view.findViewById<View>(R.id.com_facebook_sso_noapp_continue)
         .setOnClickListener {
+          continueClicked = true
           onContinueListener?.invoke()
           dismiss()
         }
@@ -88,7 +91,9 @@ class FBLoginSSONoAppDialog : DialogFragment() {
 
   override fun onDismiss(dialog: DialogInterface) {
     super.onDismiss(dialog)
-    onDismissListener?.invoke()
+    if (!continueClicked) {
+      onDismissListener?.invoke()
+    }
   }
 
   override fun onDestroyView() {

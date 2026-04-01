@@ -11,7 +11,10 @@ package com.facebook.login
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
+import android.text.TextUtils
 import androidx.activity.ComponentActivity
+import androidx.annotation.VisibleForTesting
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.facebook.AccessToken
@@ -20,11 +23,14 @@ import com.facebook.FacebookCallback
 import com.facebook.FacebookSdk.getApplicationId
 import com.facebook.FacebookSdk.getIntentUriPackageTarget
 import com.facebook.FacebookSdk.getRedirectURI
+import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.Utility
 import com.facebook.internal.NativeProtocol
 import com.facebook.login.LoginMethodHandler.Companion.createAccessTokenFromWebBundle
 import com.facebook.login.LoginMethodHandler.Companion.createAuthenticationTokenFromWebBundle
 import java.util.UUID
+import org.json.JSONObject
 
 /**
  * Launches the FBLoginSSO activity and handles the result via AndroidX ActivityResult APIs.
@@ -50,6 +56,14 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
   private var pendingNonce: String? = null
   private var pendingRequest: LoginClient.Request? = null
   private var pendingPermissions: Collection<String> = emptyList()
+  @VisibleForTesting
+  internal var appEventsLogger: InternalAppEventsLogger? = null
+    get() {
+      if (field == null) {
+        field = InternalAppEventsLogger(activity, getApplicationId())
+      }
+      return field
+    }
 
   init {
     launcher =
@@ -74,13 +88,18 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
     if (AccessToken.getCurrentAccessToken() != null) {
       return false
     }
+    val authId = UUID.randomUUID().toString()
+    Utility.logd(TAG, "auth_logger_id: $authId")
+    logSsoEvent(LoginLogger.EVENT_NAME_SSO_LAUNCH_ATTEMPTED, authId,
+        JSONObject().put("permissions", TextUtils.join(",", permissions)))
     if (!FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)) {
       pendingSsoContext = "non_sso_login_sso_not_shown"
+      logSsoEvent(LoginLogger.EVENT_NAME_SSO_NOT_SHOWN, authId,
+          JSONObject().put("reason", "gk_disabled"))
       return false
     }
     val loginConfig = LoginConfiguration(permissions)
     val loginManager = LoginManager.getInstance()
-    val authId = UUID.randomUUID().toString()
 
     val request =
         LoginClient.Request(
@@ -126,6 +145,7 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
       val resolved = activity.packageManager.resolveActivity(intent, 0)
       if (resolved != null) {
         pendingSsoContext = "non_sso_login_sso_shown"
+        logSsoEvent(LoginLogger.EVENT_NAME_SSO_DELEGATED_TO_FB4A, request.authId)
         launcher.launch(intent)
         return true
       }
@@ -136,12 +156,23 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
       val fragmentActivity = activity as? androidx.fragment.app.FragmentActivity ?: return false
       val noAppDialog = FBLoginSSONoAppDialog.newInstance()
       noAppDialog.onContinueListener = {
+        logSsoEvent(LoginLogger.EVENT_NAME_SSO_CONTINUE_CLICKED, request.authId,
+            JSONObject().put("reason", ssoContext))
         LoginManager.getInstance()
             .startLoginWithForceConfirmation(activity, pendingPermissions, ssoContext)
       }
+      noAppDialog.onDismissListener = {
+        logSsoEvent(LoginLogger.EVENT_NAME_SSO_DISMISSED, request.authId,
+            result = LoginClient.Result.Code.CANCEL.loggingValue)
+      }
       noAppDialog.show(fragmentActivity.supportFragmentManager, FBLoginSSONoAppDialog.TAG)
+      logSsoEvent(LoginLogger.EVENT_NAME_SSO_SHOWN, request.authId,
+          JSONObject().put("reason", ssoContext)
+              .put("permissions", TextUtils.join(",", permissions)))
       return true
     }
+    logSsoEvent(LoginLogger.EVENT_NAME_SSO_NOT_SHOWN, request.authId,
+        JSONObject().put("reason", ssoContext))
     pendingSsoContext = "non_sso_login_sso_not_shown"
     return false
   }
@@ -149,6 +180,19 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
   private fun handleActivityResult(resultCode: Int, data: Intent?) {
     val request = pendingRequest
     val nonce = pendingNonce
+
+    // Check if the user dismissed the SSO popup without tapping Continue
+    val ssoDismissed = data?.getBooleanExtra(SSO_DISMISSED_EXTRA, false) == true
+    Utility.logd(TAG, "handleActivityResult: resultCode=$resultCode, sso_dismissed=$ssoDismissed")
+    if (ssoDismissed) {
+      Utility.logd(TAG, "SSO popup dismissed by user (not a login cancellation)")
+      logSsoEvent(LoginLogger.EVENT_NAME_SSO_DISMISSED, request?.authId,
+          result = LoginClient.Result.Code.CANCEL.loggingValue)
+      callback?.onCancel()
+      pendingNonce = null
+      pendingRequest = null
+      return
+    }
 
     val resultIntent = Intent()
 
@@ -173,11 +217,13 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
             val loginResult =
                 LoginClient.Result.createCompositeTokenResult(
                     request, accessToken, authenticationToken)
+            markFromSso(loginResult)
             resultIntent.putExtra(LoginFragment.RESULT_KEY, loginResult)
             LoginManager.getInstance().onActivityResult(Activity.RESULT_OK, resultIntent, callback)
           } catch (ex: Exception) {
             val errorResult =
                 LoginClient.Result.createErrorResult(request, null, ex.message)
+            markFromSso(errorResult)
             resultIntent.putExtra(LoginFragment.RESULT_KEY, errorResult)
             LoginManager.getInstance().onActivityResult(Activity.RESULT_OK, resultIntent, callback)
           }
@@ -185,6 +231,7 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
           // Error response from the SSO activity
           val errorResult =
               LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode)
+          markFromSso(errorResult)
           resultIntent.putExtra(LoginFragment.RESULT_KEY, errorResult)
           LoginManager.getInstance().onActivityResult(Activity.RESULT_OK, resultIntent, callback)
         }
@@ -193,12 +240,15 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
         val errorResult =
             LoginClient.Result.createErrorResult(
                 request, null, "Unexpected null extras from SSO activity.")
+        markFromSso(errorResult)
         resultIntent.putExtra(LoginFragment.RESULT_KEY, errorResult)
         LoginManager.getInstance().onActivityResult(Activity.RESULT_OK, resultIntent, callback)
       }
     } else {
-      // Canceled or no data
+      // Canceled or no data — user cancelled the OAuth dialog after tapping Continue
+      Utility.logd(TAG, "Login cancelled (not SSO dismiss — OAuth dialog was shown)")
       val cancelResult = LoginClient.Result.createCancelResult(request, "Operation canceled")
+      markFromSso(cancelResult)
       resultIntent.putExtra(LoginFragment.RESULT_KEY, cancelResult)
       LoginManager.getInstance()
           .onActivityResult(Activity.RESULT_CANCELED, resultIntent, callback)
@@ -206,6 +256,34 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
 
     pendingNonce = null
     pendingRequest = null
+  }
+
+  private fun logSsoEvent(
+      eventName: String,
+      authLoggerId: String?,
+      extras: JSONObject? = null,
+      result: String? = null
+  ) {
+    val bundle = Bundle()
+    bundle.putLong(LoginLogger.EVENT_PARAM_TIMESTAMP, System.currentTimeMillis())
+    bundle.putString(LoginLogger.EVENT_PARAM_AUTH_LOGGER_ID, authLoggerId ?: "")
+    bundle.putString(LoginLogger.EVENT_PARAM_LOGIN_RESULT, result ?: "")
+    bundle.putString(LoginLogger.EVENT_PARAM_METHOD, "")
+    bundle.putString(LoginLogger.EVENT_PARAM_ERROR_CODE, "")
+    bundle.putString(LoginLogger.EVENT_PARAM_ERROR_MESSAGE, "")
+    bundle.putString(LoginLogger.EVENT_PARAM_EXTRAS, extras?.toString() ?: "")
+    bundle.putString(LoginLogger.EVENT_PARAM_CHALLENGE, "")
+    Utility.logd(TAG, "Event: $eventName | " +
+        "auth_logger_id=${authLoggerId ?: ""} | " +
+        "result=${result ?: ""} | " +
+        "extras=${extras?.toString() ?: ""}")
+    appEventsLogger?.logEventImplicitly(eventName, bundle)
+  }
+
+  private fun markFromSso(result: LoginClient.Result) {
+    val extras = result.loggingExtras?.toMutableMap() ?: HashMap()
+    extras[LoginLogger.EVENT_EXTRAS_FROM_SSO] = "true"
+    result.loggingExtras = extras
   }
 
   private fun isFb4aInstalled(): Boolean {
@@ -218,6 +296,9 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
   }
 
   companion object {
+    private const val TAG = "FBLoginSSOLauncher"
+    private const val SSO_DISMISSED_EXTRA = "sso_dismissed"
+
     /** Set after launch() is called; consumed by LoginManager on the next logIn() call. */
     @JvmStatic
     var pendingSsoContext: String? = null
