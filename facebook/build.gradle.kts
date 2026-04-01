@@ -9,6 +9,8 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import java.time.Duration
+
 plugins {
     id("com.android.library")
     id("kotlin-android")
@@ -89,8 +91,8 @@ android {
 
     testOptions {
         unitTests.all {
-
             it.maxHeapSize = "1024m"
+            it.timeout.set(Duration.ofMinutes(10))
         }
     }
 

@@ -9,6 +9,8 @@
 
 @file:Suppress("UnstableApiUsage")
 
+import java.time.Duration
+
 plugins {
     id("com.android.library")
     id("kotlin-android")
@@ -89,8 +91,8 @@ android {
 
     testOptions {
         unitTests.all {
-
             it.maxHeapSize = "4096m"
+            it.timeout.set(Duration.ofMinutes(10))
             // CrashShieldHandlerDebugTest is only available on Sandcastle and Github Actions
             // Because local compiling environment may recompile CrashShieldHandler multiple times
             // and generate false signals
