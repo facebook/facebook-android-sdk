@@ -26,7 +26,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest
     FacebookSdk::class,
     InstrumentData::class,
     InstrumentData.Builder::class,
-    CrashShieldHandler::class,
     Looper::class,
     Handler::class)
 class CrashShieldHandlerDebugTest : FacebookPowerMockTestCase() {
@@ -47,8 +46,7 @@ class CrashShieldHandlerDebugTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
     whenever(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
         .thenReturn(mockInstrumentData)
-    PowerMockito.spy(CrashShieldHandler::class.java)
-    whenever(CrashShieldHandler.isDebug()).thenReturn(true)
+    CrashShieldHandler.isDebug = true
     mockLooper = PowerMockito.mock(Looper::class.java)
     mockHandler = PowerMockito.mock(Handler::class.java)
     PowerMockito.mockStatic(Looper::class.java)

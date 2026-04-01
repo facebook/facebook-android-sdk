@@ -56,6 +56,7 @@ object CrashShieldHandler {
   @JvmStatic
   fun reset() {
     resetCrashingObjects()
+    isDebug = BuildConfig.DEBUG
   }
 
   @JvmStatic
@@ -63,12 +64,12 @@ object CrashShieldHandler {
     crashingObjects.clear()
   }
 
-  @VisibleForTesting @JvmStatic fun isDebug() = BuildConfig.DEBUG
+  @VisibleForTesting @JvmStatic var isDebug = BuildConfig.DEBUG
 
   @VisibleForTesting
   @JvmStatic
   fun scheduleCrashInDebug(e: Throwable?) {
-    if (isDebug()) {
+    if (isDebug) {
       Handler(Looper.getMainLooper())
           .post(
               object : Runnable {
