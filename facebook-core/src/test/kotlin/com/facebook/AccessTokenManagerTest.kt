@@ -82,6 +82,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext)
+    whenever(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
 
     MemberModifier.suppress(MemberMatcher.method(Utility::class.java, "clearFacebookCookies"))
     accessTokenCache = mock()

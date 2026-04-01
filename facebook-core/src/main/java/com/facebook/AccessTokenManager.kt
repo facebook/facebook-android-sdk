@@ -82,7 +82,9 @@ internal constructor(
     val oldUserId = oldAccessToken?.userId
     val newUserId = currentAccessToken?.userId
     if (oldUserId != null && oldUserId != newUserId) {
-      AppEventQueue.flushAndWait(FlushReason.EAGER_FLUSHING_EVENT)
+      FacebookSdk.getExecutor().execute {
+        AppEventQueue.flushAndWait(FlushReason.EAGER_FLUSHING_EVENT)
+      }
     }
 
     this.currentAccessTokenField = currentAccessToken
