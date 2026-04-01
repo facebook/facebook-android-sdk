@@ -330,6 +330,7 @@ object NativeProtocol {
       codeChallengeMethod: String?,
       redirectURI: String?,
       intentUriPackageTarget: String?,
+      forceConfirmation: Boolean = false,
       activityNameOverride: String? = null
   ): Intent? {
     val activityName = activityNameOverride ?: appInfo.getLoginActivity() ?: return null
@@ -379,6 +380,9 @@ object NativeProtocol {
     if (shouldSkipAccountDedupe) {
       intent.putExtra(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, true)
     }
+    if (forceConfirmation) {
+      intent.putExtra(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION, true)
+    }
 
     // For Katana native flow:
     // - If redirectURI is provided, use DIALOG_HTTPS_REDIRECT_URI
@@ -424,7 +428,8 @@ object NativeProtocol {
       codeChallenge: String?,
       codeChallengeMethod: String? = "S256",
       redirectURI: String?,
-      intentUriPackageTarget: String?
+      intentUriPackageTarget: String?,
+      forceConfirmation: Boolean = false
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
@@ -446,10 +451,16 @@ object NativeProtocol {
           codeChallenge,
           codeChallengeMethod,
           redirectURI,
-          intentUriPackageTarget)
+          intentUriPackageTarget,
+          forceConfirmation)
     }
   }
 
+  // Note: forceConfirmation is intentionally NOT threaded through SSO intents.
+  // FB4A's FBLoginSSOActivityImpl handles force_confirmation itself based on
+  // the user's sign-in state (Scenarios 1-3). The SDK only needs to set it
+  // for fallback paths (CCT via WebLoginMethodHandler, pre-SSO FB4A via
+  // KatanaProxyLoginMethodHandler).
   @JvmStatic
   fun createFBLoginSSOIntents(
       context: Context?,
@@ -493,7 +504,7 @@ object NativeProtocol {
           codeChallengeMethod,
           redirectURI,
           intentUriPackageTarget,
-          FACEBOOK_SSO_LOGIN_ACTIVITY)
+          activityNameOverride = FACEBOOK_SSO_LOGIN_ACTIVITY)
     }
   }
 

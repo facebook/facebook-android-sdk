@@ -590,6 +590,73 @@ class NativeProtocolTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `native intent generation with forceConfirmation includes force_confirmation extra`() {
+        val mockContext = mock<Context>()
+        setUpMockingForNativeIntentGeneration(mockContext)
+
+        val intents =
+            NativeProtocol.createProxyAuthIntents(
+                mockContext,
+                mockAppID,
+                listOf<String>(),
+                "",
+                false,
+                false,
+                DefaultAudience.FRIENDS,
+                "",
+                "",
+                false,
+                null,
+                false,
+                false,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                forceConfirmation = true
+            )
+
+        assertThat(intents).isNotEmpty()
+        assertThat(intents[0].getBooleanExtra(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION, false))
+            .isTrue()
+    }
+
+    @Test
+    fun `native intent generation without forceConfirmation omits force_confirmation extra`() {
+        val mockContext = mock<Context>()
+        setUpMockingForNativeIntentGeneration(mockContext)
+
+        val intents =
+            NativeProtocol.createProxyAuthIntents(
+                mockContext,
+                mockAppID,
+                listOf<String>(),
+                "",
+                false,
+                false,
+                DefaultAudience.FRIENDS,
+                "",
+                "",
+                false,
+                null,
+                false,
+                false,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+
+        assertThat(intents).isNotEmpty()
+        assertThat(intents[0].hasExtra(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION))
+            .isFalse()
+    }
+
+    @Test
     fun `test validate null intent for service intent`() {
         val mockContext = mock<Context>()
         setUpMockingForServiceIntentGeneration(mockContext)

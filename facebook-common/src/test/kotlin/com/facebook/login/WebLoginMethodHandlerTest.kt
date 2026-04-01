@@ -208,6 +208,20 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test addExtraParameters includes force_confirmation when set on request`() {
+    testRequest.forceConfirmation = true
+    val parameters = testHandler.addExtraParameters(Bundle(), testRequest)
+    assertThat(parameters.getString(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION))
+        .isEqualTo("true")
+  }
+
+  @Test
+  fun `test addExtraParameters omits force_confirmation by default`() {
+    val parameters = testHandler.addExtraParameters(Bundle(), testRequest)
+    assertThat(parameters.containsKey(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION)).isFalse()
+  }
+
+  @Test
   fun `test addExtraParameters with empty redirect URI uses default`() {
     val requestWithEmptyRedirectURI = LoginClient.Request(
         LoginBehavior.DIALOG_ONLY,

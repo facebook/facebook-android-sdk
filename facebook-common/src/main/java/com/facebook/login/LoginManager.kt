@@ -954,6 +954,17 @@ open class LoginManager() {
     return request
   }
 
+  /**
+   * Starts a login flow with force_confirmation=true. Used by [FBLoginSSOLauncher] for SSO
+   * fallback paths where the user needs to explicitly confirm permissions.
+   */
+  internal fun startLoginWithForceConfirmation(activity: Activity, permissions: Collection<String>) {
+    val loginConfig = LoginConfiguration(permissions)
+    val request = createLoginRequestWithConfig(loginConfig)
+    request.forceConfirmation = true
+    startLogin(ActivityStartActivityDelegate(activity), request)
+  }
+
   protected open fun createLoginRequest(permissions: Collection<String>?): LoginClient.Request {
     val request =
         LoginClient.Request(

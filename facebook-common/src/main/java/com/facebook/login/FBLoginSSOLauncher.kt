@@ -131,7 +131,8 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
       val fragmentActivity = activity as? androidx.fragment.app.FragmentActivity ?: return false
       val noAppDialog = FBLoginSSONoAppDialog.newInstance()
       noAppDialog.onContinueListener = {
-        LoginManager.getInstance().logInWithReadPermissions(activity, pendingPermissions)
+        LoginManager.getInstance()
+            .startLoginWithForceConfirmation(activity, pendingPermissions)
       }
       noAppDialog.show(fragmentActivity.supportFragmentManager, FBLoginSSONoAppDialog.TAG)
       return true

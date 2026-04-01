@@ -81,6 +81,7 @@ class LoginClientTest : FacebookPowerMockTestCase() {
     assertThat(unparceledRequest.isRerequest).isFalse
     assertThat(unparceledRequest.isFamilyLogin).isFalse
     assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isFalse
+    assertThat(unparceledRequest.forceConfirmation).isFalse
   }
 
   @Test
@@ -99,6 +100,7 @@ class LoginClientTest : FacebookPowerMockTestCase() {
     request.messengerPageId = "1928"
     request.isFamilyLogin = true
     request.setShouldSkipAccountDeduplication(true)
+    request.forceConfirmation = true
     val token1 =
         AccessToken(
             "Token2",
@@ -124,6 +126,7 @@ class LoginClientTest : FacebookPowerMockTestCase() {
     assertThat(unparceledRequest.isRerequest).isTrue
     assertThat(unparceledRequest.isFamilyLogin).isTrue
     assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isTrue
+    assertThat(unparceledRequest.forceConfirmation).isTrue
     assertThat(LoginClient.Result.Code.SUCCESS).isEqualTo(unparceledResult.code)
     assertThat(token1).isEqualTo(unparceledResult.token)
     assertThat("error 1").isEqualTo(unparceledResult.errorMessage)

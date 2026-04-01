@@ -122,6 +122,10 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_SKIP_DEDUPE, "true")
     }
 
+    if (request.forceConfirmation) {
+      parameters.putString(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION, "true")
+    }
+
     // Set Login Connect parameters if they are present
     if (request.messengerPageId != null) {
       parameters.putString(ServerProtocol.DIALOG_PARAM_MESSENGER_PAGE_ID, request.messengerPageId)

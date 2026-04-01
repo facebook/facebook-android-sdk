@@ -408,6 +408,7 @@ open class LoginClient : Parcelable {
     val loginTargetApp: LoginTargetApp
     var isFamilyLogin = false
     private var shouldSkipAccountDeduplication = false
+    var forceConfirmation = false
     val nonce: String
     val codeVerifier: String?
     val codeChallenge: String?
@@ -492,6 +493,7 @@ open class LoginClient : Parcelable {
           else LoginTargetApp.FACEBOOK
       isFamilyLogin = parcel.readByte().toInt() != 0
       shouldSkipAccountDeduplication = parcel.readByte().toInt() != 0
+      forceConfirmation = parcel.readByte().toInt() != 0
       nonce = Validate.notNullOrEmpty(parcel.readString(), "nonce")
       codeVerifier = parcel.readString()
       codeChallenge = parcel.readString()
@@ -518,6 +520,7 @@ open class LoginClient : Parcelable {
       dest.writeString(loginTargetApp.name)
       dest.writeByte((if (isFamilyLogin) 1 else 0).toByte())
       dest.writeByte((if (shouldSkipAccountDeduplication) 1 else 0).toByte())
+      dest.writeByte((if (forceConfirmation) 1 else 0).toByte())
       dest.writeString(nonce)
       dest.writeString(codeVerifier)
       dest.writeString(codeChallenge)

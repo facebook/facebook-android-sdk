@@ -51,6 +51,7 @@ object ServerProtocol {
   const val DIALOG_PARAM_SDK_VERSION = "sdk"
   const val DIALOG_PARAM_STATE = "state"
   const val DIALOG_PARAM_FAIL_ON_LOGGED_OUT = "fail_on_logged_out"
+  const val DIALOG_PARAM_FORCE_CONFIRMATION = "force_confirmation"
   const val DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH = "cct_over_app_switch"
   const val DIALOG_PARAM_MESSENGER_PAGE_ID = "messenger_page_id"
   const val DIALOG_PARAM_RESET_MESSENGER_STATE = "reset_messenger_state"
