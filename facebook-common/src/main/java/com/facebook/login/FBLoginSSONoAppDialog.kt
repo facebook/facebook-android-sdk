@@ -16,6 +16,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.facebook.common.R
 
@@ -38,8 +39,16 @@ class FBLoginSSONoAppDialog : DialogFragment() {
 
   companion object {
     const val TAG = "FBLoginSSONoAppDialog"
+    private const val ARG_FB4A_OUTDATED = "fb4a_outdated"
 
-    fun newInstance(): FBLoginSSONoAppDialog = FBLoginSSONoAppDialog()
+    @JvmStatic
+    fun newInstance(fb4aOutdated: Boolean = false): FBLoginSSONoAppDialog {
+      val dialog = FBLoginSSONoAppDialog()
+      val args = Bundle()
+      args.putBoolean(ARG_FB4A_OUTDATED, fb4aOutdated)
+      dialog.arguments = args
+      return dialog
+    }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +62,14 @@ class FBLoginSSONoAppDialog : DialogFragment() {
       savedInstanceState: Bundle?
   ): View {
     val view = inflater.inflate(R.layout.com_facebook_sso_noapp_dialog, container, false)
+
+    val fb4aOutdated = arguments?.getBoolean(ARG_FB4A_OUTDATED, false) ?: false
+    if (fb4aOutdated) {
+      view.findViewById<TextView>(R.id.com_facebook_sso_noapp_title)
+          .setText(R.string.com_facebook_sso_outdated_title)
+      view.findViewById<TextView>(R.id.com_facebook_sso_noapp_body)
+          .setText(R.string.com_facebook_sso_outdated_body)
+    }
 
     view.findViewById<View>(R.id.com_facebook_sso_noapp_close)
         .setOnClickListener { dismiss() }

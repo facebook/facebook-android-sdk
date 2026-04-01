@@ -37,4 +37,6 @@
     <string name="com_facebook_sso_noapp_title" description="Title for the SSO dialog shown when the Facebook app is not installed on the device">Sign up faster with Facebook</string>
     <string name="com_facebook_sso_noapp_body" description="Body text for the SSO dialog shown when the Facebook app is not installed">Create your account in seconds with Facebook.</string>
     <string name="com_facebook_sso_noapp_not_now" description="Dismiss button text for the SSO dialog">Not now</string>
+    <string name="com_facebook_sso_outdated_title" description="Title for the SSO dialog shown when the Facebook app is installed but too old to support SSO">Log in with Facebook</string>
+    <string name="com_facebook_sso_outdated_body" description="Body text for the SSO dialog shown when the Facebook app is installed but too old to support SSO">Continue with your Facebook account to get started.</string>
 </resources>
