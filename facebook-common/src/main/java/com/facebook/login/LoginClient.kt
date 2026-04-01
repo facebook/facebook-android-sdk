@@ -409,6 +409,7 @@ open class LoginClient : Parcelable {
     var isFamilyLogin = false
     private var shouldSkipAccountDeduplication = false
     var forceConfirmation = false
+    var androidSsoContext: String? = null
     val nonce: String
     val codeVerifier: String?
     val codeChallenge: String?
@@ -494,6 +495,7 @@ open class LoginClient : Parcelable {
       isFamilyLogin = parcel.readByte().toInt() != 0
       shouldSkipAccountDeduplication = parcel.readByte().toInt() != 0
       forceConfirmation = parcel.readByte().toInt() != 0
+      androidSsoContext = parcel.readString()
       nonce = Validate.notNullOrEmpty(parcel.readString(), "nonce")
       codeVerifier = parcel.readString()
       codeChallenge = parcel.readString()
@@ -521,6 +523,7 @@ open class LoginClient : Parcelable {
       dest.writeByte((if (isFamilyLogin) 1 else 0).toByte())
       dest.writeByte((if (shouldSkipAccountDeduplication) 1 else 0).toByte())
       dest.writeByte((if (forceConfirmation) 1 else 0).toByte())
+      dest.writeString(androidSsoContext)
       dest.writeString(nonce)
       dest.writeString(codeVerifier)
       dest.writeString(codeChallenge)

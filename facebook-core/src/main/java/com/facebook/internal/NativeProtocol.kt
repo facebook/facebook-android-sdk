@@ -331,7 +331,8 @@ object NativeProtocol {
       redirectURI: String?,
       intentUriPackageTarget: String?,
       forceConfirmation: Boolean = false,
-      activityNameOverride: String? = null
+      activityNameOverride: String? = null,
+      androidSsoContext: String? = null
   ): Intent? {
     val activityName = activityNameOverride ?: appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
@@ -394,6 +395,10 @@ object NativeProtocol {
       intent.putExtra("intent_uri_package_target", intentUri)
     }
 
+    if (!androidSsoContext.isNullOrEmpty()) {
+      intent.putExtra(ServerProtocol.DIALOG_PARAM_ANDROID_SSO_CONTEXT, androidSsoContext)
+    }
+
     return intent
   }
 
@@ -429,7 +434,8 @@ object NativeProtocol {
       codeChallengeMethod: String? = "S256",
       redirectURI: String?,
       intentUriPackageTarget: String?,
-      forceConfirmation: Boolean = false
+      forceConfirmation: Boolean = false,
+      androidSsoContext: String? = null
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
@@ -452,7 +458,8 @@ object NativeProtocol {
           codeChallengeMethod,
           redirectURI,
           intentUriPackageTarget,
-          forceConfirmation)
+          forceConfirmation,
+          androidSsoContext = androidSsoContext)
     }
   }
 

@@ -126,6 +126,11 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_FORCE_CONFIRMATION, "true")
     }
 
+    if (!request.androidSsoContext.isNullOrEmpty()) {
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_ANDROID_SSO_CONTEXT, request.androidSsoContext)
+    }
+
     // Set Login Connect parameters if they are present
     if (request.messengerPageId != null) {
       parameters.putString(ServerProtocol.DIALOG_PARAM_MESSENGER_PAGE_ID, request.messengerPageId)

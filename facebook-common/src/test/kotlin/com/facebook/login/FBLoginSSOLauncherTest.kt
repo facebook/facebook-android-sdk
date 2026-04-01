@@ -10,6 +10,7 @@ package com.facebook.login
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.Looper
@@ -120,6 +121,9 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
     whenever(OidcSecurityUtil.getRawKeyFromEndPoint(any())).thenReturn("key")
     whenever(OidcSecurityUtil.getPublicKeyFromString(any())).thenReturn(mock())
     whenever(OidcSecurityUtil.verify(any(), any(), any())).thenReturn(true)
+
+    // Clear any pending SSO context from previous tests
+    FBLoginSSOLauncher.pendingSsoContext = null
   }
 
   @Test
@@ -232,5 +236,52 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
     capturedResultCallback?.onActivityResult(ActivityResult(Activity.RESULT_OK, emptyData))
 
     verify(mockCallback).onError(any())
+  }
+
+  @Test
+  fun `launch sets pendingSsoContext to sso_not_shown when GK disabled`() {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(false)
+
+    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback)
+    launcher.launch()
+
+    assertThat(FBLoginSSOLauncher.pendingSsoContext).isEqualTo("non_sso_login_sso_not_shown")
+  }
+
+  @Test
+  fun `launch sets pendingSsoContext to sso_shown when SSO activity launches`() {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
+    whenever(mockPackageManager.resolveActivity(any(), any<Int>()))
+        .thenReturn(ResolveInfo())
+
+    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback)
+    launcher.launch()
+
+    assertThat(FBLoginSSOLauncher.pendingSsoContext).isEqualTo("non_sso_login_sso_shown")
+  }
+
+  @Test
+  fun `launch sets pendingSsoContext to sso_not_shown when no FB4A and showWithoutFBApp false`() {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
+    whenever(mockPackageManager.resolveActivity(any(), any<Int>()))
+        .thenReturn(null)
+    whenever(mockPackageManager.getPackageInfo(eq("com.facebook.katana"), any<Int>()))
+        .thenThrow(PackageManager.NameNotFoundException())
+
+    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback, showWithoutFBApp = false)
+    launcher.launch()
+
+    assertThat(FBLoginSSOLauncher.pendingSsoContext).isEqualTo("non_sso_login_sso_not_shown")
+  }
+
+  @Test
+  fun `launch does not set pendingSsoContext when user is already logged in`() {
+    whenever(mockAccessTokenCompanion.getCurrentAccessToken()).thenReturn(mock())
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
+
+    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback)
+    launcher.launch()
+
+    assertThat(FBLoginSSOLauncher.pendingSsoContext).isNull()
   }
 }

@@ -791,6 +791,53 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         assertThat(request.shouldSkipAccountDeduplication()).isEqualTo(shouldSkip)
     }
 
+    @Test
+    fun `logIn consumes pendingSsoContext and stamps it on request`() {
+        FBLoginSSOLauncher.pendingSsoContext = "non_sso_login_sso_shown"
+        val loginManager = LoginManager()
+        val loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
+        val intentCaptor = argumentCaptor<Intent>()
+        loginManager.logInWithReadPermissions(mockActivity, listOf("email"))
+        verify(mockActivity).startActivityForResult(intentCaptor.capture(), eq(loginRequestCode))
+        val bundle = intentCaptor.firstValue.getBundleExtra(LoginFragment.REQUEST_KEY)
+        checkNotNull(bundle)
+        val request = bundle.getParcelable<LoginClient.Request>(LoginFragment.EXTRA_REQUEST)
+        checkNotNull(request)
+        assertThat(request.androidSsoContext).isEqualTo("non_sso_login_sso_shown")
+        assertThat(FBLoginSSOLauncher.pendingSsoContext).isNull()
+    }
+
+    @Test
+    fun `logIn leaves androidSsoContext null when no pending context`() {
+        FBLoginSSOLauncher.pendingSsoContext = null
+        val loginManager = LoginManager()
+        val loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
+        val intentCaptor = argumentCaptor<Intent>()
+        loginManager.logInWithReadPermissions(mockActivity, listOf("email"))
+        verify(mockActivity).startActivityForResult(intentCaptor.capture(), eq(loginRequestCode))
+        val bundle = intentCaptor.firstValue.getBundleExtra(LoginFragment.REQUEST_KEY)
+        checkNotNull(bundle)
+        val request = bundle.getParcelable<LoginClient.Request>(LoginFragment.EXTRA_REQUEST)
+        checkNotNull(request)
+        assertThat(request.androidSsoContext).isNull()
+    }
+
+    @Test
+    fun `startLoginWithForceConfirmation stamps androidSsoContext on request`() {
+        val loginManager = LoginManager()
+        val loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
+        val intentCaptor = argumentCaptor<Intent>()
+        loginManager.startLoginWithForceConfirmation(
+            mockActivity, listOf("email"), "fb4a_not_installed")
+        verify(mockActivity).startActivityForResult(intentCaptor.capture(), eq(loginRequestCode))
+        val bundle = intentCaptor.firstValue.getBundleExtra(LoginFragment.REQUEST_KEY)
+        checkNotNull(bundle)
+        val request = bundle.getParcelable<LoginClient.Request>(LoginFragment.EXTRA_REQUEST)
+        checkNotNull(request)
+        assertThat(request.forceConfirmation).isTrue
+        assertThat(request.androidSsoContext).isEqualTo("fb4a_not_installed")
+    }
+
     companion object {
         private const val MOCK_APP_ID = AuthenticationTokenTestUtil.APP_ID
         private const val TOKEN_STRING = "A token of my esteem"

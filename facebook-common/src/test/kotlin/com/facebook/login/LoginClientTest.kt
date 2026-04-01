@@ -82,6 +82,15 @@ class LoginClientTest : FacebookPowerMockTestCase() {
     assertThat(unparceledRequest.isFamilyLogin).isFalse
     assertThat(unparceledRequest.shouldSkipAccountDeduplication()).isFalse
     assertThat(unparceledRequest.forceConfirmation).isFalse
+    assertThat(unparceledRequest.androidSsoContext).isNull()
+  }
+
+  @Test
+  fun testRequestParcelingWithAndroidSsoContext() {
+    val request = createRequest()
+    request.androidSsoContext = "fb4a_not_installed"
+    val unparceledRequest = checkNotNull(TestUtils.parcelAndUnparcel(request))
+    assertThat(unparceledRequest.androidSsoContext).isEqualTo("fb4a_not_installed")
   }
 
   @Test

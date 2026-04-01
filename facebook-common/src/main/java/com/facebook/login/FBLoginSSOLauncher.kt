@@ -10,6 +10,7 @@ package com.facebook.login
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -74,6 +75,7 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
       return false
     }
     if (!FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)) {
+      pendingSsoContext = "non_sso_login_sso_not_shown"
       return false
     }
     val loginConfig = LoginConfiguration(permissions)
@@ -123,20 +125,24 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
     for (intent in intents) {
       val resolved = activity.packageManager.resolveActivity(intent, 0)
       if (resolved != null) {
+        pendingSsoContext = "non_sso_login_sso_shown"
         launcher.launch(intent)
         return true
       }
     }
+    // SSO activity not available — determine why
+    val ssoContext = if (isFb4aInstalled()) "fb4a_outdated" else "fb4a_not_installed"
     if (showWithoutFBApp) {
       val fragmentActivity = activity as? androidx.fragment.app.FragmentActivity ?: return false
       val noAppDialog = FBLoginSSONoAppDialog.newInstance()
       noAppDialog.onContinueListener = {
         LoginManager.getInstance()
-            .startLoginWithForceConfirmation(activity, pendingPermissions)
+            .startLoginWithForceConfirmation(activity, pendingPermissions, ssoContext)
       }
       noAppDialog.show(fragmentActivity.supportFragmentManager, FBLoginSSONoAppDialog.TAG)
       return true
     }
+    pendingSsoContext = "non_sso_login_sso_not_shown"
     return false
   }
 
@@ -200,5 +206,21 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
 
     pendingNonce = null
     pendingRequest = null
+  }
+
+  private fun isFb4aInstalled(): Boolean {
+    return try {
+      activity.packageManager.getPackageInfo("com.facebook.katana", 0)
+      true
+    } catch (e: PackageManager.NameNotFoundException) {
+      false
+    }
+  }
+
+  companion object {
+    /** Set after launch() is called; consumed by LoginManager on the next logIn() call. */
+    @JvmStatic
+    var pendingSsoContext: String? = null
+      internal set
   }
 }

@@ -222,6 +222,20 @@ class WebLoginMethodHandlerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test addExtraParameters includes android_sso_context when set on request`() {
+    testRequest.androidSsoContext = "fb4a_not_installed"
+    val parameters = testHandler.addExtraParameters(Bundle(), testRequest)
+    assertThat(parameters.getString(ServerProtocol.DIALOG_PARAM_ANDROID_SSO_CONTEXT))
+        .isEqualTo("fb4a_not_installed")
+  }
+
+  @Test
+  fun `test addExtraParameters omits android_sso_context by default`() {
+    val parameters = testHandler.addExtraParameters(Bundle(), testRequest)
+    assertThat(parameters.containsKey(ServerProtocol.DIALOG_PARAM_ANDROID_SSO_CONTEXT)).isFalse()
+  }
+
+  @Test
   fun `test addExtraParameters with empty redirect URI uses default`() {
     val requestWithEmptyRedirectURI = LoginClient.Request(
         LoginBehavior.DIALOG_ONLY,

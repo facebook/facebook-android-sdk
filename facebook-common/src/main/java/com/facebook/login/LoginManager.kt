@@ -951,6 +951,10 @@ open class LoginManager() {
     request.resetMessengerState = resetMessengerState
     request.isFamilyLogin = isFamilyLogin
     request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication)
+    FBLoginSSOLauncher.pendingSsoContext?.let {
+      request.androidSsoContext = it
+      FBLoginSSOLauncher.pendingSsoContext = null
+    }
     return request
   }
 
@@ -958,10 +962,17 @@ open class LoginManager() {
    * Starts a login flow with force_confirmation=true. Used by [FBLoginSSOLauncher] for SSO
    * fallback paths where the user needs to explicitly confirm permissions.
    */
-  internal fun startLoginWithForceConfirmation(activity: Activity, permissions: Collection<String>) {
+  internal fun startLoginWithForceConfirmation(
+      activity: Activity,
+      permissions: Collection<String>,
+      androidSsoContext: String? = null
+  ) {
     val loginConfig = LoginConfiguration(permissions)
     val request = createLoginRequestWithConfig(loginConfig)
     request.forceConfirmation = true
+    if (androidSsoContext != null) {
+      request.androidSsoContext = androidSsoContext
+    }
     startLogin(ActivityStartActivityDelegate(activity), request)
   }
 
@@ -982,6 +993,10 @@ open class LoginManager() {
     request.resetMessengerState = resetMessengerState
     request.isFamilyLogin = isFamilyLogin
     request.setShouldSkipAccountDeduplication(shouldSkipAccountDeduplication)
+    FBLoginSSOLauncher.pendingSsoContext?.let {
+      request.androidSsoContext = it
+      FBLoginSSOLauncher.pendingSsoContext = null
+    }
     return request
   }
 
