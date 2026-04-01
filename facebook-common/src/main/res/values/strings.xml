@@ -34,4 +34,7 @@
     <string name="com_facebook_smart_login_confirmation_title">Confirm Login</string>
     <string name="com_facebook_smart_login_confirmation_continue_as">Continue as <xliff:g id="user name">%1$s</xliff:g></string>
     <string name="com_facebook_smart_login_confirmation_cancel">Not you?</string>
+    <string name="com_facebook_sso_noapp_title" description="Title for the SSO dialog shown when the Facebook app is not installed on the device">Sign up faster with Facebook</string>
+    <string name="com_facebook_sso_noapp_body" description="Body text for the SSO dialog shown when the Facebook app is not installed">Create your account in seconds with Facebook.</string>
+    <string name="com_facebook_sso_noapp_not_now" description="Dismiss button text for the SSO dialog">Not now</string>
 </resources>

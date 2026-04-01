@@ -52,6 +52,10 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="com_facebook_sso_noapp_dialog" parent="com_facebook_auth_dialog">
+        <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
+    </style>
+
     <style name="com_facebook_button_like" parent="com_facebook_button">
         <item name="android:background">@drawable/com_facebook_button_like_background</item>
     </style>

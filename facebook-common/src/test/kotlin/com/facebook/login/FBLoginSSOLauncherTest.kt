@@ -12,17 +12,17 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.os.Bundle
 import android.os.Looper
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.facebook.AccessToken
 import com.facebook.AuthenticationToken
 import com.facebook.FacebookCallback
-import com.facebook.FacebookException
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
@@ -33,6 +33,7 @@ import com.facebook.internal.security.OidcSecurityUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -49,7 +50,7 @@ import org.powermock.reflect.Whitebox
     LoginMethodHandler::class)
 class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
 
-  private lateinit var mockActivity: ComponentActivity
+  private lateinit var mockActivity: FragmentActivity
   private lateinit var mockPackageManager: PackageManager
   private lateinit var mockLauncher: ActivityResultLauncher<Intent>
   private lateinit var mockCallback: FacebookCallback<LoginResult>
@@ -57,6 +58,8 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
   private lateinit var mockAccessTokenCompanion: AccessToken.Companion
   private lateinit var mockAuthenticationTokenCompanion: AuthenticationToken.Companion
   private lateinit var mockProfileCompanion: Profile.Companion
+  private lateinit var mockFragmentManager: FragmentManager
+  private lateinit var mockFragmentTransaction: FragmentTransaction
   private var capturedResultCallback: ActivityResultCallback<ActivityResult>? = null
 
   override fun setup() {
@@ -66,6 +69,10 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
     mockLauncher = mock()
     mockCallback = mock()
     mockLooper = mock()
+    mockFragmentManager = mock()
+    mockFragmentTransaction = mock()
+    whenever(mockFragmentManager.beginTransaction()).thenReturn(mockFragmentTransaction)
+    whenever(mockFragmentTransaction.add(any<FBLoginSSONoAppDialog>(), any())).thenReturn(mockFragmentTransaction)
 
     // Capture the ActivityResultCallback passed to registerForActivityResult
     whenever(
@@ -79,6 +86,7 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
         }
 
     whenever(mockActivity.packageManager).thenReturn(mockPackageManager)
+    whenever(mockActivity.supportFragmentManager).thenReturn(mockFragmentManager)
 
     // Mock FacebookSdk
     PowerMockito.mockStatic(FacebookSdk::class.java)
@@ -138,19 +146,6 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `launch returns false when no resolvable intent found`() {
-    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
-    whenever(mockPackageManager.resolveActivity(any(), any<Int>()))
-        .thenReturn(null)
-
-    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback)
-    val result = launcher.launch()
-
-    assertThat(result).isFalse
-    verify(mockLauncher, never()).launch(any())
-  }
-
-  @Test
   fun `launch returns true and launches intent when activity is resolvable`() {
     whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
     whenever(mockPackageManager.resolveActivity(any(), any<Int>()))
@@ -161,6 +156,33 @@ class FBLoginSSOLauncherTest : FacebookPowerMockTestCase() {
 
     assertThat(result).isTrue
     verify(mockLauncher).launch(any())
+  }
+
+  @Test
+  fun `launch shows no-app dialog when no resolvable intent and showWithoutFBApp is true`() {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
+    whenever(mockPackageManager.resolveActivity(any(), any<Int>()))
+        .thenReturn(null)
+
+    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback, showWithoutFBApp = true)
+    val result = launcher.launch()
+
+    assertThat(result).isTrue
+    verify(mockLauncher, never()).launch(any())
+    verify(mockFragmentManager).beginTransaction()
+  }
+
+  @Test
+  fun `launch returns false when no resolvable intent and showWithoutFBApp is false`() {
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.LoginSSO)).thenReturn(true)
+    whenever(mockPackageManager.resolveActivity(any(), any<Int>()))
+        .thenReturn(null)
+
+    val launcher = FBLoginSSOLauncher(mockActivity, mockCallback, showWithoutFBApp = false)
+    val result = launcher.launch()
+
+    assertThat(result).isFalse
+    verify(mockLauncher, never()).launch(any())
   }
 
   @Test

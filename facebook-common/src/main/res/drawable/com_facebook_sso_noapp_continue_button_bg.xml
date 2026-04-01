@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) Meta Platforms, Inc. and affiliates.
+    All rights reserved.
+
+    This source code is licensed under the license found in the
+    LICENSE file in the root directory of this source tree.
+-->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/com_facebook_button_background_color_disabled" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#0054BD" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#0064E0" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+</selector>

@@ -37,7 +37,7 @@ import java.util.UUID
  *
  * @param activity The [ComponentActivity] from which to launch the SSO flow.
  * @param callback An optional [FacebookCallback] that will receive login results.
- * @param showWithoutFBApp Whether to show the SSO consent popup when the Facebook app is not
+ * @param showWithoutFBApp Whether to show the SSO no-app dialog when the Facebook app is not
  *   installed on the device. Defaults to true.
  */
 class FBLoginSSOLauncher @JvmOverloads constructor(
@@ -127,8 +127,15 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
         return true
       }
     }
-    // TODO: If showWithoutFBApp is true, launch a hardcoded SSO popup within the SDK
-    //  for devices that don't have the Facebook app installed.
+    if (showWithoutFBApp) {
+      val fragmentActivity = activity as? androidx.fragment.app.FragmentActivity ?: return false
+      val noAppDialog = FBLoginSSONoAppDialog.newInstance()
+      noAppDialog.onContinueListener = {
+        LoginManager.getInstance().logInWithReadPermissions(activity, pendingPermissions)
+      }
+      noAppDialog.show(fragmentActivity.supportFragmentManager, FBLoginSSONoAppDialog.TAG)
+      return true
+    }
     return false
   }
 
