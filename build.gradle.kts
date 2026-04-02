@@ -31,3 +31,16 @@ allprojects {
     maven { url = uri("https://jitpack.io") }
   }
 }
+
+// Run unit tests in a JDK 11 JVM. Gradle 8.5 requires JDK 17+ to run, but
+// PowerMock/Robolectric can't handle JDK 17 class files. The toolchain launcher
+// forks test execution into a separate JDK 11 process.
+subprojects {
+  tasks.withType<Test>().configureEach {
+    javaLauncher.set(
+      project.extensions.getByType<JavaToolchainService>().launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(11))
+      }
+    )
+  }
+}
