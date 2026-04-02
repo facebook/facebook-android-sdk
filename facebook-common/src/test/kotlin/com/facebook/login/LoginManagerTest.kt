@@ -838,6 +838,38 @@ class LoginManagerTest : FacebookPowerMockTestCase() {
         assertThat(request.androidSsoContext).isEqualTo("fb4a_not_installed")
     }
 
+    @Test
+    fun `startLoginWithForceConfirmation uses provided authId instead of generating new one`() {
+        val loginManager = LoginManager()
+        val loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
+        val intentCaptor = argumentCaptor<Intent>()
+        val expectedAuthId = "test-auth-id-12345"
+        loginManager.startLoginWithForceConfirmation(
+            mockActivity, listOf("email"), "fb4a_not_installed", expectedAuthId)
+        verify(mockActivity).startActivityForResult(intentCaptor.capture(), eq(loginRequestCode))
+        val bundle = intentCaptor.firstValue.getBundleExtra(LoginFragment.REQUEST_KEY)
+        checkNotNull(bundle)
+        val request = bundle.getParcelable<LoginClient.Request>(LoginFragment.EXTRA_REQUEST)
+        checkNotNull(request)
+        assertThat(request.authId).isEqualTo(expectedAuthId)
+    }
+
+    @Test
+    fun `startLoginWithForceConfirmation generates new authId when none provided`() {
+        val loginManager = LoginManager()
+        val loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()
+        val intentCaptor = argumentCaptor<Intent>()
+        loginManager.startLoginWithForceConfirmation(
+            mockActivity, listOf("email"), "fb4a_not_installed")
+        verify(mockActivity).startActivityForResult(intentCaptor.capture(), eq(loginRequestCode))
+        val bundle = intentCaptor.firstValue.getBundleExtra(LoginFragment.REQUEST_KEY)
+        checkNotNull(bundle)
+        val request = bundle.getParcelable<LoginClient.Request>(LoginFragment.EXTRA_REQUEST)
+        checkNotNull(request)
+        assertThat(request.authId).isNotEmpty
+        assertThat(request.authId).isNotEqualTo("test-auth-id-12345")
+    }
+
     companion object {
         private const val MOCK_APP_ID = AuthenticationTokenTestUtil.APP_ID
         private const val TOKEN_STRING = "A token of my esteem"

@@ -965,13 +965,17 @@ open class LoginManager() {
   internal fun startLoginWithForceConfirmation(
       activity: Activity,
       permissions: Collection<String>,
-      androidSsoContext: String? = null
+      androidSsoContext: String? = null,
+      authId: String? = null
   ) {
     val loginConfig = LoginConfiguration(permissions)
     val request = createLoginRequestWithConfig(loginConfig)
     request.forceConfirmation = true
     if (androidSsoContext != null) {
       request.androidSsoContext = androidSsoContext
+    }
+    if (authId != null) {
+      request.authId = authId
     }
     startLogin(ActivityStartActivityDelegate(activity), request)
   }

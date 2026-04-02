@@ -159,7 +159,7 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
         logSsoEvent(LoginLogger.EVENT_NAME_SSO_CONTINUE_CLICKED, request.authId,
             JSONObject().put("reason", ssoContext))
         LoginManager.getInstance()
-            .startLoginWithForceConfirmation(activity, pendingPermissions, ssoContext)
+            .startLoginWithForceConfirmation(activity, pendingPermissions, ssoContext, request.authId)
       }
       noAppDialog.onDismissListener = {
         logSsoEvent(LoginLogger.EVENT_NAME_SSO_DISMISSED, request.authId,
