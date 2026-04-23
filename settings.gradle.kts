@@ -41,6 +41,9 @@ include(":samples:FBLoginSample")
 
 include(":samples:KotlinSampleApp")
 
+// Size test
+include(":internal:testing:ApkSizeTestApp")
+
 if (file("internal/internal-settings.gradle").exists()) {
   apply("internal/internal-settings.gradle")
 }
