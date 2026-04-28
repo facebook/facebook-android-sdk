@@ -47,6 +47,9 @@ internal object UserSettingsManager {
   // Monitor enabled user setting from AndroidManifest
   private val monitorEnabled = UserSetting(true, FacebookSdk.MONITOR_ENABLED_PROPERTY)
 
+  private const val ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP_KEY =
+      "com.facebook.sdk.AddToMessagingCustomerBaseForWhatsApp"
+
   // Cache
   private const val USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS"
   private const val USER_SETTINGS_BITMASK = "com.facebook.sdk.USER_SETTINGS_BITMASK"
@@ -422,6 +425,26 @@ internal object UserSettingsManager {
   fun getMonitorEnabled(): Boolean {
     initializeIfNotInitialized()
     return monitorEnabled.getValue()
+  }
+
+  @JvmStatic
+  fun getAddToMessagingCustomerBaseForWhatsApp(): Boolean? {
+    initializeIfNotInitialized()
+    return if (userSettingPref.contains(ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP_KEY)) {
+      userSettingPref.getBoolean(ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP_KEY, false)
+    } else {
+      null
+    }
+  }
+
+  @JvmStatic
+  fun setAddToMessagingCustomerBaseForWhatsApp(value: Boolean?) {
+    initializeIfNotInitialized()
+    if (value != null) {
+      userSettingPref.edit().putBoolean(ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP_KEY, value).apply()
+    } else {
+      userSettingPref.edit().remove(ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP_KEY).apply()
+    }
   }
 
   private class UserSetting(var defaultVal: Boolean, var key: String) {

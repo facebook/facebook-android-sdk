@@ -209,6 +209,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             "aggregate_id",
             "anonymous_id",
             "campaign_ids",
+            "add_to_messaging_customer_base_for_whatsapp",
 
             // AppEventsIgnoredParams List
             "fb_post_attachment",

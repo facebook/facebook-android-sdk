@@ -590,6 +590,10 @@ object Utility {
     }
     params.put("application_tracking_enabled", !limitEventUsage)
     params.put("advertiser_id_collection_enabled", FacebookSdk.getAdvertiserIDCollectionEnabled())
+    val addToMessagingCustomerBaseForWhatsApp = FacebookSdk.getAddToMessagingCustomerBaseForWhatsApp()
+    if (addToMessagingCustomerBaseForWhatsApp != null) {
+      params.put("add_to_messaging_customer_base_for_whatsapp", if (addToMessagingCustomerBaseForWhatsApp) "1" else "0")
+    }
     if (attributionIdentifiers != null) {
       if (FeatureManager.isEnabled(FeatureManager.Feature.ServiceUpdateCompliance)) {
         appendAnonIdUnderCompliance(params, attributionIdentifiers, anonymousAppDeviceGUID, context)

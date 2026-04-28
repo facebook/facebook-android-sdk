@@ -1086,6 +1086,27 @@ object FacebookSdk {
         UserSettingsManager.setMonitorEnabled(flag)
     }
 
+    /**
+     * Gets the flag for adding users to the messaging customer base for WhatsApp.
+     *
+     * @return true, false, or null if not explicitly set
+     */
+    @JvmStatic
+    fun getAddToMessagingCustomerBaseForWhatsApp(): Boolean? =
+        UserSettingsManager.getAddToMessagingCustomerBaseForWhatsApp()
+
+    /**
+     * Sets the flag for adding users to the messaging customer base for WhatsApp.
+     * Set to true or false to explicitly include the field in the payload,
+     * or null to not send the field (default).
+     *
+     * @param value true, false, or null
+     */
+    @JvmStatic
+    fun setAddToMessagingCustomerBaseForWhatsApp(value: Boolean?) {
+        UserSettingsManager.setAddToMessagingCustomerBaseForWhatsApp(value)
+    }
+
     /** Sets data processing options */
     @AutoHandleExceptions
     @JvmStatic

@@ -81,7 +81,8 @@ enum class AppEventUserAndAppDataField(val rawValue: String) {
   INSTALL_REFERRER("install_referrer"),
   INSTALLER_PACKAGE("installer_package"),
   RECEIPT_DATA("receipt_data"),
-  URL_SCHEMES("url_schemes");
+  URL_SCHEMES("url_schemes"),
+  ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP("add_to_messaging_customer_base_for_whatsapp");
 
   internal companion object {
     operator fun invoke(rawValue: String): AppEventUserAndAppDataField? =
@@ -136,7 +137,8 @@ enum class ConversionsAPIUserAndAppDataField(val rawValue: String) {
   INSTALL_REFERRER("install_referrer"),
   INSTALLER_PACKAGE("installer_package"),
   RECEIPT_DATA("receipt_data"),
-  URL_SCHEMES("url_schemes")
+  URL_SCHEMES("url_schemes"),
+  ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP("add_to_messaging_customer_base_for_whatsapp")
 }
 
 enum class ConversionsAPIEventName(val rawValue: String) {
@@ -234,6 +236,10 @@ object AppEventsConversionsAPITransformer {
           AppEventUserAndAppDataField.URL_SCHEMES to
               SectionFieldMapping(
                   ConversionsAPISection.APP_DATA, ConversionsAPIUserAndAppDataField.URL_SCHEMES),
+          AppEventUserAndAppDataField.ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP to
+              SectionFieldMapping(
+                  ConversionsAPISection.APP_DATA,
+                  ConversionsAPIUserAndAppDataField.ADD_TO_MESSAGING_CUSTOMER_BASE_FOR_WHATSAPP),
           AppEventUserAndAppDataField.USER_DATA to
               SectionFieldMapping(ConversionsAPISection.USER_DATA, null),
       )
