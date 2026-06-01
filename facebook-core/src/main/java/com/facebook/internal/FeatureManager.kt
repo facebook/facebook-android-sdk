@@ -197,7 +197,7 @@ object FeatureManager {
         FilterSensitiveParams(0x00010408), /* filter out the sensitive params */
         StdParamEnforcement(0x01010409),
         BannedParamFiltering(0x0101040a),
-        VVP(0x0101040b), /* VPPA video viewing protections */
+        VVP(0x0001040b), /* VPPA video viewing protections */
         EventDeactivation(0x00010500),
         OnDeviceEventProcessing(0x00010600),
         OnDevicePostInstallEventProcessing(0x00010601),
