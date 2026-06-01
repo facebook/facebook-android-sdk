@@ -40,6 +40,7 @@ object VVPManager {
   private const val IN_SCOPE_EVENT_NAMES_KEY = "inScopeEventNames"
   private const val PLACE_KEY = "place"
   private const val KEY_REGEX_KEY = "keyRegex"
+  private const val KEY_NEGATIVE_REGEX_KEY = "keyNegativeRegex"
   private const val VALUE_REGEX_KEY = "valueRegex"
 
   // Outgoing payload keys appended to the event Bundle when VVP enforces.
@@ -65,10 +66,20 @@ object VVPManager {
   private const val SANITIZED_VALUE = "_removed_"
 
   /**
-   * One detection rule, with regexes pre-compiled at parse time. Either regex can be null (meaning
-   * "no constraint on that side"); a rule with both null is dropped during parse.
+   * One detection rule, with regexes pre-compiled at parse time. [keyRegex] and [valueRegex] can
+   * each be null (meaning "no constraint on that side"); a rule with both null is dropped during
+   * parse. [keyNegativeRegex] is an optional exclusion filter — when non-null, a customData key
+   * or event name matching it is treated as a non-match even if [keyRegex] would have matched.
+   * Mirrors the JS pixel plugin's `keyOk = keyPos && !keyNeg` semantics. A rule with only
+   * [keyNegativeRegex] set (no positive constraint) is also dropped, since it would match every
+   * key not in the exclusion set.
    */
-  data class CompiledRule(val place: Int, val keyRegex: Pattern?, val valueRegex: Pattern?)
+  data class CompiledRule(
+      val place: Int,
+      val keyRegex: Pattern?,
+      val keyNegativeRegex: Pattern?,
+      val valueRegex: Pattern?,
+  )
 
   data class VVPConfig(
       val rules: List<CompiledRule>,
@@ -149,12 +160,14 @@ object VVPManager {
       return null
     }
     val keyRegex = optRegex(ruleObj, KEY_REGEX_KEY)
+    val keyNegativeRegex = optRegex(ruleObj, KEY_NEGATIVE_REGEX_KEY)
     val valueRegex = optRegex(ruleObj, VALUE_REGEX_KEY)
     if (keyRegex == null && valueRegex == null) {
-      // Rule with no constraint would match every event -> drop.
+      // Rule with no positive constraint would match every event (or every
+      // key not in the negative set) -> drop. Mirrors JS plugin.
       return null
     }
-    return CompiledRule(place, keyRegex, valueRegex)
+    return CompiledRule(place, keyRegex, keyNegativeRegex, valueRegex)
   }
 
   private fun optRegex(obj: JSONObject, key: String): Pattern? {
@@ -233,10 +246,14 @@ object VVPManager {
       when (rule.place) {
         PLACE_EVENT_NAME -> {
           // Event-name rule — keyRegex matches the eventName itself.
+          // keyNegativeRegex excludes event names the positive regex would match.
           if (rule.keyRegex != null && rule.keyRegex.matcher(eventName).find()) {
-            matched = true
-            // Sentinel — never echo the actual event name back (it can be sensitive).
-            evNames.add(EVENT_NAME_SENTINEL)
+            val keyNeg = rule.keyNegativeRegex?.matcher(eventName)?.find() ?: false
+            if (!keyNeg) {
+              matched = true
+              // Sentinel — never echo the actual event name back (it can be sensitive).
+              evNames.add(EVENT_NAME_SENTINEL)
+            }
           }
         }
         PLACE_CUSTOM_DATA -> {
@@ -246,7 +263,9 @@ object VVPManager {
           // Both null already filtered out at compile time (compileRule).
           for (key in parameters.keySet().toList()) {
             val value = parameters.get(key)?.toString() ?: continue
-            val keyOk = rule.keyRegex?.matcher(key)?.find() ?: true
+            val keyPos = rule.keyRegex?.matcher(key)?.find() ?: true
+            val keyNeg = rule.keyNegativeRegex?.matcher(key)?.find() ?: false
+            val keyOk = keyPos && !keyNeg
             val valOk = rule.valueRegex?.matcher(value)?.find() ?: true
             if (keyOk && valOk) {
               matched = true

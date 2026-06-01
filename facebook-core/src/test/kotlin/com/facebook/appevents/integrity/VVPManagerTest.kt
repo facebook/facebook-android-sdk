@@ -222,6 +222,94 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `compileRule parses populated keyNegativeRegex`() {
+    val ruleObj =
+        JSONObject().apply {
+          put("place", VVPManager.PLACE_CUSTOM_DATA)
+          put("keyRegex", "video")
+          put("keyNegativeRegex", "^safe_")
+          put("valueRegex", "")
+        }
+    val rule = VVPManager.compileRule(ruleObj)
+    assertThat(rule).isNotNull
+    assertThat(rule!!.keyNegativeRegex).isNotNull
+    // Case-insensitive flag should be applied (mirrors keyRegex/valueRegex).
+    assertThat(rule.keyNegativeRegex!!.matcher("SAFE_VIDEO").find()).isTrue
+  }
+
+  @Test
+  fun `compileRule treats missing keyNegativeRegex as null`() {
+    val ruleObj =
+        JSONObject().apply {
+          put("place", VVPManager.PLACE_CUSTOM_DATA)
+          put("keyRegex", "video")
+          put("valueRegex", "")
+        }
+    val rule = VVPManager.compileRule(ruleObj)
+    assertThat(rule).isNotNull
+    assertThat(rule!!.keyNegativeRegex).isNull()
+  }
+
+  @Test
+  fun `compileRule treats empty keyNegativeRegex as null`() {
+    val ruleObj =
+        JSONObject().apply {
+          put("place", VVPManager.PLACE_CUSTOM_DATA)
+          put("keyRegex", "video")
+          put("keyNegativeRegex", "")
+          put("valueRegex", "")
+        }
+    val rule = VVPManager.compileRule(ruleObj)
+    assertThat(rule).isNotNull
+    assertThat(rule!!.keyNegativeRegex).isNull()
+  }
+
+  @Test
+  fun `compileRule treats JSONNull keyNegativeRegex as null`() {
+    val ruleObj =
+        JSONObject().apply {
+          put("place", VVPManager.PLACE_CUSTOM_DATA)
+          put("keyRegex", "video")
+          put("keyNegativeRegex", JSONObject.NULL)
+          put("valueRegex", "")
+        }
+    val rule = VVPManager.compileRule(ruleObj)
+    assertThat(rule).isNotNull
+    assertThat(rule!!.keyNegativeRegex).isNull()
+  }
+
+  @Test
+  fun `compileRule drops malformed keyNegativeRegex but keeps the rule`() {
+    val ruleObj =
+        JSONObject().apply {
+          put("place", VVPManager.PLACE_CUSTOM_DATA)
+          put("keyRegex", "video")
+          put("keyNegativeRegex", "[invalid")
+          put("valueRegex", "")
+        }
+    val rule = VVPManager.compileRule(ruleObj)
+    assertThat(rule).isNotNull
+    // Malformed negative regex is silently dropped; the rule itself survives
+    // since keyRegex is still valid.
+    assertThat(rule!!.keyRegex).isNotNull
+    assertThat(rule.keyNegativeRegex).isNull()
+  }
+
+  @Test
+  fun `compileRule drops rule with only keyNegativeRegex set`() {
+    // No positive constraint (no keyRegex, no valueRegex) -> rule would mark
+    // every key NOT in the negative set. Mirror JS plugin: drop.
+    val ruleObj =
+        JSONObject().apply {
+          put("place", VVPManager.PLACE_CUSTOM_DATA)
+          put("keyRegex", "")
+          put("keyNegativeRegex", "^safe_")
+          put("valueRegex", "")
+        }
+    assertThat(VVPManager.compileRule(ruleObj)).isNull()
+  }
+
+  @Test
   fun `event-name rule keeps only keyRegex`() {
     val json =
         """{
@@ -515,6 +603,135 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     assertThat(params.getString("vvp")).isEqualTo("1")
     assertThat(params.getString("fb_content_ids")).isEqualTo("tt1234567")
     assertThat(params.getString("video_title")).isEqualTo("Nemo")
+  }
+
+  // --- keyNegativeRegex detection (customData) ---
+
+  @Test
+  fun `processParametersForVVP keyNegativeRegex excludes a key the positive regex would match`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "rules": [{
+            "place": 1,
+            "keyRegex": "video",
+            "keyNegativeRegex": "^safe_",
+            "valueRegex": "tt\\d+"
+          }],
+          "standardParams": {}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    // Both keys would match `keyRegex` and value `tt\d+`, but `safe_video`
+    // is excluded by `keyNegativeRegex`. Only `unsafe_video` should match.
+    val params = bundleOf("safe_video" to "tt1234567", "unsafe_video" to "tt9876543")
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    val md = JSONObject(params.getString("vvp_md")!!)
+    val rp = md.getJSONArray("vp_rp")
+    assertThat(rp.length()).isEqualTo(1)
+    assertThat(rp.getString(0)).isEqualTo("unsafe_video")
+  }
+
+  @Test
+  fun `processParametersForVVP keyNegativeRegex blocks the only match yielding no detection`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "rules": [{
+            "place": 1,
+            "keyRegex": "video",
+            "keyNegativeRegex": "^safe_",
+            "valueRegex": "tt\\d+"
+          }],
+          "standardParams": {}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params = bundleOf("safe_video" to "tt1234567")
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    // Only candidate was excluded by negative regex -> no match -> no vvp tag.
+    assertThat(params.getString("vvp")).isNull()
+    assertThat(params.getString("safe_video")).isEqualTo("tt1234567")
+  }
+
+  // --- keyNegativeRegex detection (event name) ---
+
+  @Test
+  fun `processParametersForVVP keyNegativeRegex excludes event name the positive regex would match`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "rules": [{
+            "place": 3,
+            "keyRegex": "video",
+            "keyNegativeRegex": "^safe_"
+          }],
+          "standardParams": {}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params = bundleOf("foo" to "bar")
+
+    VVPManager.processParametersForVVP("safe_video_view", params)
+
+    // Event name matches keyRegex ("video") but also matches keyNegativeRegex
+    // ("^safe_") -> excluded -> no detection.
+    assertThat(params.getString("vvp")).isNull()
+  }
+
+  @Test
+  fun `processParametersForVVP event name fires when keyNegativeRegex does not match`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "rules": [{
+            "place": 3,
+            "keyRegex": "video",
+            "keyNegativeRegex": "^safe_"
+          }],
+          "standardParams": {}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params = bundleOf("foo" to "bar")
+
+    VVPManager.processParametersForVVP("video_view_started", params)
+
+    // Event name matches keyRegex but NOT keyNegativeRegex -> match fires.
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    val md = JSONObject(params.getString("vvp_md")!!)
+    val ev = md.getJSONArray("vp_rp_ev")
+    assertThat(ev.length()).isEqualTo(1)
+    assertThat(ev.getString(0)).isEqualTo("1")
+  }
+
+  @Test
+  fun `processParametersForVVP event name keyNeg blocks while customData still matches`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "rules": [
+            {"place": 3, "keyRegex": "video", "keyNegativeRegex": "^safe_"},
+            {"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}
+          ],
+          "standardParams": {}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params = bundleOf("fb_content_ids" to "tt1234567")
+
+    VVPManager.processParametersForVVP("safe_video_view", params)
+
+    // Event name blocked by keyNeg, but customData rule still fires.
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    val md = JSONObject(params.getString("vvp_md")!!)
+    assertThat(md.getJSONArray("vp_rp").getString(0)).isEqualTo("fb_content_ids")
+    assertThat(md.has("vp_rp_ev")).isFalse
   }
 
   // --- helpers ---
