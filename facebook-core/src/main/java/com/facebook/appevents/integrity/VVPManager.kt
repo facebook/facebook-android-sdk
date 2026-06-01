@@ -35,6 +35,7 @@ object VVPManager {
 
   // Wire field names — match the server-side TVVPAppConfig / TVVPAppRule shape.
   private const val ENABLED_KEY = "enabled"
+  private const val IS_SHADOW_ENABLED_KEY = "isShadowEnabled"
   private const val RULES_KEY = "rules"
   private const val STANDARD_PARAMS_KEY = "standardParams"
   private const val IN_SCOPE_EVENT_NAMES_KEY = "inScopeEventNames"
@@ -86,6 +87,11 @@ object VVPManager {
       val standardParams: Set<String>,
       // null means no event-name gate (NON_RETAIL); non-null restricts detection to this set.
       val inScopeEventNames: Set<String>?,
+      // Drives the shadow-vs-enforce split. Fail-open: a missing or null wire value coerces to
+      // `true` (shadow) so a misconfigured/legacy server payload never accidentally mutates
+      // advertiser data — only an explicit `false` selects the enforcing path. Mirrors JS
+      // `config.isShadowEnabled !== false`.
+      val isShadowEnabled: Boolean,
   )
 
   private var enabled: Boolean = false
@@ -136,6 +142,9 @@ object VVPManager {
           rules = rules,
           standardParams = parseStandardParams(obj),
           inScopeEventNames = parseInScopeEventNames(obj),
+          // Fail-open: missing / JSONNull / explicit `true` all coerce to shadow.
+          // Only the literal boolean `false` selects enforce.
+          isShadowEnabled = obj.optBoolean(IS_SHADOW_ENABLED_KEY, true),
       )
     } catch (_: JSONException) {
       null
@@ -280,9 +289,11 @@ object VVPManager {
       return
     }
 
-    // Sanitize / filter customData. Snapshot the keys first since we mutate
-    // the bundle in the loop.
-    if (cfg.standardParams.isNotEmpty()) {
+    // Sanitize / filter customData. Skipped entirely in shadow mode so we
+    // emit adoption tags without mutating advertiser data — only the explicit
+    // enforce path (isShadowEnabled == false) touches the Bundle. Mirrors JS
+    // plugin's shadow-vs-enforce split.
+    if (!cfg.isShadowEnabled && cfg.standardParams.isNotEmpty()) {
       val keysSnapshot = parameters.keySet().toList()
       for (key in keysSnapshot) {
         if (key in cfg.standardParams) {

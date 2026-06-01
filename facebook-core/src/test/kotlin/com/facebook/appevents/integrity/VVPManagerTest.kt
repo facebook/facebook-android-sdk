@@ -375,6 +375,38 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     assertThat(cfg!!.inScopeEventNames).isNull()
   }
 
+  // --- isShadowEnabled parsing (fail-open default) ---
+
+  @Test
+  fun `parseConfig parses explicit isShadowEnabled true`() {
+    val raw = JSONObject(VALID_NON_RETAIL_CONFIG)
+    raw.put("isShadowEnabled", true)
+    val cfg = VVPManager.parseConfig(raw.toString())
+    assertThat(cfg!!.isShadowEnabled).isTrue
+  }
+
+  @Test
+  fun `parseConfig parses explicit isShadowEnabled false`() {
+    val raw = JSONObject(VALID_NON_RETAIL_CONFIG)
+    raw.put("isShadowEnabled", false)
+    val cfg = VVPManager.parseConfig(raw.toString())
+    assertThat(cfg!!.isShadowEnabled).isFalse
+  }
+
+  @Test
+  fun `parseConfig defaults isShadowEnabled to true when missing (fail-open)`() {
+    val cfg = VVPManager.parseConfig(SHADOW_DEFAULT_NON_RETAIL_CONFIG)
+    assertThat(cfg!!.isShadowEnabled).isTrue
+  }
+
+  @Test
+  fun `parseConfig defaults isShadowEnabled to true when JSONNull (fail-open)`() {
+    val raw = JSONObject(SHADOW_DEFAULT_NON_RETAIL_CONFIG)
+    raw.put("isShadowEnabled", JSONObject.NULL)
+    val cfg = VVPManager.parseConfig(raw.toString())
+    assertThat(cfg!!.isShadowEnabled).isTrue
+  }
+
   // --- loadConfig integration with FetchedAppSettingsManager ---
 
   @Test
@@ -572,6 +604,7 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     val cfg =
         """{
           "enabled": true,
+          "isShadowEnabled": false,
           "rules": [{"place": 1, "keyRegex": "^fb_content_id$", "valueRegex": "tt\\d+"}],
           "standardParams": {"fb_currency": true}
         }"""
@@ -657,6 +690,78 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     // Only candidate was excluded by negative regex -> no match -> no vvp tag.
     assertThat(params.getString("vvp")).isNull()
     assertThat(params.getString("safe_video")).isEqualTo("tt1234567")
+  }
+
+  // --- isShadowEnabled enforcement gate ---
+
+  @Test
+  fun `processParametersForVVP shadow mode emits adoption tags without mutating customData`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": true,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "\\btt\\d{7,}\\b"}],
+          "standardParams": {"fb_currency": true, "fb_value": true},
+          "inScopeEventNames": null
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params =
+        bundleOf(
+            "fb_content_ids" to "tt1234567",
+            "fb_currency" to "USD",
+            "video_title" to "Finding Nemo",
+        )
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    // Adoption tags emitted...
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    assertThat(params.getString("vvp_md")).isNotNull
+    // ...but customData is left untouched in shadow mode.
+    assertThat(params.getString("fb_content_ids")).isEqualTo("tt1234567")
+    assertThat(params.getString("fb_currency")).isEqualTo("USD")
+    assertThat(params.getString("video_title")).isEqualTo("Finding Nemo")
+  }
+
+  @Test
+  fun `processParametersForVVP defaults to shadow mode when isShadowEnabled omitted`() {
+    initMockFetchedAppSettings(SHADOW_DEFAULT_NON_RETAIL_CONFIG)
+    VVPManager.enable()
+    val params =
+        bundleOf(
+            "fb_content_ids" to "tt1234567",
+            "video_title" to "Finding Nemo",
+        )
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    // Default = shadow => no mutation.
+    assertThat(params.getString("fb_content_ids")).isEqualTo("tt1234567")
+    assertThat(params.getString("video_title")).isEqualTo("Finding Nemo")
+  }
+
+  @Test
+  fun `processParametersForVVP enforce mode mutates only when explicit false`() {
+    initMockFetchedAppSettings(VALID_NON_RETAIL_CONFIG)
+    VVPManager.enable()
+    val params =
+        bundleOf(
+            "fb_content_ids" to "tt1234567",
+            "fb_currency" to "USD",
+            "video_title" to "Finding Nemo",
+        )
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    // standardParam preserved.
+    assertThat(params.getString("fb_currency")).isEqualTo("USD")
+    // content-ID key kept, value sanitized.
+    assertThat(params.getString("fb_content_ids")).isEqualTo("_removed_")
+    // Non-standard non-content-ID key dropped.
+    assertThat(params.containsKey("video_title")).isFalse
   }
 
   // --- keyNegativeRegex detection (event name) ---
@@ -746,6 +851,7 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     private const val VALID_NON_RETAIL_CONFIG =
         """{
               "enabled": true,
+              "isShadowEnabled": false,
               "rules": [{"place": 1, "keyRegex": "", "valueRegex": "\\btt\\d{7,}\\b"}],
               "standardParams": {"fb_currency": true, "fb_value": true},
               "inScopeEventNames": null
@@ -754,6 +860,7 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     private const val VALID_RETAIL_CONFIG =
         """{
               "enabled": true,
+              "isShadowEnabled": false,
               "rules": [{"place": 1, "keyRegex": "content_id", "valueRegex": "tt\\d+"}],
               "standardParams": {"fb_currency": true},
               "inScopeEventNames": ["Purchase", "AddToCart"]
@@ -762,9 +869,18 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     private const val RETAIL_CONFIG =
         """{
               "enabled": true,
+              "isShadowEnabled": false,
               "rules": [{"place": 1, "keyRegex": "", "valueRegex": "\\btt\\d{7,}\\b"}],
               "standardParams": {"fb_currency": true, "fb_value": true},
               "inScopeEventNames": ["fb_mobile_purchase", "fb_mobile_add_to_cart"]
+            }"""
+
+    private const val SHADOW_DEFAULT_NON_RETAIL_CONFIG =
+        """{
+              "enabled": true,
+              "rules": [{"place": 1, "keyRegex": "", "valueRegex": "\\btt\\d{7,}\\b"}],
+              "standardParams": {"fb_currency": true, "fb_value": true},
+              "inScopeEventNames": null
             }"""
   }
 }
