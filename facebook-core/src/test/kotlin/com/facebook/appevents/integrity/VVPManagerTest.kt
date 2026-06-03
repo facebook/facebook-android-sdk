@@ -764,6 +764,151 @@ class VVPManagerTest : FacebookPowerMockTestCase() {
     assertThat(params.containsKey("video_title")).isFalse
   }
 
+  // --- contents[].id sanitization ---
+
+  @Test
+  fun `processParametersForVVP scrubs id in fb_content array entries`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": false,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}],
+          "standardParams": {"fb_currency": true, "fb_content": true}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val contentsJson =
+        """[{"id":"sku_19738928","quantity":1,"item_price":50.0,"brand":"PUMA"},""" +
+            """{"id":"sku_19736278","quantity":2,"item_price":100.0,"brand":"Jordan"}]"""
+    val params = bundleOf("movie_id" to "tt1234567", "fb_currency" to "USD")
+    params.putString("fb_content", contentsJson)
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    assertThat(params.getString("fb_currency")).isEqualTo("USD")
+    val result = JSONArray(params.getString("fb_content")!!)
+    assertThat(result.length()).isEqualTo(2)
+    assertThat(result.getJSONObject(0).getString("id")).isEqualTo("_removed_")
+    assertThat(result.getJSONObject(0).getInt("quantity")).isEqualTo(1)
+    assertThat(result.getJSONObject(0).getString("brand")).isEqualTo("PUMA")
+    assertThat(result.getJSONObject(1).getString("id")).isEqualTo("_removed_")
+    assertThat(result.getJSONObject(1).getInt("quantity")).isEqualTo(2)
+    assertThat(result.getJSONObject(1).getString("brand")).isEqualTo("Jordan")
+  }
+
+  @Test
+  fun `processParametersForVVP contents no-op when fb_content missing`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": false,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}],
+          "standardParams": {"fb_currency": true}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params = bundleOf("movie_id" to "tt1234567", "fb_currency" to "USD")
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    assertThat(params.getString("fb_content")).isNull()
+  }
+
+  @Test
+  fun `processParametersForVVP contents no-op on malformed JSON`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": false,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}],
+          "standardParams": {"fb_currency": true, "fb_content": true}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val params = bundleOf("movie_id" to "tt1234567")
+    params.putString("fb_content", "not_json_at_all")
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    assertThat(params.getString("fb_content")).isEqualTo("not_json_at_all")
+  }
+
+  @Test
+  fun `processParametersForVVP contents does not add id when entry had none`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": false,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}],
+          "standardParams": {"fb_currency": true, "fb_content": true}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val contentsJson = """[{"quantity":1,"item_price":10.0},{"id":"tt9999","quantity":2}]"""
+    val params = bundleOf("movie_id" to "tt1234567")
+    params.putString("fb_content", contentsJson)
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    val result = JSONArray(params.getString("fb_content")!!)
+    assertThat(result.length()).isEqualTo(2)
+    assertThat(result.getJSONObject(0).has("id")).isFalse
+    assertThat(result.getJSONObject(0).getInt("quantity")).isEqualTo(1)
+    assertThat(result.getJSONObject(1).getString("id")).isEqualTo("_removed_")
+    assertThat(result.getJSONObject(1).getInt("quantity")).isEqualTo(2)
+  }
+
+  @Test
+  fun `processParametersForVVP contents not scrubbed in shadow mode`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": true,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}],
+          "standardParams": {"fb_currency": true, "fb_content": true}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val contentsJson = """[{"id":"sku_19738928","quantity":1}]"""
+    val params = bundleOf("movie_id" to "tt1234567")
+    params.putString("fb_content", contentsJson)
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    val result = JSONArray(params.getString("fb_content")!!)
+    assertThat(result.getJSONObject(0).getString("id")).isEqualTo("sku_19738928")
+  }
+
+  @Test
+  fun `processParametersForVVP scrubs both top-level content_ids and contents id`() {
+    val cfg =
+        """{
+          "enabled": true,
+          "isShadowEnabled": false,
+          "rules": [{"place": 1, "keyRegex": "", "valueRegex": "tt\\d+"}],
+          "standardParams": {"fb_currency": true, "fb_content": true}
+        }"""
+    initMockFetchedAppSettings(cfg)
+    VVPManager.enable()
+    val contentsJson = """[{"id":"tt1234567","quantity":1}]"""
+    val params = bundleOf("fb_content_ids" to "tt1234567", "fb_currency" to "USD")
+    params.putString("fb_content", contentsJson)
+
+    VVPManager.processParametersForVVP("Purchase", params)
+
+    assertThat(params.getString("vvp")).isEqualTo("1")
+    assertThat(params.getString("fb_content_ids")).isEqualTo("_removed_")
+    assertThat(params.getString("fb_currency")).isEqualTo("USD")
+    val result = JSONArray(params.getString("fb_content")!!)
+    assertThat(result.getJSONObject(0).getString("id")).isEqualTo("_removed_")
+    assertThat(result.getJSONObject(0).getInt("quantity")).isEqualTo(1)
+  }
+
   // --- keyNegativeRegex detection (event name) ---
 
   @Test

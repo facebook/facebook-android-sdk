@@ -66,6 +66,11 @@ object VVPManager {
   private val CONTENT_ID_SANITIZE_KEYS = setOf("fb_content_ids", "fb_content_id")
   private const val SANITIZED_VALUE = "_removed_"
 
+  // The contents-array key whose nested `id` fields are scrubbed. Mirrors
+  // `CustomEvents::FB_CONTENT` on the app server and the JS pixel's
+  // `customData.contents`.
+  private const val CONTENTS_KEY = "fb_content"
+
   /**
    * One detection rule, with regexes pre-compiled at parse time. [keyRegex] and [valueRegex] can
    * each be null (meaning "no constraint on that side"); a rule with both null is dropped during
@@ -307,6 +312,14 @@ object VVPManager {
           parameters.remove(key)
         }
       }
+
+      // Scrub `id` inside each entry of the contents array. `fb_content`
+      // is in the standardParams allowlist (so the loop above keeps it),
+      // but each entry's nested `id` carries the same video identifier
+      // the top-level `fb_content_ids` would. Mirrors the JS pixel
+      // plugin and server-side
+      // `SignalsIntegrityVVPPreprocessor::scrubIdInContentsArray`.
+      scrubIdInContentsArray(parameters)
     }
 
     parameters.putString(VVP_IS_APPLIED_KEY, VVP_IS_APPLIED_VALUE)
@@ -323,6 +336,30 @@ object VVPManager {
         md.put(VP_RP_EV, JSONArray(evNames.toList()))
       }
       parameters.putString(VVP_METADATA_KEY, md.toString())
+    }
+  }
+
+  /**
+   * Walk the JSON-encoded `fb_content` array and replace each entry's `id`
+   * with [SANITIZED_VALUE]. Other fields (quantity, item_price, brand, …)
+   * are preserved. No-op when the key is missing, not a valid JSON array,
+   * or no entry has an `id` field.
+   */
+  internal fun scrubIdInContentsArray(parameters: Bundle) {
+    val raw = parameters.getString(CONTENTS_KEY) ?: return
+    val arr = try { JSONArray(raw) } catch (_: JSONException) { return }
+
+    var didMutate = false
+    for (i in 0 until arr.length()) {
+      val entry = arr.optJSONObject(i) ?: continue
+      if (entry.has("id")) {
+        entry.put("id", SANITIZED_VALUE)
+        didMutate = true
+      }
+    }
+
+    if (didMutate) {
+      parameters.putString(CONTENTS_KEY, arr.toString())
     }
   }
 
