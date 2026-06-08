@@ -86,7 +86,7 @@ internal class BoltsExecutors private constructor() {
   companion object {
     private val INSTANCE = BoltsExecutors()
     private val isAndroidRuntime: Boolean
-      private get() {
+      get() {
         val javaRuntimeName = System.getProperty("java.runtime.name") ?: return false
         return javaRuntimeName.toLowerCase(Locale.US).contains("android")
       }
