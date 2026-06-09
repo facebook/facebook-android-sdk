@@ -76,7 +76,7 @@ object ErrorReportHandler {
   @JvmStatic
   fun listErrorReportFiles(): Array<File> {
     val reportDir = InstrumentUtility.getInstrumentReportDir() ?: return arrayOf()
-    return reportDir.listFiles { dir, name ->
+    return reportDir.listFiles { _, name ->
       name.matches(Regex(String.format("^%s[0-9]+.json$", InstrumentUtility.ERROR_REPORT_PREFIX)))
     }
   }

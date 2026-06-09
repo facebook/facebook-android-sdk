@@ -112,7 +112,6 @@ class AuthenticationTokenClaims : Parcelable {
   /** End-User's link */
   val userLink: String?
 
-  @JvmOverloads
   constructor(encodedClaims: String, expectedNonce: String) {
     Validate.notEmpty(encodedClaims, "encodedClaims")
 

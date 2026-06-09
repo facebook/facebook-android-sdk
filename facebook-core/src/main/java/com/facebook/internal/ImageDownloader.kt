@@ -36,7 +36,7 @@ object ImageDownloader {
 
   @get:Synchronized
   private var handler: Handler? = null
-    private get() {
+    get() {
       if (field == null) {
         field = Handler(Looper.getMainLooper())
       }

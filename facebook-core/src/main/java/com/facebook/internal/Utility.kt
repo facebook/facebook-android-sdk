@@ -1005,7 +1005,7 @@ object Utility {
     // Enumerate all available CPU files and try to count the number of CPU cores.
     try {
       val cpuDir = File("/sys/devices/system/cpu/")
-      val cpuFiles = cpuDir.listFiles { dir, fileName -> Pattern.matches("cpu[0-9]+", fileName) }
+      val cpuFiles = cpuDir.listFiles { _, fileName -> Pattern.matches("cpu[0-9]+", fileName) }
       if (cpuFiles != null) {
         numCPUCores = cpuFiles.size
       }

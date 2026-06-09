@@ -286,10 +286,10 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
 
   private object BufferFile {
     private const val FILE_NAME_PREFIX = "buffer"
-    private val filterExcludeBufferFiles = FilenameFilter { dir, filename ->
+    private val filterExcludeBufferFiles = FilenameFilter { _, filename ->
       !filename.startsWith(FILE_NAME_PREFIX)
     }
-    private val filterExcludeNonBufferFiles = FilenameFilter { dir, filename ->
+    private val filterExcludeNonBufferFiles = FilenameFilter { _, filename ->
       filename.startsWith(FILE_NAME_PREFIX)
     }
     fun deleteAll(root: File) {

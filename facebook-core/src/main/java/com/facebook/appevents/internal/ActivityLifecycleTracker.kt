@@ -245,7 +245,7 @@ object ActivityLifecycleTracker {
     }
 
     private val sessionTimeoutInSeconds: Int
-        private get() {
+        get() {
             val settings =
                 getAppSettingsWithoutQuery(FacebookSdk.getApplicationId())
                     ?: return getDefaultAppEventsSessionTimeoutInSeconds()

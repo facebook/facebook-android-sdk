@@ -112,7 +112,7 @@ constructor(context: Context, cacheKey: String? = null) {
       }
       is Boolean -> {
         supportedType = TYPE_BOOLEAN
-        json.put(JSON_VALUE, value as Boolean)
+        json.put(JSON_VALUE, value)
       }
       is Char -> {
         supportedType = TYPE_CHAR

@@ -94,7 +94,7 @@ internal constructor(
       }
 
     private val defaultErrorClassificationImpl: FacebookRequestErrorClassification
-      private get() {
+      get() {
         val transientErrors: HashMap<Int, Set<Int>?> =
             hashMapOf(
                 EC_SERVICE_UNAVAILABLE to null,

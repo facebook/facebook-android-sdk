@@ -64,7 +64,7 @@ internal object PredictionHistoryManager {
       val currentPath = JSONArray()
       while (view != null) {
         currentPath.put(view.javaClass.simpleName)
-        view = ViewHierarchy.getParentOfView(view) as View?
+        view = ViewHierarchy.getParentOfView(view)
       }
       pathRoute.put(CLASS_NAME_KEY, currentPath)
     } catch (je: JSONException) {

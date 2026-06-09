@@ -74,7 +74,7 @@ object CodelessLoggingEventListener {
       val rootViewValue = rootView.get()
       val hostViewValue = hostView.get()
       if (rootViewValue != null && hostViewValue != null) {
-        logEvent(mapping as EventBinding, rootViewValue, hostViewValue)
+        logEvent(mapping, rootViewValue, hostViewValue)
       }
     }
 

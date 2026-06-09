@@ -193,7 +193,7 @@ object ModelManager {
   }
 
   private val isLocaleEnglish: Boolean
-    private get() {
+    get() {
       val locale = resourceLocale
       return locale == null || locale.language.contains("en")
     }

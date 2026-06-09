@@ -1147,8 +1147,7 @@ class GraphRequest {
           outputStream = GZIPOutputStream(outputStream)
         }
         if (hasOnProgressCallbacks(requests)) {
-          var countingStream: ProgressNoopOutputStream? = null
-          countingStream = ProgressNoopOutputStream(requests.callbackHandler)
+          val countingStream = ProgressNoopOutputStream(requests.callbackHandler)
           processRequest(requests, null, numRequests, url, countingStream, shouldUseGzip)
           val max = countingStream.maxProgress
           val progressMap = countingStream.getProgressMap()
@@ -1606,7 +1605,7 @@ class GraphRequest {
     }
 
   private val graphPathWithVersion: String?
-    private get() {
+    get() {
       val matcher = versionPattern.matcher(graphPath)
       return if (matcher.matches()) {
         graphPath

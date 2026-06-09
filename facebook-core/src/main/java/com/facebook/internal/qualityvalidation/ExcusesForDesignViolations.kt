@@ -8,9 +8,6 @@
 
 package com.facebook.internal.qualityvalidation
 
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-
 /**
  * Annotations to mark code files as having known design issues and avoid failing the design
  * integration test on them
@@ -26,6 +23,6 @@ import java.lang.annotation.RetentionPolicy
  * @Excuse(type = "STORY_VIEWER_CAPITALIZATION", reason = "Legacy"),
  * @Excuse(type = "MISSING_JAVA_DOC", reason = "DI Module") ) }</pre>
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
 annotation class ExcusesForDesignViolations(vararg val value: Excuse)

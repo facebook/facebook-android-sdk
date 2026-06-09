@@ -328,18 +328,12 @@ object ViewHierarchy {
   fun getExistingOnClickListener(view: View?): View.OnClickListener? {
     try {
       val listenerInfoField = Class.forName("android.view.View").getDeclaredField("mListenerInfo")
-      if (listenerInfoField != null) {
-        listenerInfoField.isAccessible = true
-      }
+      listenerInfoField.isAccessible = true
       val listenerObj = listenerInfoField[view] ?: return null
-      var listener: View.OnClickListener? = null
       val listenerField =
           Class.forName("android.view.View\$ListenerInfo").getDeclaredField("mOnClickListener")
-      if (listenerField != null) {
-        listenerField.isAccessible = true
-        listener = listenerField[listenerObj] as View.OnClickListener
-      }
-      return listener
+      listenerField.isAccessible = true
+      return listenerField[listenerObj] as View.OnClickListener
     } catch (e: NoSuchFieldException) {
       /* no op */
     } catch (e: ClassNotFoundException) {
@@ -391,18 +385,12 @@ object ViewHierarchy {
   fun getExistingOnTouchListener(view: View?): View.OnTouchListener? {
     try {
       val listenerInfoField = Class.forName("android.view.View").getDeclaredField("mListenerInfo")
-      if (listenerInfoField != null) {
-        listenerInfoField.isAccessible = true
-      }
+      listenerInfoField.isAccessible = true
       val listenerObj = listenerInfoField[view] ?: return null
-      var listener: View.OnTouchListener? = null
       val listenerField =
           Class.forName("android.view.View\$ListenerInfo").getDeclaredField("mOnTouchListener")
-      if (listenerField != null) {
-        listenerField.isAccessible = true
-        listener = listenerField[listenerObj] as View.OnTouchListener
-      }
-      return listener
+      listenerField.isAccessible = true
+      return listenerField[listenerObj] as View.OnTouchListener
     } catch (e: NoSuchFieldException) {
       logd(TAG, e)
     } catch (e: ClassNotFoundException) {
@@ -421,7 +409,7 @@ object ViewHierarchy {
     try {
       val nativeTargetView =
           checkNotNull(methodFindTouchTargetView).invoke(null, location, RCTRootView) as View
-      if (nativeTargetView != null && nativeTargetView.id > 0) {
+      if (nativeTargetView.id > 0) {
         return nativeTargetView.parent as View
       }
     } catch (e: IllegalAccessException) {

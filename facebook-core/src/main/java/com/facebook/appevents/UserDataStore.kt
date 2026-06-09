@@ -164,7 +164,7 @@ object UserDataStore {
   }
 
   private val enabledInternalUserData: Map<String?, String?>
-    private get() {
+    get() {
       val enabledInternalUD: MutableMap<String?, String?> = HashMap()
       val ruleNames: Set<String?> = getEnabledRuleNames()
       for (ruleKey in internalHashedUserData.keys) {

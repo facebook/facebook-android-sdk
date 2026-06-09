@@ -46,7 +46,6 @@ class AuthenticationToken : Parcelable {
   /** Signature component of the id_token TODO: create a new class for the signature part */
   val signature: String
 
-  @JvmOverloads
   constructor(token: String, expectedNonce: String) {
     Validate.notEmpty(token, "token")
     Validate.notEmpty(expectedNonce, "expectedNonce")

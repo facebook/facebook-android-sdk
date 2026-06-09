@@ -80,7 +80,7 @@ object AppEventUtility {
   }
 
   private val isMainThread: Boolean
-    @JvmStatic private get() = Looper.myLooper() == Looper.getMainLooper()
+    @JvmStatic get() = Looper.myLooper() == Looper.getMainLooper()
 
   @JvmStatic
   fun getAppVersion(): String {

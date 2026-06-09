@@ -147,7 +147,7 @@ class InstrumentData {
   }
 
   private val parameters: JSONObject?
-    private get() {
+    get() {
       return when (type) {
         Type.Analysis -> analysisReportParameters
         Type.AnrReport,
@@ -159,7 +159,7 @@ class InstrumentData {
     }
 
   private val analysisReportParameters: JSONObject?
-    private get() {
+    get() {
       val obj = JSONObject()
       try {
         if (featureNames != null) {
@@ -176,7 +176,7 @@ class InstrumentData {
     }
 
   private val exceptionReportParameters: JSONObject?
-    private get() {
+    get() {
       val obj = JSONObject()
       try {
         obj.put(PARAM_DEVICE_OS, Build.VERSION.RELEASE)
