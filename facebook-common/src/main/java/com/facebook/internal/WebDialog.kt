@@ -461,7 +461,7 @@ open class WebDialog : Dialog {
     webView?.setFocusable(true)
     webView?.setFocusableInTouchMode(true)
     webView?.setOnTouchListener(
-        View.OnTouchListener { v, event ->
+        View.OnTouchListener { v, _ ->
           if (!v.hasFocus()) {
             v.requestFocus()
           }
