@@ -54,6 +54,10 @@ dependencies {
 android {
     buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook.bolts"
+
+    publishing {
+        singleVariant("release")
+    }
     compileSdk = libs.versions.compileSdk.get().toInt()
 
 

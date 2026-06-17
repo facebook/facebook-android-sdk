@@ -59,6 +59,10 @@ dependencies {
 android {
     buildToolsVersion = libs.versions.buildToolsVersion.get()
     namespace = "com.facebook.gamingservices"
+
+    publishing {
+        singleVariant("release")
+    }
     compileSdk = libs.versions.compileSdk.get().toInt()
 
 
