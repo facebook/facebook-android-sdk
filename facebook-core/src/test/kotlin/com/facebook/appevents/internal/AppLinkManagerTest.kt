@@ -102,4 +102,33 @@ class AppLinkManagerTest: FacebookPowerMockTestCase()  {
 
     assertEquals("test_campaign_1234", mockSharedPreference.getString("campaign_ids", null))
   }
+
+  @Test
+  fun testHandleNonnullClickId() {
+    val intent = Intent()
+    whenever(mockActivity.intent).thenReturn(intent)
+    intent.setData(Uri.parse("myapp://product/123?fbclid=test_clickid_1234"))
+    AppLinkManager.getInstance()?.handleURL(mockActivity)
+
+    assertEquals("test_clickid_1234", mockSharedPreference.getString("click_id", null))
+  }
+
+  @Test
+  fun testHandleMissingClickId() {
+    val intent = Intent()
+    whenever(mockActivity.intent).thenReturn(intent)
+    intent.setData(Uri.parse("myapp://product/123"))
+    AppLinkManager.getInstance()?.handleURL(mockActivity)
+
+    assertNull(mockSharedPreference.getString("click_id", null))
+  }
+
+  @Test
+  fun testHandleInvalidUri() {
+    val intent = Intent()
+    whenever(mockActivity.intent).thenReturn(intent)
+    AppLinkManager.getInstance()?.handleURL(mockActivity)
+
+    assertNull(mockSharedPreference.getString("click_id", null))
+  }
 }

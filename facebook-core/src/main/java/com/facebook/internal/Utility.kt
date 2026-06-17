@@ -623,6 +623,10 @@ object Utility {
     if (campaignIDs != null) {
       params.put("campaign_ids", campaignIDs)
     }
+    val clickId = AppLinkManager.getInstance()?.getInfo(AppLinkManager.CLICK_ID_KEY)
+    if (clickId != null) {
+      params.put("click_id", clickId) // MUST be exactly "click_id" — server reads this
+    }
   }
 
   /**

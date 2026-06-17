@@ -32,6 +32,9 @@ class AppLinkManager private constructor() {
     const val APPLINK_DATA_KEY = "al_applink_data"
     const val CAMPAIGN_IDS_KEY = "campaign_ids"
 
+    // Event-payload param name AND SharedPreferences key the server reads
+    const val CLICK_ID_KEY = "click_id"
+
     @Volatile
     private var instance: AppLinkManager? = null
 
@@ -47,6 +50,7 @@ class AppLinkManager private constructor() {
   fun handleURL(activity: Activity) {
     val uri = activity.intent.data ?: return
     processCampaignIds(uri, activity.intent)
+    processClickId(uri)
   }
 
   fun processCampaignIds(uri: Uri, intent: Intent) {
@@ -70,6 +74,14 @@ class AppLinkManager private constructor() {
   fun getCampaignIDFromIntentExtra(intent: Intent): String? {
     val applinkBundle = intent.getBundleExtra(APPLINK_DATA_KEY) ?: return null
     return applinkBundle.getString(CAMPAIGN_IDS_KEY)
+  }
+
+  fun processClickId(uri: Uri) {
+    val fbclid = uri.getQueryParameter("fbclid")
+    if (fbclid.isNullOrEmpty()) {
+      return
+    }
+    preferences.edit().putString(CLICK_ID_KEY, fbclid).apply()
   }
 
   fun getInfo(key: String): String? {

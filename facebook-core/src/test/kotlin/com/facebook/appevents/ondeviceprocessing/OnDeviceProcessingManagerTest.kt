@@ -44,7 +44,11 @@ class OnDeviceProcessingManagerTest : FacebookPowerMockTestCase() {
     context = ApplicationProvider.getApplicationContext()
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getApplicationContext()).thenReturn(context)
-    whenever(FacebookSdk.getExecutor()).thenCallRealMethod()
+    // Use a deterministic synchronous executor instead of the shared real one.
+    // The shared static FacebookSdk.executor can be polluted by other tests (e.g.
+    // WorkQueueTest installs a fixed thread pool and never restores it), which made
+    // the async sendCustomEventAsync assertions flaky under full-suite/CI runs.
+    whenever(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
     PowerMockito.mockStatic(RemoteServiceWrapper::class.java)
   }
 
