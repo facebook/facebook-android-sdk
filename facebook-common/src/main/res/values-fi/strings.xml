@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Vahvista sisäänkirjautuminen</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Jatka nimellä %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Etkö ole tämä henkilö?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Ei nyt</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Kirjaudu sisään Facebook-tunnuksilla</string>
 </resources>

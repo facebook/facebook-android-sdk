@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Подтвердите вход</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Продолжить как %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Это не вы?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Не сейчас</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Вход через Facebook</string>
 </resources>

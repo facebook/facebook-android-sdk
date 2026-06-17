@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">로그인 확인</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$s님으로 계속</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">회원님이 아닌가요?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">나중에 하기</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Facebook으로 로그인</string>
 </resources>

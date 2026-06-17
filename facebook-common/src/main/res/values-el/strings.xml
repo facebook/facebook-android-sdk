@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Επιβεβαίωση σύνδεσης</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Συνέχεια ως %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Δεν είστε εσείς;</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Όχι τώρα</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Σύνδεση μέσω Facebook</string>
 </resources>

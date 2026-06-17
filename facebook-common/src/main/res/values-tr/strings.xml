@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Girişi Onayla</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$s olarak devam et</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Siz değil misiniz?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Şimdi değil</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Facebook ile Giriş Yap</string>
 </resources>

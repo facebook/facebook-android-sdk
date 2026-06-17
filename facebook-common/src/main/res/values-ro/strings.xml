@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Confirmă conectarea</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Continuă ca %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Nu este vorba despre tine?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Nu acum</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Conectează-te cu Facebook</string>
 </resources>

@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potvrďte přihlášení</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Pokračovat jako %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Nejste to vy?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Teď ne</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Přihlášení přes Facebook</string>
 </resources>

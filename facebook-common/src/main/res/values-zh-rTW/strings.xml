@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">確認登入</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">以%1$s的身分繼續</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">不是你？</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">稍後再說</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">使用 Facebook 帳號登入</string>
 </resources>

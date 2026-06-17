@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Conferma accesso</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Continua come %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Non sei tu?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Non ora</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Accedi con Facebook</string>
 </resources>

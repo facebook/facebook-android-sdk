@@ -26,4 +26,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Bekræft login</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Fortsæt som %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Ikke dig?</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">Ikke nu</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">Log på med Facebook</string>
 </resources>

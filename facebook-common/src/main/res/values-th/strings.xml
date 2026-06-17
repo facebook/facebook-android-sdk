@@ -27,4 +27,6 @@
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ยืนยันการเข้าสู่ระบบ</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">ดำเนินการต่อในชื่อ %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">ไม่ใช่คุณใช่ไหม</string>
+    <string name="com_facebook_sso_noapp_not_now" gender="unknown">ไม่ใช่ตอนนี้</string>
+    <string name="com_facebook_sso_outdated_title" gender="unknown">เข้าสู่ระบบด้วย Facebook</string>
 </resources>
