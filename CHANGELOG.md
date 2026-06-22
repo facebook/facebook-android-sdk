@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [18.3.0]
+
+### Added
+- Added Single Sign-On (SSO) support via `FBLoginSSOLauncher`, letting users log in with their existing Facebook account directly through the installed Facebook app without re-entering credentials. When the Facebook app is missing or out of date, a "Continue with Facebook" dialog (`FBLoginSSONoAppDialog`) falls back to the standard web-based login flow.
+
 ## [18.2.3]
 
 ### Added
@@ -548,7 +553,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.2.3...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-...HEAD
+[18.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.2.3...sdk-version-18.3.0
 [18.2.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.1.3...sdk-version-18.2.3
 [18.1.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.0.3...sdk-version-18.1.3
 [17.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.1...sdk-version-17.0.2
@@ -619,5 +625,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
-
