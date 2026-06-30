@@ -14,8 +14,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.FutureTask
 
 class LockOnGetVariable<T> {
-  private var storedValue: T? = null
-  private var initLatch: CountDownLatch? = null
+  @Volatile private var storedValue: T? = null
+  @Volatile private var initLatch: CountDownLatch? = null
 
   val value: T?
     get() {
