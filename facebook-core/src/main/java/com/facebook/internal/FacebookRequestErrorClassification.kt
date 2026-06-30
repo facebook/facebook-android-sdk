@@ -81,17 +81,11 @@ internal constructor(
     const val KEY_OTHER = "other"
     const val KEY_TRANSIENT = "transient"
     const val KEY_LOGIN_RECOVERABLE = "login_recoverable"
-    private var defaultInstance: FacebookRequestErrorClassification? = null
 
     @JvmStatic
-    val defaultErrorClassification: FacebookRequestErrorClassification
-      @Synchronized
-      get() {
-        if (this.defaultInstance == null) {
-          this.defaultInstance = defaultErrorClassificationImpl
-        }
-        return defaultInstance as FacebookRequestErrorClassification
-      }
+    val defaultErrorClassification: FacebookRequestErrorClassification by lazy {
+        defaultErrorClassificationImpl
+    }
 
     private val defaultErrorClassificationImpl: FacebookRequestErrorClassification
       get() {
