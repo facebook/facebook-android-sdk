@@ -20,7 +20,7 @@ import com.facebook.FacebookSdk
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureManager {
     private const val FEATURE_MANAGER_STORE = "com.facebook.internal.FEATURE_MANAGER"
-    private val featureMapping: MutableMap<Feature, Array<String>> = hashMapOf()
+    private val featureMapping: MutableMap<Feature, Array<String>> = java.util.concurrent.ConcurrentHashMap()
 
     @JvmStatic
     fun checkFeature(feature: Feature, callback: Callback) {
