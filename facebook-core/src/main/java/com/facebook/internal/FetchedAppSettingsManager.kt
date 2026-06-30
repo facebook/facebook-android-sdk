@@ -141,6 +141,7 @@ object FetchedAppSettingsManager {
         }
         val settingsKey = String.format(APP_SETTINGS_PREFS_KEY_FORMAT, applicationId)
         FacebookSdk.getExecutor().execute { // See if we had a cached copy and use that immediately.
+            try {
             val sharedPrefs =
                 context.getSharedPreferences(APP_SETTINGS_PREFS_STORE, Context.MODE_PRIVATE)
             val settingsJSONString = sharedPrefs.getString(settingsKey, null)
@@ -183,6 +184,11 @@ object FetchedAppSettingsManager {
                 else FetchAppSettingState.ERROR
             )
             pollCallbacks()
+            } catch (e: Exception) {
+                loadingState.set(FetchAppSettingState.ERROR)
+                Utility.logd(TAG, e)
+                pollCallbacks()
+            }
         }
     }
 
