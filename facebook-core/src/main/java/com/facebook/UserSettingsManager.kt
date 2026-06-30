@@ -194,7 +194,10 @@ internal object UserSettingsManager {
     }
   }
 
+   private val hasLoggedWarnings = AtomicBoolean(false)
+
   private fun logWarnings() {
+    if (!hasLoggedWarnings.compareAndSet(false, true)) return
     try {
       val ctx = FacebookSdk.getApplicationContext()
       val ai = ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
@@ -330,7 +333,7 @@ internal object UserSettingsManager {
     if (migratedAutoLogValues.isNullOrEmpty()) {
       return autoLogAppEventsEnabledLocally.getValue()
     }
-    
+
     var migratedAutoLogEnabled : Boolean? = migratedAutoLogValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENT_ENABLED_FIELD]
     var migratedDefault : Boolean? = migratedAutoLogValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD]
 

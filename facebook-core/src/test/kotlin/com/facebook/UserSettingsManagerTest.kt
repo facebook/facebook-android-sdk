@@ -48,6 +48,17 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     @Before
     override fun setup() {
         super.setup()
+        // Reset static state for test isolation
+        Whitebox.setInternalState(
+            UserSettingsManager::class.java,
+            "isInitialized",
+            AtomicBoolean(false)
+        )
+        Whitebox.setInternalState(
+            UserSettingsManager::class.java,
+            "hasLoggedWarnings",
+            AtomicBoolean(false)
+        )
         FacebookSdk.setApplicationId("123456789")
         mockPackageManager = mock()
         mockApplicationContext = mock()
@@ -82,6 +93,17 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     @After
     fun clean() {
         mockSharedPreference.edit().clear().commit()
+        // Reset static state for next test
+        Whitebox.setInternalState(
+            UserSettingsManager::class.java,
+            "isInitialized",
+            AtomicBoolean(false)
+        )
+        Whitebox.setInternalState(
+            UserSettingsManager::class.java,
+            "hasLoggedWarnings",
+            AtomicBoolean(false)
+        )
     }
 
     @Test

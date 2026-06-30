@@ -55,7 +55,7 @@ object AutomaticAnalyticsLogger {
             if (context is Application) {
                 AppEventsLogger.activateApp(context, appId)
             } else { // Context is probably originated from ContentProvider or Mocked
-                Log.w(
+                Log.d(
                     TAG,
                     "Automatic logging of basic events will not happen, because " +
                             "FacebookSdk.getApplicationContext() returns object that is not " +

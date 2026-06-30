@@ -80,7 +80,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\", \"introductoryPricePeriod\": \"P1W\"}"
     private val subscriptionDetailsGPBLV5V7 =
         "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken\",\"subscriptionOfferDetails\":[{\"offerIdToken\":\"offerIdToken1=\",\"basePlanId\":\"baseplanId\",\"offerId\":\"offerId\",\"pricingPhases\":[{\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"Free\",\"billingPeriod\":\"P2W\",\"recurrenceMode\":2,\"billingCycleCount\":1},{\"priceAmountMicros\":3590000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.59\",\"billingPeriod\":\"P2W\",\"recurrenceMode\":2,\"billingCycleCount\":2},{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P2W\",\"recurrenceMode\":1}],\"offerTags\":[]},{\"offerIdToken\":\"offerIdToken2=\",\"basePlanId\":\"basePlanId2\",\"pricingPhases\":[{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":1}],\"offerTags\":[]}]}"
-    private var logWarningCallCount = 0
+    private var logDebugCallCount = 0
     private var appEventLoggerCallCount = 0
 
     private lateinit var context: Context
@@ -125,7 +125,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         whenever(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
             .thenReturn(mockFetchedAppSettings)
 
-        whenever(Log.w(any(), any<String>())).then { logWarningCallCount++ }
+        whenever(Log.d(any(), any<String>())).then { logDebugCallCount++ }
         whenever(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
         val dedupeParameters = listOf(
             Pair(
@@ -213,7 +213,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
         AutomaticAnalyticsLogger.logActivateAppEvent()
 
-        assertEquals(0, logWarningCallCount)
+        assertEquals(0, logDebugCallCount)
         assertEquals(0, appEventLoggerCallCount)
     }
 
@@ -223,7 +223,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
         AutomaticAnalyticsLogger.logActivateAppEvent()
 
-        assertEquals(1, logWarningCallCount)
+        assertEquals(1, logDebugCallCount)
     }
 
     @Test
