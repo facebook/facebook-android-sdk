@@ -24,6 +24,10 @@ object FeatureManager {
 
     @JvmStatic
     fun checkFeature(feature: Feature, callback: Callback) {
+        if (!FacebookSdk.isInitialized()) {
+            callback.onCompleted(false)
+            return
+        }
         FetchedAppGateKeepersManager.loadAppGateKeepersAsync(
             object : FetchedAppGateKeepersManager.Callback {
                 override fun onCompleted() {
@@ -34,6 +38,7 @@ object FeatureManager {
 
     @JvmStatic
     fun isEnabled(feature: Feature): Boolean {
+        if (!FacebookSdk.isInitialized()) return false
         if (Feature.Unknown == feature) {
             return false
         }
