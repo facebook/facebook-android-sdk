@@ -15,7 +15,7 @@ object NonceUtil {
       return false
     }
 
-    val hasWhiteSpace = nonce.indexOf(' ') >= 0
+    val hasWhiteSpace = nonce.any { it.isWhitespace() }
     return !hasWhiteSpace
   }
 }
