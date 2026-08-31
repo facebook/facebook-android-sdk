@@ -88,6 +88,65 @@ class GpsAraTriggersManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun testRegisterTriggerIsNoOpWhenEnableFailedToBuildDebugLogger() {
+        // Simulate GpsDebugLogger construction blowing up during enable() (e.g. the SDK is not
+        // initialized yet). The manager must stay disabled rather than being left enabled with
+        // an uninitialized logger, which used to surface as UninitializedPropertyAccessException
+        // from the OutcomeReceiver callback. See facebook-android-sdk#1401.
+        resetManagerState()
+        whenNew(GpsDebugLogger::class.java)
+            .withAnyArguments()
+            .thenThrow(RuntimeException("SDK not initialized"))
+
+        try {
+            GpsAraTriggersManager.enable()
+        } catch (expected: RuntimeException) {
+            // In production @AutoHandleExceptions swallows this; unit tests see it directly.
+        }
+
+        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
+        GpsAraTriggersManager.registerTrigger(applicationId, event)
+
+        assertEquals(0, registerTriggerCalledTimes)
+    }
+
+    @Test
+    fun testRegisterTriggerIsNoOpWhenEnableFailedToResolveContext() {
+        resetManagerState()
+        whenever(FacebookSdk.getApplicationContext())
+            .thenThrow(RuntimeException("SDK not initialized"))
+
+        try {
+            GpsAraTriggersManager.enable()
+        } catch (expected: RuntimeException) {
+        }
+
+        val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
+        GpsAraTriggersManager.registerTrigger(applicationId, event)
+
+        assertEquals(0, registerTriggerCalledTimes)
+    }
+
+    /**
+     * [GpsAraTriggersManager] is a Kotlin `object`, so its state survives across test methods in
+     * the same class. Reset it so a prior successful `enable()` does not leak in.
+     *
+     * Kotlin compiles `object` properties to *static* fields, so this uses plain reflection with
+     * a null receiver rather than `Whitebox.setInternalState`, which searches instance fields.
+     */
+    private fun resetManagerState() {
+        setStaticField("enabled", false)
+        setStaticField("gpsDebugLogger", null)
+        setStaticField("serverUri", null)
+    }
+
+    private fun setStaticField(name: String, value: Any?) {
+        val field = GpsAraTriggersManager::class.java.getDeclaredField(name)
+        field.isAccessible = true
+        field.set(null, value)
+    }
+
+    @Test
     fun testRegisterTriggerWithOutcomeReceiver() {
         val event = createEvent(AppEventsConstants.EVENT_NAME_VIEWED_CONTENT)
         GpsAraTriggersManager.registerTrigger(applicationId, event)

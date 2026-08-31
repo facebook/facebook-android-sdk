@@ -28,16 +28,22 @@ object GpsAraTriggersManager {
     private const val GPS_PREFIX = "gps"
     private const val REPLACEMENT_STRING = "_removed_"
     private val TAG = GpsAraTriggersManager::class.java.toString()
-    private var enabled = false
-    private lateinit var gpsDebugLogger: GpsDebugLogger
-    private lateinit var serverUri: String
+    @Volatile private var enabled = false
+    private var gpsDebugLogger: GpsDebugLogger? = null
+    private var serverUri: String? = null
 
     @JvmStatic
     fun enable() {
-        enabled = true
-        gpsDebugLogger = GpsDebugLogger(FacebookSdk.getApplicationContext())
-        serverUri =
+        // Initialize state before flipping `enabled`. If any of this throws (e.g. the SDK is
+        // not initialized yet, so getApplicationContext() raises), the manager stays disabled
+        // instead of being left permanently enabled with uninitialized fields.
+        val logger = GpsDebugLogger(FacebookSdk.getApplicationContext())
+        val uri =
             "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/mobile/register/trigger"
+
+        gpsDebugLogger = logger
+        serverUri = uri
+        enabled = true
     }
 
     fun registerTriggerAsync(applicationId: String, event: AppEvent) {
@@ -66,7 +72,7 @@ object GpsAraTriggersManager {
 
             if (measurementManager == null) {
                 Log.w(TAG, "FAILURE_GET_MEASUREMENT_MANAGER")
-                gpsDebugLogger.log(
+                gpsDebugLogger?.log(
                     Constants.GPS_ARA_FAILED,
                     Bundle().apply {
                         putString(
@@ -86,7 +92,7 @@ object GpsAraTriggersManager {
                 object : OutcomeReceiver<Any, Exception> {
                     override fun onResult(result: Any) {
                         Log.d(TAG, "OUTCOME_RECEIVER_TRIGGER_SUCCESS")
-                        gpsDebugLogger.log(
+                        gpsDebugLogger?.log(
                             Constants.GPS_ARA_SUCCEED,
                             null
                         )
@@ -94,7 +100,7 @@ object GpsAraTriggersManager {
 
                     override fun onError(error: Exception) {
                         Log.d(TAG, "OUTCOME_RECEIVER_TRIGGER_FAILURE")
-                        gpsDebugLogger.log(
+                        gpsDebugLogger?.log(
                             Constants.GPS_ARA_FAILED,
                             Bundle().apply {
                                 putString(
@@ -110,12 +116,12 @@ object GpsAraTriggersManager {
             )
         } catch (e: Exception) {
             Log.w(TAG, "FAILURE_TRIGGER_REGISTRATION_FAILED")
-            gpsDebugLogger.log(
+            gpsDebugLogger?.log(
                 Constants.GPS_ARA_FAILED,
                 Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
         } catch (e: Error) {
             Log.w(TAG, "FAILURE_TRIGGER_REGISTRATION_FAILED")
-            gpsDebugLogger.log(
+            gpsDebugLogger?.log(
                 Constants.GPS_ARA_FAILED,
                 Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
         }
@@ -138,13 +144,13 @@ object GpsAraTriggersManager {
             return true
         } catch (e: Exception) {
             Log.i(TAG, "FAILURE_NO_MEASUREMENT_MANAGER_CLASS")
-            gpsDebugLogger.log(
+            gpsDebugLogger?.log(
                 Constants.GPS_ARA_FAILED,
                 Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
             return false
         } catch (e: Error) {
             Log.i(TAG, "FAILURE_NO_MEASUREMENT_MANAGER_CLASS")
-            gpsDebugLogger.log(
+            gpsDebugLogger?.log(
                 Constants.GPS_ARA_FAILED,
                 Bundle().apply { putString(Constants.GPS_ARA_FAILED_REASON, e.toString()) })
             return false

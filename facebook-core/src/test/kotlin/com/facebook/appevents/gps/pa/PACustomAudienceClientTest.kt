@@ -139,6 +139,52 @@ class PACustomAudienceClientTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun testJoinCustomAudienceIsNoOpWhenEnableFailedToBuildDebugLogger() {
+        // Simulate GpsDebugLogger construction blowing up during enable() (e.g. the SDK is not
+        // initialized yet). The client must not be left permanently "initialized" with an
+        // uninitialized logger. See facebook-android-sdk#1401.
+        resetClientState()
+        mockStatic(CustomAudienceManager::class.java)
+        whenever(CustomAudienceManager.get(any<Context>())).thenReturn(customAudienceManager)
+        whenNew(GpsDebugLogger::class.java)
+            .withAnyArguments()
+            .thenThrow(RuntimeException("SDK not initialized"))
+
+        try {
+            PACustomAudienceClient.joinCustomAudience("1234", createEvent("test_event"))
+        } catch (expected: RuntimeException) {
+            // In production @AutoHandleExceptions swallows this; unit tests see it directly.
+        }
+
+        verify(customAudienceManager, times(0))?.joinCustomAudience(
+            any<JoinCustomAudienceRequest>(),
+            any<Executor>(),
+            any<OutcomeReceiver<Any, Exception>>()
+        )
+    }
+
+    /**
+     * [PACustomAudienceClient] is a Kotlin `object`, so its state survives across test methods in
+     * the same class. Reset it so a prior successful `enable()` does not leak in.
+     *
+     * Kotlin compiles `object` properties to *static* fields, so this uses plain reflection with
+     * a null receiver. `Whitebox.setInternalState(PACustomAudienceClient, ...)` does not work --
+     * it searches instance fields and throws FieldNotFoundException.
+     */
+    private fun resetClientState() {
+        setStaticField("enabled", false)
+        setStaticField("isInitialized", false)
+        setStaticField("gpsDebugLogger", null)
+        setStaticField("baseUri", null)
+    }
+
+    private fun setStaticField(name: String, value: Any?) {
+        val field = PACustomAudienceClient::class.java.getDeclaredField(name)
+        field.isAccessible = true
+        field.set(null, value)
+    }
+
+    @Test
     fun testInvalidCAName() {
         mockStatic(CustomAudienceManager::class.java)
         whenever(CustomAudienceManager.get(any<Context>())).thenReturn(customAudienceManager)

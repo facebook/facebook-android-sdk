@@ -39,18 +39,22 @@ object PACustomAudienceClient {
 
     // Sync with RestrictiveDataManager.REPLACEMENT_STRING
     private const val REPLACEMENT_STRING = "_removed_"
-    private var enabled = false
-    private var isInitialized = false
+    @Volatile private var enabled = false
+    @Volatile private var isInitialized = false
     private var customAudienceManager: CustomAudienceManager? = null
-    private lateinit var gpsDebugLogger: GpsDebugLogger
-    private lateinit var baseUri: String
+    private var gpsDebugLogger: GpsDebugLogger? = null
+    private var baseUri: String? = null
 
     @JvmStatic
     @TargetApi(34)
     fun enable() {
-        isInitialized = true
+        // Initialize state before flipping the flags. If any of this throws (e.g. the SDK is
+        // not initialized yet, so getApplicationContext() raises), the client stays
+        // uninitialized and can be retried, instead of being left permanently "initialized"
+        // with uninitialized fields.
         val context = FacebookSdk.getApplicationContext()
-        gpsDebugLogger = GpsDebugLogger(context)
+        val logger = GpsDebugLogger(context)
+        gpsDebugLogger = logger
         baseUri = "https://www.${FacebookSdk.getFacebookDomain()}/privacy_sandbox/pa/logic"
 
         var errorMsg: String? = null
@@ -67,8 +71,16 @@ object PACustomAudienceClient {
             Log.w(TAG, "Failed to get CustomAudienceManager: $e")
         }
 
-        if (enabled == false) {
-            gpsDebugLogger.log(
+        // Set unconditionally, including when the manager fetch above failed. A missing
+        // CustomAudienceManager is a permanent property of the device (no AdServices module),
+        // not a transient error, so retrying on every event would burn a GpsDebugLogger
+        // construction and a CustomAudienceManager.get() per call for no benefit. Callers are
+        // still safe: joinCustomAudience() returns early on `!enabled`, so a null manager is
+        // never dereferenced.
+        isInitialized = true
+
+        if (!enabled) {
+            logger.log(
                 Constants.GPS_PA_FAILED,
                 Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, errorMsg) })
         }
@@ -114,12 +126,12 @@ object PACustomAudienceClient {
                 object : OutcomeReceiver<Any, Exception> {
                     override fun onResult(result: Any) {
                         Log.i(TAG, "Successfully joined custom audience")
-                        gpsDebugLogger.log(Constants.GPS_PA_SUCCEED, null)
+                        gpsDebugLogger?.log(Constants.GPS_PA_SUCCEED, null)
                     }
 
                     override fun onError(error: Exception) {
                         Log.e(TAG, error.toString())
-                        gpsDebugLogger.log(
+                        gpsDebugLogger?.log(
                             Constants.GPS_PA_FAILED,
                             Bundle().apply {
                                 putString(
@@ -159,12 +171,12 @@ object PACustomAudienceClient {
             )
         } catch (e: Exception) {
             Log.w(TAG, "Failed to join Custom Audience: $e")
-            gpsDebugLogger.log(
+            gpsDebugLogger?.log(
                 Constants.GPS_PA_FAILED,
                 Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, e.toString()) })
         } catch (e: Error) {
             Log.w(TAG, "Failed to join Custom Audience: $e")
-            gpsDebugLogger.log(
+            gpsDebugLogger?.log(
                 Constants.GPS_PA_FAILED,
                 Bundle().apply { putString(Constants.GPS_PA_FAILED_REASON, e.toString()) })
         }
