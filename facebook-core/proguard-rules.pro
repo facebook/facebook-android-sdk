@@ -54,3 +54,20 @@
 -keep public class com.android.vending.billing.IInAppBillingService$Stub {
     public <methods>;
 }
+
+# Google Play Services classes resolved by name via reflection in AttributionIdentifiers
+# (see getAndroidIdViaReflection / isGooglePlayServicesAvailable). R8 renames these in
+# consumer apps, which makes Class.forName fail and silently disables advertiser_id (GAID)
+# collection -- affecting app event matching and deferred deep links.
+# These rules are inert for apps that do not bundle Google Play Services.
+# See https://github.com/facebook/facebook-android-sdk/issues/1404
+-keep class com.google.android.gms.common.GooglePlayServicesUtil {
+    public static int isGooglePlayServicesAvailable(android.content.Context);
+}
+-keep class com.google.android.gms.ads.identifier.AdvertisingIdClient {
+    public static ** getAdvertisingIdInfo(android.content.Context);
+}
+-keep class com.google.android.gms.ads.identifier.AdvertisingIdClient$Info {
+    public java.lang.String getId();
+    public boolean isLimitAdTrackingEnabled();
+}
