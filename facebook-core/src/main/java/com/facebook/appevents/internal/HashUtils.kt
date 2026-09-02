@@ -20,7 +20,6 @@ import java.lang.reflect.Field
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
-import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.util.concurrent.locks.ReentrantLock
@@ -54,7 +53,7 @@ internal object HashUtils {
       } while (numRead != -1)
 
       // Convert byte array to hex string and return result.
-      return BigInteger(1, md.digest()).toString(16)
+      return AppEventUtility.bytesToHex(md.digest())
     }
   }
 
@@ -97,7 +96,7 @@ internal object HashUtils {
                               getTypeMethod.invoke(c) == TYPE_WHOLE_MD5) {
                             val getValueMethod: Method = c.javaClass.getMethod("getValue")
                             val checksumValue = getValueMethod.invoke(c) as ByteArray
-                            resultChecksum = BigInteger(1, checksumValue).toString(16)
+                            resultChecksum = AppEventUtility.bytesToHex(checksumValue)
                             lock.lock()
                             try {
                               checksumReady.signalAll()
