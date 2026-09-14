@@ -17,7 +17,9 @@ import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.suggestedevents.SuggestedEventsManager
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.Utility
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -60,6 +62,7 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         PowerMockito.mockStatic(SuggestedEventsManager::class.java)
         PowerMockito.mockStatic(Utility::class.java)
         whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "ProxyBillingActivity" }
+        whenever(FeatureManager.isEnabled(eq(FeatureManager.Feature.MetadataBasic))).thenReturn(true)
 
         mockScheduledExecutor = spy(FacebookSerialThreadPoolMockExecutor(1))
         Whitebox.setInternalState(
@@ -78,6 +81,10 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         Whitebox.setInternalState(
             ActivityLifecycleTracker::class.java, "previousActivityName", "MainActivity"
         )
+        Whitebox.getInternalState<AtomicReference<String?>>(
+            ActivityLifecycleTracker::class.java,
+            "currActivityLabel",
+        ).set(null)
     }
 
     @Test
@@ -179,5 +186,79 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         assertEquals(startTrackingCount, 0)
         verify(mockScheduledExecutor, times(2)).execute(any<Runnable>())
 
+    }
+
+    @Test
+    fun `getCurrentActivityLabel returns null before any activity is resumed`() {
+        assertNull(ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `getCurrentActivityLabel returns activity title after onActivityResumed`() {
+        whenever(mockActivity.title).thenReturn("My Activity")
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+
+        assertEquals("My Activity", ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `getCurrentActivityLabel returns null when title is empty`() {
+        whenever(mockActivity.title).thenReturn("")
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+
+        assertNull(ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `getCurrentActivityLabel updates when different activity resumes`() {
+        val activityB: Activity = mock()
+        whenever(mockActivity.title).thenReturn("Activity A")
+        whenever(activityB.title).thenReturn("Activity B")
+        whenever(Utility.getActivityName(eq(activityB))).thenAnswer { "SecondActivity" }
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertEquals("Activity A", ActivityLifecycleTracker.getCurrentActivityLabel())
+
+        ActivityLifecycleTracker.onActivityResumed(activityB)
+        assertEquals("Activity B", ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `captured activity label becomes available when MetadataBasic is enabled`() {
+        whenever(FeatureManager.isEnabled(eq(FeatureManager.Feature.MetadataBasic))).thenReturn(false)
+        whenever(mockActivity.title).thenReturn("My Activity")
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        assertNull(ActivityLifecycleTracker.getCurrentActivityLabel())
+
+        whenever(FeatureManager.isEnabled(eq(FeatureManager.Feature.MetadataBasic))).thenReturn(true)
+
+        assertEquals("My Activity", ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `destroying current activity clears its title`() {
+        whenever(mockActivity.title).thenReturn("My Activity")
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        Whitebox.invokeMethod<Any?>(ActivityLifecycleTracker, "onActivityDestroyed", mockActivity)
+
+        assertNull(ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `destroying a previous activity does not clear current title`() {
+        val activityB: Activity = mock()
+        whenever(mockActivity.title).thenReturn("Activity A")
+        whenever(activityB.title).thenReturn("Activity B")
+        whenever(Utility.getActivityName(eq(activityB))).thenAnswer { "SecondActivity" }
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+        ActivityLifecycleTracker.onActivityResumed(activityB)
+        Whitebox.invokeMethod<Any?>(ActivityLifecycleTracker, "onActivityDestroyed", mockActivity)
+
+        assertEquals("Activity B", ActivityLifecycleTracker.getCurrentActivityLabel())
     }
 }

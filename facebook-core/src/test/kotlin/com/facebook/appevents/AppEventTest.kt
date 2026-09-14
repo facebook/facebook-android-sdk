@@ -116,4 +116,76 @@ class AppEventTest : FacebookPowerMockTestCase() {
             currentSessionId = null,
             inboundUrl = inboundUrl,
         )
+
+    @Test
+    fun testActivityLabelWrittenToJson() {
+        val appEvent =
+            AppEvent(
+                "contextName",
+                "eventName",
+                null,
+                null,
+                false,
+                false,
+                null,
+                activityLabel = "My Screen"
+            )
+        assertThat(appEvent.getJSONObject().getString(Constants.EVENT_PARAM_ACTIVITY_LABEL))
+            .isEqualTo("My Screen")
+    }
+
+    @Test
+    fun testActivityLabelOmittedWhenNull() {
+        val appEvent = AppEvent("contextName", "eventName", null, null, false, false, null)
+        assertThat(appEvent.getJSONObject().has(Constants.EVENT_PARAM_ACTIVITY_LABEL)).isFalse()
+    }
+
+    @Test
+    fun testActivityLabelOmittedWhenEmpty() {
+        val appEvent =
+            AppEvent("contextName", "eventName", null, null, false, false, null, activityLabel = "")
+        assertThat(appEvent.getJSONObject().has(Constants.EVENT_PARAM_ACTIVITY_LABEL)).isFalse()
+    }
+
+    @Test
+    fun testActivityLabelOverridesDeveloperParam() {
+        val parameters =
+            Bundle().apply { putString(Constants.EVENT_PARAM_ACTIVITY_LABEL, "developer_value") }
+        val appEvent =
+            AppEvent(
+                "contextName",
+                "eventName",
+                null,
+                parameters,
+                false,
+                false,
+                null,
+                activityLabel = "Resolved Label"
+            )
+        assertThat(appEvent.getJSONObject().getString(Constants.EVENT_PARAM_ACTIVITY_LABEL))
+            .isEqualTo("Resolved Label")
+    }
+
+    @Test
+    fun testActivityLabelSerializationRoundTrip() {
+        val appEvent =
+            AppEvent(
+                "contextName",
+                "eventName",
+                null,
+                null,
+                false,
+                false,
+                null,
+                activityLabel = "Settings"
+            )
+        val output = ByteArrayOutputStream()
+        ObjectOutputStream(output).use { it.writeObject(appEvent) }
+        val restored =
+            ObjectInputStream(ByteArrayInputStream(output.toByteArray())).use {
+                it.readObject() as AppEvent
+            }
+        assertThat(restored.getJSONObject().getString(Constants.EVENT_PARAM_ACTIVITY_LABEL))
+            .isEqualTo("Settings")
+    }
 }

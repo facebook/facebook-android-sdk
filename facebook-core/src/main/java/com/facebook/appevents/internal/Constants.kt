@@ -18,6 +18,7 @@ object Constants {
     // The following are for Automatic Analytics events and parameters
     const val AA_TIME_SPENT_EVENT_NAME = "fb_aa_time_spent_on_view"
     const val AA_TIME_SPENT_SCREEN_PARAMETER_NAME = "fb_aa_time_spent_view_name"
+    const val EVENT_PARAM_ACTIVITY_LABEL = "fb_screen_title"
 
     // Used to measure rollout of dynamic ads support
     const val ANDROID_DYNAMIC_ADS_CONTENT_ID = "android_dynamic_ads_content_id"

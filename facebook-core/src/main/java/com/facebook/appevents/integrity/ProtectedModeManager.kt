@@ -10,6 +10,7 @@ package com.facebook.appevents.integrity
 
 import android.os.Bundle
 import com.facebook.FacebookSdk
+import com.facebook.appevents.internal.Constants
 import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import org.json.JSONArray
@@ -108,6 +109,7 @@ object ProtectedModeManager {
             /* duplicated fb_order_id */
             "_session_id",
             "_ui",
+            Constants.EVENT_PARAM_ACTIVITY_LABEL,
             /* duplicated _valueToSum */
             "_valueToUpdate",
             "_is_fb_codeless",

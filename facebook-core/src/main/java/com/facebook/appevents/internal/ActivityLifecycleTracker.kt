@@ -38,6 +38,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 object ActivityLifecycleTracker {
     private val TAG: String =
@@ -63,8 +64,12 @@ object ActivityLifecycleTracker {
     private var appId: String? = null
     private var currentActivityAppearTime: Long = 0
     private var activityReferences = 0
+
+    @Volatile
     private var currActivity: WeakReference<Activity>? = null
     private var previousActivityName: String? = null
+
+    private val currActivityLabel = AtomicReference<String?>()
 
     @JvmStatic
     fun startTracking(application: Application, appId: String?) {
@@ -151,6 +156,7 @@ object ActivityLifecycleTracker {
     @JvmStatic
     fun onActivityResumed(activity: Activity) {
         currActivity = WeakReference(activity)
+        currActivityLabel.set(activity.title?.toString()?.takeIf { it.isNotEmpty() })
         foregroundActivityCount.incrementAndGet()
         cancelCurrentTask()
         val currentTime = System.currentTimeMillis()
@@ -242,6 +248,10 @@ object ActivityLifecycleTracker {
 
     private fun onActivityDestroyed(activity: Activity) {
         CodelessManager.onActivityDestroyed(activity)
+        if (currActivity?.get() === activity) {
+            currActivityLabel.set(null)
+            currActivity = null
+        }
     }
 
     private val sessionTimeoutInSeconds: Int
@@ -264,5 +274,13 @@ object ActivityLifecycleTracker {
     @JvmStatic
     fun getCurrentActivity(): Activity? {
         return if (currActivity != null) currActivity?.get() else null
+    }
+
+    @JvmStatic
+    fun getCurrentActivityLabel(): String? {
+        if (!FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)) {
+            return null
+        }
+        return currActivityLabel.get()
     }
 }

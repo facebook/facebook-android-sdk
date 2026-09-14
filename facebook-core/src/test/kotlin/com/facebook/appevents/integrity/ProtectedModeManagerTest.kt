@@ -179,6 +179,7 @@ class ProtectedModeManagerTest : FacebookPowerMockTestCase() {
             /* duplicated fb_order_id */
             "_session_id",
             "_ui",
+            "fb_screen_title",
             /* duplicated _valueToSum */
             "_valueToUpdate",
             "_is_fb_codeless",

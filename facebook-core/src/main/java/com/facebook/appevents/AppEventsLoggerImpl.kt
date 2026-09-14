@@ -37,6 +37,7 @@ import com.facebook.appevents.integrity.ProtectedModeManager.processParametersFo
 import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.integrity.VVPManager
 import com.facebook.appevents.integrity.StdParamsEnforcementManager.processFilterParamSchemaBlocking
+import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentActivityLabel
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
@@ -422,7 +423,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                     isInBackground(),
                     currentSessionId,
                     modifiedOperationalData,
-                    AppLinkManager.getInstance()?.getInboundUrl()
+                    inboundUrl = AppLinkManager.getInstance()?.getInboundUrl(),
+                    activityLabel = getCurrentActivityLabel()
                 )
             logEvent(event, accessTokenAppId)
         } catch (jsonException: JSONException) {
