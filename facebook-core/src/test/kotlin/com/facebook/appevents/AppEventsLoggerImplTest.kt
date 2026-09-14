@@ -8,6 +8,8 @@
 
 package com.facebook.appevents
 
+import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.webkit.WebView
@@ -19,6 +21,7 @@ import com.facebook.appevents.AppEventsLoggerImpl.Companion.addImplicitPurchaseP
 import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.internal.AppEventUtility
+import com.facebook.appevents.internal.AppLinkManager
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager
@@ -203,6 +206,29 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
     fun testLogEvent() {
         logger.logEvent(mockEventName)
         assertThat(appEventCapture?.name).isEqualTo(mockEventName)
+    }
+
+    @Test
+    fun testLogEventIncludesCachedInboundUrlWhenMetadataBasicIsEnabled() {
+        val inboundUrl = "fb123://applinks/product?id=42"
+        val preferences =
+            RuntimeEnvironment.application.getSharedPreferences(
+                AppLinkManager.APPLINK_INFO,
+                Context.MODE_PRIVATE,
+            )
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(true)
+
+        requireNotNull(AppLinkManager.getInstance()).cacheInboundUrl(Uri.parse(inboundUrl))
+
+        try {
+            logger.logEvent(mockEventName)
+
+            assertThat(
+                appEventCapture?.getJSONObject()?.getString(Constants.EVENT_PARAM_INBOUND_URL)
+            ).isEqualTo(inboundUrl)
+        } finally {
+            preferences.edit().clear().commit()
+        }
     }
 
     @Test

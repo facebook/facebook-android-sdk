@@ -43,7 +43,8 @@ class AppEvent : Serializable {
         isImplicitlyLogged: Boolean,
         isInBackground: Boolean,
         currentSessionId: UUID?,
-        operationalParameters: OperationalData? = null
+        operationalParameters: OperationalData? = null,
+        inboundUrl: String? = null
     ) {
         isImplicit = isImplicitlyLogged
         inBackground = isInBackground
@@ -55,7 +56,8 @@ class AppEvent : Serializable {
                 eventName,
                 valueToSum,
                 parameters,
-                currentSessionId
+                currentSessionId,
+                inboundUrl
             )
     }
 
@@ -87,7 +89,8 @@ class AppEvent : Serializable {
         eventName: String,
         valueToSum: Double?,
         parameters: Bundle?,
-        currentSessionId: UUID?
+        currentSessionId: UUID?,
+        inboundUrl: String?
     ): JSONObject {
         validateIdentifier(eventName)
         val eventObject = JSONObject()
@@ -109,6 +112,9 @@ class AppEvent : Serializable {
             for (key in processedParam.keys) {
                 eventObject.put(key, processedParam[key])
             }
+        }
+        if (!inboundUrl.isNullOrEmpty()) {
+            eventObject.put(Constants.EVENT_PARAM_INBOUND_URL, inboundUrl)
         }
         if (valueToSum != null) {
             eventObject.put(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, valueToSum.toDouble())

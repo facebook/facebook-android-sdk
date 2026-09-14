@@ -41,6 +41,7 @@ import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessio
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
 import com.facebook.appevents.internal.AppEventsLoggerUtility
+import com.facebook.appevents.internal.AppLinkManager
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager.isOnDeviceProcessingEnabled
@@ -420,7 +421,8 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                     isImplicitlyLogged,
                     isInBackground(),
                     currentSessionId,
-                    modifiedOperationalData
+                    modifiedOperationalData,
+                    AppLinkManager.getInstance()?.getInboundUrl()
                 )
             logEvent(event, accessTokenAppId)
         } catch (jsonException: JSONException) {

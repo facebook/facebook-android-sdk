@@ -8,8 +8,10 @@
 
 package com.facebook.appevents
 
+import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.appevents.internal.Constants
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -53,4 +55,65 @@ class AppEventTest : FacebookPowerMockTestCase() {
             appEvent1.getJSONObject().toString() == appEvent2.getJSONObject().toString()
         ).isTrue
     }
+
+    @Test
+    fun testInboundUrlIsAddedToEvent() {
+        val inboundUrl = "fb123://applinks/product?id=42"
+
+        val appEvent = createAppEvent(inboundUrl = inboundUrl)
+
+        assertThat(appEvent.getJSONObject().getString(Constants.EVENT_PARAM_INBOUND_URL))
+            .isEqualTo(inboundUrl)
+    }
+
+    @Test
+    fun testEmptyInboundUrlIsNotAddedToEvent() {
+        val appEvent = createAppEvent(inboundUrl = "")
+
+        assertThat(appEvent.getJSONObject().has(Constants.EVENT_PARAM_INBOUND_URL)).isFalse()
+    }
+
+    @Test
+    fun testSdkInboundUrlOverridesDeveloperParameter() {
+        val parameters = Bundle().apply {
+            putString(Constants.EVENT_PARAM_INBOUND_URL, "developer-value")
+        }
+        val inboundUrl = "fb123://applinks/sdk-value"
+
+        val appEvent = createAppEvent(parameters, inboundUrl)
+
+        assertThat(appEvent.getJSONObject().getString(Constants.EVENT_PARAM_INBOUND_URL))
+            .isEqualTo(inboundUrl)
+    }
+
+    @Test
+    fun testInboundUrlSurvivesSerialization() {
+        val inboundUrl = "fb123://applinks/persisted"
+        val original = createAppEvent(inboundUrl = inboundUrl)
+        val output = ByteArrayOutputStream()
+        ObjectOutputStream(output).use { it.writeObject(original) }
+
+        val restored =
+            ObjectInputStream(ByteArrayInputStream(output.toByteArray())).use {
+                it.readObject() as AppEvent
+            }
+
+        assertThat(restored.getJSONObject().getString(Constants.EVENT_PARAM_INBOUND_URL))
+            .isEqualTo(inboundUrl)
+    }
+
+    private fun createAppEvent(
+        parameters: Bundle? = null,
+        inboundUrl: String? = null,
+    ): AppEvent =
+        AppEvent(
+            contextName = "test-context",
+            eventName = "test-event",
+            valueToSum = null,
+            parameters = parameters,
+            isImplicitlyLogged = false,
+            isInBackground = false,
+            currentSessionId = null,
+            inboundUrl = inboundUrl,
+        )
 }

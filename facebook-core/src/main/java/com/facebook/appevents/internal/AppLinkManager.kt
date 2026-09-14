@@ -17,17 +17,21 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import com.facebook.FacebookSdk
+import com.facebook.internal.FeatureManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.util.concurrent.atomic.AtomicBoolean
 import org.json.JSONObject
 
 @AutoHandleExceptions
 class AppLinkManager private constructor() {
+  private val lifecycleRegistered = AtomicBoolean(false)
 
   private val preferences: SharedPreferences by lazy {
     FacebookSdk.getApplicationContext().getSharedPreferences(APPLINK_INFO, Context.MODE_PRIVATE)
   }
 
   companion object {
+    private const val TAG = "AppLinkManager"
     const val APPLINK_INFO = "com.facebook.sdk.APPLINK_INFO"
     const val APPLINK_DATA_KEY = "al_applink_data"
     const val CAMPAIGN_IDS_KEY = "campaign_ids"
@@ -51,6 +55,24 @@ class AppLinkManager private constructor() {
     val uri = activity.intent.data ?: return
     processCampaignIds(uri, activity.intent)
     processClickId(uri)
+    cacheInboundUrl(uri)
+  }
+
+  internal fun cacheInboundUrl(uri: Uri?) {
+    val url = uri?.toString()
+    if (url.isNullOrEmpty()) {
+      return
+    }
+    // Cache before the asynchronous gatekeeper fetch finishes so the launch URL is not lost.
+    // getInboundUrl gates whether the cached value can be attached to an event and transmitted.
+    preferences.edit().putString(Constants.EVENT_PARAM_INBOUND_URL, url).apply()
+  }
+
+  internal fun getInboundUrl(): String? {
+    if (!FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)) {
+      return null
+    }
+    return getInfo(Constants.EVENT_PARAM_INBOUND_URL)
   }
 
   fun processCampaignIds(uri: Uri, intent: Intent) {
@@ -66,7 +88,7 @@ class AppLinkManager private constructor() {
       val json = JSONObject(applinkData)
       return json.getString(CAMPAIGN_IDS_KEY)
     } catch (_: Exception) {
-      Log.d("AppLinkManager", "Fail to parse Applink data from Uri")
+      Log.d(TAG, "Fail to parse Applink data from Uri")
     }
     return null
   }
@@ -89,6 +111,10 @@ class AppLinkManager private constructor() {
   }
 
   fun setupLifecycleListener(application: Application) {
+    if (!lifecycleRegistered.compareAndSet(false, true)) {
+      return
+    }
+
     application.registerActivityLifecycleCallbacks(
       object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
