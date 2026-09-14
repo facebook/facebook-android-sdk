@@ -10,6 +10,7 @@ package com.facebook.internal
 
 import com.facebook.internal.FeatureManager.Feature
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
@@ -146,6 +147,10 @@ class FeatureManagerTest {
         Feature.Monitoring,
         FeatureManager.getFeature(
             "com.facebook.internal.logging.monitor.DoesNotExistButStillShouldPass"))
+
+    assertEquals(
+        Feature.MetadataBasic,
+        FeatureManager.getFeature("com.facebook.appevents.internal.AppLinkManager"))
   }
 
   @Test
@@ -177,6 +182,22 @@ class FeatureManagerTest {
     assertEquals(Feature.Core, Feature.Monitoring.parent)
     assertEquals(Feature.Core, Feature.Megatron.parent)
     assertEquals(Feature.Core, Feature.Elora.parent)
+    assertEquals(Feature.AppEvents, Feature.MetadataBasic.parent)
+  }
+
+  @Test
+  fun `test MetadataBasic uses canonical mobile SDK response key`() {
+    assertEquals("FBSDKFeatureMetadataBasic", Feature.MetadataBasic.toKey())
+  }
+
+  @Test
+  fun `test MetadataBasic is disabled by default`() {
+    val defaultStatusMethod =
+        FeatureManager::class.java.getDeclaredMethod("defaultStatus", Feature::class.java).apply {
+          isAccessible = true
+        }
+
+    assertFalse(defaultStatusMethod.invoke(FeatureManager, Feature.MetadataBasic) as Boolean)
   }
 
   @Test

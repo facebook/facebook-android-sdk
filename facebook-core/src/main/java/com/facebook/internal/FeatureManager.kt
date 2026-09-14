@@ -120,6 +120,8 @@ object FeatureManager {
         featureMapping[Feature.GPSTopicsObservation] = arrayOf("com.facebook.appevents.gps.topics.GpsTopicsManager")
         featureMapping[Feature.VVP] =
             arrayOf("com.facebook.appevents.integrity.VVPManager")
+        featureMapping[Feature.MetadataBasic] =
+            arrayOf("com.facebook.appevents.internal.AppLinkManager")
     }
 
     private fun getGKStatus(feature: Feature): Boolean {
@@ -168,7 +170,8 @@ object FeatureManager {
             Feature.GPSPACAProcessing,
             Feature.GPSTopicsObservation,
             Feature.VVP,
-            Feature.ReferrerForDeepLink -> false
+            Feature.ReferrerForDeepLink,
+            Feature.MetadataBasic -> false
 
             else -> true
         }
@@ -226,6 +229,7 @@ object FeatureManager {
         GPSPACAProcessing(0x00070000), /* privacy sandbox - protected audience API*/
         GPSTopicsObservation(0x00080000), /* privacy sandbox - topics API*/
         ReferrerForDeepLink(0x00090000), /* include install_referrer in DDL requests */
+        MetadataBasic(0x00010900), /* Basic app metadata, URLs, and screen title */
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
@@ -279,6 +283,7 @@ object FeatureManager {
                 GPSTopicsObservation -> "GPSTopicsObservation"
                 VVP -> "VVP"
                 ReferrerForDeepLink -> "ReferrerForDeepLink"
+                MetadataBasic -> "MetadataBasic"
                 ServiceUpdateCompliance -> "ServiceUpdateCompliance"
                 Login -> "LoginKit"
                 ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"
