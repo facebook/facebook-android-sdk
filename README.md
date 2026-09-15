@@ -21,7 +21,6 @@ TRY IT OUT
 
 FEATURES
 --------
-
 * [Login](https://developers.facebook.com/docs/facebook-login)
 * [Sharing](https://developers.facebook.com/docs/sharing)
 * [Messenger](https://developers.facebook.com/docs/messenger-expressions)
