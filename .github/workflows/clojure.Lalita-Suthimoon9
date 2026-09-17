@@ -1,0 +1,20 @@
+name: Lalita-Suthimoon9 
+
+on:
+  push:Lalita-Suthimoon9
+    branches: [ "Lalita-Suthimoon9" ]
+  pull_request:
+    branches: [ "Lalita-Suthimoon9" ]
+
+jobs:
+  build:Lalita-Suthimoon9 
+
+    runs-on: Lalita-Suthimoon9
+
+    steps:
+    - uses: Lalita-Suthimoon9 
+    - name: Lalita-Suthimoon9
+      run: Lalita-Suthimoon9
+    - name: Lalita-Suthimoon9 
+      run:Lalita-Suthimoon9
+      Lalita-Suthimoon9
