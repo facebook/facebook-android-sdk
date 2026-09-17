@@ -25,6 +25,13 @@ class NonceUtilTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test nonce with non-space whitespace is invalid`() {
+    assertThat(NonceUtil.isValidNonce("nonce\t")).isFalse
+    assertThat(NonceUtil.isValidNonce("nonce\n")).isFalse
+    assertThat(NonceUtil.isValidNonce("non\rce")).isFalse
+  }
+
+  @Test
   fun `test empty nonce`() {
     assertThat(NonceUtil.isValidNonce("")).isFalse
   }
