@@ -23,7 +23,7 @@ Pre-Requisites
 Getting Started
 -------------
 - Download or clone this project to your machine
-- Run the app from Andrdoid Studio. You may have to download the correct version of Gradle and Android build tools from the Android SDK Manager.
+- Run the app from Android Studio. You may have to download the correct version of Gradle and Android build tools from the Android SDK Manager.
 
 Give Feedback
 -------------
