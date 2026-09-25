@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [19.0.0]
+
+### Added
+- Starting on October 12, 2026, Screen Title and AppLink URL will be included with events logged with Facebook SDK. You can disable additional metadata by setting AutoLogMetaDataEnabled false in your AndroidManifest.xml or by turning off "Automatically include more app event details" in Events Manager.
+
+### Changed
+- If the AutoLogAppEventsEnabled flag is set as false, Automatic App Event Logging will be disabled even if it is enabled in Events Manager.
+
 ## [18.3.0]
 
 ### Added
