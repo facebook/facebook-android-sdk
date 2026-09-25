@@ -1010,6 +1010,10 @@ object FacebookSdk {
     /**
      * Gets the flag used by [com.facebook.appevents.AppEventsLogger]
      *
+     * Automatic App Event Logging is enabled only when both the client-side flag (set in
+     * AndroidManifest.xml or via [setAutoLogAppEventsEnabled]) and the Events Manager setting are
+     * enabled.
+     *
      * @return the auto logging events flag for the application
      */
     @JvmStatic

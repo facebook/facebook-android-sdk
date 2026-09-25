@@ -59,6 +59,7 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
             "hasLoggedWarnings",
             AtomicBoolean(false)
         )
+        resetUserSettingValue("autoLogAppEventsEnabledLocally")
         FacebookSdk.setApplicationId("123456789")
         mockPackageManager = mock()
         mockApplicationContext = mock()
@@ -106,6 +107,11 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
         )
     }
 
+    private fun resetUserSettingValue(fieldName: String) {
+        val setting = Whitebox.getInternalState<Any>(UserSettingsManager::class.java, fieldName)
+        Whitebox.setInternalState(setting, "value", null as Boolean?)
+    }
+
     @Test
     fun testAutoInitEnabled() {
         PowerMockito.mockStatic(UserSettingsManager::class.java)
@@ -150,113 +156,83 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
-    fun `test AutoLogEnabled without values from server`() {
-        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-        whenever(FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()).thenReturn(
-            null
-        )
+    fun `test AutoLogEnabled is true when neither client nor server sets a value`() {
+        mockServerAutoLogValueMap(null)
 
-        val enable = FacebookSdk.getAutoLogAppEventsEnabled()
-        assertThat(enable).isTrue
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isTrue
     }
 
     @Test
-    fun `test AutoLogEnabled return the enabled value fetched from server`() {
-        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-        val mockedAutoLogAppEventsValues = HashMap<String, Boolean>()
-        mockedAutoLogAppEventsValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] =
-            false
-        mockedAutoLogAppEventsValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENT_ENABLED_FIELD] =
-            false
-        whenever(FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()).thenReturn(
-            mockedAutoLogAppEventsValues
-        )
+    fun `test AutoLogEnabled is true when client and server are both true`() {
+        mockServerAutoLogValues(enabled = true)
+        mockManifestAutoLogValue(true)
+
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isTrue
+    }
+
+    @Test
+    fun `test AutoLogEnabled is false when server is false and client is true`() {
+        mockServerAutoLogValues(enabled = false)
 
         setAutoLogAppEventsEnabled(true)
-        val enable = FacebookSdk.getAutoLogAppEventsEnabled()
-        assertThat(enable).isFalse
+
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isFalse
     }
 
     @Test
-    fun `test AutoLogEnabled return the value in cache`() {
-        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-        val mockedAutoLogAppEventsValues = HashMap<String, Boolean>()
-        mockedAutoLogAppEventsValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] =
-            false
-        whenever(FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()).thenReturn(
-            mockedAutoLogAppEventsValues
-        )
+    fun `test AutoLogEnabled is false when manifest is false and server is true`() {
+        mockServerAutoLogValues(enabled = true)
+        mockManifestAutoLogValue(false)
 
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isFalse
+    }
+
+    @Test
+    fun `test AutoLogEnabled is false when cached client value is false and server is true`() {
+        mockServerAutoLogValues(enabled = true)
         val jsonObject = JSONObject()
-        jsonObject.put("value", true)
+        jsonObject.put("value", false)
+        jsonObject.put("last_timestamp", 0L)
         mockSharedPreference.edit()
             .putString(FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY, jsonObject.toString())
             .apply()
-        Whitebox.setInternalState(
-            UserSettingsManager::class.java,
-            "isInitialized",
-            AtomicBoolean(true)
-        )
-        Whitebox.setInternalState(
-            UserSettingsManager::class.java,
-            "userSettingPref",
-            mockSharedPreference
-        )
 
-        val enable = FacebookSdk.getAutoLogAppEventsEnabled()
-        assertThat(enable).isTrue
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isFalse
     }
 
     @Test
-    fun `test AutoLogEnabled return the value set in manifest file`() {
-        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-        val mockedAutoLogAppEventsValues = HashMap<String, Boolean>()
-        mockedAutoLogAppEventsValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] =
-            false
-        whenever(FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()).thenReturn(
-            mockedAutoLogAppEventsValues
-        )
-        Whitebox.setInternalState(
-            UserSettingsManager::class.java,
-            "isInitialized",
-            AtomicBoolean(true)
-        )
-        Whitebox.setInternalState(
-            UserSettingsManager::class.java,
-            "userSettingPref",
-            mockSharedPreference
-        )
+    fun `test AutoLogEnabled is false when client is false and server has no value`() {
+        mockServerAutoLogValueMap(null)
 
+        setAutoLogAppEventsEnabled(false)
+
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isFalse
+    }
+
+    @Test
+    fun `test AutoLogEnabled ignores the server default value`() {
+        mockServerAutoLogValues(default = false)
+
+        assertThat(FacebookSdk.getAutoLogAppEventsEnabled()).isTrue
+    }
+
+    private fun mockServerAutoLogValues(enabled: Boolean? = null, default: Boolean? = null) {
+        val values = HashMap<String, Boolean>()
+        enabled?.let { values[FetchedAppSettingsManager.AUTO_LOG_APP_EVENT_ENABLED_FIELD] = it }
+        default?.let { values[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] = it }
+        mockServerAutoLogValueMap(values)
+    }
+
+    private fun mockServerAutoLogValueMap(values: Map<String, Boolean>?) {
+        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
+        whenever(FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings())
+            .thenReturn(values)
+    }
+
+    private fun mockManifestAutoLogValue(value: Boolean) {
         val metaData = Bundle()
-        metaData.putBoolean(FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY, true)
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY, value)
         mockApplicationInfo.metaData = metaData
-
-        val enable = FacebookSdk.getAutoLogAppEventsEnabled()
-        assertThat(enable).isTrue
-    }
-
-    @Test
-    fun `test AutoLogEnabled return the default value fetched from server`() {
-        PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
-        val mockedAutoLogAppEventsValues = HashMap<String, Boolean>()
-        mockedAutoLogAppEventsValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD] =
-            false
-        whenever(FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()).thenReturn(
-            mockedAutoLogAppEventsValues
-        )
-        Whitebox.setInternalState(
-            UserSettingsManager::class.java,
-            "isInitialized",
-            AtomicBoolean(true)
-        )
-        Whitebox.setInternalState(
-            UserSettingsManager::class.java,
-            "userSettingPref",
-            mockSharedPreference
-        )
-
-        val enable = FacebookSdk.getAutoLogAppEventsEnabled()
-        assertThat(enable).isFalse
     }
 
     @Test

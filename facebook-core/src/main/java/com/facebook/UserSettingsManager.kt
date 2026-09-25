@@ -327,67 +327,10 @@ internal object UserSettingsManager {
   }
 
   private fun checkAutoLogAppEventsEnabled(): Boolean {
-    val migratedAutoLogValues: Map<String, Boolean>? =
-      FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()
-
-    if (migratedAutoLogValues.isNullOrEmpty()) {
-      return autoLogAppEventsEnabledLocally.getValue()
-    }
-
-    var migratedAutoLogEnabled : Boolean? = migratedAutoLogValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENT_ENABLED_FIELD]
-    var migratedDefault : Boolean? = migratedAutoLogValues[FetchedAppSettingsManager.AUTO_LOG_APP_EVENTS_DEFAULT_FIELD]
-
-    migratedAutoLogEnabled?.let {
-      return it
-    }
-    checkClientSideConfiguration()?.let {
-      return it
-    }
-    migratedDefault?.let {
-      return it
-    }
-    return true
-  }
-
-  private fun checkClientSideConfiguration(): Boolean? {
-    readAutoLogAppEventsSettingFromCache()?.let {
-      return it
-    }
-
-    loadAutoLogAppEventsSettingFromManifest()?.let {
-      return it
-    }
-
-    return null
-  }
-
-  @JvmStatic
-  private fun readAutoLogAppEventsSettingFromCache(): Boolean? {
-    validateInitialized()
-    try {
-      val settingStr = userSettingPref.getString(autoLogAppEventsEnabledLocally.key, "") ?: ""
-      if (settingStr.isNotEmpty()) {
-        val setting = JSONObject(settingStr)
-        return setting.getBoolean(VALUE)
-      }
-    } catch (je: JSONException) {
-      logd(TAG, je)
-    }
-    return null
-  }
-
-  private fun loadAutoLogAppEventsSettingFromManifest(): Boolean? {
-    validateInitialized()
-    try {
-      val ctx = FacebookSdk.getApplicationContext()
-      val ai = ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
-      if (ai?.metaData != null && ai.metaData.containsKey(autoLogAppEventsEnabledLocally.key)) {
-        return ai.metaData.getBoolean(autoLogAppEventsEnabledLocally.key)
-      }
-    } catch (e: PackageManager.NameNotFoundException) {
-      logd(TAG, e)
-    }
-    return null
+    val serverEnabled =
+        FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()
+            ?.get(FetchedAppSettingsManager.AUTO_LOG_APP_EVENT_ENABLED_FIELD) ?: true
+    return autoLogAppEventsEnabledLocally.getValue() && serverEnabled
   }
 
   @JvmStatic
