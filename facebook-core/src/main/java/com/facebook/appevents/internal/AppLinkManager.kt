@@ -17,7 +17,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import com.facebook.FacebookSdk
-import com.facebook.internal.FeatureManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.util.concurrent.atomic.AtomicBoolean
 import org.json.JSONObject
@@ -69,8 +68,7 @@ class AppLinkManager private constructor() {
   }
 
   internal fun getInboundUrl(): String? {
-    if (!FacebookSdk.getAutoLogMetaDataEnabled() ||
-        !FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)) {
+    if (!UserJourneyTracker.isMetadataCollectionEnabled()) {
       return null
     }
     return getInfo(Constants.EVENT_PARAM_INBOUND_URL)

@@ -37,7 +37,6 @@ import com.facebook.appevents.integrity.ProtectedModeManager.processParametersFo
 import com.facebook.appevents.integrity.SensitiveParamsManager.processFilterSensitiveParams
 import com.facebook.appevents.integrity.VVPManager
 import com.facebook.appevents.integrity.StdParamsEnforcementManager.processFilterParamSchemaBlocking
-import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentActivityLabel
 import com.facebook.appevents.internal.ActivityLifecycleTracker.getCurrentSessionGuid
 import com.facebook.appevents.internal.ActivityLifecycleTracker.isInBackground
 import com.facebook.appevents.internal.ActivityLifecycleTracker.startTracking
@@ -45,6 +44,7 @@ import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.appevents.internal.AppLinkManager
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled
 import com.facebook.appevents.internal.Constants
+import com.facebook.appevents.internal.UserJourneyTracker
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager.isOnDeviceProcessingEnabled
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager.sendCustomEventAsync
 import com.facebook.internal.AnalyticsEvents
@@ -424,7 +424,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                     currentSessionId,
                     modifiedOperationalData,
                     inboundUrl = AppLinkManager.getInstance()?.getInboundUrl(),
-                    activityLabel = getCurrentActivityLabel()
+                    activityLabel = UserJourneyTracker.getCurrentScreenTitle()
                 )
             logEvent(event, accessTokenAppId)
         } catch (jsonException: JSONException) {
