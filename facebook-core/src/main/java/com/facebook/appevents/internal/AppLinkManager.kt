@@ -18,12 +18,15 @@ import android.os.Bundle
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 import org.json.JSONObject
 
 @AutoHandleExceptions
 class AppLinkManager private constructor() {
   private val lifecycleRegistered = AtomicBoolean(false)
+
+  @Volatile private var lastHandledIntent: WeakReference<Intent>? = null
 
   private val preferences: SharedPreferences by lazy {
     FacebookSdk.getApplicationContext().getSharedPreferences(APPLINK_INFO, Context.MODE_PRIVATE)
@@ -51,10 +54,24 @@ class AppLinkManager private constructor() {
   }
 
   fun handleURL(activity: Activity) {
-    val uri = activity.intent.data ?: return
-    processCampaignIds(uri, activity.intent)
+    val intent = activity.intent ?: return
+    val uri = intent.data ?: return
+    processCampaignIds(uri, intent)
     processClickId(uri)
     cacheInboundUrl(uri)
+    logInboundAppLinkIfNew(intent)
+  }
+
+  // handleURL runs on both onActivityStarted and onActivityResumed, so dedupe on the Intent
+  // instance: each newly delivered intent is logged once, even if it repeats the same URL.
+  private fun logInboundAppLinkIfNew(intent: Intent) {
+    if (lastHandledIntent?.get() === intent) {
+      return
+    }
+    lastHandledIntent = WeakReference(intent)
+    val parameters = Bundle()
+    parameters.putString(Constants.EVENT_PARAM_URL_TYPE, Constants.URL_TYPE_INBOUND)
+    UserJourneyTracker.logEvent(Constants.EVENT_NAME_APPLINK, parameters)
   }
 
   internal fun cacheInboundUrl(uri: Uri?) {

@@ -18,14 +18,21 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.facebook.appevents.AppEventsLoggerImpl
 import com.facebook.internal.FeatureManager
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -38,12 +45,15 @@ import kotlin.test.assertNull
   FacebookSdk::class,
   FeatureManager::class,
   AppLinkManager::class,
+  UserJourneyTracker::class,
 )
 class AppLinkManagerTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockApplicationContext: Context
   private lateinit var mockActivity: Activity
   private lateinit var appLinkManager: AppLinkManager
+  private lateinit var mockLogger: AppEventsLoggerImpl
+  private var metadataBasicEnabled = true
 
   companion object {
     private val mockSharedPreference: SharedPreferences = MockSharedPreference()
@@ -62,7 +72,16 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
     whenever(mockApplicationContext.getSharedPreferences(any<String>(), any()))
       .thenReturn(mockSharedPreference)
     PowerMockito.mockStatic(FeatureManager::class.java)
-    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(true)
+    metadataBasicEnabled = true
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenAnswer {
+      metadataBasicEnabled
+    }
+    whenever(FeatureManager.checkFeature(eq(FeatureManager.Feature.MetadataBasic), any())).then {
+      (it.arguments[1] as FeatureManager.Callback).onCompleted(metadataBasicEnabled)
+      Unit
+    }
+    mockLogger = mock()
+    PowerMockito.whenNew(AppEventsLoggerImpl::class.java).withAnyArguments().thenReturn(mockLogger)
     appLinkManager =
       AppLinkManager::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
   }
@@ -193,7 +212,7 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun `disabled MetadataBasic allows local cache but blocks event attribution`() {
     val url = "fb123://applinks/disabled"
-    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(false)
+    metadataBasicEnabled = false
     appLinkManager.cacheInboundUrl(Uri.parse(url))
 
     assertEquals(url, mockSharedPreference.getString(Constants.EVENT_PARAM_INBOUND_URL, null))
@@ -242,6 +261,89 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
     appLinkManager.clearInboundUrl()
 
     assertNull(mockSharedPreference.getString(Constants.EVENT_PARAM_INBOUND_URL, null))
+  }
+
+  @Test
+  fun `handleURL logs implicit fb_mobile_applink with inbound url_type`() {
+    whenever(mockActivity.intent)
+      .thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse("fb123://applinks/logged")))
+
+    appLinkManager.handleURL(mockActivity)
+
+    val captor = argumentCaptor<Bundle>()
+    verify(mockLogger, times(1))
+      .logEventImplicitly(eq(Constants.EVENT_NAME_APPLINK), isNull<Double>(), captor.capture())
+    verifyNoMoreInteractions(mockLogger)
+    assertEquals(
+      Constants.URL_TYPE_INBOUND, captor.firstValue.getString(Constants.EVENT_PARAM_URL_TYPE))
+  }
+
+  @Test
+  fun `handleURL logs once when the same intent is handled on start and resume`() {
+    whenever(mockActivity.intent)
+      .thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse("fb123://applinks/started_resumed")))
+
+    appLinkManager.handleURL(mockActivity)
+    appLinkManager.handleURL(mockActivity)
+
+    verify(mockLogger, times(1))
+      .logEventImplicitly(eq(Constants.EVENT_NAME_APPLINK), isNull<Double>(), anyOrNull<Bundle>())
+  }
+
+  @Test
+  fun `handleURL logs again for a new intent with the same URL`() {
+    val url = "fb123://applinks/repeated"
+    whenever(mockActivity.intent).thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    appLinkManager.handleURL(mockActivity)
+    whenever(mockActivity.intent).thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+
+    appLinkManager.handleURL(mockActivity)
+
+    verify(mockLogger, times(2))
+      .logEventImplicitly(eq(Constants.EVENT_NAME_APPLINK), isNull<Double>(), anyOrNull<Bundle>())
+  }
+
+  @Test
+  fun `handleURL does not log without an inbound URL`() {
+    whenever(mockActivity.intent).thenReturn(Intent())
+
+    appLinkManager.handleURL(mockActivity)
+
+    verifyZeroInteractions(mockLogger)
+  }
+
+  @Test
+  fun `handleURL does not log when metadata collection is disabled`() {
+    whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(false)
+    whenever(mockActivity.intent)
+      .thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse("fb123://applinks/opted_out")))
+
+    appLinkManager.handleURL(mockActivity)
+
+    verifyZeroInteractions(mockLogger)
+  }
+
+  @Test
+  fun `handleURL does not log when MetadataBasic is disabled`() {
+    metadataBasicEnabled = false
+    whenever(mockActivity.intent)
+      .thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse("fb123://applinks/gk_off")))
+
+    appLinkManager.handleURL(mockActivity)
+
+    verifyZeroInteractions(mockLogger)
+  }
+
+  @Test
+  fun `handleURL logs even when AutoLogAppEvents is disabled`() {
+    whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
+    whenever(mockActivity.intent)
+      .thenReturn(Intent(Intent.ACTION_VIEW, Uri.parse("fb123://applinks/autolog_off")))
+
+    appLinkManager.handleURL(mockActivity)
+
+    verify(mockLogger, times(1))
+      .logEventImplicitly(eq(Constants.EVENT_NAME_APPLINK), isNull<Double>(), anyOrNull<Bundle>())
   }
 
   @Test
