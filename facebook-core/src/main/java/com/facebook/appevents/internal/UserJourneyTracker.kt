@@ -14,7 +14,6 @@ import android.os.Bundle
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLoggerImpl
 import com.facebook.internal.FeatureManager
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.lang.ref.WeakReference
@@ -22,9 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Collects app metadata (the current screen title) and logs the UserJourney events. Collection is
- * independent of AutoLogAppEvents and is gated only by the AutoLogMetaDataEnabled flag
- * and the MetadataBasic feature.
+ * Collects app metadata (the current screen title) that is attached to every logged app event.
+ * Collection is independent of AutoLogAppEvents and is gated only by the AutoLogMetaDataEnabled
+ * flag and the MetadataBasic feature.
  */
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -74,24 +73,6 @@ internal object UserJourneyTracker {
     currentScreenTitle.set(null)
   }
 
-  /**
-   * Logs a UserJourney event as an implicit internal event. It goes through AppEventsLoggerImpl
-   * directly because InternalAppEventsLogger is gated on AutoLogAppEvents. The feature check waits
-   * for gatekeepers to load so events at app launch are not dropped.
-   */
-  @JvmStatic
-  fun logEvent(eventName: String, parameters: Bundle?) {
-    if (!FacebookSdk.getAutoLogMetaDataEnabled()) {
-      return
-    }
-    FeatureManager.checkFeature(FeatureManager.Feature.MetadataBasic) { enabled ->
-      if (enabled) {
-        AppEventsLoggerImpl(FacebookSdk.getApplicationContext(), null, null)
-            .logEventImplicitly(eventName, null, parameters)
-      }
-    }
-  }
-
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
   internal fun onActivityResumed(activity: Activity) {
     // The title is captured before the gatekeeper check so the first screen is not lost while
@@ -100,13 +81,8 @@ internal object UserJourneyTracker {
       clear()
       return
     }
-    val title = activity.title?.toString()?.takeIf { it.isNotEmpty() }
-    val isNewScreen = currentActivity?.get() !== activity || currentScreenTitle.get() != title
     currentActivity = WeakReference(activity)
-    currentScreenTitle.set(title)
-    if (isNewScreen) {
-      logEvent(Constants.EVENT_NAME_SCREEN_VIEW, null)
-    }
+    currentScreenTitle.set(activity.title?.toString()?.takeIf { it.isNotEmpty() })
   }
 
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

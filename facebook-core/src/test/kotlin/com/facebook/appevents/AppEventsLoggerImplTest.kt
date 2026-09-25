@@ -8,6 +8,7 @@
 
 package com.facebook.appevents
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.os.Build
@@ -22,6 +23,7 @@ import com.facebook.appevents.iap.InAppPurchase
 import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.internal.AppEventUtility
 import com.facebook.appevents.internal.AppLinkManager
+import com.facebook.appevents.internal.UserJourneyTracker
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager
@@ -228,6 +230,28 @@ class AppEventsLoggerImplTest : FacebookPowerMockTestCase() {
             ).isEqualTo(inboundUrl)
         } finally {
             preferences.edit().clear().commit()
+        }
+    }
+
+    @Test
+    fun testManualAndImplicitEventsIncludeScreenTitleWhenMetadataBasicIsEnabled() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(true)
+        val activity: Activity = mock()
+        whenever(activity.title).thenReturn("Product Detail")
+        UserJourneyTracker.onActivityResumed(activity)
+
+        try {
+            logger.logEvent(mockEventName)
+            assertThat(
+                appEventCapture?.getJSONObject()?.getString(Constants.EVENT_PARAM_ACTIVITY_LABEL)
+            ).isEqualTo("Product Detail")
+
+            logger.logEventImplicitly(mockEventName, null, null)
+            assertThat(
+                appEventCapture?.getJSONObject()?.getString(Constants.EVENT_PARAM_ACTIVITY_LABEL)
+            ).isEqualTo("Product Detail")
+        } finally {
+            UserJourneyTracker.clear()
         }
     }
 

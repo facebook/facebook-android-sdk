@@ -10,11 +10,8 @@ package com.facebook.appevents.internal
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
-import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLoggerImpl
 import com.facebook.internal.FeatureManager
 import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Assert.assertEquals
@@ -22,47 +19,27 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, FeatureManager::class, UserJourneyTracker::class)
+@PrepareForTest(FacebookSdk::class, FeatureManager::class)
 class UserJourneyTrackerTest : FacebookPowerMockTestCase() {
   private lateinit var mockActivity: Activity
-  private lateinit var mockLogger: AppEventsLoggerImpl
-  private var metadataBasicEnabled = true
-  private var checkFeatureCalls = 0
 
   @Before
   fun init() {
     mockActivity = mock()
     whenever(mockActivity.title).thenReturn("Home")
-    mockLogger = mock()
-    metadataBasicEnabled = true
-    checkFeatureCalls = 0
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
     whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(true)
-    whenever(FacebookSdk.getApplicationContext()).thenReturn(mock<Context>())
     PowerMockito.mockStatic(FeatureManager::class.java)
-    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenAnswer {
-      metadataBasicEnabled
-    }
-    whenever(FeatureManager.checkFeature(eq(FeatureManager.Feature.MetadataBasic), any())).then {
-      checkFeatureCalls++
-      (it.arguments[1] as FeatureManager.Callback).onCompleted(metadataBasicEnabled)
-      Unit
-    }
-    PowerMockito.whenNew(AppEventsLoggerImpl::class.java).withAnyArguments().thenReturn(mockLogger)
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(true)
 
     UserJourneyTracker.clear()
     Whitebox.setInternalState(UserJourneyTracker::class.java, "tracking", AtomicBoolean(false))
@@ -84,24 +61,10 @@ class UserJourneyTrackerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `resuming an activity captures its title and logs an implicit screen view`() {
+  fun `resuming an activity captures its title`() {
     UserJourneyTracker.onActivityResumed(mockActivity)
 
     assertEquals("Home", UserJourneyTracker.getCurrentScreenTitle())
-    verify(mockLogger, times(1))
-        .logEventImplicitly(
-            eq(Constants.EVENT_NAME_SCREEN_VIEW), isNull<Double>(), isNull<Bundle>())
-    verifyNoMoreInteractions(mockLogger)
-  }
-
-  @Test
-  fun `logEvent does not check the gatekeeper when metadata collection is disabled`() {
-    whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(false)
-
-    UserJourneyTracker.logEvent(Constants.EVENT_NAME_SCREEN_VIEW, null)
-
-    assertEquals(0, checkFeatureCalls)
-    verifyZeroInteractions(mockLogger)
   }
 
   @Test
@@ -114,30 +77,17 @@ class UserJourneyTrackerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `resuming the same activity with the same title does not log again`() {
-    UserJourneyTracker.onActivityResumed(mockActivity)
-    UserJourneyTracker.onActivityResumed(mockActivity)
-
-    verify(mockLogger, times(1))
-        .logEventImplicitly(
-            eq(Constants.EVENT_NAME_SCREEN_VIEW), isNull<Double>(), anyOrNull<Bundle>())
-  }
-
-  @Test
-  fun `title change on the same activity logs a new screen view`() {
+  fun `resuming the same activity picks up a changed title`() {
     UserJourneyTracker.onActivityResumed(mockActivity)
     whenever(mockActivity.title).thenReturn("Cart")
 
     UserJourneyTracker.onActivityResumed(mockActivity)
 
     assertEquals("Cart", UserJourneyTracker.getCurrentScreenTitle())
-    verify(mockLogger, times(2))
-        .logEventImplicitly(
-            eq(Constants.EVENT_NAME_SCREEN_VIEW), isNull<Double>(), anyOrNull<Bundle>())
   }
 
   @Test
-  fun `switching activities logs a screen view for each`() {
+  fun `switching activities updates the title`() {
     val activityB: Activity = mock()
     whenever(activityB.title).thenReturn("Checkout")
 
@@ -145,20 +95,16 @@ class UserJourneyTrackerTest : FacebookPowerMockTestCase() {
     UserJourneyTracker.onActivityResumed(activityB)
 
     assertEquals("Checkout", UserJourneyTracker.getCurrentScreenTitle())
-    verify(mockLogger, times(2))
-        .logEventImplicitly(
-            eq(Constants.EVENT_NAME_SCREEN_VIEW), isNull<Double>(), anyOrNull<Bundle>())
   }
 
   @Test
-  fun `nothing is captured or logged when metadata collection flag is disabled`() {
+  fun `nothing is captured when metadata collection is disabled`() {
     whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(false)
 
     UserJourneyTracker.onActivityResumed(mockActivity)
 
     whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(true)
     assertNull(UserJourneyTracker.getCurrentScreenTitle())
-    verifyZeroInteractions(mockLogger)
   }
 
   @Test
@@ -173,34 +119,23 @@ class UserJourneyTrackerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `screen view is not logged when MetadataBasic is disabled`() {
-    metadataBasicEnabled = false
-
-    UserJourneyTracker.onActivityResumed(mockActivity)
-
-    verifyZeroInteractions(mockLogger)
-  }
-
-  @Test
   fun `captured title becomes available once MetadataBasic is enabled`() {
-    metadataBasicEnabled = false
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(false)
     UserJourneyTracker.onActivityResumed(mockActivity)
     assertNull(UserJourneyTracker.getCurrentScreenTitle())
 
-    metadataBasicEnabled = true
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)).thenReturn(true)
 
     assertEquals("Home", UserJourneyTracker.getCurrentScreenTitle())
   }
 
   @Test
-  fun `screen view is logged even when AutoLogAppEvents is disabled`() {
+  fun `title is captured even when AutoLogAppEvents is disabled`() {
     whenever(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
     UserJourneyTracker.onActivityResumed(mockActivity)
 
-    verify(mockLogger, times(1))
-        .logEventImplicitly(
-            eq(Constants.EVENT_NAME_SCREEN_VIEW), isNull<Double>(), isNull<Bundle>())
+    assertEquals("Home", UserJourneyTracker.getCurrentScreenTitle())
   }
 
   @Test

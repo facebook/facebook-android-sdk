@@ -20,12 +20,6 @@ object Constants {
     const val AA_TIME_SPENT_SCREEN_PARAMETER_NAME = "fb_aa_time_spent_view_name"
     const val EVENT_PARAM_ACTIVITY_LABEL = "fb_screen_title"
 
-    // UserJourney events
-    const val EVENT_NAME_SCREEN_VIEW = "fb_mobile_screen_view"
-    const val EVENT_NAME_APPLINK = "fb_mobile_applink"
-    const val EVENT_PARAM_URL_TYPE = "url_type"
-    const val URL_TYPE_INBOUND = "inbound"
-
     // Used to measure rollout of dynamic ads support
     const val ANDROID_DYNAMIC_ADS_CONTENT_ID = "android_dynamic_ads_content_id"
 
