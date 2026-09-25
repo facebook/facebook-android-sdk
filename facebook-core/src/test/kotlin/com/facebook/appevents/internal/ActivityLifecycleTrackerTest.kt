@@ -11,6 +11,7 @@ package com.facebook.appevents.internal
 import android.app.Activity
 import android.app.Application
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.FacebookSdk
 import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.codeless.CodelessManager
 import com.facebook.appevents.iap.InAppPurchaseManager
@@ -35,6 +36,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
 @PrepareForTest(
+    FacebookSdk::class,
     FeatureManager::class,
     CodelessManager::class,
     MetadataIndexer::class,
@@ -236,6 +238,17 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         whenever(FeatureManager.isEnabled(eq(FeatureManager.Feature.MetadataBasic))).thenReturn(true)
 
         assertEquals("My Activity", ActivityLifecycleTracker.getCurrentActivityLabel())
+    }
+
+    @Test
+    fun `activity label is null when metadata collection is disabled`() {
+        whenever(mockActivity.title).thenReturn("My Activity")
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+
+        PowerMockito.mockStatic(FacebookSdk::class.java)
+        whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(false)
+
+        assertNull(ActivityLifecycleTracker.getCurrentActivityLabel())
     }
 
     @Test

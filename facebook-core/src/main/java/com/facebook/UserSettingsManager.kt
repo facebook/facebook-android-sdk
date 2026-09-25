@@ -44,6 +44,11 @@ internal object UserSettingsManager {
       UserSetting(true, FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY)
   private val codelessSetupEnabled = UserSetting(false, EVENTS_CODELESS_SETUP_ENABLED)
 
+  // Deliberately excluded from the logIfSDKSettingsChanged bitmask: adding a bit would make every
+  // existing install report a spurious settings change on upgrade.
+  private val autoLogMetaDataEnabled =
+      UserSetting(true, FacebookSdk.AUTO_LOG_METADATA_ENABLED_PROPERTY)
+
   // Monitor enabled user setting from AndroidManifest
   private val monitorEnabled = UserSetting(true, FacebookSdk.MONITOR_ENABLED_PROPERTY)
 
@@ -85,7 +90,11 @@ internal object UserSettingsManager {
     userSettingPref =
         FacebookSdk.getApplicationContext()
             .getSharedPreferences(USER_SETTINGS, Context.MODE_PRIVATE)
-    initializeUserSetting(autoLogAppEventsEnabledLocally, advertiserIDCollectionEnabled, autoInitEnabled)
+    initializeUserSetting(
+        autoLogAppEventsEnabledLocally,
+        advertiserIDCollectionEnabled,
+        autoInitEnabled,
+        autoLogMetaDataEnabled)
     initializeCodelessSetupEnabledAsync()
     logWarnings()
     logIfSDKSettingsChanged()
@@ -331,6 +340,23 @@ internal object UserSettingsManager {
         FetchedAppSettingsManager.getCachedMigratedAutoLogValuesInAppSettings()
             ?.get(FetchedAppSettingsManager.AUTO_LOG_APP_EVENT_ENABLED_FIELD) ?: true
     return autoLogAppEventsEnabledLocally.getValue() && serverEnabled
+  }
+
+  @JvmStatic
+  fun setAutoLogMetaDataEnabled(flag: Boolean) {
+    autoLogMetaDataEnabled.value = flag
+    autoLogMetaDataEnabled.lastTS = System.currentTimeMillis()
+    if (isInitialized.get()) {
+      writeSettingToCache(autoLogMetaDataEnabled)
+    } else {
+      initializeIfNotInitialized()
+    }
+  }
+
+  @JvmStatic
+  fun getAutoLogMetaDataEnabled(): Boolean {
+    initializeIfNotInitialized()
+    return autoLogMetaDataEnabled.getValue()
   }
 
   @JvmStatic

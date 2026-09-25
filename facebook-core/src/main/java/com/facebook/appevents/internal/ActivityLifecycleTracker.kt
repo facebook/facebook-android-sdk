@@ -278,7 +278,9 @@ object ActivityLifecycleTracker {
 
     @JvmStatic
     fun getCurrentActivityLabel(): String? {
-        if (!FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)) {
+        if (!FacebookSdk.getAutoLogMetaDataEnabled() ||
+            !FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)
+        ) {
             return null
         }
         return currActivityLabel.get()

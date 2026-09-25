@@ -60,7 +60,7 @@ class AppLinkManager private constructor() {
 
   internal fun cacheInboundUrl(uri: Uri?) {
     val url = uri?.toString()
-    if (url.isNullOrEmpty()) {
+    if (url.isNullOrEmpty() || !FacebookSdk.getAutoLogMetaDataEnabled()) {
       return
     }
     // Cache before the asynchronous gatekeeper fetch finishes so the launch URL is not lost.
@@ -69,10 +69,15 @@ class AppLinkManager private constructor() {
   }
 
   internal fun getInboundUrl(): String? {
-    if (!FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)) {
+    if (!FacebookSdk.getAutoLogMetaDataEnabled() ||
+        !FeatureManager.isEnabled(FeatureManager.Feature.MetadataBasic)) {
       return null
     }
     return getInfo(Constants.EVENT_PARAM_INBOUND_URL)
+  }
+
+  internal fun clearInboundUrl() {
+    preferences.edit().remove(Constants.EVENT_PARAM_INBOUND_URL).apply()
   }
 
   fun processCampaignIds(uri: Uri, intent: Intent) {

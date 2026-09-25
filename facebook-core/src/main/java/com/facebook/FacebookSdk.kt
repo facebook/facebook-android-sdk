@@ -121,6 +121,13 @@ object FacebookSdk {
     /** The key for the auto logging app events in the Android manifest. */
     const val AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY = "com.facebook.sdk.AutoLogAppEventsEnabled"
 
+    /**
+     * The key for automatically collecting app metadata, such as screen titles and AppLink URLs, in
+     * the Android manifest.
+     */
+    const val AUTO_LOG_METADATA_ENABLED_PROPERTY =
+        "com.facebook.sdk.AutoLogMetaDataEnabled"
+
     /** The key for the auto log codeless in the Android manifest. */
     const val CODELESS_DEBUG_LOG_ENABLED_PROPERTY = "com.facebook.sdk.CodelessDebugLogEnabled"
 
@@ -542,6 +549,9 @@ object FacebookSdk {
                 callback?.onInitialized()
                 AppEventsLogger.initializeLib(getApplicationContext(), applicationId)
                 UserSettingsManager.logIfAutoAppLinkEnabled()
+                if (!UserSettingsManager.getAutoLogMetaDataEnabled()) {
+                    AppLinkManager.getInstance()?.clearInboundUrl()
+                }
 
                 // Flush any app events that might have been persisted during last run.
                 AppEventsLogger.newLogger(getApplicationContext().applicationContext).flush()
@@ -1033,6 +1043,32 @@ object FacebookSdk {
         if (flag) {
             val application = getApplicationContext() as Application
             startTracking(application, getApplicationId())
+        }
+    }
+
+    /**
+     * Gets the flag that controls whether the SDK automatically collects app metadata, such as
+     * screen titles and AppLink URLs, and includes it with logged app events.
+     *
+     * The metadata is collected only when both this flag and the Events Manager setting are enabled.
+     *
+     * @return the auto logging metadata collection flag for the application
+     */
+    @JvmStatic
+    fun getAutoLogMetaDataEnabled(): Boolean =
+        UserSettingsManager.getAutoLogMetaDataEnabled()
+
+    /**
+     * Sets the flag that controls whether the SDK automatically collects app metadata, such as
+     * screen titles and AppLink URLs, and includes it with logged app events.
+     *
+     * @param flag true or false. When false, metadata that was already collected is discarded.
+     */
+    @JvmStatic
+    fun setAutoLogMetaDataEnabled(flag: Boolean) {
+        UserSettingsManager.setAutoLogMetaDataEnabled(flag)
+        if (!flag) {
+            AppLinkManager.getInstance()?.clearInboundUrl()
         }
     }
 

@@ -28,8 +28,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
@@ -60,6 +62,7 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
             AtomicBoolean(false)
         )
         resetUserSettingValue("autoLogAppEventsEnabledLocally")
+        resetUserSettingValue("autoLogMetaDataEnabled")
         FacebookSdk.setApplicationId("123456789")
         mockPackageManager = mock()
         mockApplicationContext = mock()
@@ -233,6 +236,59 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
         val metaData = Bundle()
         metaData.putBoolean(FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY, value)
         mockApplicationInfo.metaData = metaData
+    }
+
+    @Test
+    fun `test AutoLogMetaDataEnabled defaults to true`() {
+        assertThat(UserSettingsManager.getAutoLogMetaDataEnabled()).isTrue
+    }
+
+    @Test
+    fun `test AutoLogMetaDataEnabled reads false from manifest`() {
+        val metaData = Bundle()
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_METADATA_ENABLED_PROPERTY, false)
+        mockApplicationInfo.metaData = metaData
+
+        assertThat(UserSettingsManager.getAutoLogMetaDataEnabled()).isFalse
+    }
+
+    @Test
+    fun `test set AutoLogMetaDataEnabled persists the value to cache`() {
+        UserSettingsManager.setAutoLogMetaDataEnabled(false)
+
+        assertThat(UserSettingsManager.getAutoLogMetaDataEnabled()).isFalse
+        val cached =
+            JSONObject(
+                checkNotNull(
+                    mockSharedPreference.getString(
+                        FacebookSdk.AUTO_LOG_METADATA_ENABLED_PROPERTY, null)))
+        assertThat(cached.getBoolean("value")).isFalse
+    }
+
+    @Test
+    fun `test cached AutoLogMetaDataEnabled overrides manifest`() {
+        val jsonObject = JSONObject()
+        jsonObject.put("value", false)
+        jsonObject.put("last_timestamp", 0L)
+        mockSharedPreference.edit()
+            .putString(
+                FacebookSdk.AUTO_LOG_METADATA_ENABLED_PROPERTY, jsonObject.toString())
+            .apply()
+        val metaData = Bundle()
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_METADATA_ENABLED_PROPERTY, true)
+        mockApplicationInfo.metaData = metaData
+
+        assertThat(UserSettingsManager.getAutoLogMetaDataEnabled()).isFalse
+    }
+
+    @Test
+    fun `test toggling AutoLogMetaDataEnabled does not log settings changed`() {
+        UserSettingsManager.getAutoLogMetaDataEnabled()
+        clearInvocations(mockLogger)
+
+        UserSettingsManager.setAutoLogMetaDataEnabled(false)
+
+        verify(mockLogger, never()).logChangedSettingsEvent(any())
     }
 
     @Test

@@ -58,6 +58,7 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
     whenever(FacebookSdk.getApplicationId()).thenReturn("123456789")
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext)
+    whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(true)
     whenever(mockApplicationContext.getSharedPreferences(any<String>(), any()))
       .thenReturn(mockSharedPreference)
     PowerMockito.mockStatic(FeatureManager::class.java)
@@ -215,6 +216,32 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
       AppLinkManager::class.java.getDeclaredConstructor().apply { isAccessible = true }.newInstance()
 
     assertEquals(url, newManager.getInboundUrl())
+  }
+
+  @Test
+  fun `cacheInboundUrl does not cache when metadata collection is disabled`() {
+    whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(false)
+
+    appLinkManager.cacheInboundUrl(Uri.parse("fb123://applinks/opted_out"))
+
+    assertNull(mockSharedPreference.getString(Constants.EVENT_PARAM_INBOUND_URL, null))
+  }
+
+  @Test
+  fun `getInboundUrl returns null when metadata collection is disabled`() {
+    appLinkManager.cacheInboundUrl(Uri.parse("fb123://applinks/before_opt_out"))
+    whenever(FacebookSdk.getAutoLogMetaDataEnabled()).thenReturn(false)
+
+    assertNull(appLinkManager.getInboundUrl())
+  }
+
+  @Test
+  fun `clearInboundUrl removes the cached URL`() {
+    appLinkManager.cacheInboundUrl(Uri.parse("fb123://applinks/cleared"))
+
+    appLinkManager.clearInboundUrl()
+
+    assertNull(mockSharedPreference.getString(Constants.EVENT_PARAM_INBOUND_URL, null))
   }
 
   @Test

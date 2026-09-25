@@ -17,6 +17,7 @@ import android.os.Bundle
 import android.os.ConditionVariable
 import android.util.Base64
 import androidx.test.core.app.ApplicationProvider
+import com.facebook.appevents.internal.AppLinkManager
 import com.facebook.internal.FetchedAppSettingsManager
 import com.facebook.internal.ServerProtocol.getGraphUrlBase
 import com.facebook.internal.Utility
@@ -79,6 +80,31 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
         } finally {
             FacebookSdk.setExecutor(original)
         }
+    }
+
+    @Test
+    fun testAutoLogMetaDataEnabled() {
+        FacebookSdk.setAutoLogMetaDataEnabled(false)
+        assertThat(FacebookSdk.getAutoLogMetaDataEnabled()).isFalse
+
+        FacebookSdk.setAutoLogMetaDataEnabled(true)
+        assertThat(FacebookSdk.getAutoLogMetaDataEnabled()).isTrue
+    }
+
+    @Test
+    fun testDisablingAutoLogMetaDataClearsCachedInboundUrl() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(true))
+        Whitebox.setInternalState(FacebookSdk::class.java, "applicationContext", context)
+        Whitebox.setInternalState(AppLinkManager::class.java, "instance", null as AppLinkManager?)
+        val appLinkPreferences =
+            context.getSharedPreferences(AppLinkManager.APPLINK_INFO, Context.MODE_PRIVATE)
+        appLinkPreferences.edit().putString("inbound_url", "fb123://applinks/cached").commit()
+
+        FacebookSdk.setAutoLogMetaDataEnabled(false)
+
+        assertThat(appLinkPreferences.getString("inbound_url", null)).isNull()
+        FacebookSdk.setAutoLogMetaDataEnabled(true)
     }
 
     @Test
