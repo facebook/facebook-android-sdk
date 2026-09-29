@@ -11,6 +11,7 @@ package com.facebook.applinks;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -74,6 +75,10 @@ public class AppLinkData {
   private static final String DEFERRED_APP_LINK_CLASS_FIELD = "applink_class";
   private static final String DEFERRED_APP_LINK_CLICK_TIME_FIELD = "click_time";
   private static final String DEFERRED_APP_LINK_URL_FIELD = "applink_url";
+  private static final String DEFERRED_APP_LINK_FIRST_FETCH_TIME_KEY =
+      "fbsdk_ddl_first_fetch_time";
+  private static final String DEFERRED_APP_LINK_RECEIVED_KEY = "fbsdk_ddl_link_received";
+  private static final long DEFERRED_APP_LINK_FETCH_WINDOW_MS = 30 * 60 * 1000L;
 
   private static final String AUTO_APPLINK_FLAG_KEY = "is_auto_applink";
   private static final String METHOD_ARGS_TARGET_URL_KEY = "target_url";
@@ -136,8 +141,55 @@ public class AppLinkData {
             });
   }
 
+  /**
+   * Whether the deferred app link fetch should be skipped.
+   *
+   * <p>The server serves a deferred link at most once and drops the record, so once one has been
+   * received there is nothing left to ask for. Otherwise the first call records its own timestamp
+   * and is allowed through, leaving {@link #DEFERRED_APP_LINK_FETCH_WINDOW_MS} for a caller that
+   * fetches more than once in the first session, or for a retry after a failed attempt.
+   */
+  private static boolean shouldSkipDeferredAppLinkFetch(Context context) {
+    SharedPreferences preferences =
+        context.getSharedPreferences(FacebookSdk.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
+    if (preferences.getBoolean(DEFERRED_APP_LINK_RECEIVED_KEY, false)) {
+      return true;
+    }
+    long firstFetchTime = preferences.getLong(DEFERRED_APP_LINK_FIRST_FETCH_TIME_KEY, 0L);
+    if (firstFetchTime == 0L) {
+      preferences
+          .edit()
+          .putLong(DEFERRED_APP_LINK_FIRST_FETCH_TIME_KEY, System.currentTimeMillis())
+          .apply();
+      return false;
+    }
+    // Negative elapsed time means the device clock moved backwards; fail open.
+    return System.currentTimeMillis() - firstFetchTime > DEFERRED_APP_LINK_FETCH_WINDOW_MS;
+  }
+
+  /**
+   * Records that the server has handed us a deferred link. Keyed on {@code applink_url} rather than
+   * a parsed {@link AppLinkData}, because that is what the server drops its record on: {@code
+   * applink_args} is absent from the great majority of responses, so a parse failure must not look
+   * like "no link was served".
+   */
+  private static void markDeferredAppLinkReceived(Context context) {
+    context
+        .getSharedPreferences(FacebookSdk.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
+        .edit()
+        .putBoolean(DEFERRED_APP_LINK_RECEIVED_KEY, true)
+        .apply();
+  }
+
   private static void fetchDeferredAppLinkFromServer(
       Context context, String applicationId, final CompletionHandler completionHandler) {
+
+    // A deferred app link is only available for the first session after install.
+    if (FeatureManager.isEnabled(FeatureManager.Feature.AndroidDeferredAppLinkFirstLaunchOnly)
+        && shouldSkipDeferredAppLinkFetch(context)) {
+      completionHandler.onDeferredAppLinkDataFetched(null);
+      return;
+    }
 
     JSONObject deferredApplinkParams = new JSONObject();
     try {
@@ -164,6 +216,7 @@ public class AppLinkData {
 
     String deferredApplinkUrlPath = String.format(DEFERRED_APP_LINK_PATH, applicationId);
     AppLinkData appLinkData = null;
+    boolean linkReceived = false;
 
     try {
       GraphRequest deferredApplinkRequest =
@@ -175,6 +228,7 @@ public class AppLinkData {
         final long tapTimeUtc = jsonResponse.optLong(DEFERRED_APP_LINK_CLICK_TIME_FIELD, -1);
         final String appLinkClassName = jsonResponse.optString(DEFERRED_APP_LINK_CLASS_FIELD);
         final String appLinkUrl = jsonResponse.optString(DEFERRED_APP_LINK_URL_FIELD);
+        linkReceived = !TextUtils.isEmpty(appLinkUrl);
 
         if (!TextUtils.isEmpty(appLinkArgsJsonString)) {
           appLinkData = createFromJson(appLinkArgsJsonString);
@@ -224,6 +278,10 @@ public class AppLinkData {
       }
     } catch (Exception e) {
       Utility.logd(TAG, "Unable to fetch deferred applink from server");
+    }
+
+    if (linkReceived) {
+      markDeferredAppLinkReceived(context);
     }
 
     completionHandler.onDeferredAppLinkDataFetched(appLinkData);

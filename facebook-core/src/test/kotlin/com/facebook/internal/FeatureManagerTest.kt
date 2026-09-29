@@ -183,6 +183,26 @@ class FeatureManagerTest {
     assertEquals(Feature.Core, Feature.Megatron.parent)
     assertEquals(Feature.Core, Feature.Elora.parent)
     assertEquals(Feature.AppEvents, Feature.MetadataBasic.parent)
+    assertEquals(Feature.Core, Feature.AndroidDeferredAppLinkFirstLaunchOnly.parent)
+  }
+
+  @Test
+  fun `test AndroidDeferredAppLinkFirstLaunchOnly uses canonical mobile SDK response key`() {
+    assertEquals(
+        "FBSDKFeatureAndroidDeferredAppLinkFirstLaunchOnly",
+        Feature.AndroidDeferredAppLinkFirstLaunchOnly.toKey())
+  }
+
+  @Test
+  fun `test AndroidDeferredAppLinkFirstLaunchOnly is disabled by default`() {
+    val defaultStatusMethod =
+        FeatureManager::class.java.getDeclaredMethod("defaultStatus", Feature::class.java).apply {
+          isAccessible = true
+        }
+
+    assertFalse(
+        defaultStatusMethod.invoke(FeatureManager, Feature.AndroidDeferredAppLinkFirstLaunchOnly)
+            as Boolean)
   }
 
   @Test

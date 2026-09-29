@@ -171,6 +171,7 @@ object FeatureManager {
             Feature.GPSTopicsObservation,
             Feature.VVP,
             Feature.ReferrerForDeepLink,
+            Feature.AndroidDeferredAppLinkFirstLaunchOnly,
             Feature.MetadataBasic -> false
 
             else -> true
@@ -229,6 +230,7 @@ object FeatureManager {
         GPSPACAProcessing(0x00070000), /* privacy sandbox - protected audience API*/
         GPSTopicsObservation(0x00080000), /* privacy sandbox - topics API*/
         ReferrerForDeepLink(0x00090000), /* include install_referrer in DDL requests */
+        AndroidDeferredAppLinkFirstLaunchOnly(0x000a0000), /* fetch DDL only shortly after the first launch */
         MetadataBasic(0x00010900), /* Basic app metadata, URLs, and screen title */
         // Features in LoginKit
         /** Essential of LoginKit */
@@ -283,6 +285,7 @@ object FeatureManager {
                 GPSTopicsObservation -> "GPSTopicsObservation"
                 VVP -> "VVP"
                 ReferrerForDeepLink -> "ReferrerForDeepLink"
+                AndroidDeferredAppLinkFirstLaunchOnly -> "AndroidDeferredAppLinkFirstLaunchOnly"
                 MetadataBasic -> "MetadataBasic"
                 ServiceUpdateCompliance -> "ServiceUpdateCompliance"
                 Login -> "LoginKit"
