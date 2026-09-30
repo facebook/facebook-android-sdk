@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.facebook.appevents.iap
 
 object InAppPurchaseConstants {
@@ -30,6 +38,7 @@ object InAppPurchaseConstants {
     const val METHOD_NEW_BUILDER = "newBuilder"
     const val METHOD_BUILD = "build"
     const val METHOD_ENABLE_PENDING_PURCHASES = "enablePendingPurchases"
+    const val METHOD_ENABLE_ONE_TIME_PRODUCTS = "enableOneTimeProducts"
     const val METHOD_SET_LISTENER = "setListener"
     const val METHOD_START_CONNECTION = "startConnection"
 
