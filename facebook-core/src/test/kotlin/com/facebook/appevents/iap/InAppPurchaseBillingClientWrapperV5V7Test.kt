@@ -39,6 +39,10 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
     private val purchaseJsonStr = "{\"productId\":\"product_1\"}"
     private val purchaseHistoryRecordJsonStr =
         "{\"productId\":\"product_2\"}"
+    private val purchaseWithOrderIdJsonStr =
+        "{\"productId\":\"product_1\",\"purchaseToken\":\"token_1\",\"orderId\":\"GPA.1234-5678-9012-34567\"}"
+    private val purchaseHistoryRecordWithTokenJsonStr =
+        "{\"productId\":\"product_1\",\"purchaseToken\":\"token_1\"}"
     private val METHOD_ON_BILLING_SETUP_FINISHED = "onBillingSetupFinished"
     private val METHOD_ON_BILLING_SERVICE_DISCONNECTED = "onBillingServiceDisconnected"
     private val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
@@ -102,6 +106,7 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
         InAppPurchaseBillingClientWrapperV5V7.productDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()
+        InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap.clear()
         InAppPurchaseBillingClientWrapperV5V7.isServiceConnected.set(false)
         Whitebox.setInternalState(
             InAppPurchaseBillingClientWrapperV5V7::class.java,
@@ -440,6 +445,138 @@ class InAppPurchaseBillingClientWrapperV5V7Test : FacebookPowerMockTestCase() {
         ).isFalse()
     }
 
+
+    @Test
+    fun testQueryPurchaseOrderIdsAsync() {
+        var completionCount = 0
+        val completionHandler = Runnable { completionCount++ }
+        val purchaseList: List<*> = listOf(purchase)
+        val args = arrayOf(billingResult, purchaseList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchase),
+            )
+        ).thenReturn(purchaseWithOrderIdJsonStr)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.OrderIdListenerWrapper(completionHandler)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap["token_1"])
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        // Looking up order IDs must not add purchases to be logged
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap).isEmpty()
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap).isEmpty()
+        Assertions.assertThat(completionCount).isEqualTo(1)
+    }
+
+    @Test
+    fun testQueryPurchaseOrderIdsWithoutPurchaseListStillCompletes() {
+        var completionCount = 0
+        val completionHandler = Runnable { completionCount++ }
+        val args = arrayOf(billingResult)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.OrderIdListenerWrapper(completionHandler)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap).isEmpty()
+        Assertions.assertThat(completionCount).isEqualTo(1)
+    }
+
+    @Test
+    fun testQueryPurchaseOrderIdsSkipsPurchaseWithoutOrderId() {
+        var completionCount = 0
+        val completionHandler = Runnable { completionCount++ }
+        val purchaseList: List<*> = listOf(purchase)
+        val args = arrayOf(billingResult, purchaseList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchase),
+            )
+        ).thenReturn(purchaseHistoryRecordWithTokenJsonStr)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.OrderIdListenerWrapper(completionHandler)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_QUERY_PURCHASES_RESPONSE),
+            args
+        )
+        Assertions.assertThat(InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap).isEmpty()
+        Assertions.assertThat(completionCount).isEqualTo(1)
+    }
+
+    @Test
+    fun testQueryPurchaseHistoryAddsOrderIdFromOwnedPurchase() {
+        InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap["token_1"] =
+            "GPA.1234-5678-9012-34567"
+        val productType: Any = InAppPurchaseUtils.IAPProductType.INAPP
+        val wrapperArgs = arrayOf(productType, runnable)
+        val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
+        val args = arrayOf(billingResult, purchaseHistoryRecordList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchaseHistoryRecord),
+            )
+        ).thenReturn(purchaseHistoryRecordWithTokenJsonStr)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
+            args
+        )
+        Assertions.assertThat(
+            InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap["product_1"]?.optString("orderId")
+        ).isEqualTo("GPA.1234-5678-9012-34567")
+    }
+
+    @Test
+    fun testQueryPurchaseHistoryWithoutMatchingOwnedPurchaseHasNoOrderId() {
+        InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap["other_token"] =
+            "GPA.1234-5678-9012-34567"
+        val productType: Any = InAppPurchaseUtils.IAPProductType.SUBS
+        val wrapperArgs = arrayOf(productType, runnable)
+        val purchaseHistoryRecordList: List<*> = listOf(purchaseHistoryRecord)
+        val args = arrayOf(billingResult, purchaseHistoryRecordList)
+        whenever(
+            invokeMethod(
+                anyOrNull(),
+                anyOrNull(),
+                eq(purchaseHistoryRecord),
+            )
+        ).thenReturn(purchaseHistoryRecordWithTokenJsonStr)
+
+        val inAppPurchaseBillingClientWrapperV5Plus =
+            getWrapperWithMockedContext()
+        inAppPurchaseBillingClientWrapperV5Plus?.ListenerWrapper(wrapperArgs)?.invoke(
+            proxy,
+            Class.forName(exampleClassName)
+                .getMethod(METHOD_ON_PURCHASE_HISTORY_RESPONSE),
+            args
+        )
+        Assertions.assertThat(
+            InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap["product_1"]?.has("orderId")
+        ).isFalse()
+    }
 
     fun onBillingSetupFinished() {}
     fun onBillingServiceDisconnected() {}

@@ -49,8 +49,10 @@ import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_PRODUCT_LIST
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_PRODUCT_TYPE
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_START_CONNECTION
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_TO_STRING
+import com.facebook.appevents.iap.InAppPurchaseConstants.ORDER_ID
 import com.facebook.appevents.iap.InAppPurchaseConstants.PACKAGE_NAME
 import com.facebook.appevents.iap.InAppPurchaseConstants.PRODUCT_ID
+import com.facebook.appevents.iap.InAppPurchaseConstants.PURCHASE_TOKEN
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
@@ -140,6 +142,15 @@ private constructor(
                 METHOD_ON_BILLING_SERVICE_DISCONNECTED -> onBillingServiceDisconnected(
                     wrapperArgs, listenerArgs
                 )
+            }
+            return null
+        }
+    }
+
+    inner class OrderIdListenerWrapper(private val completionHandler: Runnable) : InvocationHandler {
+        override fun invoke(proxy: Any, m: Method, listenerArgs: Array<Any>?): Any? {
+            if (m.name == METHOD_ON_QUERY_PURCHASES_RESPONSE) {
+                onQueryPurchaseOrderIdsResponse(completionHandler, listenerArgs)
             }
             return null
         }
@@ -281,6 +292,32 @@ private constructor(
         executeServiceRequest(runnableQuery)
     }
 
+    /**
+     * Purchase history records don't include the Google order ID, so we query the currently owned
+     * purchases (which do) and map each purchase token to its order ID. The order ID is then added
+     * to the matching purchase history record in onPurchaseHistoryResponse.
+     */
+    fun queryPurchaseOrderIds(
+        productType: InAppPurchaseUtils.IAPProductType,
+        completionHandler: Runnable
+    ) {
+        val runnableQuery = Runnable {
+            val listenerObj = Proxy.newProxyInstance(
+                purchasesResponseListenerClazz.classLoader,
+                arrayOf(purchasesResponseListenerClazz),
+                OrderIdListenerWrapper(completionHandler)
+            )
+            invokeMethod(
+                billingClientClazz,
+                queryPurchasesAsyncMethod,
+                billingClient,
+                getQueryPurchasesParams(productType),
+                listenerObj
+            )
+        }
+        executeServiceRequest(runnableQuery)
+    }
+
     override fun queryPurchaseHistory(
         productType: InAppPurchaseUtils.IAPProductType, completionHandler: Runnable
     ) {
@@ -397,6 +434,35 @@ private constructor(
     }
 
 
+    private fun onQueryPurchaseOrderIdsResponse(
+        completionHandler: Runnable,
+        listenerArgs: Array<Any>?
+    ) {
+        val purchaseList = listenerArgs?.getOrNull(1)
+        if (purchaseList is List<*>) {
+            for (purchase in purchaseList) {
+                try {
+                    val purchaseJsonStr =
+                        invokeMethod(
+                            purchaseClazz,
+                            purchaseGetOriginalJsonMethod,
+                            purchase
+                        ) as? String ?: continue
+                    val purchaseJson = JSONObject(purchaseJsonStr)
+                    val purchaseToken = purchaseJson.optString(PURCHASE_TOKEN)
+                    val orderId = purchaseJson.optString(ORDER_ID)
+                    if (purchaseToken.isNotEmpty() && orderId.isNotEmpty()) {
+                        purchaseTokenToOrderIdMap[purchaseToken] = orderId
+                    }
+                } catch (e: Exception) {
+                    /* swallow */
+                }
+            }
+        }
+        // Always continue, even if the query failed, so purchase logging is never blocked
+        completionHandler.run()
+    }
+
     private fun onPurchaseHistoryResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         val productType = wrapperArgs?.getOrNull(0)
         if (productType == null || productType !is InAppPurchaseUtils.IAPProductType) {
@@ -420,6 +486,11 @@ private constructor(
                     purchaseHistoryRecord
                 ) as? String ?: continue
                 val purchaseHistoryRecordJson = JSONObject(purchaseHistoryRecordJsonStr)
+                val orderId =
+                    purchaseTokenToOrderIdMap[purchaseHistoryRecordJson.optString(PURCHASE_TOKEN)]
+                if (orderId != null && !purchaseHistoryRecordJson.has(ORDER_ID)) {
+                    purchaseHistoryRecordJson.put(ORDER_ID, orderId)
+                }
                 if (purchaseHistoryRecordJson.has(PRODUCT_ID)) {
                     val productId = purchaseHistoryRecordJson.getString(PRODUCT_ID)
                     if (productId !in productDetailsMap) {
@@ -501,6 +572,7 @@ private constructor(
         val iapPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val subsPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+        val purchaseTokenToOrderIdMap: MutableMap<String, String> = ConcurrentHashMap()
 
         @Synchronized
         @JvmStatic

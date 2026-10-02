@@ -436,6 +436,16 @@ object AutomaticAnalyticsLogger {
                 params,
                 operationalData
             )
+            val orderId = purchaseJSON.optString(Constants.GP_IAP_ORDER_ID)
+            if (orderId.isNotEmpty()) {
+                OperationalData.addParameter(
+                    IAPParameters,
+                    AppEventsConstants.EVENT_PARAM_ORDER_ID,
+                    orderId,
+                    params,
+                    operationalData
+                )
+            }
             OperationalData.addParameter(
                 IAPParameters,
                 Constants.IAP_PACKAGE_NAME,

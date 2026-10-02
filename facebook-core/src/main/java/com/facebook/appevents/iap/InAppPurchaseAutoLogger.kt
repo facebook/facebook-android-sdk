@@ -54,15 +54,35 @@ object InAppPurchaseAutoLogger {
         if (isEnabled(FeatureManager.Feature.AndroidIAPSubscriptionAutoLogging)
             && (!ProtectedModeManager.isEnabled() || billingClientVersion == V2_V4)
         ) {
-            billingClientWrapper.queryPurchaseHistory(INAPP) {
-                billingClientWrapper.queryPurchaseHistory(SUBS) {
-                    logPurchase(billingClientVersion, context.packageName)
+            queryPurchaseOrderIds(billingClientWrapper, INAPP) {
+                billingClientWrapper.queryPurchaseHistory(INAPP) {
+                    queryPurchaseOrderIds(billingClientWrapper, SUBS) {
+                        billingClientWrapper.queryPurchaseHistory(SUBS) {
+                            logPurchase(billingClientVersion, context.packageName)
+                        }
+                    }
                 }
             }
         } else {
-            billingClientWrapper.queryPurchaseHistory(INAPP) {
-                logPurchase(billingClientVersion, context.packageName)
+            queryPurchaseOrderIds(billingClientWrapper, INAPP) {
+                billingClientWrapper.queryPurchaseHistory(INAPP) {
+                    logPurchase(billingClientVersion, context.packageName)
+                }
             }
+        }
+    }
+
+    // Purchase history records from GPBL v5 - v7 don't include the order ID,
+    // so look it up from the currently owned purchases before querying history
+    private fun queryPurchaseOrderIds(
+        billingClientWrapper: InAppPurchaseBillingClientWrapper,
+        productType: InAppPurchaseUtils.IAPProductType,
+        completionHandler: Runnable
+    ) {
+        if (billingClientWrapper is InAppPurchaseBillingClientWrapperV5V7) {
+            billingClientWrapper.queryPurchaseOrderIds(productType, completionHandler)
+        } else {
+            completionHandler.run()
         }
     }
 
@@ -112,6 +132,7 @@ object InAppPurchaseAutoLogger {
             )
             InAppPurchaseBillingClientWrapperV5V7.iapPurchaseDetailsMap.clear()
             InAppPurchaseBillingClientWrapperV5V7.subsPurchaseDetailsMap.clear()
+            InAppPurchaseBillingClientWrapperV5V7.purchaseTokenToOrderIdMap.clear()
         }
         if (isFirstAppLaunch) {
             setAppHasBeenLaunchedWithNewIAP()

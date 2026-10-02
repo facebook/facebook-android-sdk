@@ -67,9 +67,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     private val activityName = "activity name"
     private val timeSpent = 5L
     private val subscriptionPurchase =
-        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"packageName\": \"examplePackageName\", \"autoRenewing\": true}"
+        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"orderId\": \"GPA.1234-5678-9012-34567\", \"packageName\": \"examplePackageName\", \"autoRenewing\": true}"
     private val oneTimePurchase =
-        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"packageName\": \"examplePackageName\"}"
+        "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"orderId\": \"GPA.1234-5678-9012-34567\", \"packageName\": \"examplePackageName\"}"
     private val oneTimePurchaseDetailsGPBLV2V4 =
         "{\"productId\":\"id123\",\"type\":\"inapp\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"description\":\"Exampledescription.\",\"price\":\"$12.00\",\"price_amount_micros\":12000000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"sampleToken\"}"
     private val oneTimePurchaseDetailsGPBLV5V7 =
@@ -356,6 +356,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
@@ -470,6 +478,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
@@ -578,6 +594,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
@@ -686,6 +710,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
@@ -1956,6 +1988,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
@@ -1994,6 +2034,33 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("GPBL.5.1.0")
+    }
+
+    @Test
+    fun `test log purchase without order id does not add fb_order_id`() {
+        val purchaseWithoutOrderId =
+            "{\"productId\":\"id123\", \"purchaseTime\":\"12345\", \"purchaseToken\": \"token123\", \"packageName\": \"examplePackageName\"}"
+        AutomaticAnalyticsLogger.logPurchase(
+            purchaseWithoutOrderId,
+            oneTimePurchaseDetailsGPBLV5V7,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V5_V7
+        )
+        verify(mockInternalAppEventsLogger)
+            .logPurchaseImplicitly(
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>(), any<OperationalData>(),
+            )
+        Assertions.assertThat(bundle).isNotNull
+        Assertions.assertThat(bundle?.containsKey(AppEventsConstants.EVENT_PARAM_ORDER_ID)).isFalse
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters, IAP_PURCHASE_TOKEN,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("token123")
     }
 
     @Test
@@ -2039,6 +2106,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,
@@ -2125,6 +2200,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
                 operationalData
             )
         ).isEqualTo("token123")
+        Assertions.assertThat(bundle?.getCharSequence(AppEventsConstants.EVENT_PARAM_ORDER_ID))
+            .isEqualTo("GPA.1234-5678-9012-34567")
+        Assertions.assertThat(
+            operationalData?.getParameter(
+                OperationalDataEnum.IAPParameters,
+                AppEventsConstants.EVENT_PARAM_ORDER_ID
+            )
+        ).isNull()
         Assertions.assertThat(
             OperationalData.getParameter(
                 OperationalDataEnum.IAPParameters, Constants.IAP_PACKAGE_NAME,

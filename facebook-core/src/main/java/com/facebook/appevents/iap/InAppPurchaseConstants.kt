@@ -11,6 +11,8 @@ package com.facebook.appevents.iap
 object InAppPurchaseConstants {
     const val PRODUCT_ID = "productId"
     const val PACKAGE_NAME = "packageName"
+    const val PURCHASE_TOKEN = "purchaseToken"
+    const val ORDER_ID = "orderId"
 
 
     /**

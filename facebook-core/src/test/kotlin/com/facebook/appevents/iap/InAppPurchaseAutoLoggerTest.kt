@@ -276,6 +276,15 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             Unit
         }
 
+        var queryOrderIdsCount = 0
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchaseOrderIds(any(), any())
+        ).thenAnswer {
+            queryOrderIdsCount++
+            (it.getArgument(1) as Runnable).run()
+            Unit
+        }
+
         InAppPurchaseAutoLogger.startIapLogging(
             mockContext,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
@@ -287,6 +296,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         assertThat(logPurchaseCallTimes).isEqualTo(2)
         assertThat(queryPurchaseCount).isEqualTo(1)
         assertThat(querySubCount).isEqualTo(1)
+        assertThat(queryOrderIdsCount).isEqualTo(2)
         assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 
@@ -340,6 +350,15 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             Unit
         }
 
+        var queryOrderIdsCount = 0
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchaseOrderIds(any(), any())
+        ).thenAnswer {
+            queryOrderIdsCount++
+            (it.getArgument(1) as Runnable).run()
+            Unit
+        }
+
         InAppPurchaseAutoLogger.startIapLogging(
             mockContext,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
@@ -350,6 +369,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         assertThat(logPurchaseCallTimes).isEqualTo(2)
         assertThat(queryPurchaseCount).isEqualTo(1)
         assertThat(querySubCount).isEqualTo(0)
+        assertThat(queryOrderIdsCount).isEqualTo(1)
         assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 
@@ -392,6 +412,15 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
             Unit
         }
 
+        var queryOrderIdsCount = 0
+        whenever(
+            mockBillingClientWrapperV5Plus.queryPurchaseOrderIds(any(), any())
+        ).thenAnswer {
+            queryOrderIdsCount++
+            (it.getArgument(1) as Runnable).run()
+            Unit
+        }
+
         InAppPurchaseAutoLogger.startIapLogging(
             mockContext,
             InAppPurchaseUtils.BillingClientVersion.V5_V7
@@ -400,6 +429,7 @@ class InAppPurchaseAutoLoggerTest : FacebookPowerMockTestCase() {
         loggingRunnable?.run()
         assertThat(logPurchaseCallTimes).isEqualTo(2)
         assertThat(queryPurchaseCount).isEqualTo(1)
+        assertThat(queryOrderIdsCount).isEqualTo(1)
         assertThat(InAppPurchaseAutoLogger.failedToCreateWrapper.get()).isFalse()
     }
 }

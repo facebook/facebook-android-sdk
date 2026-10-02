@@ -50,6 +50,7 @@ object Constants {
     const val GP_IAP_PRODUCT_ID = "productId"
     const val GP_IAP_PURCHASE_TIME = "purchaseTime"
     const val GP_IAP_PURCHASE_TOKEN = "purchaseToken"
+    const val GP_IAP_ORDER_ID = "orderId"
     const val GP_IAP_PACKAGE_NAME = "packageName"
     const val GP_IAP_TITLE = "title"
     const val GP_IAP_DESCRIPTION = "description"
