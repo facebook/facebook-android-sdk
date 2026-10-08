@@ -88,7 +88,8 @@ object InAppPurchaseUtils {
         NONE("none"),
         V1("Android-GPBL-V1"),
         V2_V4("Android-GPBL-V2-V4"),
-        V5_V7("Android-GPBL-V5-V7")
+        V5_V7("Android-GPBL-V5-V7"),
+        V8_PLUS("Android-GPBL-V8-Plus")
     }
 
     enum class IAPProductType(val type: String) {

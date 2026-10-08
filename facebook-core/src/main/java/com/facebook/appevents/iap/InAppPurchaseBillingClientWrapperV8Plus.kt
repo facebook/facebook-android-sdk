@@ -100,6 +100,17 @@ private constructor(
         fun onComplete(success: Boolean)
     }
 
+    internal fun interface PurchaseQueryResultCallback {
+        fun onComplete(result: PurchaseQueryResult)
+    }
+
+    internal data class PurchaseQueryResult(
+        val productType: InAppPurchaseUtils.IAPProductType,
+        val succeeded: Boolean,
+        val purchaseDetails: Map<String, JSONObject> = emptyMap(),
+        val productDetails: Map<String, JSONObject> = emptyMap(),
+    )
+
     inner class ListenerWrapper(private val wrapperArgs: Array<Any>?) : InvocationHandler {
         override fun invoke(proxy: Any, method: Method, listenerArgs: Array<Any>?): Any? {
             when (method.name) {
@@ -204,18 +215,21 @@ private constructor(
         productType: InAppPurchaseUtils.IAPProductType,
         completionHandler: Runnable,
     ) {
-        queryPurchasesWithResult(productType) { completionHandler.run() }
+        queryPurchasesWithResult(productType) { result ->
+            publishQueryResult(result)
+            completionHandler.run()
+        }
     }
 
     internal fun queryPurchasesWithResult(
         productType: InAppPurchaseUtils.IAPProductType,
-        completionHandler: QueryResultCallback,
+        completionHandler: PurchaseQueryResultCallback,
     ) {
         val runnableQuery = Runnable {
             val queryPurchasesParams = getQueryPurchasesParams(productType)
             if (queryPurchasesParams == null) {
                 Log.w(TAG, "Failed to build GPBL 8 query purchases parameters")
-                completionHandler.onComplete(false)
+                completionHandler.onComplete(PurchaseQueryResult(productType, false))
                 return@Runnable
             }
             val listener =
@@ -232,7 +246,10 @@ private constructor(
                 listener,
             )
         }
-        executeServiceRequest(runnableQuery, Runnable { completionHandler.onComplete(false) })
+        executeServiceRequest(
+            runnableQuery,
+            Runnable { completionHandler.onComplete(PurchaseQueryResult(productType, false)) },
+        )
     }
 
     override fun queryPurchaseHistory(
@@ -246,6 +263,7 @@ private constructor(
     private fun queryProductDetailsAsync(
         productType: InAppPurchaseUtils.IAPProductType,
         productIds: List<String>,
+        productDetailsTarget: MutableMap<String, JSONObject>,
         completionHandler: QueryResultCallback,
     ) {
         val runnableQuery = Runnable {
@@ -259,7 +277,9 @@ private constructor(
                 Proxy.newProxyInstance(
                     productDetailsResponseListenerClazz.classLoader,
                     arrayOf(productDetailsResponseListenerClazz),
-                    ListenerWrapper(arrayOf(productIds, completionHandler)),
+                    ListenerWrapper(
+                        arrayOf(productIds, productDetailsTarget, completionHandler)
+                    ),
                 )
             invokeMethod(
                 billingClientClazz,
@@ -309,43 +329,63 @@ private constructor(
     }
 
     private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val completionHandler = wrapperArgs?.getOrNull(1) as? QueryResultCallback ?: return
+        val completionHandler =
+            wrapperArgs?.getOrNull(1) as? PurchaseQueryResultCallback ?: return
         val productType = wrapperArgs.getOrNull(0) as? InAppPurchaseUtils.IAPProductType
-        val purchaseList = listenerArgs?.getOrNull(1) as? List<*>
-        if (!hasSuccessfulBillingResult(listenerArgs, "purchases query")) {
-            completionHandler.onComplete(false)
+        if (productType == null) {
+            Log.w(TAG, "Failed to read GPBL 8 purchases product type")
             return
         }
-        if (productType == null || purchaseList == null) {
+        val purchaseList = listenerArgs?.getOrNull(1) as? List<*>
+        if (!hasSuccessfulBillingResult(listenerArgs, "purchases query")) {
+            completionHandler.onComplete(PurchaseQueryResult(productType, false))
+            return
+        }
+        if (purchaseList == null) {
             Log.w(TAG, "Failed to read GPBL 8 purchases response")
-            completionHandler.onComplete(false)
+            completionHandler.onComplete(PurchaseQueryResult(productType, false))
             return
         }
 
         val purchaseJsons = mutableListOf<JSONObject>()
-        var parsedEveryPurchase = true
         for (purchase in purchaseList) {
             try {
                 val purchaseJsonString =
                     invokeMethod(purchaseClazz, purchaseGetOriginalJsonMethod, purchase) as? String
                 if (purchaseJsonString == null) {
-                    parsedEveryPurchase = false
                     continue
                 }
                 purchaseJsons.add(JSONObject(purchaseJsonString))
             } catch (exception: Exception) {
-                parsedEveryPurchase = false
                 Log.w(TAG, "Failed to parse a GPBL 8 purchase", exception)
             }
         }
-        processPurchaseJsons(productType, purchaseJsons) { productDetailsComplete ->
-            completionHandler.onComplete(parsedEveryPurchase && productDetailsComplete)
+        val purchaseDetails = mutableMapOf<String, JSONObject>()
+        val queryProductDetails = mutableMapOf<String, JSONObject>()
+        processPurchaseJsons(
+            productType,
+            purchaseJsons,
+            purchaseDetails,
+            queryProductDetails,
+        ) {
+            // A successful purchases response completes the scan. ProductDetails and individual
+            // payload failures remain retryable, but must not keep first-launch mode enabled.
+            completionHandler.onComplete(
+                PurchaseQueryResult(
+                    productType,
+                    true,
+                    purchaseDetails.toMap(),
+                    queryProductDetails.toMap(),
+                )
+            )
         }
     }
 
     internal fun processPurchaseJsons(
         productType: InAppPurchaseUtils.IAPProductType,
         purchaseJsons: List<JSONObject>,
+        purchaseDetailsTarget: MutableMap<String, JSONObject>,
+        productDetailsTarget: MutableMap<String, JSONObject>,
         completionHandler: QueryResultCallback,
     ) {
         val missingProductIds = linkedSetOf<String>()
@@ -360,20 +400,21 @@ private constructor(
             for (productId in productIds) {
                 val normalizedPurchase =
                     JSONObject(purchaseJson.toString()).put(PRODUCT_ID, productId)
-                if (productId !in productDetailsMap) {
+                val cachedProductDetails = productDetailsMap[productId]
+                if (cachedProductDetails == null) {
                     missingProductIds.add(productId)
-                }
-                if (productType == InAppPurchaseUtils.IAPProductType.INAPP) {
-                    iapPurchaseDetailsMap[productId] = normalizedPurchase
                 } else {
-                    subsPurchaseDetailsMap[productId] = normalizedPurchase
+                    productDetailsTarget[productId] = cachedProductDetails
                 }
+                purchaseDetailsTarget[productId] = normalizedPurchase
             }
         }
         if (missingProductIds.isNotEmpty()) {
-            queryProductDetailsAsync(productType, missingProductIds.toList()) {
-                completionHandler.onComplete(mappedEveryPurchase && it)
-            }
+            queryProductDetailsAsync(
+                productType,
+                missingProductIds.toList(),
+                productDetailsTarget,
+            ) { completionHandler.onComplete(mappedEveryPurchase && it) }
         } else {
             completionHandler.onComplete(mappedEveryPurchase)
         }
@@ -395,7 +436,10 @@ private constructor(
 
     private fun onProductDetailsResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
         val requestedProductIds = wrapperArgs?.getOrNull(0) as? List<*> ?: return
-        val completionHandler = wrapperArgs.getOrNull(1) as? QueryResultCallback ?: return
+        @Suppress("UNCHECKED_CAST")
+        val productDetailsTarget =
+            wrapperArgs.getOrNull(1) as? MutableMap<String, JSONObject> ?: return
+        val completionHandler = wrapperArgs.getOrNull(2) as? QueryResultCallback ?: return
         if (!hasSuccessfulBillingResult(listenerArgs, "product details query")) {
             completionHandler.onComplete(false)
             return
@@ -438,14 +482,15 @@ private constructor(
                 val productDetailsJsonString = getOriginalJson(productDetailsString) ?: continue
                 val productDetailsJson = JSONObject(productDetailsJsonString)
                 if (productDetailsJson.has(PRODUCT_ID)) {
-                    productDetailsMap[productDetailsJson.getString(PRODUCT_ID)] = productDetailsJson
+                    productDetailsTarget[productDetailsJson.getString(PRODUCT_ID)] =
+                        productDetailsJson
                 }
             } catch (exception: Exception) {
                 Log.w(TAG, "Failed to parse GPBL 8 product details", exception)
             }
         }
         completionHandler.onComplete(
-            requestedProductIds.filterIsInstance<String>().all(productDetailsMap::containsKey)
+            requestedProductIds.filterIsInstance<String>().all(productDetailsTarget::containsKey)
         )
     }
 
@@ -500,6 +545,17 @@ private constructor(
         val iapPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val subsPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val productDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
+
+        internal fun publishQueryResult(result: PurchaseQueryResult) {
+            productDetailsMap.putAll(result.productDetails)
+            val purchaseDetailsTarget =
+                if (result.productType == InAppPurchaseUtils.IAPProductType.INAPP) {
+                    iapPurchaseDetailsMap
+                } else {
+                    subsPurchaseDetailsMap
+                }
+            purchaseDetailsTarget.putAll(result.purchaseDetails)
+        }
 
         @JvmStatic
         fun getOrCreateInstance(context: Context): InAppPurchaseBillingClientWrapperV8Plus? {

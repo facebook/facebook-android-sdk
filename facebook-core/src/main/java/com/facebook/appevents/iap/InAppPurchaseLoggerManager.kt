@@ -12,6 +12,8 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk.getApplicationContext
+import com.facebook.appevents.iap.InAppPurchaseConstants.PURCHASE_STATE
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V8_PLUS
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger.logPurchase
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
@@ -31,7 +33,6 @@ object InAppPurchaseLoggerManager {
     // January 10, 2025 05:00:00 PM GMT
     private const val APPROXIMATE_IAP_ENHANCEMENT_RELEASE_TIME = 1736528400000L
     private const val MILLISECONDS_IN_SECONDS = 1000.0
-    private const val PURCHASE_TIME = "purchaseTime"
     private const val IAP_SKU_CACHE_GPBLV1 = "com.facebook.internal.SKU_DETAILS"
     private const val IAP_PURCHASE_CACHE_GPBLV1 = "com.facebook.internal.PURCHASE"
     private const val IAP_CACHE_OLD = "com.facebook.internal.iap.PRODUCT_DETAILS"
@@ -181,14 +182,35 @@ object InAppPurchaseLoggerManager {
         packageName: String,
         billingClientVersion: InAppPurchaseUtils.BillingClientVersion,
         isFirstAppLaunch: Boolean,
-    ) {
-        val deduped = cacheDeDupPurchase(purchaseDetailsMap, isSubscription)
+    ): Set<String> {
+        val purchasesWithMetadata =
+            purchaseDetailsMap.filterTo(mutableMapOf<String, JSONObject>()) { (productId, purchase) ->
+                skuDetailsMap[productId] != null &&
+                    (billingClientVersion != V8_PLUS ||
+                        purchase.optInt(PURCHASE_STATE, PURCHASE_STATE_UNSPECIFIED) !=
+                            PURCHASE_STATE_PENDING) &&
+                    (billingClientVersion != V8_PLUS ||
+                        purchase.optString(Constants.GP_IAP_PURCHASE_TOKEN).isNotEmpty())
+            }
+        val terminalProductIds = purchasesWithMetadata.keys.toSet()
+        val deduped =
+            if (billingClientVersion == V8_PLUS) {
+                cacheDeDupPurchaseByToken(purchasesWithMetadata, isSubscription)
+            } else {
+                cacheDeDupPurchase(purchasesWithMetadata, isSubscription, false)
+            }
         val loggingReady = constructLoggingReadyMap(
             deduped,
             skuDetailsMap,
             packageName
         )
         logPurchases(loggingReady, isSubscription, billingClientVersion, isFirstAppLaunch)
+        if (billingClientVersion == V8_PLUS) {
+            updateLastLoggedPurchaseTokens(deduped, isSubscription)
+        } else {
+            updateLastLoggedPurchaseTime(deduped, isSubscription)
+        }
+        return terminalProductIds
     }
 
     private fun logPurchases(
@@ -212,6 +234,7 @@ object InAppPurchaseLoggerManager {
     internal fun cacheDeDupPurchase(
         purchaseDetailsMap: MutableMap<String, JSONObject>,
         isSubscription: Boolean,
+        updateCache: Boolean = true,
     ): Map<String, JSONObject> {
         val iapCache =
             getApplicationContext().getSharedPreferences(
@@ -239,7 +262,7 @@ object InAppPurchaseLoggerManager {
                         Constants.GP_IAP_PURCHASE_TIME
                     )
                 ) {
-                    val purchaseTime = purchaseJson.getLong(PURCHASE_TIME)
+                    val purchaseTime = purchaseJson.getLong(Constants.GP_IAP_PURCHASE_TIME)
                     if (purchaseTime <= timeOfLastLoggedPurchase) {
                         purchaseDetailsMap.remove(key)
                     }
@@ -251,7 +274,7 @@ object InAppPurchaseLoggerManager {
                 /* swallow */
             }
         }
-        if (timeOfLatestNewlyLoggedPurchase >= timeOfLastLoggedPurchase) {
+        if (updateCache && timeOfLatestNewlyLoggedPurchase >= timeOfLastLoggedPurchase) {
             if (isSubscription) {
                 iapCache.edit()
                     .putLong(TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY, timeOfLatestNewlyLoggedPurchase)
@@ -263,6 +286,88 @@ object InAppPurchaseLoggerManager {
             }
         }
         return HashMap(purchaseDetailsMap)
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun cacheDeDupPurchaseByToken(
+        purchaseDetailsMap: MutableMap<String, JSONObject>,
+        isSubscription: Boolean,
+    ): Map<String, JSONObject> {
+        val iapCache =
+            getApplicationContext().getSharedPreferences(
+                IAP_CACHE_GPBLV2V7,
+                Context.MODE_PRIVATE,
+            )
+        val purchases = purchaseDetailsMap.toMap()
+        for ((productId, purchase) in purchases) {
+            val purchaseToken = purchase.optString(Constants.GP_IAP_PURCHASE_TOKEN)
+            val cachedToken =
+                iapCache.getString(getPurchaseTokenCacheKey(productId, isSubscription), null)
+            if (purchaseToken.isEmpty() || purchaseToken == cachedToken) {
+                purchaseDetailsMap.remove(productId)
+            }
+        }
+        return HashMap(purchaseDetailsMap)
+    }
+
+    private fun updateLastLoggedPurchaseTokens(
+        purchaseDetailsMap: Map<String, JSONObject>,
+        isSubscription: Boolean,
+    ) {
+        if (purchaseDetailsMap.isEmpty()) {
+            return
+        }
+        val iapCache =
+            getApplicationContext().getSharedPreferences(
+                IAP_CACHE_GPBLV2V7,
+                Context.MODE_PRIVATE,
+            )
+        val editor = iapCache.edit()
+        for ((productId, purchase) in purchaseDetailsMap) {
+            val purchaseToken = purchase.optString(Constants.GP_IAP_PURCHASE_TOKEN)
+            if (purchaseToken.isNotEmpty()) {
+                editor.putString(getPurchaseTokenCacheKey(productId, isSubscription), purchaseToken)
+            }
+        }
+        editor.apply()
+    }
+
+    private fun getPurchaseTokenCacheKey(productId: String, isSubscription: Boolean): String {
+        val prefix =
+            if (isSubscription) {
+                LAST_LOGGED_SUBSCRIPTION_TOKEN_PREFIX
+            } else {
+                LAST_LOGGED_PURCHASE_TOKEN_PREFIX
+            }
+        return "$prefix$productId"
+    }
+
+    private fun updateLastLoggedPurchaseTime(
+        purchaseDetailsMap: Map<String, JSONObject>,
+        isSubscription: Boolean,
+    ) {
+        var latestPurchaseTime = 0L
+        for (purchase in purchaseDetailsMap.values) {
+            if (purchase.has(Constants.GP_IAP_PURCHASE_TIME)) {
+                latestPurchaseTime =
+                    max(latestPurchaseTime, purchase.optLong(Constants.GP_IAP_PURCHASE_TIME))
+            }
+        }
+        if (latestPurchaseTime == 0L) {
+            return
+        }
+        val iapCache =
+            getApplicationContext().getSharedPreferences(
+                IAP_CACHE_GPBLV2V7,
+                Context.MODE_PRIVATE
+            )
+        val cacheKey =
+            if (isSubscription) {
+                TIME_OF_LAST_LOGGED_SUBSCRIPTION_KEY
+            } else {
+                TIME_OF_LAST_LOGGED_PURCHASE_KEY
+            }
+        iapCache.edit().putLong(cacheKey, latestPurchaseTime).apply()
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -287,4 +392,9 @@ object InAppPurchaseLoggerManager {
         }
         return purchaseResultMap
     }
+
+    private const val PURCHASE_STATE_UNSPECIFIED = 1
+    private const val PURCHASE_STATE_PENDING = 4
+    private const val LAST_LOGGED_PURCHASE_TOKEN_PREFIX = "LAST_LOGGED_PURCHASE_TOKEN_"
+    private const val LAST_LOGGED_SUBSCRIPTION_TOKEN_PREFIX = "LAST_LOGGED_SUBSCRIPTION_TOKEN_"
 }

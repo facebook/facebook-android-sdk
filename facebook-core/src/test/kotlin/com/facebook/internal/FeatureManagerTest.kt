@@ -164,6 +164,7 @@ class FeatureManagerTest {
     assertEquals(Feature.AppEvents, Feature.PrivacyProtection.parent)
     assertEquals(Feature.AppEvents, Feature.IapLogging.parent)
     assertEquals(Feature.IapLogging, Feature.IapLoggingLib2.parent)
+    assertEquals(Feature.IapLogging, Feature.IapLoggingLib8Plus.parent)
     assertEquals(Feature.PrivacyProtection, Feature.SuggestedEvents.parent)
     assertEquals(Feature.PrivacyProtection, Feature.IntelligentIntegrity.parent)
     assertEquals(Feature.PrivacyProtection, Feature.ProtectedMode.parent)
@@ -218,6 +219,17 @@ class FeatureManagerTest {
         }
 
     assertFalse(defaultStatusMethod.invoke(FeatureManager, Feature.MetadataBasic) as Boolean)
+  }
+
+  @Test
+  fun `test GPBL 8 feature uses canonical key and is disabled by default`() {
+    assertEquals("FBSDKFeatureIAPLoggingLib8Plus", Feature.IapLoggingLib8Plus.toKey())
+    val defaultStatusMethod =
+        FeatureManager::class.java.getDeclaredMethod("defaultStatus", Feature::class.java).apply {
+          isAccessible = true
+        }
+
+    assertFalse(defaultStatusMethod.invoke(FeatureManager, Feature.IapLoggingLib8Plus) as Boolean)
   }
 
   @Test

@@ -18,6 +18,7 @@ import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -32,6 +33,7 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
     private lateinit var mockNewCachePrefs: SharedPreferences
     private lateinit var mockOldCachePrefs: SharedPreferences
     private var mockNewCachedMap: MutableMap<String, Long> = ConcurrentHashMap()
+    private var mockNewCachedTokenMap: MutableMap<String, String> = ConcurrentHashMap()
     private lateinit var editor: SharedPreferences.Editor
     private val packageName = "sample.packagename"
     private val TIME_OF_LAST_LOGGED_PURCHASE_KEY = "TIME_OF_LAST_LOGGED_PURCHASE"
@@ -39,6 +41,8 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
 
     @Before
     fun init() {
+        mockNewCachedMap.clear()
+        mockNewCachedTokenMap.clear()
         PowerMockito.mockStatic(FacebookSdk::class.java)
         whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
         whenever(FacebookSdk.isInitialized()).thenReturn(true)
@@ -60,8 +64,11 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
             return@thenAnswer editor
         }
         whenever(editor.putString(any(), any())).thenAnswer {
-            mockNewCachedMap[it.getArgument(0)] = it.getArgument(1)
+            mockNewCachedTokenMap[it.getArgument(0)] = it.getArgument(1)
             return@thenAnswer editor
+        }
+        whenever(mockNewCachePrefs.getString(any(), anyOrNull())).thenAnswer {
+            mockNewCachedTokenMap[it.getArgument(0)] ?: it.getArgument(1)
         }
         whenever(
             mockNewCachePrefs.getLong(
@@ -512,5 +519,118 @@ class InAppPurchaseLoggerManagerTest : FacebookPowerMockTestCase() {
         )
         Assertions.assertThat(result2.containsKey(expectedResult))
             .isTrue()
+    }
+    @Test
+    fun `GPBL 8 pending purchase stays retryable until purchased`() {
+        val previousPurchaseTime = 1_700_000_000_000L
+        val purchaseTime = 1_800_000_000_000L
+        mockNewCachedMap.clear()
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = previousPurchaseTime
+        val purchase =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":$purchaseTime,\"purchaseState\":4}"
+            )
+        val purchases = mutableMapOf("espresso" to purchase)
+        val productDetails = mapOf<String, JSONObject?>("espresso" to JSONObject())
+
+        val pendingResult =
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                purchases,
+                productDetails,
+                false,
+                packageName,
+                InAppPurchaseUtils.BillingClientVersion.V8_PLUS,
+                false,
+            )
+
+        Assertions.assertThat(pendingResult).isEmpty()
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(previousPurchaseTime)
+
+        purchase.put("purchaseState", 0)
+        val purchasedResult =
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                purchases,
+                productDetails,
+                false,
+                packageName,
+                InAppPurchaseUtils.BillingClientVersion.V8_PLUS,
+                false,
+            )
+
+        Assertions.assertThat(purchasedResult).containsExactly("espresso")
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(previousPurchaseTime)
+        Assertions.assertThat(mockNewCachedTokenMap.values).contains("token123")
+    }
+
+    @Test
+    fun `GPBL 8 purchase without product details does not advance dedupe watermark`() {
+        val previousPurchaseTime = 1_700_000_000_000L
+        mockNewCachedMap.clear()
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = previousPurchaseTime
+        val purchases =
+            mutableMapOf(
+                "espresso" to
+                    JSONObject(
+                        "{\"productId\":\"espresso\",\"purchaseToken\":\"token123\",\"purchaseTime\":1800000000000,\"purchaseState\":0}"
+                    )
+            )
+
+        val result =
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                purchases,
+                emptyMap(),
+                false,
+                packageName,
+                InAppPurchaseUtils.BillingClientVersion.V8_PLUS,
+                false,
+            )
+
+        Assertions.assertThat(result).isEmpty()
+        Assertions.assertThat(purchases).containsKey("espresso")
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(previousPurchaseTime)
+    }
+
+    @Test
+    fun `GPBL 8 older incomplete purchase remains eligible after newer purchase logs`() {
+        val previousPurchaseTime = 1_850_000_000_000L
+        mockNewCachedMap.clear()
+        mockNewCachedTokenMap.clear()
+        mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY] = previousPurchaseTime
+        val olderPurchase =
+            JSONObject(
+                "{\"productId\":\"espresso\",\"purchaseToken\":\"older-token\",\"purchaseTime\":1800000000000,\"purchaseState\":0}"
+            )
+        val newerPurchase =
+            JSONObject(
+                "{\"productId\":\"latte\",\"purchaseToken\":\"newer-token\",\"purchaseTime\":1900000000000,\"purchaseState\":0}"
+            )
+
+        InAppPurchaseLoggerManager.filterPurchaseLogging(
+            mutableMapOf("espresso" to olderPurchase, "latte" to newerPurchase),
+            mapOf("latte" to JSONObject()),
+            false,
+            packageName,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS,
+            false,
+        )
+
+        val olderResult =
+            InAppPurchaseLoggerManager.filterPurchaseLogging(
+                mutableMapOf("espresso" to olderPurchase),
+                mapOf("espresso" to JSONObject()),
+                false,
+                packageName,
+                InAppPurchaseUtils.BillingClientVersion.V8_PLUS,
+                false,
+            )
+
+        Assertions.assertThat(olderResult).containsExactly("espresso")
+        Assertions.assertThat(mockNewCachedMap[TIME_OF_LAST_LOGGED_PURCHASE_KEY])
+            .isEqualTo(previousPurchaseTime)
+        Assertions.assertThat(mockNewCachedTokenMap.values)
+            .containsExactlyInAnyOrder("older-token", "newer-token")
     }
 }

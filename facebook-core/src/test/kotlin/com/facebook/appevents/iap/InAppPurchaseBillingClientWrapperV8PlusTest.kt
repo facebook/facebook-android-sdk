@@ -42,11 +42,13 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
         var succeeded: Boolean? = null
         val productDetails = ProductDetailsStub(PRODUCT_DETAILS_STRING)
         val queryResult = QueryProductDetailsResultStub(listOf(productDetails))
+        val productDetailsTarget = mutableMapOf<String, JSONObject>()
 
         wrapper
             .ListenerWrapper(
                 arrayOf<Any>(
                     listOf("exampleProductId"),
+                    productDetailsTarget,
                     InAppPurchaseBillingClientWrapperV8Plus.QueryResultCallback { succeeded = it },
                 )
             )
@@ -57,18 +59,19 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
             )
 
         assertThat(succeeded).isTrue()
-        assertThat(InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap)
-            .containsKey("exampleProductId")
+        assertThat(productDetailsTarget).containsKey("exampleProductId")
     }
 
     @Test
     fun `product details callback fails closed when GPBL response cannot be read`() {
         var succeeded: Boolean? = null
+        val productDetailsTarget = mutableMapOf<String, JSONObject>()
 
         wrapper
             .ListenerWrapper(
                 arrayOf<Any>(
                     listOf("exampleProductId"),
+                    productDetailsTarget,
                     InAppPurchaseBillingClientWrapperV8Plus.QueryResultCallback { succeeded = it },
                 )
             )
@@ -79,17 +82,19 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
             )
 
         assertThat(succeeded).isFalse()
-        assertThat(InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap).isEmpty()
+        assertThat(productDetailsTarget).isEmpty()
     }
 
     @Test
     fun `product details callback reports non-OK BillingResult`() {
         var succeeded: Boolean? = null
+        val productDetailsTarget = mutableMapOf<String, JSONObject>()
 
         wrapper
             .ListenerWrapper(
                 arrayOf<Any>(
                     listOf("exampleProductId"),
+                    productDetailsTarget,
                     InAppPurchaseBillingClientWrapperV8Plus.QueryResultCallback { succeeded = it },
                 )
             )
@@ -100,6 +105,28 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
             )
 
         assertThat(succeeded).isFalse()
+    }
+
+    @Test
+    fun `successful purchases query completes when a purchase cannot be mapped`() {
+        var succeeded: Boolean? = null
+
+        wrapper
+            .ListenerWrapper(
+                arrayOf<Any>(
+                    InAppPurchaseUtils.IAPProductType.INAPP,
+                    InAppPurchaseBillingClientWrapperV8Plus.PurchaseQueryResultCallback {
+                        succeeded = it.succeeded
+                    },
+                )
+            )
+            .invoke(
+                Any(),
+                ListenerMethods::class.java.getMethod("onQueryPurchasesResponse"),
+                arrayOf(BillingResultStub(0), listOf(PurchaseStub("not-json"))),
+            )
+
+        assertThat(succeeded).isTrue()
     }
 
     @Test
@@ -129,23 +156,37 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
     fun `purchase productIds are normalized for logging`() {
         InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap["productA"] = JSONObject()
         InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap["productB"] = JSONObject()
+        val purchaseDetailsTarget = mutableMapOf<String, JSONObject>()
+        val productDetailsTarget = mutableMapOf<String, JSONObject>()
         var succeeded: Boolean? = null
 
         wrapper.processPurchaseJsons(
             InAppPurchaseUtils.IAPProductType.INAPP,
-            listOf(JSONObject("{\"productIds\":[\"productA\",\"productB\"],\"purchaseState\":1}")),
+            listOf(JSONObject("{\"productIds\":[\"productA\",\"productB\"],\"purchaseState\":0}")),
+            purchaseDetailsTarget,
+            productDetailsTarget,
         ) {
             succeeded = it
         }
 
         assertThat(succeeded).isTrue()
-        assertThat(InAppPurchaseBillingClientWrapperV8Plus.iapPurchaseDetailsMap.keys)
-            .isEqualTo(setOf("productA", "productB"))
-        assertThat(
-                InAppPurchaseBillingClientWrapperV8Plus.iapPurchaseDetailsMap["productB"]
-                    ?.getString("productId")
-            )
+        assertThat(purchaseDetailsTarget.keys).isEqualTo(setOf("productA", "productB"))
+        assertThat(purchaseDetailsTarget["productB"]?.getString("productId"))
             .isEqualTo("productB")
+        assertThat(productDetailsTarget.keys).containsExactlyInAnyOrder("productA", "productB")
+        assertThat(InAppPurchaseBillingClientWrapperV8Plus.iapPurchaseDetailsMap).isEmpty()
+
+        InAppPurchaseBillingClientWrapperV8Plus.publishQueryResult(
+            InAppPurchaseBillingClientWrapperV8Plus.PurchaseQueryResult(
+                InAppPurchaseUtils.IAPProductType.INAPP,
+                true,
+                purchaseDetailsTarget,
+                productDetailsTarget,
+            )
+        )
+
+        assertThat(InAppPurchaseBillingClientWrapperV8Plus.iapPurchaseDetailsMap.keys)
+            .containsExactlyInAnyOrder("productA", "productB")
     }
 
     @Test
@@ -163,7 +204,7 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
             ListenerMethods::class.java.getMethod("onPurchasesUpdated"),
             arrayOf(
                 BillingResultStub(0),
-                listOf(PurchaseStub("{\"productId\":\"exampleProductId\",\"purchaseState\":1}")),
+                listOf(PurchaseStub("{\"productId\":\"exampleProductId\",\"purchaseState\":0}")),
             ),
         )
 
@@ -275,6 +316,8 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
         fun onProductDetailsResponse() = Unit
 
         fun onPurchasesUpdated() = Unit
+
+        fun onQueryPurchasesResponse() = Unit
     }
 
     companion object {

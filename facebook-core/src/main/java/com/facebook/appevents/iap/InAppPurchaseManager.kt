@@ -15,6 +15,7 @@ import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.NONE
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V1
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V2_V4
 import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V5_V7
+import com.facebook.appevents.iap.InAppPurchaseUtils.BillingClientVersion.V8_PLUS
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.UserSettingsManager
 import com.facebook.appevents.OperationalData
@@ -79,6 +80,15 @@ object InAppPurchaseManager {
                     )
                 }
             }
+
+            V8_PLUS -> {
+                if (isEnabled(FeatureManager.Feature.IapLoggingLib8Plus)) {
+                    InAppPurchaseAutoLogger.startIapLogging(
+                        getApplicationContext(),
+                        billingClientVersion
+                    )
+                }
+            }
         }
     }
 
@@ -108,7 +118,7 @@ object InAppPurchaseManager {
                 limit = 3
             )
             if (version.isEmpty()) {
-                // Default to newest version
+                // Preserve the last broadly compatible implementation when metadata is malformed.
                 return V5_V7
             }
             setSpecificBillingLibraryVersion("GPBL.$version")
@@ -118,11 +128,12 @@ object InAppPurchaseManager {
                 V1
             } else if (majorVersion < 5) {
                 V2_V4
-            } else {
+            } else if (majorVersion < 8) {
                 V5_V7
+            } else {
+                V8_PLUS
             }
         } catch (e: Exception) {
-            // Default to newest version
             return V5_V7
         }
     }

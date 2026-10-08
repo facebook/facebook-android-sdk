@@ -152,6 +152,7 @@ object FeatureManager {
             Feature.IapLogging,
             Feature.IapLoggingLib2,
             Feature.IapLoggingLib5To7,
+            Feature.IapLoggingLib8Plus,
             Feature.AndroidManualImplicitPurchaseDedupe,
             Feature.AndroidManualImplicitSubsDedupe,
             Feature.AndroidIAPSubscriptionAutoLogging,
@@ -213,6 +214,7 @@ object FeatureManager {
         IapLogging(0x00010700),
         IapLoggingLib2(0x00010701),
         IapLoggingLib5To7(0x0010702),
+        IapLoggingLib8Plus(0x0010706),
         AndroidManualImplicitPurchaseDedupe(0x0010703),
         AndroidManualImplicitSubsDedupe(0x0010704),
         AndroidIAPSubscriptionAutoLogging(0x0010705),
@@ -274,6 +276,7 @@ object FeatureManager {
                 IapLogging -> "IAPLogging"
                 IapLoggingLib2 -> "IAPLoggingLib2"
                 IapLoggingLib5To7 -> "IAPLoggingLib5To7"
+                IapLoggingLib8Plus -> "IAPLoggingLib8Plus"
                 AndroidManualImplicitPurchaseDedupe -> "AndroidManualImplicitPurchaseDedupe"
                 AndroidManualImplicitSubsDedupe -> "AndroidManualImplicitSubsDedupe"
                 AndroidIAPSubscriptionAutoLogging -> "AndroidIAPSubscriptionAutoLogging"

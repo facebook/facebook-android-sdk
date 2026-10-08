@@ -282,6 +282,80 @@ class InAppPurchaseManagerTest : FacebookPowerMockTestCase() {
     }
 
     @Test
+    fun `test start iap logging when billing library is v8 plus and feature is enabled`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib8Plus)).thenReturn(true)
+        configureBillingLibraryVersion("8.0.0")
+
+        var isStartIapLoggingCalled = false
+        whenever(
+            InAppPurchaseAutoLogger.startIapLogging(
+                any(),
+                eq(InAppPurchaseUtils.BillingClientVersion.V8_PLUS)
+            )
+        ).thenAnswer {
+            isStartIapLoggingCalled = true
+            null
+        }
+
+        InAppPurchaseManager.startTracking()
+
+        assertThat(isStartIapLoggingCalled).isTrue
+        assertThat(InAppPurchaseManager.getSpecificBillingLibraryVersion()).isEqualTo("GPBL.8.0.0")
+    }
+
+    @Test
+    fun `test start iap logging when billing library is newer than v8 and feature is disabled`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib8Plus)).thenReturn(false)
+        configureBillingLibraryVersion("9.1.0")
+
+        var isStartIapLoggingCalled = false
+        whenever(
+            InAppPurchaseAutoLogger.startIapLogging(
+                any(),
+                eq(InAppPurchaseUtils.BillingClientVersion.V8_PLUS)
+            )
+        ).thenAnswer {
+            isStartIapLoggingCalled = true
+            null
+        }
+
+        InAppPurchaseManager.startTracking()
+
+        assertThat(isStartIapLoggingCalled).isFalse
+    }
+
+    @Test
+    fun `test unparseable billing library version preserves v5 to v7 fallback`() {
+        configureBillingLibraryVersion("not-a-version")
+
+        val billingClientVersion =
+            Whitebox.invokeMethod<InAppPurchaseUtils.BillingClientVersion>(
+                InAppPurchaseManager,
+                "getBillingClientVersion"
+            )
+
+        assertThat(billingClientVersion)
+            .isEqualTo(InAppPurchaseUtils.BillingClientVersion.V5_V7)
+    }
+
+    private fun configureBillingLibraryVersion(version: String) {
+        val mockPackageManager: PackageManager = mock()
+        val mockApplicationInfo = ApplicationInfo()
+        mockApplicationInfo.metaData =
+            Bundle().apply {
+                putString("com.google.android.play.billingclient.version", version)
+            }
+        whenever(mockContext.packageManager).thenReturn(mockPackageManager)
+        whenever(mockContext.packageName).thenReturn("com.facebook.test")
+        whenever(
+            mockPackageManager.getApplicationInfo(
+                any<String>(),
+                any<Int>()
+            )
+        ).thenReturn(mockApplicationInfo)
+    }
+
+    @Test
     fun testPerformDedupe() {
         val purchase = InAppPurchase(
             AppEventsConstants.EVENT_NAME_PURCHASED,
