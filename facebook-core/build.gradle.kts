@@ -56,6 +56,8 @@ dependencies {
     testImplementation(libs.mockwebserver)
 
     testImplementation(libs.android.installreferrer)
+    // Validate the reflection-only wrapper against the minimum supported GPBL 8 API surface.
+    testImplementation("com.android.billingclient:billing:8.0.0")
     testImplementation(libs.kotlin.stdlib)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.play.services.gcm)

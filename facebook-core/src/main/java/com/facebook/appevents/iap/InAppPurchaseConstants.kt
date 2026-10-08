@@ -10,10 +10,10 @@ package com.facebook.appevents.iap
 
 object InAppPurchaseConstants {
     const val PRODUCT_ID = "productId"
+    const val PRODUCT_IDS = "productIds"
     const val PACKAGE_NAME = "packageName"
     const val PURCHASE_TOKEN = "purchaseToken"
     const val ORDER_ID = "orderId"
-
 
     /**
      * Google Play Billing Library V2 - V7
@@ -123,5 +123,6 @@ object InAppPurchaseConstants {
     // Method names: Listeners
     const val METHOD_ON_QUERY_PURCHASES_RESPONSE = "onQueryPurchasesResponse"
     const val METHOD_ON_PRODUCT_DETAILS_RESPONSE = "onProductDetailsResponse"
+    const val METHOD_ON_PURCHASES_UPDATED = "onPurchasesUpdated"
 
 }

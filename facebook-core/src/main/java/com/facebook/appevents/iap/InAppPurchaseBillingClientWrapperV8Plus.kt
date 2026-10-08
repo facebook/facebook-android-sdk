@@ -37,6 +37,7 @@ import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_NEW_BUILDER
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_BILLING_SERVICE_DISCONNECTED
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_BILLING_SETUP_FINISHED
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_PRODUCT_DETAILS_RESPONSE
+import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_PURCHASES_UPDATED
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_ON_QUERY_PURCHASES_RESPONSE
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_QUERY_PRODUCT_DETAILS_ASYNC
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_QUERY_PURCHASES_ASYNC
@@ -47,6 +48,7 @@ import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_SET_PRODUCT_TYPE
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_START_CONNECTION
 import com.facebook.appevents.iap.InAppPurchaseConstants.METHOD_TO_STRING
 import com.facebook.appevents.iap.InAppPurchaseConstants.PRODUCT_ID
+import com.facebook.appevents.iap.InAppPurchaseConstants.PRODUCT_IDS
 import com.facebook.appevents.iap.InAppPurchaseUtils.getClass
 import com.facebook.appevents.iap.InAppPurchaseUtils.getMethod
 import com.facebook.appevents.iap.InAppPurchaseUtils.invokeMethod
@@ -93,6 +95,10 @@ private constructor(
     private val billingClientStartConnectionMethod: Method,
     private val billingResultGetResponseCodeMethod: Method,
 ) : InAppPurchaseBillingClientWrapper {
+
+    internal fun interface QueryResultCallback {
+        fun onComplete(success: Boolean)
+    }
 
     inner class ListenerWrapper(private val wrapperArgs: Array<Any>?) : InvocationHandler {
         override fun invoke(proxy: Any, method: Method, listenerArgs: Array<Any>?): Any? {
@@ -198,10 +204,18 @@ private constructor(
         productType: InAppPurchaseUtils.IAPProductType,
         completionHandler: Runnable,
     ) {
+        queryPurchasesWithResult(productType) { completionHandler.run() }
+    }
+
+    internal fun queryPurchasesWithResult(
+        productType: InAppPurchaseUtils.IAPProductType,
+        completionHandler: QueryResultCallback,
+    ) {
         val runnableQuery = Runnable {
             val queryPurchasesParams = getQueryPurchasesParams(productType)
             if (queryPurchasesParams == null) {
                 Log.w(TAG, "Failed to build GPBL 8 query purchases parameters")
+                completionHandler.onComplete(false)
                 return@Runnable
             }
             val listener =
@@ -218,7 +232,7 @@ private constructor(
                 listener,
             )
         }
-        executeServiceRequest(runnableQuery)
+        executeServiceRequest(runnableQuery, Runnable { completionHandler.onComplete(false) })
     }
 
     override fun queryPurchaseHistory(
@@ -232,19 +246,20 @@ private constructor(
     private fun queryProductDetailsAsync(
         productType: InAppPurchaseUtils.IAPProductType,
         productIds: List<String>,
-        completionHandler: Runnable,
+        completionHandler: QueryResultCallback,
     ) {
         val runnableQuery = Runnable {
             val queryProductDetailsParams = getQueryProductDetailsParams(productType, productIds)
             if (queryProductDetailsParams == null) {
                 Log.w(TAG, "Failed to build GPBL 8 query product details parameters")
+                completionHandler.onComplete(false)
                 return@Runnable
             }
             val listener =
                 Proxy.newProxyInstance(
                     productDetailsResponseListenerClazz.classLoader,
                     arrayOf(productDetailsResponseListenerClazz),
-                    ListenerWrapper(arrayOf(completionHandler)),
+                    ListenerWrapper(arrayOf(productIds, completionHandler)),
                 )
             invokeMethod(
                 billingClientClazz,
@@ -254,23 +269,23 @@ private constructor(
                 listener,
             )
         }
-        executeServiceRequest(runnableQuery)
+        executeServiceRequest(runnableQuery, Runnable { completionHandler.onComplete(false) })
     }
 
-    private fun executeServiceRequest(runnable: Runnable) {
+    private fun executeServiceRequest(runnable: Runnable, failureHandler: Runnable) {
         if (isServiceConnected.get()) {
             runnable.run()
         } else {
-            startConnection(runnable)
+            startConnection(runnable, failureHandler)
         }
     }
 
-    private fun startConnection(runnable: Runnable) {
+    private fun startConnection(runnable: Runnable, failureHandler: Runnable) {
         val listener =
             Proxy.newProxyInstance(
                 billingClientStateListenerClazz.classLoader,
                 arrayOf(billingClientStateListenerClazz),
-                ListenerWrapper(arrayOf(runnable)),
+                ListenerWrapper(arrayOf(runnable, failureHandler)),
             )
         invokeMethod(
             billingClientClazz,
@@ -281,55 +296,115 @@ private constructor(
     }
 
     fun getOriginalJson(productDetailsString: String): String? {
-        val jsonStringRegex = """jsonString='(.*?)'""".toRegex()
-        return jsonStringRegex.find(productDetailsString)?.groupValues?.getOrNull(1)
+        // ProductDetails does not expose its original JSON. GPBL 8 currently wraps it between
+        // these two delimiters in toString(); return null if that representation changes.
+        val start = productDetailsString.indexOf(PRODUCT_DETAILS_JSON_PREFIX)
+        if (start < 0) {
+            return null
+        }
+        val jsonStart = start + PRODUCT_DETAILS_JSON_PREFIX.length
+        val jsonEnd = productDetailsString.lastIndexOf(PRODUCT_DETAILS_JSON_SUFFIX)
+        return if (jsonEnd >= jsonStart) productDetailsString.substring(jsonStart, jsonEnd)
+        else null
     }
 
     private fun onQueryPurchasesResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val completionHandler = wrapperArgs?.getOrNull(1) as? Runnable ?: return
+        val completionHandler = wrapperArgs?.getOrNull(1) as? QueryResultCallback ?: return
         val productType = wrapperArgs.getOrNull(0) as? InAppPurchaseUtils.IAPProductType
         val purchaseList = listenerArgs?.getOrNull(1) as? List<*>
+        if (!hasSuccessfulBillingResult(listenerArgs, "purchases query")) {
+            completionHandler.onComplete(false)
+            return
+        }
         if (productType == null || purchaseList == null) {
             Log.w(TAG, "Failed to read GPBL 8 purchases response")
+            completionHandler.onComplete(false)
             return
         }
 
-        val productIds = mutableListOf<String>()
+        val purchaseJsons = mutableListOf<JSONObject>()
+        var parsedEveryPurchase = true
         for (purchase in purchaseList) {
             try {
                 val purchaseJsonString =
                     invokeMethod(purchaseClazz, purchaseGetOriginalJsonMethod, purchase) as? String
-                        ?: continue
-                val purchaseJson = JSONObject(purchaseJsonString)
-                if (!purchaseJson.has(PRODUCT_ID)) {
+                if (purchaseJsonString == null) {
+                    parsedEveryPurchase = false
                     continue
                 }
-                val productId = purchaseJson.getString(PRODUCT_ID)
-                if (productId !in productDetailsMap) {
-                    productIds.add(productId)
-                }
-                if (productType == InAppPurchaseUtils.IAPProductType.INAPP) {
-                    iapPurchaseDetailsMap[productId] = purchaseJson
-                } else {
-                    subsPurchaseDetailsMap[productId] = purchaseJson
-                }
+                purchaseJsons.add(JSONObject(purchaseJsonString))
             } catch (exception: Exception) {
+                parsedEveryPurchase = false
                 Log.w(TAG, "Failed to parse a GPBL 8 purchase", exception)
             }
         }
-        if (productIds.isNotEmpty()) {
-            queryProductDetailsAsync(productType, productIds, completionHandler)
-        } else {
-            completionHandler.run()
+        processPurchaseJsons(productType, purchaseJsons) { productDetailsComplete ->
+            completionHandler.onComplete(parsedEveryPurchase && productDetailsComplete)
         }
     }
 
+    internal fun processPurchaseJsons(
+        productType: InAppPurchaseUtils.IAPProductType,
+        purchaseJsons: List<JSONObject>,
+        completionHandler: QueryResultCallback,
+    ) {
+        val missingProductIds = linkedSetOf<String>()
+        var mappedEveryPurchase = true
+        for (purchaseJson in purchaseJsons) {
+            val productIds = getProductIds(purchaseJson)
+            if (productIds.isEmpty()) {
+                mappedEveryPurchase = false
+                Log.w(TAG, "GPBL 8 purchase is missing product identifiers")
+                continue
+            }
+            for (productId in productIds) {
+                val normalizedPurchase =
+                    JSONObject(purchaseJson.toString()).put(PRODUCT_ID, productId)
+                if (productId !in productDetailsMap) {
+                    missingProductIds.add(productId)
+                }
+                if (productType == InAppPurchaseUtils.IAPProductType.INAPP) {
+                    iapPurchaseDetailsMap[productId] = normalizedPurchase
+                } else {
+                    subsPurchaseDetailsMap[productId] = normalizedPurchase
+                }
+            }
+        }
+        if (missingProductIds.isNotEmpty()) {
+            queryProductDetailsAsync(productType, missingProductIds.toList()) {
+                completionHandler.onComplete(mappedEveryPurchase && it)
+            }
+        } else {
+            completionHandler.onComplete(mappedEveryPurchase)
+        }
+    }
+
+    private fun getProductIds(purchaseJson: JSONObject): List<String> {
+        val productIds = mutableListOf<String>()
+        val productIdArray = purchaseJson.optJSONArray(PRODUCT_IDS)
+        if (productIdArray != null) {
+            for (index in 0 until productIdArray.length()) {
+                productIdArray.optString(index).takeIf { it.isNotEmpty() }?.let(productIds::add)
+            }
+        }
+        if (productIds.isEmpty()) {
+            purchaseJson.optString(PRODUCT_ID).takeIf { it.isNotEmpty() }?.let(productIds::add)
+        }
+        return productIds.distinct()
+    }
+
     private fun onProductDetailsResponse(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val completionHandler = wrapperArgs?.getOrNull(0) as? Runnable ?: return
+        val requestedProductIds = wrapperArgs?.getOrNull(0) as? List<*> ?: return
+        val completionHandler = wrapperArgs.getOrNull(1) as? QueryResultCallback ?: return
+        if (!hasSuccessfulBillingResult(listenerArgs, "product details query")) {
+            completionHandler.onComplete(false)
+            return
+        }
         val rawResult =
             listenerArgs?.getOrNull(1)
                 ?: run {
                     Log.w(TAG, "GPBL 8 product details response is missing")
+                    completionHandler.onComplete(false)
                     return
                 }
         val productDetailsList =
@@ -348,6 +423,7 @@ private constructor(
             }
 
         if (productDetailsList == null) {
+            completionHandler.onComplete(false)
             return
         }
         for (productDetails in productDetailsList) {
@@ -368,18 +444,40 @@ private constructor(
                 Log.w(TAG, "Failed to parse GPBL 8 product details", exception)
             }
         }
-        completionHandler.run()
+        completionHandler.onComplete(
+            requestedProductIds.filterIsInstance<String>().all(productDetailsMap::containsKey)
+        )
+    }
+
+    private fun hasSuccessfulBillingResult(listenerArgs: Array<Any>?, operation: String): Boolean {
+        val billingResult = listenerArgs?.getOrNull(0)
+        val responseCode = billingResult?.let {
+            invokeMethod(billingResultClazz, billingResultGetResponseCodeMethod, it) as? Int
+        }
+        if (responseCode != BILLING_RESPONSE_OK) {
+            Log.w(TAG, "GPBL 8 $operation failed with response code $responseCode")
+            return false
+        }
+        return true
     }
 
     private fun onBillingSetupFinished(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
-        val billingResult = listenerArgs?.getOrNull(0) ?: return
+        val failureHandler = wrapperArgs?.getOrNull(1) as? Runnable
+        val billingResult =
+            listenerArgs?.getOrNull(0)
+                ?: run {
+                    Log.w(TAG, "GPBL 8 billing setup response is missing")
+                    failureHandler?.run()
+                    return
+                }
         val responseCode =
             invokeMethod(billingResultClazz, billingResultGetResponseCodeMethod, billingResult)
-        if (responseCode == 0) {
+        if (responseCode == BILLING_RESPONSE_OK) {
             isServiceConnected.set(true)
             (wrapperArgs?.getOrNull(0) as? Runnable)?.run()
         } else {
             Log.w(TAG, "GPBL 8 billing setup failed with response code $responseCode")
+            failureHandler?.run()
         }
     }
 
@@ -389,10 +487,15 @@ private constructor(
 
     companion object : InvocationHandler {
         private val TAG = InAppPurchaseBillingClientWrapperV8Plus::class.java.canonicalName
+        private const val BILLING_RESPONSE_OK = 0
         private const val METHOD_GET_PRODUCT_DETAILS_LIST = "getProductDetailsList"
+        private const val PRODUCT_DETAILS_JSON_PREFIX = "jsonString='"
+        private const val PRODUCT_DETAILS_JSON_SUFFIX = "', parsedJson="
         val isServiceConnected = AtomicBoolean(false)
-        private var instance: InAppPurchaseBillingClientWrapperV8Plus? = null
+        @Volatile private var instance: InAppPurchaseBillingClientWrapperV8Plus? = null
         private val lock = Any()
+
+        @Volatile internal var purchasesUpdatedHandler: ((Int, List<JSONObject>) -> Unit)? = null
 
         val iapPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
         val subsPurchaseDetailsMap: MutableMap<String, JSONObject> = ConcurrentHashMap()
@@ -685,7 +788,41 @@ private constructor(
             )
         }
 
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? = null
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
+            if (method.name == METHOD_ON_PURCHASES_UPDATED) {
+                handlePurchasesUpdated(args)
+            }
+            return null
+        }
+
+        private fun handlePurchasesUpdated(args: Array<Any>?) {
+            val wrapper = instance ?: return
+            val billingResult = args?.getOrNull(0) ?: return
+            val purchases = args.getOrNull(1) as? List<*> ?: return
+            val responseCode =
+                invokeMethod(
+                    wrapper.billingResultClazz,
+                    wrapper.billingResultGetResponseCodeMethod,
+                    billingResult,
+                )
+                    as? Int ?: return
+            val purchaseJsons = mutableListOf<JSONObject>()
+            for (purchase in purchases) {
+                try {
+                    val originalJson =
+                        invokeMethod(
+                            wrapper.purchaseClazz,
+                            wrapper.purchaseGetOriginalJsonMethod,
+                            purchase,
+                        )
+                            as? String ?: continue
+                    purchaseJsons.add(JSONObject(originalJson))
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Failed to parse a GPBL 8 realtime purchase update", exception)
+                }
+            }
+            purchasesUpdatedHandler?.invoke(responseCode, purchaseJsons)
+        }
 
         private const val WRAPPER_CREATION_ERROR =
             "Failed to create Google Play billing library wrapper for in-app purchase auto-logging"

@@ -10,6 +10,7 @@ package com.facebook.appevents.iap
 
 import com.facebook.FacebookTestCase
 import org.assertj.core.api.Assertions.assertThat
+import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 
@@ -22,6 +23,8 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
         InAppPurchaseBillingClientWrapperV8Plus.subsPurchaseDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap.clear()
         InAppPurchaseBillingClientWrapperV8Plus.isServiceConnected.set(false)
+        InAppPurchaseBillingClientWrapperV8Plus.purchasesUpdatedHandler = null
+        setSingletonInstance(null)
         wrapper = createWrapper()
     }
 
@@ -36,43 +39,166 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
 
     @Test
     fun `product details callback reads GPBL 8 result wrapper`() {
-        var completed = false
+        var succeeded: Boolean? = null
         val productDetails = ProductDetailsStub(PRODUCT_DETAILS_STRING)
         val queryResult = QueryProductDetailsResultStub(listOf(productDetails))
 
         wrapper
-            .ListenerWrapper(arrayOf<Any>(Runnable { completed = true }))
+            .ListenerWrapper(
+                arrayOf<Any>(
+                    listOf("exampleProductId"),
+                    InAppPurchaseBillingClientWrapperV8Plus.QueryResultCallback { succeeded = it },
+                )
+            )
             .invoke(
                 Any(),
                 ListenerMethods::class.java.getMethod("onProductDetailsResponse"),
-                arrayOf(Any(), queryResult),
+                arrayOf(BillingResultStub(0), queryResult),
             )
 
-        assertThat(completed).isTrue()
+        assertThat(succeeded).isTrue()
         assertThat(InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap)
             .containsKey("exampleProductId")
     }
 
     @Test
     fun `product details callback fails closed when GPBL response cannot be read`() {
-        var completed = false
+        var succeeded: Boolean? = null
 
         wrapper
-            .ListenerWrapper(arrayOf<Any>(Runnable { completed = true }))
+            .ListenerWrapper(
+                arrayOf<Any>(
+                    listOf("exampleProductId"),
+                    InAppPurchaseBillingClientWrapperV8Plus.QueryResultCallback { succeeded = it },
+                )
+            )
             .invoke(
                 Any(),
                 ListenerMethods::class.java.getMethod("onProductDetailsResponse"),
-                arrayOf(Any(), Any()),
+                arrayOf(BillingResultStub(0), Any()),
             )
 
-        assertThat(completed).isFalse()
+        assertThat(succeeded).isFalse()
         assertThat(InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap).isEmpty()
+    }
+
+    @Test
+    fun `product details callback reports non-OK BillingResult`() {
+        var succeeded: Boolean? = null
+
+        wrapper
+            .ListenerWrapper(
+                arrayOf<Any>(
+                    listOf("exampleProductId"),
+                    InAppPurchaseBillingClientWrapperV8Plus.QueryResultCallback { succeeded = it },
+                )
+            )
+            .invoke(
+                Any(),
+                ListenerMethods::class.java.getMethod("onProductDetailsResponse"),
+                arrayOf(BillingResultStub(5), QueryProductDetailsResultStub(emptyList())),
+            )
+
+        assertThat(succeeded).isFalse()
     }
 
     @Test
     fun `original json is extracted from product details string`() {
         assertThat(wrapper.getOriginalJson(PRODUCT_DETAILS_STRING))
             .isEqualTo("{\"productId\":\"exampleProductId\"}")
+    }
+
+    @Test
+    fun `original json extraction preserves apostrophes`() {
+        val productDetailsString =
+            "ProductDetails{jsonString='{\"productId\":\"exampleProductId\",\"title\":\"Kid's Pack\"}', parsedJson={}}"
+
+        assertThat(wrapper.getOriginalJson(productDetailsString))
+            .isEqualTo("{\"productId\":\"exampleProductId\",\"title\":\"Kid's Pack\"}")
+    }
+
+    @Test
+    fun `original json extraction rejects an unknown product details layout`() {
+        val productDetailsString =
+            "ProductDetails{jsonString='{\"productId\":\"exampleProductId\"}', otherValue='x'}"
+
+        assertThat(wrapper.getOriginalJson(productDetailsString) == null).isTrue()
+    }
+
+    @Test
+    fun `purchase productIds are normalized for logging`() {
+        InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap["productA"] = JSONObject()
+        InAppPurchaseBillingClientWrapperV8Plus.productDetailsMap["productB"] = JSONObject()
+        var succeeded: Boolean? = null
+
+        wrapper.processPurchaseJsons(
+            InAppPurchaseUtils.IAPProductType.INAPP,
+            listOf(JSONObject("{\"productIds\":[\"productA\",\"productB\"],\"purchaseState\":1}")),
+        ) {
+            succeeded = it
+        }
+
+        assertThat(succeeded).isTrue()
+        assertThat(InAppPurchaseBillingClientWrapperV8Plus.iapPurchaseDetailsMap.keys)
+            .isEqualTo(setOf("productA", "productB"))
+        assertThat(
+                InAppPurchaseBillingClientWrapperV8Plus.iapPurchaseDetailsMap["productB"]
+                    ?.getString("productId")
+            )
+            .isEqualTo("productB")
+    }
+
+    @Test
+    fun `realtime listener forwards successful purchase updates`() {
+        setSingletonInstance(wrapper)
+        var forwardedCode: Int? = null
+        var forwardedPurchases: List<JSONObject>? = null
+        InAppPurchaseBillingClientWrapperV8Plus.purchasesUpdatedHandler = { code, purchases ->
+            forwardedCode = code
+            forwardedPurchases = purchases
+        }
+
+        InAppPurchaseBillingClientWrapperV8Plus.invoke(
+            Any(),
+            ListenerMethods::class.java.getMethod("onPurchasesUpdated"),
+            arrayOf(
+                BillingResultStub(0),
+                listOf(PurchaseStub("{\"productId\":\"exampleProductId\",\"purchaseState\":1}")),
+            ),
+        )
+
+        assertThat(forwardedCode).isEqualTo(0)
+        assertThat(forwardedPurchases?.size).isEqualTo(1)
+        assertThat(forwardedPurchases?.first()?.getString("productId"))
+            .isEqualTo("exampleProductId")
+    }
+
+    @Test
+    fun `GPBL 8 dependency exposes reflected API contract`() {
+        val billingResultClass = Class.forName("com.android.billingclient.api.BillingResult")
+        val queryResultClass =
+            Class.forName("com.android.billingclient.api.QueryProductDetailsResult")
+        val listenerClass =
+            Class.forName("com.android.billingclient.api.ProductDetailsResponseListener")
+        val pendingPurchasesParamsClass =
+            Class.forName("com.android.billingclient.api.PendingPurchasesParams")
+
+        assertThat(queryResultClass.getMethod("getProductDetailsList") != null).isTrue()
+        assertThat(
+                listenerClass.getMethod(
+                    "onProductDetailsResponse",
+                    billingResultClass,
+                    queryResultClass,
+                ) != null
+            )
+            .isTrue()
+        assertThat(
+                pendingPurchasesParamsClass
+                    .getMethod("newBuilder")
+                    .returnType
+                    .getMethod("enableOneTimeProducts") != null
+            )
+            .isTrue()
     }
 
     private fun createWrapper(): InAppPurchaseBillingClientWrapperV8Plus {
@@ -87,10 +213,10 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
         return constructor.newInstance(
             fixture,
             fixtureClass,
-            fixtureClass,
+            PurchaseStub::class.java,
             ProductDetailsStub::class.java,
             fixtureClass,
-            fixtureClass,
+            BillingResultStub::class.java,
             fixtureClass,
             fixtureClass,
             fixtureClass,
@@ -103,7 +229,7 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
             noOpMethod,
             noOpMethod,
             noOpMethod,
-            noOpMethod,
+            PurchaseStub::class.java.getMethod("getOriginalJson"),
             noOpMethod,
             noOpMethod,
             noOpMethod,
@@ -114,8 +240,15 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
             noOpMethod,
             ProductDetailsStub::class.java.getMethod("toString"),
             noOpMethod,
-            noOpMethod,
+            BillingResultStub::class.java.getMethod("getResponseCode"),
         ) as InAppPurchaseBillingClientWrapperV8Plus
+    }
+
+    private fun setSingletonInstance(instance: InAppPurchaseBillingClientWrapperV8Plus?) {
+        val instanceField =
+            InAppPurchaseBillingClientWrapperV8Plus::class.java.getDeclaredField("instance")
+        instanceField.isAccessible = true
+        instanceField.set(null, instance)
     }
 
     class ReflectionFixture {
@@ -126,12 +259,22 @@ class InAppPurchaseBillingClientWrapperV8PlusTest : FacebookTestCase() {
         override fun toString(): String = value
     }
 
+    class BillingResultStub(private val responseCode: Int) {
+        fun getResponseCode(): Int = responseCode
+    }
+
+    class PurchaseStub(private val originalJson: String) {
+        fun getOriginalJson(): String = originalJson
+    }
+
     class QueryProductDetailsResultStub(private val productDetailsList: List<ProductDetailsStub>) {
         fun getProductDetailsList(): List<ProductDetailsStub> = productDetailsList
     }
 
     class ListenerMethods {
         fun onProductDetailsResponse() = Unit
+
+        fun onPurchasesUpdated() = Unit
     }
 
     companion object {
