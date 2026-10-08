@@ -44,6 +44,8 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
 
     private lateinit var mockApplication: Application
     private lateinit var mockActivity: Activity
+    private lateinit var mockBillingActivity: Activity
+    private lateinit var mockHostActivity: Activity
     private lateinit var mockScheduledExecutor: FacebookSerialThreadPoolMockExecutor
     private lateinit var mockIapExecutor: FacebookSerialThreadPoolMockExecutor
 
@@ -53,6 +55,8 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
     fun init() {
         mockApplication = PowerMockito.mock(Application::class.java)
         mockActivity = PowerMockito.mock(Activity::class.java)
+        mockBillingActivity = PowerMockito.mock(Activity::class.java)
+        mockHostActivity = PowerMockito.mock(Activity::class.java)
         PowerMockito.mockStatic(FeatureManager::class.java)
         PowerMockito.mockStatic(CodelessManager::class.java)
         PowerMockito.mockStatic(InAppPurchaseManager::class.java)
@@ -60,6 +64,8 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         PowerMockito.mockStatic(SuggestedEventsManager::class.java)
         PowerMockito.mockStatic(Utility::class.java)
         whenever(Utility.getActivityName(eq(mockActivity))).thenAnswer { "ProxyBillingActivity" }
+        whenever(Utility.getActivityName(eq(mockBillingActivity))).thenReturn("ProxyBillingActivity")
+        whenever(Utility.getActivityName(eq(mockHostActivity))).thenReturn("MainActivity")
 
         mockScheduledExecutor = spy(FacebookSerialThreadPoolMockExecutor(1))
         Whitebox.setInternalState(
@@ -77,6 +83,11 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         )
         Whitebox.setInternalState(
             ActivityLifecycleTracker::class.java, "previousActivityName", "MainActivity"
+        )
+        Whitebox.setInternalState(
+            ActivityLifecycleTracker::class.java,
+            "didRefreshIapOnBillingActivityStop",
+            false,
         )
     }
 
@@ -146,6 +157,107 @@ class ActivityLifecycleTrackerTest : FacebookPowerMockTestCase() {
         ActivityLifecycleTracker.onActivityResumed(mockActivity)
         assertEquals(startTrackingCount, 1)
         verify(mockScheduledExecutor, times(2)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test stopping billing activity refreshes in-app purchases`() {
+        ActivityLifecycleTracker.onActivityResumed(mockBillingActivity)
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity
+        )
+
+        verify(mockIapExecutor, times(1)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test stopping non-billing activity does not refresh in-app purchases`() {
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockHostActivity
+        )
+
+        verify(mockIapExecutor, times(0)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test billing stop before host resume schedules one purchase refresh`() {
+        ActivityLifecycleTracker.onActivityResumed(mockBillingActivity)
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity,
+        )
+        ActivityLifecycleTracker.onActivityResumed(mockHostActivity)
+
+        verify(mockIapExecutor, times(1)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test host resume before billing stop schedules one purchase refresh`() {
+        ActivityLifecycleTracker.onActivityResumed(mockBillingActivity)
+        ActivityLifecycleTracker.onActivityResumed(mockHostActivity)
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity,
+        )
+
+        verify(mockIapExecutor, times(1)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test similarly named activity does not trigger purchase refresh`() {
+        Whitebox.setInternalState(
+            ActivityLifecycleTracker::class.java,
+            "previousActivityName",
+            "NotProxyBillingActivity",
+        )
+        whenever(Utility.getActivityName(eq(mockActivity))).thenReturn("MainActivity")
+
+        ActivityLifecycleTracker.onActivityResumed(mockActivity)
+
+        verify(mockIapExecutor, times(0)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test duplicate billing stop schedules one purchase refresh`() {
+        ActivityLifecycleTracker.onActivityResumed(mockBillingActivity)
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity,
+        )
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity,
+        )
+
+        verify(mockIapExecutor, times(1)).execute(any<Runnable>())
+    }
+
+    @Test
+    fun `test consecutive billing flows each schedule one purchase refresh`() {
+        ActivityLifecycleTracker.onActivityResumed(mockBillingActivity)
+        ActivityLifecycleTracker.onActivityResumed(mockHostActivity)
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity,
+        )
+
+        ActivityLifecycleTracker.onActivityResumed(mockBillingActivity)
+        Whitebox.invokeMethod<Any?>(
+            ActivityLifecycleTracker,
+            "onActivityStopped",
+            mockBillingActivity,
+        )
+        ActivityLifecycleTracker.onActivityResumed(mockHostActivity)
+
+        verify(mockIapExecutor, times(2)).execute(any<Runnable>())
     }
 
     @Test

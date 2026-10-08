@@ -48,6 +48,7 @@ object ActivityLifecycleTracker {
                 "matching activity resume. Logging data may be incorrect. Make sure you call " +
                 "activateApp from your Application's onCreate method"
     private const val INTERRUPTION_THRESHOLD_MILLISECONDS: Long = 1000
+    private const val BILLING_ACTIVITY_NAME = "ProxyBillingActivity"
     private val singleThreadExecutor = Executors.newSingleThreadScheduledExecutor()
     private val iapExecutor = Executors.newSingleThreadScheduledExecutor()
 
@@ -67,6 +68,7 @@ object ActivityLifecycleTracker {
     @Volatile
     private var currActivity: WeakReference<Activity>? = null
     private var previousActivityName: String? = null
+    private var didRefreshIapOnBillingActivityStop = false
 
     @JvmStatic
     fun startTracking(application: Application, appId: String?) {
@@ -108,6 +110,7 @@ object ActivityLifecycleTracker {
 
                 override fun onActivityStopped(activity: Activity) {
                     log(LoggingBehavior.APP_EVENTS, TAG, "onActivityStopped")
+                    ActivityLifecycleTracker.onActivityStopped(activity)
                     AppEventsLogger.onContextStop()
                     activityReferences--
                 }
@@ -149,6 +152,17 @@ object ActivityLifecycleTracker {
         }
     }
 
+    private fun onActivityStopped(activity: Activity) {
+        if (
+            getActivityName(activity) == BILLING_ACTIVITY_NAME &&
+                !didRefreshIapOnBillingActivityStop
+        ) {
+            // GPBL 8 only returns unconsumed purchases, so query as soon as billing finishes.
+            didRefreshIapOnBillingActivityStop = true
+            iapExecutor.execute { InAppPurchaseManager.startTracking() }
+        }
+    }
+
     // Public in order to allow unity sdk to correctly log app events
     @JvmStatic
     fun onActivityResumed(activity: Activity) {
@@ -158,11 +172,22 @@ object ActivityLifecycleTracker {
         val currentTime = System.currentTimeMillis()
         currentActivityAppearTime = currentTime
         val activityName = getActivityName(activity)
+        if (activityName == BILLING_ACTIVITY_NAME) {
+            // Start a new billing transition. Android can resume the host before stopping this
+            // activity, so whichever callback arrives first consumes this transition's refresh.
+            didRefreshIapOnBillingActivityStop = false
+        }
         CodelessManager.onActivityResumed(activity)
         MetadataIndexer.onActivityResumed(activity)
         SuggestedEventsManager.trackActivity(activity)
-        if (previousActivityName?.contains("ProxyBillingActivity") == true && activityName != "ProxyBillingActivity") {
-            iapExecutor.execute { InAppPurchaseManager.startTracking() }
+        if (previousActivityName == BILLING_ACTIVITY_NAME &&
+            activityName != BILLING_ACTIVITY_NAME
+        ) {
+            if (!didRefreshIapOnBillingActivityStop) {
+                // Fallback for hosts where the billing activity's stop callback was not observed.
+                didRefreshIapOnBillingActivityStop = true
+                iapExecutor.execute { InAppPurchaseManager.startTracking() }
+            }
         }
         val appContext = activity.applicationContext
         val handleActivityResume = Runnable {
