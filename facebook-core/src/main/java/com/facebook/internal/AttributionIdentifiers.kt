@@ -41,6 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class AttributionIdentifiers {
   private var androidAdvertiserIdValue: String? = null
   private var fetchTime: Long = 0
+  private var advertisingIdReadTime: Long = 0
+  private var isAdvertisingIdCarriedOver = false
   var attributionId: String? = null
     private set
   var androidInstallerPackage: String? = null
@@ -49,8 +51,9 @@ class AttributionIdentifiers {
     private set
 
   /**
-   * Whether the advertising ID read succeeded, independent of the advertiser ID collection
-   * setting, which hides the ID itself but not the limit-tracking flag read with it.
+   * Whether these identifiers hold a successful advertising ID read, from this fetch or carried
+   * over from a recent one. Independent of the advertiser ID collection setting, which hides the
+   * ID itself but not the limit-tracking flag read with it.
    */
   internal val isAdvertisingIdRead: Boolean
     get() = androidAdvertiserIdValue != null
@@ -79,6 +82,8 @@ class AttributionIdentifiers {
     private const val CONNECTION_RESULT_SUCCESS = 0
     private const val IDENTIFIER_REFRESH_INTERVAL_MILLIS = (3600 * 1000).toLong()
     private const val FAILED_READ_RETRY_INTERVAL_MILLIS = (5 * 60 * 1000).toLong()
+    // A good read outlives its refresh by at most one more interval while reads keep failing.
+    private const val CARRY_OVER_MAX_AGE_MILLIS = 2 * IDENTIFIER_REFRESH_INTERVAL_MILLIS
 
     // Matches the bind timeout Google's AdvertisingIdClient uses.
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -267,17 +272,42 @@ class AttributionIdentifiers {
     private fun isFresh(identifiers: AttributionIdentifiers): Boolean {
       val age = System.currentTimeMillis() - identifiers.fetchTime
       val maxAge =
-          if (identifiers.androidAdvertiserIdValue == null) FAILED_READ_RETRY_INTERVAL_MILLIS
-          else IDENTIFIER_REFRESH_INTERVAL_MILLIS
+          if (identifiers.androidAdvertiserIdValue == null ||
+              identifiers.isAdvertisingIdCarriedOver) {
+            FAILED_READ_RETRY_INTERVAL_MILLIS
+          } else {
+            IDENTIFIER_REFRESH_INTERVAL_MILLIS
+          }
       return age in 0 until maxAge
     }
 
     private fun cacheAndReturnIdentifiers(
         identifiers: AttributionIdentifiers
     ): AttributionIdentifiers {
-      identifiers.fetchTime = System.currentTimeMillis()
+      val now = System.currentTimeMillis()
+      identifiers.fetchTime = now
+      if (identifiers.isAdvertisingIdRead) {
+        identifiers.advertisingIdReadTime = now
+      } else if (isAdvertisingIdReliabilityEnabled()) {
+        carryOverRecentRead(identifiers, now)
+      }
       cachedIdentifiers = identifiers
       return identifiers
+    }
+
+    // A failed refresh would otherwise replace a good read with blank identifiers, dropping the ID
+    // and its limit-tracking flag for every caller until a later read succeeds. Resets and opt-outs
+    // arrive as successful reads, so they are never masked by this.
+    private fun carryOverRecentRead(identifiers: AttributionIdentifiers, now: Long) {
+      val previous = cachedIdentifiers ?: return
+      if (!previous.isAdvertisingIdRead ||
+          now - previous.advertisingIdReadTime !in 0 until CARRY_OVER_MAX_AGE_MILLIS) {
+        return
+      }
+      identifiers.androidAdvertiserIdValue = previous.androidAdvertiserIdValue
+      identifiers.isTrackingLimited = previous.isTrackingLimited
+      identifiers.advertisingIdReadTime = previous.advertisingIdReadTime
+      identifiers.isAdvertisingIdCarriedOver = true
     }
 
     private fun getInstallerPackageName(context: Context): String? {

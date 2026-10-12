@@ -183,6 +183,89 @@ class AttributionIdentifiersAdvertisingIdTest : FacebookPowerMockTestCase() {
     assertThat(AdvertisingIdClient.callCount).isEqualTo(2)
   }
 
+  @Test
+  fun `test with the feature a failed refresh keeps the last good read`() {
+    enableFeature()
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    ageCachedRead(SIXTY_ONE_MINUTES_MILLIS)
+    AdvertisingIdClient.failure = IllegalStateException("transient")
+
+    val identifiers = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+
+    assertThat(AdvertisingIdClient.callCount).isEqualTo(2)
+    assertThat(identifiers?.androidAdvertiserId).isEqualTo(GAID)
+    assertThat(identifiers?.isAdvertisingIdRead).isTrue
+  }
+
+  @Test
+  fun `test with the feature a carried read keeps its limit tracking flag for every caller`() {
+    enableFeature()
+    AdvertisingIdClient.nextInfo = AdvertisingIdClient.Info(GAID, true)
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    ageCachedRead(SIXTY_ONE_MINUTES_MILLIS)
+    AdvertisingIdClient.failure = IllegalStateException("transient")
+
+    val identifiers = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+
+    assertThat(identifiers?.isTrackingLimited).isTrue
+    // The static check other callers use, e.g. automatic advanced matching.
+    assertThat(AttributionIdentifiers.isTrackingLimited(mockContext)).isTrue
+  }
+
+  @Test
+  fun `test with the feature a carried read is retried after the failed read interval`() {
+    enableFeature()
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    ageCachedRead(SIXTY_ONE_MINUTES_MILLIS)
+    AdvertisingIdClient.failure = IllegalStateException("transient")
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    AdvertisingIdClient.failure = null
+    AdvertisingIdClient.nextInfo = AdvertisingIdClient.Info(OTHER_GAID, false)
+
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    assertThat(AdvertisingIdClient.callCount).isEqualTo(2)
+
+    ageCachedIdentifiers(SIX_MINUTES_MILLIS)
+    val identifiers = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    assertThat(AdvertisingIdClient.callCount).isEqualTo(3)
+    assertThat(identifiers?.androidAdvertiserId).isEqualTo(OTHER_GAID)
+  }
+
+  @Test
+  fun `test with the feature a good read is not carried past two hours`() {
+    enableFeature()
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    ageCachedRead(TWO_HOURS_ONE_MINUTE_MILLIS)
+    AdvertisingIdClient.failure = IllegalStateException("prolonged")
+
+    val identifiers = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+
+    assertThat(identifiers?.androidAdvertiserId).isNull()
+    assertThat(identifiers?.isAdvertisingIdRead).isFalse
+  }
+
+  @Test
+  fun `test without the feature a failed refresh drops the good read`() {
+    enableFeature()
+    AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+    ageCachedRead(SIXTY_ONE_MINUTES_MILLIS)
+    whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+        .thenReturn(false)
+
+    val identifiers = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+
+    assertThat(identifiers?.androidAdvertiserId).isNull()
+  }
+
+  // Ages both the cache entry and the read it holds, as if the read happened ageMillis ago.
+  private fun ageCachedRead(ageMillis: Long) {
+    ageCachedIdentifiers(ageMillis)
+    Whitebox.setInternalState(
+        checkNotNull(AttributionIdentifiers.cachedIdentifiers),
+        "advertisingIdReadTime",
+        System.currentTimeMillis() - ageMillis)
+  }
+
   private fun ageCachedIdentifiers(ageMillis: Long) {
     Whitebox.setInternalState(
         checkNotNull(AttributionIdentifiers.cachedIdentifiers),
@@ -200,5 +283,7 @@ class AttributionIdentifiersAdvertisingIdTest : FacebookPowerMockTestCase() {
     private const val ZEROED_GAID = "00000000-0000-0000-0000-000000000000"
     private const val SIX_MINUTES_MILLIS = 6 * 60 * 1000L
     private const val SIXTY_ONE_MINUTES_MILLIS = 61 * 60 * 1000L
+    private const val TWO_HOURS_ONE_MINUTE_MILLIS = 121 * 60 * 1000L
+    private const val OTHER_GAID = "6f3a1c2e-0d4b-4e8a-9b7c-1a2b3c4d5e6f"
   }
 }
