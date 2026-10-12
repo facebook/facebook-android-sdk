@@ -95,7 +95,9 @@ class AttributionIdentifiers {
 
     private fun getAndroidIdViaReflection(context: Context): AttributionIdentifiers? {
       try {
-        if (!isGooglePlayServicesAvailable(context)) {
+        // AdvertisingIdClient checks Google Play services availability itself. The pre-check
+        // looks up a class from play-services-base, which apps can bundle the client without.
+        if (!isAdvertisingIdReliabilityEnabled() && !isGooglePlayServicesAvailable(context)) {
           return null
         }
         val getAdvertisingIdInfo =
@@ -120,9 +122,15 @@ class AttributionIdentifiers {
         return identifiers
       } catch (e: Exception) {
         logd("android_id", e)
+      } catch (e: LinkageError) {
+        // The client class can resolve while a class it depends on cannot.
+        logd("android_id", "Advertising ID client failed to load", e)
       }
       return null
     }
+
+    private fun isAdvertisingIdReliabilityEnabled(): Boolean =
+        FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @JvmStatic

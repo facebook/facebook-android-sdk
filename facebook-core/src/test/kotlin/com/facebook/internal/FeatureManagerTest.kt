@@ -185,6 +185,7 @@ class FeatureManagerTest {
     assertEquals(Feature.Core, Feature.Elora.parent)
     assertEquals(Feature.AppEvents, Feature.MetadataBasic.parent)
     assertEquals(Feature.Core, Feature.AndroidDeferredAppLinkFirstLaunchOnly.parent)
+    assertEquals(Feature.Core, Feature.AndroidAdvertisingIDReliability.parent)
   }
 
   @Test
@@ -203,6 +204,25 @@ class FeatureManagerTest {
 
     assertFalse(
         defaultStatusMethod.invoke(FeatureManager, Feature.AndroidDeferredAppLinkFirstLaunchOnly)
+            as Boolean)
+  }
+
+  @Test
+  fun `test AndroidAdvertisingIDReliability uses canonical mobile SDK response key`() {
+    assertEquals(
+        "FBSDKFeatureAndroidAdvertisingIDReliability",
+        Feature.AndroidAdvertisingIDReliability.toKey())
+  }
+
+  @Test
+  fun `test AndroidAdvertisingIDReliability is disabled by default`() {
+    val defaultStatusMethod =
+        FeatureManager::class.java.getDeclaredMethod("defaultStatus", Feature::class.java).apply {
+          isAccessible = true
+        }
+
+    assertFalse(
+        defaultStatusMethod.invoke(FeatureManager, Feature.AndroidAdvertisingIDReliability)
             as Boolean)
   }
 

@@ -36,7 +36,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(
-    FacebookSdk::class, Utility::class, Looper::class, FacebookSignatureValidator::class
+    FacebookSdk::class,
+    Utility::class,
+    Looper::class,
+    FacebookSignatureValidator::class,
+    FeatureManager::class
 )
 class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
     private lateinit var mockMainLooper: Looper
@@ -55,6 +59,7 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
         mockMainLooper = PowerMockito.mock(Looper::class.java)
         whenever(Looper.getMainLooper()).thenReturn(mockMainLooper)
         PowerMockito.mockStatic(Utility::class.java)
+        PowerMockito.mockStatic(FeatureManager::class.java)
 
         mockId = PowerMockito.mock(AttributionIdentifiers::class.java)
         mockContext = PowerMockito.mock(Context::class.java)
