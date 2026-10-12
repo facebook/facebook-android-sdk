@@ -20,11 +20,16 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -64,6 +69,11 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
         AttributionIdentifiers.cachedIdentifiers = null
     }
 
+    @After
+    fun tearDown() {
+        AttributionIdentifiers.serviceBindTimeoutMillis = 10_000L
+    }
+
     @Test
     fun `test is tracking limited`() {
         val mockAttributionIdentifierCompanion =
@@ -85,6 +95,32 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
     fun `test get attribution id on main thread`() {
         whenever(Looper.myLooper()).thenReturn(mockMainLooper)
         assertThat(AttributionIdentifiers.getAttributionIdentifiers(mockContext)).isNull()
+    }
+
+    @Test
+    fun `test main thread returns before reading the advertising id`() {
+        whenever(Looper.myLooper()).thenReturn(mockMainLooper)
+        stubGooglePlayServicesAvailable()
+
+        assertThat(AttributionIdentifiers.getAttributionIdentifiers(mockContext)).isNull()
+        verify(mockContext, never()).bindService(any<Intent>(), any<ServiceConnection>(), any<Int>())
+    }
+
+    @Test
+    fun `test advertising id service that never connects times out instead of blocking`() {
+        whenever(Looper.myLooper()).thenReturn(PowerMockito.mock(Looper::class.java))
+        stubGooglePlayServicesAvailable()
+        whenever(mockContext.bindService(any<Intent>(), any<ServiceConnection>(), any<Int>()))
+            .thenReturn(true)
+        AttributionIdentifiers.serviceBindTimeoutMillis = 200L
+
+        val start = System.currentTimeMillis()
+        val obtainedId = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+        val elapsed = System.currentTimeMillis() - start
+
+        assertThat(obtainedId).isNotNull
+        assertThat(elapsed).isBetween(200L, 5_000L)
+        verify(mockContext).unbindService(any())
     }
 
     @Test
@@ -118,6 +154,22 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
         assertThat(obtainedId).isEqualTo(AttributionIdentifiers.cachedIdentifiers)
     }
 
+    private fun stubGooglePlayServicesAvailable() {
+        val availabilityMethod =
+            FakeGooglePlayServicesUtil::class.java.getMethod(
+                "isGooglePlayServicesAvailable", Context::class.java
+            )
+        whenever(
+            Utility.getMethodQuietly(
+                eq("com.google.android.gms.common.GooglePlayServicesUtil"),
+                eq("isGooglePlayServicesAvailable"),
+                any()
+            )
+        )
+            .thenReturn(availabilityMethod)
+        whenever(Utility.invokeMethodQuietly(isNull(), eq(availabilityMethod), any())).thenReturn(0)
+    }
+
     private fun setMockContextWithAttributionIdProvider() {
         mockAttributionId = "aid123456789"
         val mockAttributionIdProviderInfo = ProviderInfo()
@@ -139,5 +191,9 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
         whenever(mockContext.contentResolver).thenReturn(mockContentResolver)
         whenever(mockContentResolver.query(any(), any(), anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(mockCursor)
+    }
+
+    object FakeGooglePlayServicesUtil {
+        @JvmStatic fun isGooglePlayServicesAvailable(context: Context): Int = 0
     }
 }

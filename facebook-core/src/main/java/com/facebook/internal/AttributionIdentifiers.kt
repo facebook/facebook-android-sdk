@@ -22,7 +22,6 @@ import android.os.Parcel
 import android.os.RemoteException
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.internal.FacebookSignatureValidator.validateSignature
 import com.facebook.internal.Utility.getMethodQuietly
@@ -30,6 +29,8 @@ import com.facebook.internal.Utility.invokeMethodQuietly
 import com.facebook.internal.Utility.logd
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -70,6 +71,11 @@ class AttributionIdentifiers {
     // com.google.android.gms.common.ConnectionResult.SUCCESS
     private const val CONNECTION_RESULT_SUCCESS = 0
     private const val IDENTIFIER_REFRESH_INTERVAL_MILLIS = (3600 * 1000).toLong()
+
+    // Matches the bind timeout Google's AdvertisingIdClient uses.
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @JvmField
+    internal var serviceBindTimeoutMillis = 10_000L
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @Volatile
@@ -168,14 +174,15 @@ class AttributionIdentifiers {
 
     @JvmStatic
     fun getAttributionIdentifiers(context: Context): AttributionIdentifiers? {
+      // Reading the advertising ID blocks on Google Play services, so refuse before reading:
+      // on the main thread the service connection can never be delivered.
+      if (Looper.myLooper() == Looper.getMainLooper()) {
+        logd(TAG, "getAttributionIdentifiers cannot be called on the main thread.")
+        return null
+      }
       val identifiers = getAndroidId(context)
       var c: Cursor? = null
       try {
-        // We can't call getAdvertisingIdInfo on the main thread or the app will potentially
-        // freeze, if this is the case throw:
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-          throw FacebookException("getAttributionIdentifiers cannot be called on the main thread.")
-        }
         val cachedIdentifiers = this.cachedIdentifiers
         if (cachedIdentifiers != null &&
             System.currentTimeMillis() - cachedIdentifiers.fetchTime <
@@ -260,11 +267,12 @@ class AttributionIdentifiers {
 
     override fun onServiceDisconnected(name: ComponentName?) = Unit
 
-    @get:Throws(InterruptedException::class)
+    @get:Throws(InterruptedException::class, TimeoutException::class)
     val binder: IBinder
       get() {
         check(consumed.compareAndSet(false, true)) { "Binder already consumed" }
-        return queue.take()
+        return queue.poll(serviceBindTimeoutMillis, TimeUnit.MILLISECONDS)
+            ?: throw TimeoutException("Timed out waiting for the advertising ID service")
       }
   }
 
