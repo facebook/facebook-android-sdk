@@ -48,6 +48,13 @@ class AttributionIdentifiers {
   var isTrackingLimited = false
     private set
 
+  /**
+   * Whether the advertising ID read succeeded, independent of the advertiser ID collection
+   * setting, which hides the ID itself but not the limit-tracking flag read with it.
+   */
+  internal val isAdvertisingIdRead: Boolean
+    get() = androidAdvertiserIdValue != null
+
   val androidAdvertiserId: String?
     get() {
       return if (FacebookSdk.isInitialized() && FacebookSdk.getAdvertiserIDCollectionEnabled()) {
@@ -71,6 +78,7 @@ class AttributionIdentifiers {
     // com.google.android.gms.common.ConnectionResult.SUCCESS
     private const val CONNECTION_RESULT_SUCCESS = 0
     private const val IDENTIFIER_REFRESH_INTERVAL_MILLIS = (3600 * 1000).toLong()
+    private const val FAILED_READ_RETRY_INTERVAL_MILLIS = (5 * 60 * 1000).toLong()
 
     // Matches the bind timeout Google's AdvertisingIdClient uses.
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -188,11 +196,19 @@ class AttributionIdentifiers {
         logd(TAG, "getAttributionIdentifiers cannot be called on the main thread.")
         return null
       }
+      val readCacheFirst = isAdvertisingIdReliabilityEnabled()
+      if (readCacheFirst) {
+        val cachedIdentifiers = this.cachedIdentifiers
+        if (cachedIdentifiers != null && isFresh(cachedIdentifiers)) {
+          return cachedIdentifiers
+        }
+      }
       val identifiers = getAndroidId(context)
       var c: Cursor? = null
       try {
         val cachedIdentifiers = this.cachedIdentifiers
-        if (cachedIdentifiers != null &&
+        if (!readCacheFirst &&
+            cachedIdentifiers != null &&
             System.currentTimeMillis() - cachedIdentifiers.fetchTime <
                 IDENTIFIER_REFRESH_INTERVAL_MILLIS) {
           return cachedIdentifiers
@@ -244,6 +260,16 @@ class AttributionIdentifiers {
         c?.close()
       }
       return cacheAndReturnIdentifiers(identifiers)
+    }
+
+    // A failed read is retried sooner than a successful one is refreshed. A fetch time in the
+    // future means the clock moved backwards, so it is treated as stale.
+    private fun isFresh(identifiers: AttributionIdentifiers): Boolean {
+      val age = System.currentTimeMillis() - identifiers.fetchTime
+      val maxAge =
+          if (identifiers.androidAdvertiserIdValue == null) FAILED_READ_RETRY_INTERVAL_MILLIS
+          else IDENTIFIER_REFRESH_INTERVAL_MILLIS
+      return age in 0 until maxAge
     }
 
     private fun cacheAndReturnIdentifiers(

@@ -29,6 +29,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito
@@ -126,6 +127,33 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
         assertThat(obtainedId).isNotNull
         assertThat(elapsed).isBetween(200L, 5_000L)
         verify(mockContext).unbindService(any())
+    }
+
+    @Test
+    fun `test without the feature every lookup reads again while the cache is fresh`() {
+        whenever(Looper.myLooper()).thenReturn(PowerMockito.mock(Looper::class.java))
+        stubGooglePlayServicesAvailable()
+
+        AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+        AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+
+        verify(mockContext, times(2))
+            .bindService(any<Intent>(), any<ServiceConnection>(), any<Int>())
+    }
+
+    @Test
+    fun `test with the feature a fresh cache is returned without reading again`() {
+        whenever(Looper.myLooper()).thenReturn(PowerMockito.mock(Looper::class.java))
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+            .thenReturn(true)
+        stubGooglePlayServicesAvailable()
+
+        val first = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+        val second = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
+
+        assertThat(second).isSameAs(first)
+        verify(mockContext, times(1))
+            .bindService(any<Intent>(), any<ServiceConnection>(), any<Int>())
     }
 
     @Test

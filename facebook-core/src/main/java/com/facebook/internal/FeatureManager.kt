@@ -234,7 +234,7 @@ object FeatureManager {
         GPSTopicsObservation(0x00080000), /* privacy sandbox - topics API*/
         ReferrerForDeepLink(0x00090000), /* include install_referrer in DDL requests */
         AndroidDeferredAppLinkFirstLaunchOnly(0x000a0000), /* fetch DDL only shortly after the first launch */
-        AndroidAdvertisingIDReliability(0x000b0000), /* read GAID without the Play services pre-check */
+        AndroidAdvertisingIDReliability(0x000b0000), /* reliable GAID reads: no Play services pre-check, cache first */
         MetadataBasic(0x00010900), /* Basic app metadata, URLs, and screen title */
         // Features in LoginKit
         /** Essential of LoginKit */

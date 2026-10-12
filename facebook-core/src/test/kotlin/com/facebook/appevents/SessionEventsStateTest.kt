@@ -15,15 +15,24 @@ import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.internal.FeatureManager
+import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
+import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
+import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(
     EventDeactivationManager::class,
@@ -45,6 +54,155 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
         mockStatic(AppEventsLoggerUtility::class.java)
         mockStatic(EventDeactivationManager::class.java)
         mockStatic(FeatureManager::class.java)
+    }
+
+    @After
+    fun restoreAttributionIdentifiers() {
+        WhiteboxImpl.setInternalState(
+            AttributionIdentifiers::class.java, "Companion", originalAttributionIdentifiers
+        )
+    }
+
+    @Test
+    fun `populate request with the feature uses the current identifiers`() {
+        val (stored, _) = stubIdentifierSources(current = AttributionIdentifiers())
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+            .thenReturn(true)
+        val state = SessionEventsState(stored, "anonGUID")
+        state.addEvent(appEvent)
+        val request = GraphRequest()
+
+        state.populateRequest(request, mock(), true, false)
+
+        assertEquals("current", request.graphObject?.optString("identifiers"))
+        verify(mockAttributionIdentifiersCompanion).getAttributionIdentifiers(any())
+    }
+
+    @Test
+    fun `populate request with the feature keeps a captured advertising id over a failed refresh`() {
+        // A failed hourly refresh returns blank identifiers, not null.
+        val (stored, _) =
+            stubIdentifierSources(
+                current = AttributionIdentifiers(), stored = identifiersWithAdvertisingId())
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+            .thenReturn(true)
+        val state = SessionEventsState(stored, "anonGUID")
+        state.addEvent(appEvent)
+        val request = GraphRequest()
+
+        state.populateRequest(request, mock(), true, false)
+
+        assertEquals("stored", request.graphObject?.optString("identifiers"))
+    }
+
+    @Test
+    fun `populate request with the feature keeps the captured limit tracking flag when collection is disabled`() {
+        // With collection disabled every androidAdvertiserId is null, so the choice has to rest on
+        // whether the read succeeded. A failed refresh must not replace isTrackingLimited = true.
+        val (stored, _) =
+            stubIdentifierSources(
+                current = AttributionIdentifiers(), stored = identifiersReadWithCollectionDisabled())
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+            .thenReturn(true)
+        val state = SessionEventsState(stored, "anonGUID")
+        state.addEvent(appEvent)
+        val request = GraphRequest()
+
+        state.populateRequest(request, mock(), true, false)
+
+        assertEquals("stored", request.graphObject?.optString("identifiers"))
+    }
+
+    @Test
+    fun `populate request with the feature prefers a current advertising id over the captured one`() {
+        val (stored, _) =
+            stubIdentifierSources(
+                current = identifiersWithAdvertisingId(), stored = identifiersWithAdvertisingId())
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+            .thenReturn(true)
+        val state = SessionEventsState(stored, "anonGUID")
+        state.addEvent(appEvent)
+        val request = GraphRequest()
+
+        state.populateRequest(request, mock(), true, false)
+
+        assertEquals("current", request.graphObject?.optString("identifiers"))
+    }
+
+    @Test
+    fun `populate request with the feature falls back to the stored identifiers`() {
+        val (stored, _) = stubIdentifierSources(current = null)
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability))
+            .thenReturn(true)
+        val state = SessionEventsState(stored, "anonGUID")
+        state.addEvent(appEvent)
+        val request = GraphRequest()
+
+        state.populateRequest(request, mock(), true, false)
+
+        assertEquals("stored", request.graphObject?.optString("identifiers"))
+    }
+
+    @Test
+    fun `populate request without the feature uses the stored identifiers`() {
+        val (stored, _) = stubIdentifierSources(current = AttributionIdentifiers())
+        val state = SessionEventsState(stored, "anonGUID")
+        state.addEvent(appEvent)
+        val request = GraphRequest()
+
+        state.populateRequest(request, mock(), true, false)
+
+        assertEquals("stored", request.graphObject?.optString("identifiers"))
+        verify(mockAttributionIdentifiersCompanion, never()).getAttributionIdentifiers(any())
+    }
+
+    private lateinit var mockAttributionIdentifiersCompanion: AttributionIdentifiers.Companion
+    private val originalAttributionIdentifiers = AttributionIdentifiers.Companion
+
+    // Tags the publish params with which identifiers object the request was built from.
+    private fun identifiersWithAdvertisingId(): AttributionIdentifiers {
+        val identifiers = mock<AttributionIdentifiers>()
+        whenever(identifiers.isAdvertisingIdRead).thenReturn(true)
+        whenever(identifiers.androidAdvertiserId).thenReturn("38400000-8cf0-11bd-b23e-10b96e40000d")
+        return identifiers
+    }
+
+    // What an app with advertiser ID collection disabled captures for a limit-ad-tracking user:
+    // the read succeeded, the ID itself is hidden, and the limit-tracking flag is set.
+    private fun identifiersReadWithCollectionDisabled(): AttributionIdentifiers {
+        val identifiers = mock<AttributionIdentifiers>()
+        whenever(identifiers.isAdvertisingIdRead).thenReturn(true)
+        whenever(identifiers.androidAdvertiserId).thenReturn(null)
+        whenever(identifiers.isTrackingLimited).thenReturn(true)
+        return identifiers
+    }
+
+    private fun stubIdentifierSources(
+        current: AttributionIdentifiers?,
+        stored: AttributionIdentifiers = AttributionIdentifiers()
+    ): Pair<AttributionIdentifiers, AttributionIdentifiers?> {
+        mockAttributionIdentifiersCompanion =
+            PowerMockito.mock(AttributionIdentifiers.Companion::class.java)
+        WhiteboxImpl.setInternalState(
+            AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanion
+        )
+        whenever(mockAttributionIdentifiersCompanion.getAttributionIdentifiers(any()))
+            .thenReturn(current)
+        whenever(
+            AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
+                any(), eq(stored), anyOrNull(), any(), any()
+            )
+        )
+            .thenReturn(JSONObject().put("identifiers", "stored"))
+        if (current != null) {
+            whenever(
+                AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
+                    any(), eq(current), anyOrNull(), any(), any()
+                )
+            )
+                .thenReturn(JSONObject().put("identifiers", "current"))
+        }
+        return Pair(stored, current)
     }
 
     @Test

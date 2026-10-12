@@ -117,6 +117,21 @@ internal class SessionEventsState(
         accumulatedEvents.addAll(events)
     }
 
+    // Identifiers captured when the session started can hold a failed read, so prefer the current
+    // ones. A failed refresh is not null but blank, though: keep the captured identifiers when only
+    // their read succeeded, so neither the ID nor its limit-tracking flag is lost. This decides on
+    // the read rather than on androidAdvertiserId, which is null whenever collection is disabled.
+    private fun currentIdentifiers(applicationContext: Context): AttributionIdentifiers {
+        val current =
+            AttributionIdentifiers.getAttributionIdentifiers(applicationContext)
+                ?: return attributionIdentifiers
+        return if (!current.isAdvertisingIdRead && attributionIdentifiers.isAdvertisingIdRead) {
+            attributionIdentifiers
+        } else {
+            current
+        }
+    }
+
     private fun populateRequest(
         request: GraphRequest,
         applicationContext: Context,
@@ -125,12 +140,18 @@ internal class SessionEventsState(
         operationalParameters: JSONArray,
         limitEventUsage: Boolean
     ) {
+        val identifiers =
+            if (isEnabled(FeatureManager.Feature.AndroidAdvertisingIDReliability)) {
+                currentIdentifiers(applicationContext)
+            } else {
+                attributionIdentifiers
+            }
         var publishParams: JSONObject?
         try {
             publishParams =
                 getJSONObjectForGraphAPICall(
                     AppEventsLoggerUtility.GraphAPIActivityType.CUSTOM_APP_EVENTS,
-                    attributionIdentifiers,
+                    identifiers,
                     anonymousAppDeviceGUID,
                     limitEventUsage,
                     applicationContext
