@@ -31,6 +31,8 @@ class AppLinkManager private constructor() {
 
   companion object {
     private const val TAG = "AppLinkManager"
+    private const val UTM_CONTENT_KEY = "utm_content"
+    private const val FBC_KEY = "fbc"
     const val APPLINK_INFO = "com.facebook.sdk.APPLINK_INFO"
     const val APPLINK_DATA_KEY = "al_applink_data"
     const val CAMPAIGN_IDS_KEY = "campaign_ids"
@@ -107,6 +109,31 @@ class AppLinkManager private constructor() {
       return
     }
     preferences.edit().putString(CLICK_ID_KEY, fbclid).apply()
+  }
+
+  internal fun processInstallReferrer(referrer: String?) {
+    val fbc = getFbcFromInstallReferrer(referrer) ?: return
+    if (preferences.getString(CLICK_ID_KEY, null).isNullOrEmpty()) {
+      preferences.edit().putString(CLICK_ID_KEY, fbc).apply()
+    }
+  }
+
+  private fun getFbcFromInstallReferrer(referrer: String?): String? {
+    if (referrer.isNullOrEmpty()) {
+      return null
+    }
+    return try {
+      val referrerUri =
+        Uri.Builder()
+          .scheme("https")
+          .authority("localhost")
+          .encodedQuery(referrer)
+          .build()
+      val utmContent = referrerUri.getQueryParameter(UTM_CONTENT_KEY) ?: return null
+      (JSONObject(utmContent).opt(FBC_KEY) as? String)?.takeIf { it.isNotEmpty() }
+    } catch (_: Exception) {
+      null
+    }
   }
 
   fun getInfo(key: String): String? {

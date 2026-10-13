@@ -714,6 +714,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             val preferences = ctx.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
             if (referrer != null) {
                 preferences.edit().putString("install_referrer", referrer).apply()
+                AppLinkManager.getInstance()?.processInstallReferrer(referrer)
             }
         }
 

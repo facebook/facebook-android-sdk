@@ -18,7 +18,11 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.facebook.appevents.AppEventsLoggerImpl
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.Utility
+import org.assertj.core.api.Assertions.assertThat
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -80,6 +84,9 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
       null as AppLinkManager?,
     )
   }
+
+  private fun installReferrer(utmContent: JSONObject): String =
+    "utm_source=apps.facebook.com&utm_content=${Uri.encode(utmContent.toString())}"
 
   @Test
   fun testGetInstance() {
@@ -155,6 +162,81 @@ class AppLinkManagerTest : FacebookPowerMockTestCase() {
     AppLinkManager.getInstance()?.handleURL(mockActivity)
 
     assertNull(mockSharedPreference.getString("click_id", null))
+  }
+
+  @Test
+  fun `setInstallReferrer persists raw referrer and seeds click ID`() {
+    val referrer =
+      installReferrer(JSONObject().put("app", 123456789).put("fbc", "install_fbc"))
+
+    AppEventsLoggerImpl.setInstallReferrer(referrer)
+
+    assertThat(mockSharedPreference.getString("install_referrer", null)).isEqualTo(referrer)
+    assertThat(mockSharedPreference.getString(AppLinkManager.CLICK_ID_KEY, null))
+      .isEqualTo("install_fbc")
+  }
+
+  @Test
+  fun `event attribution includes click ID seeded from install referrer`() {
+    appLinkManager.processInstallReferrer(
+      installReferrer(JSONObject().put("fbc", "install_fbc")),
+    )
+    val params = JSONObject()
+
+    Utility.setAppEventAttributionParameters(
+      params,
+      null,
+      "fb_mock_anon_id",
+      false,
+      mockApplicationContext,
+    )
+
+    assertThat(params.getString(AppLinkManager.CLICK_ID_KEY)).isEqualTo("install_fbc")
+  }
+
+  @Test
+  fun `install referrer ignores invalid fbc values`() {
+    val invalidReferrers =
+      listOf(
+        null,
+        "",
+        "utm_source=apps.facebook.com",
+        "utm_content=%7Bmalformed",
+        installReferrer(JSONObject().put("source", JSONObject().put("fbc", "nested"))),
+        installReferrer(JSONObject().put("fbc", 123)),
+        installReferrer(JSONObject().put("fbc", "")),
+      )
+
+    invalidReferrers.forEach { referrer ->
+      appLinkManager.processInstallReferrer(referrer)
+      assertThat(mockSharedPreference.getString(AppLinkManager.CLICK_ID_KEY, null))
+        .describedAs("click ID for referrer %s", referrer)
+        .isNull()
+    }
+  }
+
+  @Test
+  fun `latest deeplink click ID wins over install and older deeplinks`() {
+    appLinkManager.processInstallReferrer(
+      installReferrer(JSONObject().put("fbc", "first_install_fbc")),
+    )
+    assertThat(mockSharedPreference.getString(AppLinkManager.CLICK_ID_KEY, null))
+      .isEqualTo("first_install_fbc")
+
+    appLinkManager.processInstallReferrer(
+      installReferrer(JSONObject().put("fbc", "later_install_fbc")),
+    )
+    assertThat(mockSharedPreference.getString(AppLinkManager.CLICK_ID_KEY, null))
+      .isEqualTo("first_install_fbc")
+
+    appLinkManager.processClickId(Uri.parse("myapp://product/123?fbclid=first_deeplink_fbc"))
+    appLinkManager.processClickId(Uri.parse("myapp://product/456?fbclid=latest_deeplink_fbc"))
+    appLinkManager.processInstallReferrer(
+      installReferrer(JSONObject().put("fbc", "final_install_fbc")),
+    )
+
+    assertThat(mockSharedPreference.getString(AppLinkManager.CLICK_ID_KEY, null))
+      .isEqualTo("latest_deeplink_fbc")
   }
 
   @Test
