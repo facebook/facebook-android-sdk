@@ -60,6 +60,9 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
         )
             .toReturn(null)
         FacebookSdk.setAutoLogAppEventsEnabled(false)
+        val productImprovementSetting =
+            Whitebox.getInternalState<Any>(UserSettingsManager::class.java, "autoLogProductImprovementEnabled")
+        Whitebox.setInternalState(productImprovementSetting, "value", null as Boolean?)
     }
 
     @Test
@@ -80,6 +83,19 @@ class FacebookSdkTest : FacebookPowerMockTestCase() {
         } finally {
             FacebookSdk.setExecutor(original)
         }
+    }
+
+    @Test
+    fun testAutoLogProductImprovementEnabled() {
+        assertThat(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY)
+            .isEqualTo("com.facebook.sdk.AutoLogProductImprovementEnabled")
+        assertThat(FacebookSdk.getAutoLogProductImprovementEnabled()).isTrue
+
+        FacebookSdk.setAutoLogProductImprovementEnabled(false)
+        assertThat(FacebookSdk.getAutoLogProductImprovementEnabled()).isFalse
+
+        FacebookSdk.setAutoLogProductImprovementEnabled(true)
+        assertThat(FacebookSdk.getAutoLogProductImprovementEnabled()).isTrue
     }
 
     @Test

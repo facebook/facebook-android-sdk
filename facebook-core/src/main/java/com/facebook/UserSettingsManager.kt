@@ -48,6 +48,8 @@ internal object UserSettingsManager {
   // existing install report a spurious settings change on upgrade.
   private val autoLogMetaDataEnabled =
       UserSetting(true, FacebookSdk.AUTO_LOG_METADATA_ENABLED_PROPERTY)
+  private val autoLogProductImprovementEnabled =
+      UserSetting(true, FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY)
 
   // Monitor enabled user setting from AndroidManifest
   private val monitorEnabled = UserSetting(true, FacebookSdk.MONITOR_ENABLED_PROPERTY)
@@ -94,7 +96,8 @@ internal object UserSettingsManager {
         autoLogAppEventsEnabledLocally,
         advertiserIDCollectionEnabled,
         autoInitEnabled,
-        autoLogMetaDataEnabled)
+        autoLogMetaDataEnabled,
+        autoLogProductImprovementEnabled)
     initializeCodelessSetupEnabledAsync()
     logWarnings()
     logIfSDKSettingsChanged()
@@ -357,6 +360,23 @@ internal object UserSettingsManager {
   fun getAutoLogMetaDataEnabled(): Boolean {
     initializeIfNotInitialized()
     return autoLogMetaDataEnabled.getValue()
+  }
+
+  @JvmStatic
+  fun setAutoLogProductImprovementEnabled(flag: Boolean) {
+    autoLogProductImprovementEnabled.value = flag
+    autoLogProductImprovementEnabled.lastTS = System.currentTimeMillis()
+    if (isInitialized.get()) {
+      writeSettingToCache(autoLogProductImprovementEnabled)
+    } else {
+      initializeIfNotInitialized()
+    }
+  }
+
+  @JvmStatic
+  fun getAutoLogProductImprovementEnabled(): Boolean {
+    initializeIfNotInitialized()
+    return autoLogProductImprovementEnabled.getValue()
   }
 
   @JvmStatic

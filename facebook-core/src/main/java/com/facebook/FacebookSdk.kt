@@ -129,6 +129,10 @@ object FacebookSdk {
     const val AUTO_LOG_METADATA_ENABLED_PROPERTY =
         "com.facebook.sdk.AutoLogMetaDataEnabled"
 
+    /** The key for automatically sending product improvement data in the Android manifest. */
+    const val AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY =
+        "com.facebook.sdk.AutoLogProductImprovementEnabled"
+
     /** The key for the auto log codeless in the Android manifest. */
     const val CODELESS_DEBUG_LOG_ENABLED_PROPERTY = "com.facebook.sdk.CodelessDebugLogEnabled"
 
@@ -1059,6 +1063,30 @@ object FacebookSdk {
     @JvmStatic
     fun getAutoLogMetaDataEnabled(): Boolean =
         UserSettingsManager.getAutoLogMetaDataEnabled()
+
+    /**
+     * Gets the flag controlling whether diagnostic data about the app and the content on screen may
+     * be sent automatically. Defaults to true and is independent of automatic app event logging and
+     * metadata collection. This setting alone does not enable data collection.
+     *
+     * @return the auto logging product improvement data flag for the application
+     */
+    @JvmStatic
+    fun getAutoLogProductImprovementEnabled(): Boolean =
+        UserSettingsManager.getAutoLogProductImprovementEnabled()
+
+    /**
+     * Sets the flag controlling whether product improvement data may be sent automatically.
+     *
+     * An app can opt out by setting com.facebook.sdk.AutoLogProductImprovementEnabled to false in its
+     * Android manifest or by calling this method with false. Runtime assignments are persisted once
+     * the SDK is initialized and take precedence over the manifest on later launches.
+     *
+     * @param flag true to allow automatic product improvement data logging, false to opt out
+     */
+    @JvmStatic
+    fun setAutoLogProductImprovementEnabled(flag: Boolean) =
+        UserSettingsManager.setAutoLogProductImprovementEnabled(flag)
 
     /**
      * Sets the flag that controls whether the SDK automatically collects app metadata, such as

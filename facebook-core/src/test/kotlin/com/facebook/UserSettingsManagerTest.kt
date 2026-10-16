@@ -63,6 +63,7 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
         )
         resetUserSettingValue("autoLogAppEventsEnabledLocally")
         resetUserSettingValue("autoLogMetaDataEnabled")
+        resetUserSettingValue("autoLogProductImprovementEnabled")
         FacebookSdk.setApplicationId("123456789")
         mockPackageManager = mock()
         mockApplicationContext = mock()
@@ -289,6 +290,125 @@ class UserSettingsManagerTest : FacebookPowerMockTestCase() {
         UserSettingsManager.setAutoLogMetaDataEnabled(false)
 
         verify(mockLogger, never()).logChangedSettingsEvent(any())
+    }
+
+    @Test
+    fun `test AutoLogProductImprovementEnabled defaults to true`() {
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isTrue
+    }
+
+    @Test
+    fun `test AutoLogProductImprovementEnabled reads manifest values`() {
+        val metaData = Bundle()
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, false)
+        mockApplicationInfo.metaData = metaData
+
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isFalse
+
+        resetProductImprovementInitialization()
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, true)
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isTrue
+    }
+
+    @Test
+    fun `test set AutoLogProductImprovementEnabled persists false and true`() {
+        UserSettingsManager.getAutoLogProductImprovementEnabled()
+        for (value in listOf(false, true)) {
+            UserSettingsManager.setAutoLogProductImprovementEnabled(value)
+
+            assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isEqualTo(value)
+            val cached = JSONObject(checkNotNull(mockSharedPreference.getString(
+                FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, null)))
+            assertThat(cached.getBoolean("value")).isEqualTo(value)
+            assertThat(cached.getLong("last_timestamp")).isGreaterThan(0L)
+        }
+    }
+
+    @Test
+    fun `test cached AutoLogProductImprovementEnabled overrides manifest after reload`() {
+        val metaData = Bundle()
+        mockApplicationInfo.metaData = metaData
+        for (value in listOf(false, true)) {
+            UserSettingsManager.setAutoLogProductImprovementEnabled(value)
+            resetProductImprovementInitialization()
+            metaData.putBoolean(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, !value)
+
+            assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun `test AutoLogProductImprovementEnabled set before initialization overrides cache and manifest`() {
+        UserSettingsManager.setAutoLogProductImprovementEnabled(true)
+        resetProductImprovementInitialization()
+        val metaData = Bundle()
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, true)
+        mockApplicationInfo.metaData = metaData
+        whenever(FacebookSdk.isInitialized()).thenReturn(false)
+
+        UserSettingsManager.setAutoLogProductImprovementEnabled(false)
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isFalse
+        whenever(FacebookSdk.isInitialized()).thenReturn(true)
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isFalse
+
+        resetProductImprovementInitialization()
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isFalse
+    }
+
+    @Test
+    fun `test invalid AutoLogProductImprovementEnabled cache falls back to manifest`() {
+        mockSharedPreference.edit()
+            .putString(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, "not-json")
+            .apply()
+        val metaData = Bundle()
+        metaData.putBoolean(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, false)
+        mockApplicationInfo.metaData = metaData
+
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isFalse
+    }
+
+    @Test
+    fun `test invalid AutoLogProductImprovementEnabled manifest value falls back to default`() {
+        val metaData = Bundle()
+        metaData.putString(FacebookSdk.AUTO_LOG_PRODUCT_IMPROVEMENT_ENABLED_PROPERTY, "invalid")
+        mockApplicationInfo.metaData = metaData
+
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isTrue
+    }
+
+    @Test
+    fun `test AutoLogProductImprovementEnabled is independent of other logging controls`() {
+        mockServerAutoLogValues(enabled = true)
+        UserSettingsManager.setAutoLogMetaDataEnabled(false)
+        UserSettingsManager.setAutoLogAppEventsEnabled(false)
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isTrue
+
+        UserSettingsManager.setAutoLogMetaDataEnabled(true)
+        UserSettingsManager.setAutoLogAppEventsEnabled(true)
+        UserSettingsManager.setAutoLogProductImprovementEnabled(false)
+        assertThat(UserSettingsManager.getAutoLogMetaDataEnabled()).isTrue
+        assertThat(UserSettingsManager.getAutoLogAppEventsEnabled()).isTrue
+
+        mockServerAutoLogValues(enabled = false)
+        UserSettingsManager.setAutoLogProductImprovementEnabled(true)
+        assertThat(UserSettingsManager.getAutoLogProductImprovementEnabled()).isTrue
+        assertThat(UserSettingsManager.getAutoLogAppEventsEnabled()).isFalse
+    }
+
+    @Test
+    fun `test toggling AutoLogProductImprovementEnabled does not log settings changed`() {
+        UserSettingsManager.getAutoLogProductImprovementEnabled()
+        clearInvocations(mockLogger)
+
+        UserSettingsManager.setAutoLogProductImprovementEnabled(false)
+        UserSettingsManager.setAutoLogProductImprovementEnabled(true)
+
+        verify(mockLogger, never()).logChangedSettingsEvent(any())
+    }
+
+    private fun resetProductImprovementInitialization() {
+        resetUserSettingValue("autoLogProductImprovementEnabled")
+        Whitebox.setInternalState(UserSettingsManager::class.java, "isInitialized", AtomicBoolean(false))
     }
 
     @Test
