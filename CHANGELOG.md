@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [19.0.0]
 
 ### Added
+- Added `AutoLogProductImprovementEnabled`, an independent control for automatically sending diagnostic data about the app and the content on screen (product improvement data). It defaults to `true`. Apps can opt out by setting `com.facebook.sdk.AutoLogProductImprovementEnabled` to `false` in the Android manifest or by calling `FacebookSdk.setAutoLogProductImprovementEnabled(false)` at runtime. Runtime assignments persist across app launches and take precedence over the manifest; the resolved value is available through `FacebookSdk.getAutoLogProductImprovementEnabled()`. This control is independent of metadata collection and automatic app event logging. This change adds the control only; the SDK does not yet collect or send product improvement data.
 - Starting on October 12, 2026, Screen Title and AppLink URL will be included with events logged with Facebook SDK. You can disable additional metadata by setting AutoLogMetaDataEnabled false in your AndroidManifest.xml or by turning off "Automatically include more app event details" in Events Manager.
 
 ### Changed
