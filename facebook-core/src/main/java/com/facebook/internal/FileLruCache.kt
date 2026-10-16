@@ -527,16 +527,16 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
   // Caches the result of lastModified during sort/heap operations
   private class ModifiedFile constructor(val file: File) : Comparable<ModifiedFile> {
     val modified = file.lastModified()
-    override fun compareTo(another: ModifiedFile): Int {
+    override fun compareTo(other: ModifiedFile): Int {
       return when {
-        modified < another.modified -> -1
-        modified > another.modified -> 1
-        else -> file.compareTo(another.file)
+        modified < other.modified -> -1
+        modified > other.modified -> 1
+        else -> file.compareTo(other.file)
       }
     }
 
-    override fun equals(another: Any?): Boolean {
-      return another is ModifiedFile && compareTo(another) == 0
+    override fun equals(other: Any?): Boolean {
+      return other is ModifiedFile && compareTo(other) == 0
     }
 
     override fun hashCode(): Int {

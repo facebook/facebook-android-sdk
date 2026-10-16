@@ -117,15 +117,15 @@ class ShareVideoContent : ShareContent<ShareVideoContent, ShareVideoContent.Buil
       return ShareVideoContent(this)
     }
 
-    override fun readFrom(content: ShareVideoContent?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: ShareVideoContent?): Builder {
+      return if (model == null) {
         this
       } else
-          super.readFrom(content)
-              .setContentDescription(content.contentDescription)
-              .setContentTitle(content.contentTitle)
-              .setPreviewPhoto(content.previewPhoto)
-              .setVideo(content.video)
+          super.readFrom(model)
+              .setContentDescription(model.contentDescription)
+              .setContentTitle(model.contentTitle)
+              .setPreviewPhoto(model.previewPhoto)
+              .setVideo(model.video)
     }
   }
 

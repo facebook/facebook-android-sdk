@@ -66,12 +66,12 @@ class SharePhoto : ShareMedia<SharePhoto, SharePhoto.Builder> {
 
   override fun describeContents(): Int = 0
 
-  override fun writeToParcel(out: Parcel, flags: Int) {
-    super.writeToParcel(out, flags)
-    out.writeParcelable(bitmap, 0)
-    out.writeParcelable(imageUrl, 0)
-    out.writeByte((if (userGenerated) 1 else 0).toByte())
-    out.writeString(caption)
+  override fun writeToParcel(dest: Parcel, flags: Int) {
+    super.writeToParcel(dest, flags)
+    dest.writeParcelable(bitmap, 0)
+    dest.writeParcelable(imageUrl, 0)
+    dest.writeByte((if (userGenerated) 1 else 0).toByte())
+    dest.writeString(caption)
   }
 
   override val mediaType: Type = Type.PHOTO

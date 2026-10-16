@@ -9,5 +9,5 @@
 package com.facebook
 
 internal fun interface RequestOutputStream {
-  fun setCurrentRequest(r: GraphRequest?)
+  fun setCurrentRequest(request: GraphRequest?)
 }

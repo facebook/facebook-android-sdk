@@ -26,12 +26,12 @@ class AccessTokenAppIdPair(accessTokenString: String?, val applicationId: String
     return (accessTokenString?.hashCode() ?: 0) xor (applicationId.hashCode() ?: 0)
   }
 
-  override fun equals(o: Any?): Boolean {
-    if (o !is AccessTokenAppIdPair) {
+  override fun equals(other: Any?): Boolean {
+    if (other !is AccessTokenAppIdPair) {
       return false
     }
-    return areObjectsEqual(o.accessTokenString, accessTokenString) &&
-        areObjectsEqual(o.applicationId, applicationId)
+    return areObjectsEqual(other.accessTokenString, accessTokenString) &&
+        areObjectsEqual(other.applicationId, applicationId)
   }
 
   internal class SerializationProxyV1

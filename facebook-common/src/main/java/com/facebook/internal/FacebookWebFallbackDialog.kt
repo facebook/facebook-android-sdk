@@ -34,8 +34,8 @@ class FacebookWebFallbackDialog
 private constructor(context: Context, url: String, expectedRedirectUrl: String) :
     WebDialog(context, url) {
   private var waitingForDialogToClose = false
-  override fun parseResponseUri(url: String?): Bundle {
-    val responseUri = Uri.parse(url)
+  override fun parseResponseUri(urlString: String?): Bundle {
+    val responseUri = Uri.parse(urlString)
     val queryParams = parseUrlQueryString(responseUri.query)
 
     // Convert Bridge args to the format that the Native dialog code understands.

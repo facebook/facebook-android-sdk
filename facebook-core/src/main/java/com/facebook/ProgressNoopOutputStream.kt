@@ -19,9 +19,9 @@ class ProgressNoopOutputStream(private val callbackHandler: Handler?) :
   var maxProgress = 0
     private set
 
-  override fun setCurrentRequest(currentRequest: GraphRequest?) {
-    this.currentRequest = currentRequest
-    currentRequestProgress = if (currentRequest != null) progressMap[currentRequest] else null
+  override fun setCurrentRequest(request: GraphRequest?) {
+    this.currentRequest = request
+    currentRequestProgress = if (request != null) progressMap[request] else null
   }
 
   fun getProgressMap(): Map<GraphRequest, RequestProgress> = progressMap

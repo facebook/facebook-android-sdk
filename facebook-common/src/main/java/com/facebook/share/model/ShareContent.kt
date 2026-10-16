@@ -180,16 +180,16 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
       return this as B
     }
 
-    override fun readFrom(content: M?): B {
-      return if (content == null) {
+    override fun readFrom(model: M?): B {
+      return if (model == null) {
         this as B
       } else
-          setContentUrl(content.contentUrl)
-              .setPeopleIds(content.peopleIds)
-              .setPlaceId(content.placeId)
-              .setPageId(content.pageId)
-              .setRef(content.ref)
-              .setShareHashtag(content.shareHashtag)
+          setContentUrl(model.contentUrl)
+              .setPeopleIds(model.peopleIds)
+              .setPlaceId(model.placeId)
+              .setPageId(model.pageId)
+              .setRef(model.ref)
+              .setShareHashtag(model.shareHashtag)
     }
   }
 }

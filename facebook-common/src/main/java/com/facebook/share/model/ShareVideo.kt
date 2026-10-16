@@ -35,9 +35,9 @@ class ShareVideo : ShareMedia<ShareVideo, ShareVideo.Builder> {
 
   override fun describeContents(): Int = 0
 
-  override fun writeToParcel(out: Parcel, flags: Int) {
-    super.writeToParcel(out, flags)
-    out.writeParcelable(localUrl, 0)
+  override fun writeToParcel(dest: Parcel, flags: Int) {
+    super.writeToParcel(dest, flags)
+    dest.writeParcelable(localUrl, 0)
   }
 
   override val mediaType: Type = Type.VIDEO

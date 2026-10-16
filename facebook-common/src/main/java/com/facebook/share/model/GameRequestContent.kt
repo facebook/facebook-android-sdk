@@ -205,19 +205,19 @@ class GameRequestContent : ShareModel {
       return GameRequestContent(this)
     }
 
-    override fun readFrom(content: GameRequestContent?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: GameRequestContent?): Builder {
+      return if (model == null) {
         this
       } else
-          setMessage(content.message)
-              .setCta(content.cta)
-              .setRecipients(content.recipients)
-              .setTitle(content.title)
-              .setData(content.data)
-              .setActionType(content.actionType)
-              .setObjectId(content.objectId)
-              .setFilters(content.filters)
-              .setSuggestions(content.suggestions)
+          setMessage(model.message)
+              .setCta(model.cta)
+              .setRecipients(model.recipients)
+              .setTitle(model.title)
+              .setData(model.data)
+              .setActionType(model.actionType)
+              .setObjectId(model.objectId)
+              .setFilters(model.filters)
+              .setSuggestions(model.suggestions)
     }
 
     internal fun readFrom(parcel: Parcel): Builder {

@@ -82,10 +82,10 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
       return ShareMediaContent(this)
     }
 
-    override fun readFrom(content: ShareMediaContent?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: ShareMediaContent?): Builder {
+      return if (model == null) {
         this
-      } else super.readFrom(content).addMedia(content.media)
+      } else super.readFrom(model).addMedia(model.media)
     }
 
     /**

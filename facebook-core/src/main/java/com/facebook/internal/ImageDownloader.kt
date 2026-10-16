@@ -283,10 +283,10 @@ object ImageDownloader {
       return result
     }
 
-    override fun equals(o: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
       var isEqual = false
-      if (o != null && o is RequestKey) {
-        val compareTo = o
+      if (other != null && other is RequestKey) {
+        val compareTo = other
         isEqual = compareTo.uri == uri && compareTo.tag == tag
       }
       return isEqual

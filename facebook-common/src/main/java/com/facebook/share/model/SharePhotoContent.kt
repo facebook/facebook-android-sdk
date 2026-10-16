@@ -69,10 +69,10 @@ class SharePhotoContent : ShareContent<SharePhotoContent, SharePhotoContent.Buil
 
     override fun build(): SharePhotoContent = SharePhotoContent(this)
 
-    override fun readFrom(content: SharePhotoContent?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: SharePhotoContent?): Builder {
+      return if (model == null) {
         this
-      } else super.readFrom(content).addPhotos(content.photos)
+      } else super.readFrom(model).addPhotos(model.photos)
     }
 
     /**

@@ -106,13 +106,13 @@ class AppGroupCreationContent : ShareModel {
       return AppGroupCreationContent(this)
     }
 
-    override fun readFrom(content: AppGroupCreationContent?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: AppGroupCreationContent?): Builder {
+      return if (model == null) {
         this
       } else
-          setName(content.name)
-              .setDescription(content.description)
-              .setAppGroupPrivacy(content.appGroupPrivacy)
+          setName(model.name)
+              .setDescription(model.description)
+              .setAppGroupPrivacy(model.appGroupPrivacy)
     }
   }
 

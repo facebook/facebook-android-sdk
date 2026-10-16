@@ -105,18 +105,18 @@ class ShareFeedContent : ShareContent<ShareFeedContent, ShareFeedContent.Builder
       return ShareFeedContent(this)
     }
 
-    override fun readFrom(content: ShareFeedContent?): Builder {
-      return if (content == null) {
+    override fun readFrom(model: ShareFeedContent?): Builder {
+      return if (model == null) {
         this
       } else
-          super.readFrom(content)
-              .setToId(content.toId)
-              .setLink(content.link)
-              .setLinkName(content.linkName)
-              .setLinkCaption(content.linkCaption)
-              .setLinkDescription(content.linkDescription)
-              .setPicture(content.picture)
-              .setMediaSource(content.mediaSource)
+          super.readFrom(model)
+              .setToId(model.toId)
+              .setLink(model.link)
+              .setLinkName(model.linkName)
+              .setLinkCaption(model.linkCaption)
+              .setLinkDescription(model.linkDescription)
+              .setPicture(model.picture)
+              .setMediaSource(model.mediaSource)
     }
   }
 
