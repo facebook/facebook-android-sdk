@@ -119,14 +119,10 @@ class Logger(behavior: LoggingBehavior, tag: String) {
 
     @JvmStatic
     fun log(behavior: LoggingBehavior, priority: Int, tag: String, string: String) {
-      var tag = tag
-      var string = string
       if (FacebookSdk.isLoggingBehaviorEnabled(behavior)) {
-        string = replaceStrings(string)
-        if (tag.startsWith(LOG_TAG_BASE) == false) {
-          tag = LOG_TAG_BASE + tag
-        }
-        Log.println(priority, tag, string)
+        val message = replaceStrings(string)
+        val fullTag = if (tag.startsWith(LOG_TAG_BASE) == false) LOG_TAG_BASE + tag else tag
+        Log.println(priority, fullTag, message)
 
         // Developer errors warrant special treatment by printing out a stack trace, to make
         // both more noticeable, and let the source of the problem be more easily pinpointed.
@@ -138,11 +134,11 @@ class Logger(behavior: LoggingBehavior, tag: String) {
 
     @Synchronized
     private fun replaceStrings(string: String): String {
-      var string = string
+      var result = string
       for ((key, value) in stringsToReplace) {
-        string = string.replace(key, value)
+        result = result.replace(key, value)
       }
-      return string
+      return result
     }
   }
 

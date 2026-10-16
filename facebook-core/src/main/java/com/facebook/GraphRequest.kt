@@ -603,17 +603,17 @@ class GraphRequest {
         applicationId: String?,
         callback: Callback?
     ): GraphRequest {
-      var applicationId = applicationId
-      if (applicationId == null && accessToken != null) {
-        applicationId = accessToken.applicationId
+      var resolvedApplicationId = applicationId
+      if (resolvedApplicationId == null && accessToken != null) {
+        resolvedApplicationId = accessToken.applicationId
       }
-      if (applicationId == null) {
-        applicationId = getMetadataApplicationId(context)
+      if (resolvedApplicationId == null) {
+        resolvedApplicationId = getMetadataApplicationId(context)
       }
-      if (applicationId == null) {
+      if (resolvedApplicationId == null) {
         throw FacebookException("Facebook App ID cannot be determined")
       }
-      val endpoint = "$applicationId/custom_audience_third_party_id"
+      val endpoint = "$resolvedApplicationId/custom_audience_third_party_id"
       val attributionIdentifiers = getAttributionIdentifiers(context)
       val parameters = Bundle()
       if (accessToken == null) {
@@ -1203,13 +1203,13 @@ class GraphRequest {
     }
 
     private fun isMeRequest(path: String): Boolean {
-      var path = path
-      val matcher = versionPattern.matcher(path)
+      var unversionedPath = path
+      val matcher = versionPattern.matcher(unversionedPath)
       if (matcher.matches()) {
         // Group 1 contains the path aside from version
-        path = matcher.group(1)
+        unversionedPath = matcher.group(1)
       }
-      return path.startsWith("me/") || path.startsWith("/me/")
+      return unversionedPath.startsWith("me/") || unversionedPath.startsWith("/me/")
     }
 
     private fun processGraphObject(
@@ -1613,12 +1613,9 @@ class GraphRequest {
     }
 
   private fun getUrlWithGraphPath(baseUrl: String): String {
-    var baseUrl = baseUrl
-    if (!isValidGraphRequestForDomain()) {
-      // If not valid for current domain, re-route back to facebook domain
-      baseUrl = getFacebookGraphUrlBase()
-    }
-    return String.format("%s/%s", baseUrl, graphPathWithVersion)
+    // If not valid for current domain, re-route back to facebook domain
+    val urlBase = if (isValidGraphRequestForDomain()) baseUrl else getFacebookGraphUrlBase()
+    return String.format("%s/%s", urlBase, graphPathWithVersion)
   }
 
   private fun shouldForceClientTokenForRequest(): Boolean {
@@ -1809,11 +1806,7 @@ class GraphRequest {
     }
 
     fun writeContentUri(key: String, contentUri: Uri, mimeType: String?) {
-      var mimeType = mimeType
-      if (mimeType == null) {
-        mimeType = "content/unknown"
-      }
-      writeContentDisposition(key, key, mimeType)
+      writeContentDisposition(key, key, mimeType ?: "content/unknown")
       var totalBytes = 0
       if (outputStream is ProgressNoopOutputStream) {
         // If we are only counting bytes then skip reading the file
@@ -1830,11 +1823,7 @@ class GraphRequest {
     }
 
     fun writeFile(key: String, descriptor: ParcelFileDescriptor, mimeType: String?) {
-      var mimeType = mimeType
-      if (mimeType == null) {
-        mimeType = "content/unknown"
-      }
-      writeContentDisposition(key, key, mimeType)
+      writeContentDisposition(key, key, mimeType ?: "content/unknown")
       var totalBytes = 0
       if (outputStream is ProgressNoopOutputStream) {
         // If we are only counting bytes then skip reading the file

@@ -285,8 +285,9 @@ internal constructor(
       for (i in 0 until jsonArray.length()) {
         val request = requests[i]
         try {
-          val obj = jsonArray[i]
-          responses.add(createResponseFromObject(request, connection, obj, originalResult))
+          val responseObject = jsonArray[i]
+          responses.add(
+              createResponseFromObject(request, connection, responseObject, originalResult))
         } catch (e: JSONException) {
           responses.add(GraphResponse(request, connection, FacebookRequestError(connection, e)))
         } catch (e: FacebookException) {

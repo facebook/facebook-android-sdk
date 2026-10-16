@@ -1321,13 +1321,12 @@ open class LoginManager() {
 
     @Synchronized
     fun getLogger(context: Context?): LoginLogger? {
-      var context = context
-      context = context ?: getApplicationContext()
-      if (context == null) {
+      val resolvedContext = context ?: getApplicationContext()
+      if (resolvedContext == null) {
         return null
       }
       if (logger == null) {
-        logger = LoginLogger(context, getApplicationId())
+        logger = LoginLogger(resolvedContext, getApplicationId())
       }
       return logger
     }

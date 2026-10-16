@@ -58,23 +58,21 @@ private constructor(
 
     @JvmStatic
     fun getProfilePictureUri(userId: String?, width: Int, height: Int, accessToken: String?): Uri {
-      var width = width
-      var height = height
       Validate.notNullOrEmpty(userId, "userId")
-      width = Math.max(width, UNSPECIFIED_DIMENSION)
-      height = Math.max(height, UNSPECIFIED_DIMENSION)
-      require(!(width == UNSPECIFIED_DIMENSION && height == UNSPECIFIED_DIMENSION)) {
+      val clampedWidth = Math.max(width, UNSPECIFIED_DIMENSION)
+      val clampedHeight = Math.max(height, UNSPECIFIED_DIMENSION)
+      require(!(clampedWidth == UNSPECIFIED_DIMENSION && clampedHeight == UNSPECIFIED_DIMENSION)) {
         "Either width or height must be greater than 0"
       }
       val builder =
           Uri.parse(ServerProtocol.getGraphUrlBase())
               .buildUpon()
               .path(String.format(Locale.US, PATH, FacebookSdk.getGraphApiVersion(), userId))
-      if (height != UNSPECIFIED_DIMENSION) {
-        builder.appendQueryParameter(HEIGHT_PARAM, height.toString())
+      if (clampedHeight != UNSPECIFIED_DIMENSION) {
+        builder.appendQueryParameter(HEIGHT_PARAM, clampedHeight.toString())
       }
-      if (width != UNSPECIFIED_DIMENSION) {
-        builder.appendQueryParameter(WIDTH_PARAM, width.toString())
+      if (clampedWidth != UNSPECIFIED_DIMENSION) {
+        builder.appendQueryParameter(WIDTH_PARAM, clampedWidth.toString())
       }
       builder.appendQueryParameter(MIGRATION_PARAM, MIGRATION_VALUE)
       if (!Utility.isNullOrEmpty(accessToken)) {

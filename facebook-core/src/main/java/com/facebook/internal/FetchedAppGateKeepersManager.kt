@@ -108,8 +108,6 @@ object FetchedAppGateKeepersManager {
             val gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId)
             if (gateKeepersResultJSON.length() != 0) {
                 parseAppGateKeepersFromJSON(applicationId, gateKeepersResultJSON)
-                val gateKeepersSharedPrefs =
-                    context.getSharedPreferences(APP_GATEKEEPERS_PREFS_STORE, Context.MODE_PRIVATE)
                 gateKeepersSharedPrefs
                     .edit()
                     .putString(gateKeepersKey, gateKeepersResultJSON.toString())

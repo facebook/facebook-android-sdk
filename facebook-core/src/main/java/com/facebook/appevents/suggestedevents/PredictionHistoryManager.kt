@@ -57,14 +57,14 @@ internal object PredictionHistoryManager {
 
   @JvmStatic
   fun getPathID(view: View, text: String): String? {
-    var view: View? = view
+    var current: View? = view
     val pathRoute = JSONObject()
     try {
       pathRoute.put(TEXT_KEY, text)
       val currentPath = JSONArray()
-      while (view != null) {
-        currentPath.put(view.javaClass.simpleName)
-        view = ViewHierarchy.getParentOfView(view)
+      while (current != null) {
+        currentPath.put(current.javaClass.simpleName)
+        current = ViewHierarchy.getParentOfView(current)
       }
       pathRoute.put(CLASS_NAME_KEY, currentPath)
     } catch (je: JSONException) {

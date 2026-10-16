@@ -129,29 +129,29 @@ constructor(
     }
 
     fun addToList(list: WorkNode?, addToFront: Boolean): WorkNode {
-      var list = list
+      var head = list
       assert(next == null)
       assert(prev == null)
-      if (list == null) {
+      if (head == null) {
         prev = this
         next = prev
-        list = next
+        head = next
       } else {
-        next = list
-        prev = list.prev
+        next = head
+        prev = head.prev
         prev?.next = this
         next?.prev = prev?.next
       }
-      checkNotNull(list)
-      return if (addToFront) this else list
+      checkNotNull(head)
+      return if (addToFront) this else head
     }
 
     fun removeFromList(list: WorkNode?): WorkNode? {
-      var list = list
+      var head = list
       assert(next != null)
       assert(prev != null)
-      if (list === this) {
-        list =
+      if (head === this) {
+        head =
             if (next === this) {
               null
             } else {
@@ -162,7 +162,7 @@ constructor(
       prev?.next = next
       prev = null
       next = prev
-      return list
+      return head
     }
 
     fun verify(shouldBeRunning: Boolean) {

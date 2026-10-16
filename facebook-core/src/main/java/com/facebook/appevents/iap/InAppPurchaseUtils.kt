@@ -60,12 +60,9 @@ object InAppPurchaseUtils {
      */
     @JvmStatic
     fun invokeMethod(clazz: Class<*>, method: Method, obj: Any?, vararg args: Any?): Any? {
-        var obj = obj
-        if (obj != null) {
-            obj = clazz.cast(obj)
-        }
+        val receiver = if (obj != null) clazz.cast(obj) else null
         try {
-            return method.invoke(obj, *args)
+            return method.invoke(receiver, *args)
         } catch (e: IllegalAccessException) {
             /* swallow */
         } catch (e: InvocationTargetException) {

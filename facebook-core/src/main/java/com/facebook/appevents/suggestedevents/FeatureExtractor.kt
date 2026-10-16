@@ -111,13 +111,12 @@ internal object FeatureExtractor {
   @JvmStatic
   fun getDenseFeatures(viewHierarchy: JSONObject, appName: String): FloatArray? {
     // sanity check
-    var appName = appName
     if (!initialized) {
       return null
     }
     val ret = FloatArray(NUM_OF_FEATURES) { 0f }
     try {
-      appName = appName.toLowerCase()
+      val lowercaseAppName = appName.toLowerCase()
       val viewTree = JSONObject(viewHierarchy.optJSONObject(VIEW_KEY).toString()) // copy
       val screenName = viewHierarchy.optString(SCREEN_NAME_KEY)
       val siblings = JSONArray()
@@ -126,7 +125,8 @@ internal object FeatureExtractor {
       sum(ret, parseResult)
       val interactedNode = getInteractedNode(viewTree) ?: return null
       val nonparseFeatures =
-          nonparseFeatures(interactedNode, siblings, screenName, viewTree.toString(), appName)
+          nonparseFeatures(
+              interactedNode, siblings, screenName, viewTree.toString(), lowercaseAppName)
       sum(ret, nonparseFeatures)
       return ret
     } catch (je: JSONException) {

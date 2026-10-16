@@ -274,14 +274,14 @@ internal class CodelessMatcher private constructor() {
           index: Int,
           mapKey: String
       ): List<MatchedView> {
-        val mapKey = "$mapKey.$index"
+        val viewMapKey = "$mapKey.$index"
         val result: MutableList<MatchedView> = ArrayList()
         if (null == view) {
           return result
         }
         if (level >= path.size) {
           // Match all children views if their parent view is matched
-          result.add(MatchedView(view, mapKey))
+          result.add(MatchedView(view, viewMapKey))
         } else {
           val pathElement = path[level]
           if (pathElement.className == PARENT_CLASS_NAME) {
@@ -291,14 +291,14 @@ internal class CodelessMatcher private constructor() {
               val childCount = visibleViews.size
               for (i in 0 until childCount) {
                 val child = visibleViews[i]
-                val matchedViews = findViewByPath(mapping, child, path, level + 1, i, mapKey)
+                val matchedViews = findViewByPath(mapping, child, path, level + 1, i, viewMapKey)
                 result.addAll(matchedViews)
               }
             }
             return result
           } else if (pathElement.className == CURRENT_CLASS_NAME) {
             // Set self as selected element
-            result.add(MatchedView(view, mapKey))
+            result.add(MatchedView(view, viewMapKey))
             return result
           }
           if (!isTheSameView(view, pathElement, index)) {
@@ -307,7 +307,7 @@ internal class CodelessMatcher private constructor() {
 
           // Found it!
           if (level == path.size - 1) {
-            result.add(MatchedView(view, mapKey))
+            result.add(MatchedView(view, viewMapKey))
           }
         }
         if (view is ViewGroup) {
@@ -315,7 +315,7 @@ internal class CodelessMatcher private constructor() {
           val childCount = visibleViews.size
           for (i in 0 until childCount) {
             val child = visibleViews[i]
-            val matchedViews = findViewByPath(mapping, child, path, level + 1, i, mapKey)
+            val matchedViews = findViewByPath(mapping, child, path, level + 1, i, viewMapKey)
             result.addAll(matchedViews)
           }
         }

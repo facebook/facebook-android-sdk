@@ -47,13 +47,13 @@ open class CustomTab(action: String, parameters: Bundle?) {
   }
 
   init {
-    var parameters = parameters ?: Bundle()
+    val uriParameters = parameters ?: Bundle()
     uri =
         if (GamingAction.values().map { it.rawValue }.contains(action)) {
           buildUri(
-              getGamingDialogAuthority(), "/" + ServerProtocol.DIALOG_PATH + action, parameters)
+              getGamingDialogAuthority(), "/" + ServerProtocol.DIALOG_PATH + action, uriParameters)
         } else {
-          getURIForAction(action, parameters)
+          getURIForAction(action, uriParameters)
         }
   }
 }

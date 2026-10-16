@@ -213,27 +213,19 @@ open class LoginClient : Parcelable {
   }
 
   private fun addLoggingExtra(key: String, value: String, accumulate: Boolean) {
-    var value = value
     val extras = loggingExtras ?: HashMap()
     if (loggingExtras == null) {
       loggingExtras = extras
     }
-    if (extras.containsKey(key) && accumulate) {
-      value = "${extras[key]},$value"
-    }
-    extras[key] = value
+    extras[key] = if (extras.containsKey(key) && accumulate) "${extras[key]},$value" else value
   }
 
   fun addExtraData(key: String, value: String, accumulate: Boolean) {
-    var value = value
     val extras = extraData ?: HashMap()
     if (extraData == null) {
       extraData = extras
     }
-    if (extras.containsKey(key) && accumulate) {
-      value = "${extras[key]},$value"
-    }
-    extras[key] = value
+    extras[key] = if (extras.containsKey(key) && accumulate) "${extras[key]},$value" else value
   }
 
   fun tryCurrentHandler(): Boolean {

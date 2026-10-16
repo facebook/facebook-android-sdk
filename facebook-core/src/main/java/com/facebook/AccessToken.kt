@@ -518,8 +518,8 @@ class AccessToken : Parcelable {
             object : Utility.GraphMeRequestWithCacheCallback {
               override fun onSuccess(userInfo: JSONObject?) {
                 try {
-                  val userId = checkNotNull(userInfo?.getString("id"))
-                  extras.putString(USER_ID_KEY, userId)
+                  val fetchedUserId = checkNotNull(userInfo?.getString("id"))
+                  extras.putString(USER_ID_KEY, fetchedUserId)
                   accessTokenCallback.onSuccess(
                       createFromBundle(
                           null,

@@ -328,8 +328,8 @@ internal constructor(
       val instance = instanceField
       if (instance == null) {
         synchronized(this) {
-          val instance = instanceField
-          return if (instance == null) {
+          val lockedInstance = instanceField
+          return if (lockedInstance == null) {
             val applicationContext = FacebookSdk.getApplicationContext()
             val localBroadcastManager = LocalBroadcastManager.getInstance(applicationContext)
             val accessTokenCache = AccessTokenCache()
@@ -337,7 +337,7 @@ internal constructor(
             instanceField = newInstance
             newInstance
           } else {
-            instance
+            lockedInstance
           }
         }
       } else {

@@ -243,29 +243,28 @@ object UserDataStore {
   }
 
   private fun normalizeData(type: String, data: String): String {
-    var data = data
-    data = data.trim { it <= ' ' }.toLowerCase()
+    var normalized = data.trim { it <= ' ' }.toLowerCase()
     if (EMAIL == type) {
-      return if (Patterns.EMAIL_ADDRESS.matcher(data).matches()) {
-        data
+      return if (Patterns.EMAIL_ADDRESS.matcher(normalized).matches()) {
+        normalized
       } else {
         Log.e(TAG, "Setting email failure: this is not a valid email address")
         ""
       }
     }
     if (PHONE == type) {
-      return data.replace("[^0-9]".toRegex(), "")
+      return normalized.replace("[^0-9]".toRegex(), "")
     }
     if (GENDER == type) {
-      data = if (data.isNotEmpty()) data.substring(0, 1) else ""
-      return if ("f" == data || "m" == data) {
-        data
+      normalized = if (normalized.isNotEmpty()) normalized.substring(0, 1) else ""
+      return if ("f" == normalized || "m" == normalized) {
+        normalized
       } else {
         Log.e(TAG, "Setting gender failure: the supported value for gender is f or m")
         ""
       }
     }
-    return data
+    return normalized
   }
 
   private fun maybeSHA256Hashed(data: String): Boolean {

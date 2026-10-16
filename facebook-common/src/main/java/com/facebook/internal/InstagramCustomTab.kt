@@ -32,10 +32,6 @@ class InstagramCustomTab(action: String, parameters: Bundle?) : CustomTab(action
   }
 
   init {
-    var parameters = parameters
-    if (parameters == null) {
-      parameters = Bundle()
-    }
-    uri = getURIForAction(action, parameters)
+    uri = getURIForAction(action, parameters ?: Bundle())
   }
 }

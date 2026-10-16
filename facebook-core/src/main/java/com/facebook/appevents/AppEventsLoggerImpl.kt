@@ -134,7 +134,6 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         isImplicitlyLogged: Boolean,
         operationalData: OperationalData? = null
     ) {
-        var parameters = parameters
         if (purchaseAmount == null) {
             notifyDeveloperError("purchaseAmount cannot be null")
             return
@@ -142,14 +141,12 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             notifyDeveloperError("currency cannot be null")
             return
         }
-        if (parameters == null) {
-            parameters = Bundle()
-        }
-        parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
+        val purchaseParameters = parameters ?: Bundle()
+        purchaseParameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
         logEvent(
             AppEventsConstants.EVENT_NAME_PURCHASED,
             purchaseAmount.toDouble(),
-            parameters,
+            purchaseParameters,
             isImplicitlyLogged,
             getCurrentSessionGuid(),
             operationalData
@@ -200,7 +197,6 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         brand: String?,
         parameters: Bundle?
     ) {
-        var parameters = parameters
         if (itemID == null) {
             notifyDeveloperError("itemID cannot be null")
             return
@@ -232,31 +228,32 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             notifyDeveloperError("Either gtin, mpn or brand is required")
             return
         }
-        if (parameters == null) {
-            parameters = Bundle()
-        }
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_ITEM_ID, itemID)
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_AVAILABILITY, availability.name)
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_CONDITION, condition.name)
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_DESCRIPTION, description)
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_IMAGE_LINK, imageLink)
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_LINK, link)
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, title)
-        parameters.putString(
+        val productParameters = parameters ?: Bundle()
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_ITEM_ID, itemID)
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_AVAILABILITY, availability.name)
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_CONDITION, condition.name)
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_DESCRIPTION, description)
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_IMAGE_LINK, imageLink)
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_LINK, link)
+        productParameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, title)
+        productParameters.putString(
             Constants.EVENT_PARAM_PRODUCT_PRICE_AMOUNT,
             priceAmount.setScale(3, RoundingMode.HALF_UP).toString()
         )
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY, currency.currencyCode)
+        productParameters.putString(
+            Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY,
+            currency.currencyCode
+        )
         if (gtin != null) {
-            parameters.putString(Constants.EVENT_PARAM_PRODUCT_GTIN, gtin)
+            productParameters.putString(Constants.EVENT_PARAM_PRODUCT_GTIN, gtin)
         }
         if (mpn != null) {
-            parameters.putString(Constants.EVENT_PARAM_PRODUCT_MPN, mpn)
+            productParameters.putString(Constants.EVENT_PARAM_PRODUCT_MPN, mpn)
         }
         if (brand != null) {
-            parameters.putString(Constants.EVENT_PARAM_PRODUCT_BRAND, brand)
+            productParameters.putString(Constants.EVENT_PARAM_PRODUCT_BRAND, brand)
         }
-        logEvent(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE, parameters)
+        logEvent(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE, productParameters)
         eagerFlush()
     }
 
@@ -302,19 +299,16 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         parameters: Bundle?,
         operationalData: OperationalData? = null
     ) {
-        var parameters = parameters
         if (purchaseAmount == null || currency == null) {
             logd(TAG, "purchaseAmount and currency cannot be null")
             return
         }
-        if (parameters == null) {
-            parameters = Bundle()
-        }
-        parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
+        val purchaseParameters = parameters ?: Bundle()
+        purchaseParameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.currencyCode)
         logEvent(
             eventName,
             purchaseAmount.toDouble(),
-            parameters,
+            purchaseParameters,
             true,
             getCurrentSessionGuid(),
             operationalData
@@ -503,7 +497,6 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
 
         @JvmStatic
         fun activateApp(application: Application, applicationId: String?) {
-            var applicationId = applicationId
             if (!FacebookSdk.isInitialized()) {
                 throw FacebookException(
                     "The Facebook sdk must be initialized before calling " + "activateApp"
@@ -511,21 +504,22 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
             }
             AnalyticsUserIDStore.initStore()
             UserDataStore.initStore()
-            if (applicationId == null) {
-                applicationId = FacebookSdk.getApplicationId()
-            }
+            val resolvedApplicationId = applicationId ?: FacebookSdk.getApplicationId()
 
             // activateApp supersedes publishInstall in the public API, so we need to explicitly invoke
             // it, since the server can't reliably infer install state for all conditions of an app
             // activate.
-            FacebookSdk.publishInstallAsync(application, applicationId)
+            FacebookSdk.publishInstallAsync(application, resolvedApplicationId)
 
             // Will do nothing in case AutoLogAppEventsEnabled is true, as we already started the
             // tracking as part of sdkInitialize() flow
-            startTracking(application, applicationId)
+            startTracking(application, resolvedApplicationId)
 
             if (isEnabled(FeatureManager.Feature.GPSPACAProcessing)) {
-                PACustomAudienceClient.joinCustomAudience(applicationId, "fb_mobile_app_install")
+                PACustomAudienceClient.joinCustomAudience(
+                    resolvedApplicationId,
+                    "fb_mobile_app_install"
+                )
             }
 
             if (isEnabled(FeatureManager.Feature.GPSARATriggers)) {
@@ -540,7 +534,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
                         currentSessionId = getCurrentSessionGuid(),
                         operationalParameters = null
                     )
-                GpsAraTriggersManager.registerTriggerAsync(applicationId, event)
+                GpsAraTriggersManager.registerTriggerAsync(resolvedApplicationId, event)
             }
         }
 
@@ -850,26 +844,21 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
 
     init {
-        var applicationId = applicationId
-        var accessToken = accessToken
         sdkInitialized()
         contextName = activityName
-        if (accessToken == null) {
-            accessToken = getCurrentAccessToken()
-        }
+        val resolvedAccessToken = accessToken ?: getCurrentAccessToken()
 
         // If we have a session and the appId passed is null or matches the session's app ID:
-        if (accessToken != null &&
-            !accessToken.isExpired &&
-            (applicationId == null || applicationId == accessToken.applicationId)
+        if (resolvedAccessToken != null &&
+            !resolvedAccessToken.isExpired &&
+            (applicationId == null || applicationId == resolvedAccessToken.applicationId)
         ) {
-            accessTokenAppId = AccessTokenAppIdPair(accessToken)
+            accessTokenAppId = AccessTokenAppIdPair(resolvedAccessToken)
         } else {
             // If no app ID passed, get it from the manifest:
-            if (applicationId == null) {
-                applicationId = getMetadataApplicationId(FacebookSdk.getApplicationContext())
-            }
-            accessTokenAppId = AccessTokenAppIdPair(null, checkNotNull(applicationId))
+            val resolvedApplicationId =
+                applicationId ?: getMetadataApplicationId(FacebookSdk.getApplicationContext())
+            accessTokenAppId = AccessTokenAppIdPair(null, checkNotNull(resolvedApplicationId))
         }
         initializeTimersIfNeeded()
     }

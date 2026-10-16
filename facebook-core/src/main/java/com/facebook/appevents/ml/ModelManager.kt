@@ -330,9 +330,9 @@ object ModelManager {
           if (model != null) {
             for (slave in slaves) {
               val ruleFileName = slave.useCase + "_" + slave.versionId + "_rule"
-              download(slave.ruleUri, ruleFileName) { file ->
+              download(slave.ruleUri, ruleFileName) { ruleFile ->
                 slave.model = model
-                slave.ruleFile = file
+                slave.ruleFile = ruleFile
                 slave.onPostExecute?.run()
               }
             }

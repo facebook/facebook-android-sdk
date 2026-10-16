@@ -141,24 +141,25 @@ internal class MetadataViewObserver private constructor(activity: Activity) :
     }
 
     private fun putUserData(userData: MutableMap<String, String>, key: String, value: String) {
-      var value = value
-      when (key) {
-        "r3" ->
-            value =
+      userData[key] =
+          when (key) {
+            "r3" ->
                 if (value.startsWith("m") || value.startsWith("b") || value.startsWith("ge")) {
                   "m"
                 } else {
                   "f"
                 }
-        "r4",
-        "r5" -> value = value.replace("[^a-z]+".toRegex(), "") // lowercase already
-        "r6" ->
-            if (value.contains("-")) {
-              val splitArray = value.split("-".toRegex()).toTypedArray()
-              value = splitArray[0]
-            }
-      }
-      userData[key] = value
+            "r4",
+            "r5" -> value.replace("[^a-z]+".toRegex(), "") // lowercase already
+            "r6" ->
+                if (value.contains("-")) {
+                  val splitArray = value.split("-".toRegex()).toTypedArray()
+                  splitArray[0]
+                } else {
+                  value
+                }
+            else -> value
+          }
     }
   }
 }

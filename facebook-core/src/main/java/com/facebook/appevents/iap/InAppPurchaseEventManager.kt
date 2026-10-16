@@ -353,7 +353,6 @@ object InAppPurchaseEventManager {
       obj: Any?,
       args: Array<Any?>
   ): Any? {
-    var obj = obj
     val classObj = getClass(context, className) ?: return null
     val method = getMethod(classObj, methodName) ?: return null
     return InAppPurchaseUtils.invokeMethod(classObj, method, obj, *args)

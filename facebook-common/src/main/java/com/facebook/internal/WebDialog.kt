@@ -176,37 +176,36 @@ open class WebDialog : Dialog {
       targetApp: LoginTargetApp,
       listener: OnCompleteListener?
   ) : super(context, if (theme == 0) getWebDialogTheme() else theme) {
-    var parameters = parameters
-    if (parameters == null) {
-      parameters = Bundle()
-    }
+    val dialogParameters = parameters ?: Bundle()
     val isChromeOS = isChromeOS(context)
     expectedRedirectUrl =
         if (isChromeOS) ServerProtocol.DIALOG_REDIRECT_CHROME_OS_URI
         else ServerProtocol.DIALOG_REDIRECT_URI
 
     // our webview client only handles the redirect uri we specify, so just hard code it here
-    parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, expectedRedirectUrl)
-    parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH)
-    parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId())
-    parameters.putString(
+    dialogParameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, expectedRedirectUrl)
+    dialogParameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH)
+    dialogParameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId())
+    dialogParameters.putString(
         ServerProtocol.DIALOG_PARAM_SDK_VERSION,
         String.format(Locale.ROOT, "android-%s", getSdkVersion()))
     onCompleteListener = listener
     if (action == ShareDialog.WEB_SHARE_DIALOG &&
-        parameters.containsKey(ShareConstants.WEB_DIALOG_PARAM_MEDIA)) {
-      uploadTask = UploadStagingResourcesTask(action, parameters)
+        dialogParameters.containsKey(ShareConstants.WEB_DIALOG_PARAM_MEDIA)) {
+      uploadTask = UploadStagingResourcesTask(action, dialogParameters)
     } else {
       val uri: Uri =
           when (targetApp) {
             LoginTargetApp.INSTAGRAM ->
                 buildUri(
-                    getInstagramDialogAuthority(), ServerProtocol.INSTAGRAM_OAUTH_PATH, parameters)
+                    getInstagramDialogAuthority(),
+                    ServerProtocol.INSTAGRAM_OAUTH_PATH,
+                    dialogParameters)
             else ->
                 buildUri(
                     getDialogAuthority(),
                     getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-                    parameters)
+                    dialogParameters)
           }
       url = uri.toString()
     }
@@ -619,11 +618,8 @@ open class WebDialog : Dialog {
      * @param parameters a Bundle containing parameters to pass as part of the URL.
      */
     constructor(context: Context, applicationId: String?, action: String, parameters: Bundle?) {
-      var applicationId = applicationId
-      if (applicationId == null) {
-        applicationId = getMetadataApplicationId(context)
-      }
-      this.applicationId = notNullOrEmpty(applicationId, "applicationId")
+      this.applicationId =
+          notNullOrEmpty(applicationId ?: getMetadataApplicationId(context), "applicationId")
       finishInit(context, action, parameters)
     }
 

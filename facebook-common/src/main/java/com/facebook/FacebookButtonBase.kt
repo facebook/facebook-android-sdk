@@ -330,11 +330,13 @@ protected constructor(
   }
 
   init {
-    var defStyleRes = defStyleRes
-    defStyleRes = if (defStyleRes == 0) defaultStyleResource else defStyleRes
-    defStyleRes =
-        if (defStyleRes == 0) com.facebook.common.R.style.com_facebook_button else defStyleRes
-    configureButton(context, attrs, defStyleAttr, defStyleRes)
+    var resolvedDefStyleRes = defStyleRes
+    resolvedDefStyleRes =
+        if (resolvedDefStyleRes == 0) defaultStyleResource else resolvedDefStyleRes
+    resolvedDefStyleRes =
+        if (resolvedDefStyleRes == 0) com.facebook.common.R.style.com_facebook_button
+        else resolvedDefStyleRes
+    configureButton(context, attrs, defStyleAttr, resolvedDefStyleRes)
     this.analyticsButtonCreatedEventName = analyticsButtonCreatedEventName
     this.analyticsButtonTappedEventName = analyticsButtonTappedEventName
     isClickable = true

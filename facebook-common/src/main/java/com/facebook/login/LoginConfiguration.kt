@@ -56,9 +56,9 @@ class LoginConfiguration {
   ) {
     require(NonceUtil.isValidNonce(nonce) && PKCEUtil.isValidCodeVerifier(codeVerifier))
 
-    val permissions = if (permissions != null) HashSet(permissions) else HashSet()
-    permissions.add(OPENID)
-    this.permissions = Collections.unmodifiableSet(permissions)
+    val permissionSet = if (permissions != null) HashSet(permissions) else HashSet()
+    permissionSet.add(OPENID)
+    this.permissions = Collections.unmodifiableSet(permissionSet)
     this.nonce = nonce
     this.codeVerifier = codeVerifier
   }

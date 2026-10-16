@@ -437,13 +437,13 @@ object ViewHierarchy {
 
   @JvmStatic
   fun findRCTRootView(view: View?): View? {
-    var view = view
-    while (null != view) {
-      if (isRCTRootView(view)) {
-        return view
+    var current = view
+    while (null != current) {
+      if (isRCTRootView(current)) {
+        return current
       }
-      val viewParent = view.parent
-      view =
+      val viewParent = current.parent
+      current =
           if (viewParent is View) {
             viewParent
           } else {

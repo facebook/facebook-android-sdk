@@ -51,10 +51,10 @@ object DeviceRequestsHelper {
     // We don't need all the information in Utility.setAppEventExtendedDeviceInfoParameters
     // We only want the model so we can show it to the user, so they know which device
     // the login request comes from
-    val deviceInfo = deviceInfo ?: HashMap()
-    deviceInfo[DEVICE_INFO_DEVICE] = Build.DEVICE
-    deviceInfo[DEVICE_INFO_MODEL] = Build.MODEL
-    return JSONObject(deviceInfo as Map<*, *>).toString()
+    val info = deviceInfo ?: HashMap()
+    info[DEVICE_INFO_DEVICE] = Build.DEVICE
+    info[DEVICE_INFO_MODEL] = Build.MODEL
+    return JSONObject(info as Map<*, *>).toString()
   }
 
   @JvmStatic
