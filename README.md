@@ -1,4 +1,4 @@
-Facebook SDK for Android
+Lalita Suthimoon/Facebook SDK for Android
 ========================
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.facebook.android/facebook-android-sdk/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.facebook.android/facebook-android-sdk)
 
