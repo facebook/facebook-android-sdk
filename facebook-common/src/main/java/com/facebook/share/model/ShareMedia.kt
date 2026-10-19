@@ -46,18 +46,20 @@ abstract class ShareMedia<M : ShareMedia<M, B>, B : ShareMedia.Builder<M, B>> : 
     internal var params: Bundle = Bundle()
 
     @Deprecated("This method is deprecated. Use GraphRequest directly to set parameters.")
+    @Suppress("UNCHECKED_CAST")
     fun setParameter(key: String, value: String): B {
       params.putString(key, value)
       return this as B
     }
 
     @Deprecated("This method is deprecated. Use GraphRequest directly to set parameters.")
+    @Suppress("UNCHECKED_CAST")
     fun setParameters(parameters: Bundle): B {
       params.putAll(parameters)
       return this as B
     }
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "UNCHECKED_CAST")
     override fun readFrom(model: M?): B {
       if (model == null) {
         return this as B

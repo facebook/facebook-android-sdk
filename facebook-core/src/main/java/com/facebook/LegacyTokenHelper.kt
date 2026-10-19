@@ -182,7 +182,7 @@ constructor(context: Context, cacheKey: String? = null) {
           }
           is List<*> -> {
             supportedType = TYPE_STRING_LIST
-            val stringList = value as List<String?>
+            @Suppress("UNCHECKED_CAST") val stringList = value as List<String?>
             for (v in stringList) {
               jsonArray.put(v ?: JSONObject.NULL)
             }
@@ -305,7 +305,7 @@ constructor(context: Context, cacheKey: String? = null) {
     } else if (valueType == TYPE_ENUM) {
       try {
         val enumType = json.getString(JSON_VALUE_ENUM_TYPE)
-        val enumClass = Class.forName(enumType) as Class<out Enum<*>>
+        @Suppress("UNCHECKED_CAST") val enumClass = Class.forName(enumType) as Class<out Enum<*>>
         val enumValue = java.lang.Enum.valueOf(enumClass, json.getString(JSON_VALUE))
         bundle.putSerializable(key, enumValue)
       } catch (e: ClassNotFoundException) {

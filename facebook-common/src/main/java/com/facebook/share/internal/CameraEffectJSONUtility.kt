@@ -60,7 +60,7 @@ object CameraEffectJSONUtility {
                 @Throws(JSONException::class)
                 override fun setOnJSON(json: JSONObject, key: String, value: Any?) {
                   val jsonArray = JSONArray()
-                  for (stringValue in value as Array<String?>) {
+                  for (stringValue in value as Array<*>) {
                     jsonArray.put(stringValue)
                   }
                   json.put(key, jsonArray)

@@ -162,8 +162,10 @@ class AppEvent : Serializable {
         }
         if (!isOperational) {
             IntegrityManager.processParameters(paramMap)
-            processParameters(paramMap as MutableMap<String, String?>, name)
-            processDeprecatedParameters(paramMap as MutableMap<String, String?>, name)
+            @Suppress("UNCHECKED_CAST")
+            val nullableParamMap = paramMap as MutableMap<String, String?>
+            processParameters(nullableParamMap, name)
+            processDeprecatedParameters(nullableParamMap, name)
         }
         return paramMap
     }

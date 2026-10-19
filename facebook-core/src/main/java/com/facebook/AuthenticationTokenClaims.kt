@@ -145,8 +145,9 @@ class AuthenticationTokenClaims : Parcelable {
     this.userAgeRange =
         if (userAgeRangeJson == null) null
         else {
-          Collections.unmodifiableMap(
-              convertJSONObjectToHashMap(userAgeRangeJson) as Map<String, Int>?)
+          @Suppress("UNCHECKED_CAST")
+          val userAgeRangeMap = convertJSONObjectToHashMap(userAgeRangeJson) as Map<String, Int>
+          Collections.unmodifiableMap(userAgeRangeMap)
         }
     val userHometownJson = jsonObj.optJSONObject(JSON_KEY_USER_HOMETOWN)
     this.userHometown =
@@ -274,17 +275,24 @@ class AuthenticationTokenClaims : Parcelable {
 
     this.userBirthday = parcel.readString()
 
-    val userAgeRangeMap = parcel.readHashMap(Int.javaClass.classLoader) as? (HashMap<String, Int>)
+    @Suppress("UNCHECKED_CAST")
+    val userAgeRangeMap =
+        parcel.readHashMap(AuthenticationTokenClaims::class.java.classLoader)
+            as? (HashMap<String, Int>)
     this.userAgeRange =
         if (userAgeRangeMap != null) Collections.unmodifiableMap(userAgeRangeMap) else null
 
+    @Suppress("UNCHECKED_CAST")
     val userHometownMap =
-        parcel.readHashMap(String.javaClass.classLoader) as? (HashMap<String, String>)
+        parcel.readHashMap(AuthenticationTokenClaims::class.java.classLoader)
+            as? (HashMap<String, String>)
     this.userHometown =
         if (userHometownMap != null) Collections.unmodifiableMap(userHometownMap) else null
 
+    @Suppress("UNCHECKED_CAST")
     val userLocationMap =
-        parcel.readHashMap(String.javaClass.classLoader) as? (HashMap<String, String>)
+        parcel.readHashMap(AuthenticationTokenClaims::class.java.classLoader)
+            as? (HashMap<String, String>)
     this.userLocation =
         if (userLocationMap != null) Collections.unmodifiableMap(userLocationMap) else null
 
@@ -517,6 +525,7 @@ class AuthenticationTokenClaims : Parcelable {
 
     @Throws(JSONException::class)
     @JvmStatic
+    @Suppress("UNCHECKED_CAST")
     internal fun createFromJSONObject(jsonObject: JSONObject): AuthenticationTokenClaims {
       val jti = jsonObject.getString(JSON_KEY_JIT)
       val iss = jsonObject.getString(JSON_KEY_ISS)

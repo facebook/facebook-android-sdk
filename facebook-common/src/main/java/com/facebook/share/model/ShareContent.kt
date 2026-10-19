@@ -119,6 +119,7 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
      * @param contentUrl [android.net.Uri] representation of the content link.
      * @return The builder.
      */
+    @Suppress("UNCHECKED_CAST")
     fun setContentUrl(contentUrl: Uri?): B {
       this.contentUrl = contentUrl
       return this as B
@@ -130,6 +131,7 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
      * @param peopleIds [java.util.List] of Ids for people to tag.
      * @return The builder.
      */
+    @Suppress("UNCHECKED_CAST")
     fun setPeopleIds(peopleIds: List<String>?): B {
       this.peopleIds = if (peopleIds == null) null else Collections.unmodifiableList(peopleIds)
       return this as B
@@ -141,6 +143,7 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
      * @param placeId The Id for the place to tag.
      * @return The builder.
      */
+    @Suppress("UNCHECKED_CAST")
     fun setPlaceId(placeId: String?): B {
       this.placeId = placeId
       return this as B
@@ -152,6 +155,7 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
      * @param pageId The Id for the Page
      * @return The builder
      */
+    @Suppress("UNCHECKED_CAST")
     fun setPageId(pageId: String?): B {
       this.pageId = pageId
       return this as B
@@ -164,6 +168,7 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
      * @param ref The ref for the content.
      * @return The builder.
      */
+    @Suppress("UNCHECKED_CAST")
     fun setRef(ref: String?): B {
       this.ref = ref
       return this as B
@@ -175,11 +180,13 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
      * @param shareHashtag The hashtag for this content
      * @return The builder
      */
+    @Suppress("UNCHECKED_CAST")
     fun setShareHashtag(shareHashtag: ShareHashtag?): B {
       hashtag = shareHashtag
       return this as B
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun readFrom(model: M?): B {
       return if (model == null) {
         this as B

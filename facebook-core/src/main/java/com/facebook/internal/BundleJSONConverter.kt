@@ -37,7 +37,7 @@ object BundleJSONConverter {
       // Special case List<String> as getClass would not work, since List is an interface
       if (value is List<*>) {
         val jsonArray = JSONArray()
-        val listValue = value as List<String>
+        @Suppress("UNCHECKED_CAST") val listValue = value as List<String>
         for (stringValue in listValue) {
           jsonArray.put(stringValue)
         }
@@ -161,7 +161,7 @@ object BundleJSONConverter {
           @Throws(JSONException::class)
           override fun setOnJSON(json: JSONObject, key: String, value: Any) {
             val jsonArray = JSONArray()
-            for (stringValue in value as Array<String>) {
+            for (stringValue in value as Array<*>) {
               jsonArray.put(stringValue)
             }
             json.put(key, jsonArray)

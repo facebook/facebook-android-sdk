@@ -71,7 +71,8 @@ internal class CodelessMatcher private constructor() {
     }
     activitiesSet.remove(activity)
     viewMatchers.clear()
-    activityToListenerMap[activity.hashCode()] = listenerSet.clone() as HashSet<String>
+    @Suppress("UNCHECKED_CAST") val listenerSetCopy = listenerSet.clone() as HashSet<String>
+    activityToListenerMap[activity.hashCode()] = listenerSetCopy
     listenerSet.clear()
   }
 

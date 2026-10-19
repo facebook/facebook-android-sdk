@@ -139,7 +139,7 @@ class Task<TResult> {
    * the type of the result.
    */
   fun <TOut> cast(): Task<TOut> {
-    @Suppress("unchecked") return this as Task<TOut>
+    @Suppress("UNCHECKED_CAST") return this as Task<TOut>
   }
 
   /** Turns a Task<T> into a Task<Void>, dropping any result. </Void></T> */
@@ -545,7 +545,7 @@ class Task<TResult> {
     }
 
     /** Creates a completed task with the given value. */
-    @Suppress("unchecked")
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun <TResult> forResult(value: TResult?): Task<TResult> {
       if (value == null) {
@@ -568,7 +568,7 @@ class Task<TResult> {
     }
 
     /** Creates a cancelled task. */
-    @Suppress("unchecked")
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun <TResult> cancelled(): Task<TResult> {
       return TASK_CANCELLED as Task<TResult>
@@ -741,7 +741,7 @@ class Task<TResult> {
      * @return A task that represents the completion of one of the supplied tasks. The return task's
      * Result is the task that completed.
      */
-    @Suppress("unchecked")
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun whenAny(tasks: Collection<Task<*>>): Task<Task<*>> {
       if (tasks.isEmpty()) {
@@ -825,7 +825,7 @@ class Task<TResult> {
      * @param tasks The tasks that the return value will wait for before completing.
      * @return A Task that will resolve to `Void` when all the tasks are resolved.
      */
-    @Suppress("unchecked")
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun whenAll(tasks: Collection<Task<*>>): Task<Void> {
       if (tasks.isEmpty()) {

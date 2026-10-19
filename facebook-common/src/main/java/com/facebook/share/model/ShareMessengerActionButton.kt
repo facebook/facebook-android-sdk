@@ -35,11 +35,13 @@ abstract class ShareMessengerActionButton : ShareModel {
     internal var title: String? = null
 
     /** Sets the title for the Messenger action button. */
+    @Suppress("UNCHECKED_CAST")
     fun setTitle(title: String?): B {
       this.title = title
       return this as B
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun readFrom(model: M?): B {
       return if (model == null) {
         this as B
