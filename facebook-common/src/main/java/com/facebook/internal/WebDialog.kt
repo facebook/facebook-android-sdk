@@ -596,14 +596,7 @@ open class WebDialog : Dialog {
     constructor(context: Context, action: String, parameters: Bundle?) {
       accessToken = getCurrentAccessToken()
       if (!isCurrentAccessTokenActive()) {
-        val applicationId = getMetadataApplicationId(context)
-        if (applicationId != null) {
-          this.applicationId = applicationId
-        } else {
-          throw FacebookException(
-              "Attempted to create a builder without a valid" +
-                  " access token or a valid default Application ID.")
-        }
+        this.applicationId = getMetadataApplicationId(context)
       }
       finishInit(context, action, parameters)
     }

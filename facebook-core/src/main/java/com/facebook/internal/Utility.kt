@@ -327,10 +327,7 @@ object Utility {
     val keys = jsonObject.keys()
     while (keys.hasNext()) {
       val key = keys.next()
-      val value = jsonObject.optString(key)
-      if (value != null) {
-        map[key] = value
-      }
+      map[key] = jsonObject.optString(key)
     }
     return map
   }
@@ -398,7 +395,7 @@ object Utility {
       val stringBuilder = StringBuilder()
       val bufferSize = 1024 * 2
       val buffer = CharArray(bufferSize)
-      var n = 0
+      var n: Int
       while (reader.read(buffer).also { n = it } != -1) {
         stringBuilder.append(buffer, 0, n)
       }
@@ -639,7 +636,7 @@ object Utility {
    */
   @JvmStatic
   fun getAppVersion(): String? {
-    val context = FacebookSdk.getApplicationContext() ?: return null
+    val context = FacebookSdk.getApplicationContext()
     val pkgName = context.packageName
     try {
       val pi = context.packageManager.getPackageInfo(pkgName, 0) ?: return null

@@ -75,8 +75,7 @@ object WebDialogParameters {
   @JvmStatic
   fun create(sharePhotoContent: SharePhotoContent): Bundle {
     val params = createBaseParameters(sharePhotoContent)
-    val photos = sharePhotoContent.photos ?: emptyList()
-    val urls = photos.map { it.imageUrl.toString() }.toTypedArray()
+    val urls = sharePhotoContent.photos.map { it.imageUrl.toString() }.toTypedArray()
     params.putStringArray(ShareConstants.WEB_DIALOG_PARAM_MEDIA, urls)
     return params
   }

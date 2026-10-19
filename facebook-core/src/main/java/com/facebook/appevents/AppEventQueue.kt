@@ -9,7 +9,6 @@
 package com.facebook.appevents
 
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -175,10 +174,7 @@ internal object AppEventQueue {
     val postRequest =
         newPostRequest(null, String.format("%s/activities", applicationId), null, null)
     postRequest.setForceApplicationRequest(true)
-    var requestParameters = postRequest.parameters
-    if (requestParameters == null) {
-      requestParameters = Bundle()
-    }
+    val requestParameters = postRequest.parameters
     val accessToken = accessTokenAppId.accessTokenString ?: AccessToken.getCurrentAccessToken()?.token
     if (accessToken != null) {
       requestParameters.putString("access_token", accessToken)

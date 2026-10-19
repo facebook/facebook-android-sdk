@@ -46,7 +46,7 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
       parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope)
       addLoggingExtra(ServerProtocol.DIALOG_PARAM_SCOPE, scope)
     }
-    val audience = request.defaultAudience ?: DefaultAudience.NONE
+    val audience = request.defaultAudience
     parameters.putString(
         ServerProtocol.DIALOG_PARAM_DEFAULT_AUDIENCE, audience.nativeProtocolAudience)
     parameters.putString(ServerProtocol.DIALOG_PARAM_STATE, getClientState(request.authId))

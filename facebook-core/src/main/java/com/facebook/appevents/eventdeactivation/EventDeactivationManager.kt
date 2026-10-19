@@ -44,18 +44,16 @@ object EventDeactivationManager {
         while (keys.hasNext()) {
           val key = keys.next()
           val json = jsonObject.getJSONObject(key)
-          if (json != null) {
-            if (json.optBoolean("is_deprecated_event")) {
-              deprecatedEvents.add(key)
-            } else {
-              val deprecatedParamJsonArray = json.optJSONArray("deprecated_param")
-              val deprecatedParamFilter = DeprecatedParamFilter(key, ArrayList())
-              if (deprecatedParamJsonArray != null) {
-                deprecatedParamFilter.deprecateParams =
-                    convertJSONArrayToList(deprecatedParamJsonArray)
-              }
-              deprecatedParamFilters.add(deprecatedParamFilter)
+          if (json.optBoolean("is_deprecated_event")) {
+            deprecatedEvents.add(key)
+          } else {
+            val deprecatedParamJsonArray = json.optJSONArray("deprecated_param")
+            val deprecatedParamFilter = DeprecatedParamFilter(key, ArrayList())
+            if (deprecatedParamJsonArray != null) {
+              deprecatedParamFilter.deprecateParams =
+                  convertJSONArrayToList(deprecatedParamJsonArray)
             }
+            deprecatedParamFilters.add(deprecatedParamFilter)
           }
         }
       }

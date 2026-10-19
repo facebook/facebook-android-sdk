@@ -58,7 +58,7 @@ class GetTokenLoginMethodHandler : LoginMethodHandler {
     if (result != null) {
       val currentPermissions =
           result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS) ?: emptyList()
-      val permissions = request.permissions ?: emptySet()
+      val permissions = request.permissions
       val idTokenString = result.getString(NativeProtocol.EXTRA_AUTHENTICATION_TOKEN)
 
       // if request param has openid but result does not have id_token

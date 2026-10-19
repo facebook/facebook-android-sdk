@@ -69,7 +69,7 @@ object SensitiveParamsManager {
                         val sensitiveParamsScope = jsonObject.getString("key")
                         val sensitiveParams = jsonObject.getJSONArray("value")
                         sensitiveParamsScope.let {
-                            sensitiveParams?.let {
+                            sensitiveParams.let {
                                 convertJSONArrayToHashSet(sensitiveParams)?.let {
                                     if (sensitiveParamsScope.equals(DEFAULT_SENSITIVE_PARAMS_KEY)) {
                                         defaultSensitiveParameters = it

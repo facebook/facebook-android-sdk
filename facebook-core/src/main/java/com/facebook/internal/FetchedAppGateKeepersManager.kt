@@ -22,6 +22,7 @@ import com.facebook.internal.gatekeeper.GateKeeper
 import com.facebook.internal.gatekeeper.GateKeeperRuntimeCache
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 import org.json.JSONArray
 import org.json.JSONException
@@ -79,7 +80,9 @@ object FetchedAppGateKeepersManager {
             pollCallbacks()
             return
         }
-        val context = FacebookSdk.getApplicationContext()
+        // Nullable locals keep these guards: this runs from FacebookException's constructor, which
+        // must not throw.
+        val context: Context? = FacebookSdk.getApplicationContext()
         val gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId)
         if (context == null) {
             return
@@ -100,7 +103,10 @@ object FetchedAppGateKeepersManager {
                 parseAppGateKeepersFromJSON(applicationId, gateKeepersJSON)
             }
         }
-        val executor = FacebookSdk.getExecutor() ?: return
+        val executor: Executor? = FacebookSdk.getExecutor()
+        if (executor == null) {
+            return
+        }
         if (!isLoading.compareAndSet(false, true)) {
             return
         }

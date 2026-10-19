@@ -197,7 +197,7 @@ internal object UserSettingsManager {
     try {
       val ctx = FacebookSdk.getApplicationContext()
       val ai = ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
-      if (ai?.metaData != null && ai.metaData.containsKey(userSetting.key)) {
+      if (ai.metaData != null && ai.metaData.containsKey(userSetting.key)) {
         // default value should not be used
         userSetting.value = ai.metaData.getBoolean(userSetting.key, userSetting.defaultVal)
       }
@@ -213,7 +213,7 @@ internal object UserSettingsManager {
     try {
       val ctx = FacebookSdk.getApplicationContext()
       val ai = ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
-      if (ai?.metaData != null) {
+      if (ai.metaData != null) {
         // Log warnings for App Event Flags
         if (!ai.metaData.containsKey(FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY)) {
           Log.w(TAG, ADVERTISERID_COLLECTION_NOT_SET_WARNING)
@@ -240,7 +240,7 @@ internal object UserSettingsManager {
     bitmask = bitmask or ((if (autoInitEnabled.getValue()) 1 else 0) shl bit++)
     bitmask = bitmask or ((if (autoLogAppEventsEnabledLocally.getValue()) 1 else 0) shl bit++)
     bitmask = bitmask or ((if (advertiserIDCollectionEnabled.getValue()) 1 else 0) shl bit++)
-    bitmask = bitmask or ((if (monitorEnabled.getValue()) 1 else 0) shl bit++)
+    bitmask = bitmask or ((if (monitorEnabled.getValue()) 1 else 0) shl bit)
     val previousBitmask = userSettingPref.getInt(USER_SETTINGS_BITMASK, 0)
     if (previousBitmask != bitmask) {
       userSettingPref.edit().putInt(USER_SETTINGS_BITMASK, bitmask).apply()
@@ -249,7 +249,7 @@ internal object UserSettingsManager {
       try {
         val ai =
             ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
-        if (ai?.metaData != null) {
+        if (ai.metaData != null) {
           val keys =
               arrayOf(
                   FacebookSdk.AUTO_INIT_ENABLED_PROPERTY,
@@ -281,7 +281,7 @@ internal object UserSettingsManager {
     try {
       val ctx = FacebookSdk.getApplicationContext()
       val ai = ctx.packageManager.getApplicationInfo(ctx.packageName, PackageManager.GET_META_DATA)
-      if (ai?.metaData != null &&
+      if (ai.metaData != null &&
           ai.metaData.getBoolean("com.facebook.sdk.AutoAppLinkEnabled", false)) {
         val logger = InternalAppEventsLogger(ctx)
         val params = Bundle()

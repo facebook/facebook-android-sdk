@@ -23,7 +23,7 @@ class AccessTokenAppIdPair(accessTokenString: String?, val applicationId: String
   constructor(accessToken: AccessToken) : this(accessToken.token, FacebookSdk.getApplicationId())
 
   override fun hashCode(): Int {
-    return (accessTokenString?.hashCode() ?: 0) xor (applicationId.hashCode() ?: 0)
+    return (accessTokenString?.hashCode() ?: 0) xor applicationId.hashCode()
   }
 
   override fun equals(other: Any?): Boolean {

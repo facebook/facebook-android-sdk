@@ -50,17 +50,15 @@ object RestrictiveDataManager {
       while (keys.hasNext()) {
         val key = keys.next()
         val filteredValues = restrictiveData.getJSONObject(key)
-        if (filteredValues != null) {
-          val restrictiveParamJson = filteredValues.optJSONObject(RESTRICTIVE_PARAM)
-          val restrictiveParamFilter = RestrictiveParamFilter(key, HashMap())
-          if (restrictiveParamJson != null) {
-            restrictiveParamFilter.restrictiveParams =
-                convertJSONObjectToStringMap(restrictiveParamJson)
-            restrictiveParamFilters.add(restrictiveParamFilter)
-          }
-          if (filteredValues.has(PROCESS_EVENT_NAME)) {
-            restrictedEvents.add(restrictiveParamFilter.eventName)
-          }
+        val restrictiveParamJson = filteredValues.optJSONObject(RESTRICTIVE_PARAM)
+        val restrictiveParamFilter = RestrictiveParamFilter(key, HashMap())
+        if (restrictiveParamJson != null) {
+          restrictiveParamFilter.restrictiveParams =
+              convertJSONObjectToStringMap(restrictiveParamJson)
+          restrictiveParamFilters.add(restrictiveParamFilter)
+        }
+        if (filteredValues.has(PROCESS_EVENT_NAME)) {
+          restrictedEvents.add(restrictiveParamFilter.eventName)
         }
       }
     } catch (e: Exception) {
@@ -107,9 +105,6 @@ object RestrictiveDataManager {
       val restrictiveParamFiltersCopy: List<RestrictiveParamFilter> =
           ArrayList(restrictiveParamFilters)
       for (filter in restrictiveParamFiltersCopy) {
-        if (filter == null) { // sanity check
-          continue
-        }
         if (eventName == filter.eventName) {
           for (param in filter.restrictiveParams.keys) {
             if (paramKey == param) {

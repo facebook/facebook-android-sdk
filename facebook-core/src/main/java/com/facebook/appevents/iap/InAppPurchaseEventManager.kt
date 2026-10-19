@@ -205,7 +205,7 @@ object InAppPurchaseEventManager {
     try {
       val skuDetailsJson = JSONObject(skuDetail)
       val freeTrialPeriod = skuDetailsJson.optString("freeTrialPeriod")
-      return freeTrialPeriod != null && freeTrialPeriod.isNotEmpty()
+      return freeTrialPeriod.isNotEmpty()
     } catch (e: JSONException) {
       /*no op*/
     }

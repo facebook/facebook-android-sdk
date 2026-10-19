@@ -10,6 +10,7 @@ package com.facebook.appevents.gps.ara
 
 import android.adservices.measurement.MeasurementManager
 import android.annotation.TargetApi
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -54,22 +55,13 @@ object GpsAraTriggersManager {
 
     @TargetApi(34)
     fun registerTrigger(applicationId: String, event: AppEvent) {
-        if (applicationId == null || !isValidEvent(event)) return
+        if (!isValidEvent(event)) return
         if (!canRegisterTrigger()) return
 
         val context = FacebookSdk.getApplicationContext()
-        var measurementManager: MeasurementManager? = null
 
         try {
-            measurementManager =
-                context.getSystemService(MeasurementManager::class.java)
-            if (measurementManager == null) {
-                // On certain Android versions, Context.getSystemService() returns null since ARA is not yet
-                // merged into the public SDK. If this happens, we use the factory method to get the
-                // MeasurementManager instance.
-                measurementManager = MeasurementManager.get(context.applicationContext)
-            }
-
+            val measurementManager = getMeasurementManager(context)
             if (measurementManager == null) {
                 Log.w(TAG, "FAILURE_GET_MEASUREMENT_MANAGER")
                 gpsDebugLogger?.log(
@@ -127,6 +119,15 @@ object GpsAraTriggersManager {
         }
     }
 
+    // Nullable despite MeasurementManager.get() being annotated @NonNull: it can still return null.
+    @TargetApi(34)
+    private fun getMeasurementManager(context: Context): MeasurementManager? =
+        // On certain Android versions, Context.getSystemService() returns null since ARA is not yet
+        // merged into the public SDK. If this happens, we use the factory method to get the
+        // MeasurementManager instance.
+        context.getSystemService(MeasurementManager::class.java)
+            ?: MeasurementManager.get(context.applicationContext)
+
     private fun canRegisterTrigger(): Boolean {
         if (!enabled) {
             return false
@@ -160,7 +161,7 @@ object GpsAraTriggersManager {
     private fun getEventParameters(event: AppEvent): String {
         val params = event.getJSONObject()
 
-        if (params == null || params.length() == 0) {
+        if (params.length() == 0) {
             return ""
         }
 

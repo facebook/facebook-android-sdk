@@ -137,9 +137,6 @@ object ServerProtocol {
     try {
       val bridgeArgsJSON = BundleJSONConverter.convertToJSON(bridgeArguments)
       val methodArgsJSON = BundleJSONConverter.convertToJSON(methodArgs ?: Bundle())
-      if (bridgeArgsJSON == null || methodArgsJSON == null) {
-        return null
-      }
       webParams.putString(FALLBACK_DIALOG_PARAM_BRIDGE_ARGS, bridgeArgsJSON.toString())
       webParams.putString(FALLBACK_DIALOG_PARAM_METHOD_ARGS, methodArgsJSON.toString())
     } catch (je: JSONException) {

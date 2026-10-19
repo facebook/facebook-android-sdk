@@ -45,7 +45,7 @@ object SensitiveUserDataUtils {
       return true
     }
     val text = ViewHierarchy.getTextOfView(view)
-    return if (text == null || text.isEmpty()) {
+    return if (text.isEmpty()) {
       false
     } else Patterns.EMAIL_ADDRESS.matcher(text).matches()
   }

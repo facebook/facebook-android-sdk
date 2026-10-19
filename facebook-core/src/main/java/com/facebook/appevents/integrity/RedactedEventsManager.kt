@@ -46,7 +46,7 @@ object RedactedEventsManager {
                     if (hasKey && hasValue) {
                         val redactedString = jsonObject.getString("key")
                         val eventsNeedToBeRedacted = jsonObject.getJSONArray("value")
-                        redactedString?.let { /* redacted String */
+                        redactedString.let { /* redacted String */
                             convertJSONArrayToHashSet(eventsNeedToBeRedacted)?.let { /* event names under the specific redacted String */
                                 redactedEvents[redactedString] = it
                             }

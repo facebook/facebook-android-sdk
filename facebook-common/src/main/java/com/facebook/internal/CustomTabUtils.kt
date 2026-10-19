@@ -9,6 +9,7 @@
 package com.facebook.internal
 
 import android.content.Intent
+import android.content.pm.ResolveInfo
 import androidx.browser.customtabs.CustomTabsService
 import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.internal.Validate.hasCustomTabRedirectActivity
@@ -43,7 +44,8 @@ object CustomTabUtils {
   fun getChromePackage(): String? {
     val context = getApplicationContext()
     val serviceIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
-    val resolveInfos = context.packageManager.queryIntentServices(serviceIntent, 0)
+    val resolveInfos: List<ResolveInfo>? =
+        context.packageManager.queryIntentServices(serviceIntent, 0)
     if (resolveInfos != null) {
       val chromePackages: Set<String> = CHROME_PACKAGES.toHashSet()
       for (resolveInfo in resolveInfos) {

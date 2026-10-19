@@ -32,7 +32,7 @@ internal class InstagramAppLoginMethodHandler : NativeAppLoginMethodHandler {
             e2e,
             request.isRerequest,
             request.hasPublishPermission(),
-            request.defaultAudience ?: DefaultAudience.NONE,
+            request.defaultAudience,
             getClientState(request.authId),
             request.authType,
             request.messengerPageId,

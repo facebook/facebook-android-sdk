@@ -182,7 +182,7 @@ constructor(context: Context, cacheKey: String? = null) {
           }
           is List<*> -> {
             supportedType = TYPE_STRING_LIST
-            val stringList = value as List<String>
+            val stringList = value as List<String?>
             for (v in stringList) {
               jsonArray.put(v ?: JSONObject.NULL)
             }
@@ -277,7 +277,7 @@ constructor(context: Context, cacheKey: String? = null) {
       bundle.putDoubleArray(key, array)
     } else if (valueType == TYPE_CHAR) {
       val charString = json.getString(JSON_VALUE)
-      if (charString != null && charString.length == 1) {
+      if (charString.length == 1) {
         bundle.putChar(key, charString[0])
       }
     } else if (valueType == TYPE_CHAR_ARRAY) {

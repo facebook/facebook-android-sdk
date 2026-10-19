@@ -922,7 +922,7 @@ open class LoginManager() {
       loginConfig: LoginConfiguration
   ): LoginClient.Request {
     // init the PKCE vars (code challenge and challenge method)
-    var codeChallenge: String? = null
+    var codeChallenge: String?
     var codeChallengeMethod = CodeChallengeMethod.S256
     try {
       codeChallenge = generateCodeChallenge(loginConfig.codeVerifier, codeChallengeMethod)
@@ -1168,13 +1168,8 @@ open class LoginManager() {
     val applicationId = getApplicationId()
     val redirectURI = getRedirectURI()
     val loggerRef = UUID.randomUUID().toString()
-    val logger = LoginLogger(context ?: getApplicationContext(), applicationId)
+    val logger = LoginLogger(context, applicationId)
     if (!isExpressLoginAllowed) {
-      logger.logLoginStatusFailure(loggerRef)
-      responseCallback.onFailure()
-      return
-    }
-    if (redirectURI == null) {
       logger.logLoginStatusFailure(loggerRef)
       responseCallback.onFailure()
       return
@@ -1322,9 +1317,6 @@ open class LoginManager() {
     @Synchronized
     fun getLogger(context: Context?): LoginLogger? {
       val resolvedContext = context ?: getApplicationContext()
-      if (resolvedContext == null) {
-        return null
-      }
       if (logger == null) {
         logger = LoginLogger(resolvedContext, getApplicationId())
       }

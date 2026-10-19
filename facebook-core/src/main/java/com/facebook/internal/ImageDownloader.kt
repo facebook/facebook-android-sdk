@@ -167,7 +167,7 @@ object ImageDownloader {
     val completedRequestContext = removePendingRequest(key)
     if (completedRequestContext != null && !completedRequestContext.isCancelled) {
       val request = completedRequestContext.request
-      val callback = request?.callback
+      val callback = request.callback
       if (callback != null) {
         handler?.post(
             Runnable {

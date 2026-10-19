@@ -115,7 +115,7 @@ object ShareContentValidation {
 
   private fun validatePhotoContent(photoContent: SharePhotoContent, validator: Validator) {
     val photos = photoContent.photos
-    if (photos == null || photos.isEmpty()) {
+    if (photos.isEmpty()) {
       throw FacebookException("Must specify at least one Photo in SharePhotoContent.")
     }
     if (photos.size > ShareConstants.MAXIMUM_PHOTO_COUNT) {
@@ -182,7 +182,7 @@ object ShareContentValidation {
 
   private fun validateMediaContent(mediaContent: ShareMediaContent, validator: Validator) {
     val media = mediaContent.media
-    if (media == null || media.isEmpty()) {
+    if (media.isEmpty()) {
       throw FacebookException("Must specify at least one medium in ShareMediaContent.")
     }
     if (media.size > ShareConstants.MAXIMUM_MEDIA_COUNT) {

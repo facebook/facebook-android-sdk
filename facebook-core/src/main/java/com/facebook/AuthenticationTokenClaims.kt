@@ -381,10 +381,6 @@ class AuthenticationTokenClaims : Parcelable {
   override fun describeContents(): Int = 0
 
   private fun isValidClaims(claimsJson: JSONObject, expectedNonce: String): Boolean {
-    if (claimsJson == null) {
-      return false
-    }
-
     val jti = claimsJson.optString(JSON_KEY_JIT)
     if (jti.isEmpty()) {
       return false
@@ -445,9 +441,7 @@ class AuthenticationTokenClaims : Parcelable {
     jsonObject.put(JSON_KEY_NONCE, this.nonce)
     jsonObject.put(JSON_KEY_EXP, this.exp)
     jsonObject.put(JSON_KEY_IAT, this.iat)
-    if (this.sub != null) {
-      jsonObject.put(JSON_KEY_SUB, this.sub)
-    }
+    jsonObject.put(JSON_KEY_SUB, this.sub)
     if (this.name != null) {
       jsonObject.put(JSON_KEY_NAME, this.name)
     }

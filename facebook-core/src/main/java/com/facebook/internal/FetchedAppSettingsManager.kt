@@ -159,15 +159,13 @@ object FetchedAppSettingsManager {
                 }
             }
             val resultJSON = getAppSettingsQueryResponse(applicationId)
-            if (resultJSON != null) {
-                parseAppSettingsFromJSON(applicationId, resultJSON)
-                sharedPrefs.edit().putString(settingsKey, resultJSON.toString()).apply()
-            }
+            parseAppSettingsFromJSON(applicationId, resultJSON)
+            sharedPrefs.edit().putString(settingsKey, resultJSON.toString()).apply()
 
             // Print log to notify developers to upgrade SDK when version is too old
             if (appSettings != null) {
                 val updateMessage = appSettings.sdkUpdateMessage
-                if (!printedSDKUpdatedMessage && updateMessage != null && updateMessage.length > 0) {
+                if (!printedSDKUpdatedMessage && updateMessage.length > 0) {
                     printedSDKUpdatedMessage = true
                     Log.w(TAG, updateMessage)
                 }
@@ -458,7 +456,6 @@ object FetchedAppSettingsManager {
         key: String
     ): List<String>? {
         try {
-            var resultList: ArrayList<String>? = null
             val dedupeConfigs = originalJSON?.getJSONArray(DEDUPE_KEY) ?: return null
             for (index in 0 until dedupeConfigs.length()) {
                 val config = dedupeConfigs.getJSONObject(index)
@@ -480,9 +477,7 @@ object FetchedAppSettingsManager {
                         val manualKey = manualKeyJSONObject.getString(VALUE)
                         manualKeys.add(manualKey)
                     }
-                    resultList = ArrayList()
-                    resultList.addAll(manualKeys)
-                    return resultList
+                    return manualKeys
                 }
             }
             return null

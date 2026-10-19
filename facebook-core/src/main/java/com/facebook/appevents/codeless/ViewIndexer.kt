@@ -11,7 +11,6 @@ package com.facebook.appevents.codeless
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
@@ -230,10 +229,7 @@ class ViewIndexer(activity: Activity) {
       val postRequest =
           newPostRequest(
               accessToken, String.format(Locale.US, "%s/app_indexing", appId), null, null)
-      var requestParameters = postRequest.parameters
-      if (requestParameters == null) {
-        requestParameters = Bundle()
-      }
+      val requestParameters = postRequest.parameters
       requestParameters.putString(TREE_PARAM, appIndex)
       requestParameters.putString(APP_VERSION_PARAM, getAppVersion())
       requestParameters.putString(PLATFORM_PARAM, Constants.PLATFORM)

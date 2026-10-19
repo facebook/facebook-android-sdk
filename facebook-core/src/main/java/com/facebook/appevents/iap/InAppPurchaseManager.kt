@@ -150,7 +150,7 @@ object InAppPurchaseManager {
         if (purchaseParameters.isNullOrEmpty()) {
             return null
         }
-        if (purchases.size != purchaseParameters?.size) {
+        if (purchases.size != purchaseParameters.size) {
             return null
         }
         var dedupeParameters: Bundle? = null

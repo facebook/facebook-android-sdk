@@ -54,9 +54,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
       if (facebookVersion != null) {
         extras.put(EVENT_EXTRAS_FACEBOOK_VERSION, facebookVersion)
       }
-      if (pendingLoginRequest.loginTargetApp != null) {
-        extras.put(EVENT_EXTRAS_TARGET_APP, pendingLoginRequest.loginTargetApp.toString())
-      }
+      extras.put(EVENT_EXTRAS_TARGET_APP, pendingLoginRequest.loginTargetApp.toString())
       bundle.putString(EVENT_PARAM_EXTRAS, extras.toString())
     } catch (e: JSONException) {}
     logAndEmit(eventName, bundle)
@@ -90,9 +88,7 @@ internal class LoginLogger(context: Context, val applicationId: String) {
       }
       try {
         for ((key, value) in resultExtras) {
-          if (key != null) {
-            jsonObject.put(key, value)
-          }
+          jsonObject.put(key, value)
         }
       } catch (e: JSONException) {}
     }

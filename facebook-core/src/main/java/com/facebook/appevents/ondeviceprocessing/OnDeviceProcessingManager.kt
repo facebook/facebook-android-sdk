@@ -40,7 +40,7 @@ object OnDeviceProcessingManager {
   @JvmStatic
   fun sendInstallEventAsync(applicationId: String?, preferencesName: String?) {
     val context = FacebookSdk.getApplicationContext()
-    if (context != null && applicationId != null && preferencesName != null) {
+    if (applicationId != null && preferencesName != null) {
       FacebookSdk.getExecutor().execute {
         val preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
         val pingKey = applicationId + "pingForOnDevice"

@@ -610,9 +610,6 @@ class GraphRequest {
       if (resolvedApplicationId == null) {
         resolvedApplicationId = getMetadataApplicationId(context)
       }
-      if (resolvedApplicationId == null) {
-        throw FacebookException("Facebook App ID cannot be determined")
-      }
       val endpoint = "$resolvedApplicationId/custom_audience_third_party_id"
       val attributionIdentifiers = getAttributionIdentifiers(context)
       val parameters = Bundle()

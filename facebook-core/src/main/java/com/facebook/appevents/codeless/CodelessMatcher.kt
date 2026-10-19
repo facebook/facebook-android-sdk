@@ -90,12 +90,10 @@ internal class CodelessMatcher private constructor() {
 
   private fun matchViews() {
     for (activity in activitiesSet) {
-      if (null != activity) {
-        val rootView = getRootView(activity)
-        val activityName = activity.javaClass.simpleName
-        val matcher = ViewMatcher(rootView, uiThreadHandler, listenerSet, activityName)
-        viewMatchers.add(matcher)
-      }
+      val rootView = getRootView(activity)
+      val activityName = activity.javaClass.simpleName
+      val matcher = ViewMatcher(rootView, uiThreadHandler, listenerSet, activityName)
+      viewMatchers.add(matcher)
     }
   }
 
@@ -424,30 +422,28 @@ internal class CodelessMatcher private constructor() {
         return params
       }
       val parameters = mapping.viewParameters
-      if (null != parameters) {
-        for (component in parameters) {
-          if (component.value != null && component.value.isNotEmpty()) {
-            params.putString(component.name, component.value)
-          } else if (component.path.size > 0) {
-            var matchedViews: List<MatchedView>
-            val pathType = component.pathType
-            matchedViews =
-                if (pathType == Constants.PATH_TYPE_RELATIVE) {
-                  ViewMatcher.findViewByPath(
-                      mapping, hostView, component.path, 0, -1, hostView.javaClass.simpleName)
-                } else {
-                  ViewMatcher.findViewByPath(
-                      mapping, rootView, component.path, 0, -1, rootView.javaClass.simpleName)
-                }
-            for (view in matchedViews) {
-              if (view.getView() == null) {
-                continue
+      for (component in parameters) {
+        if (component.value.isNotEmpty()) {
+          params.putString(component.name, component.value)
+        } else if (component.path.size > 0) {
+          var matchedViews: List<MatchedView>
+          val pathType = component.pathType
+          matchedViews =
+              if (pathType == Constants.PATH_TYPE_RELATIVE) {
+                ViewMatcher.findViewByPath(
+                    mapping, hostView, component.path, 0, -1, hostView.javaClass.simpleName)
+              } else {
+                ViewMatcher.findViewByPath(
+                    mapping, rootView, component.path, 0, -1, rootView.javaClass.simpleName)
               }
-              val text = ViewHierarchy.getTextOfView(view.getView())
-              if (text.isNotEmpty()) {
-                params.putString(component.name, text)
-                break
-              }
+          for (view in matchedViews) {
+            if (view.getView() == null) {
+              continue
+            }
+            val text = ViewHierarchy.getTextOfView(view.getView())
+            if (text.isNotEmpty()) {
+              params.putString(component.name, text)
+              break
             }
           }
         }

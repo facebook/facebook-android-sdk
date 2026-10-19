@@ -73,7 +73,7 @@ object AppEventsConversionsAPITransformerWebRequests {
   fun getCredentials(): String? {
 
     return try {
-      credentials?.toString()
+      credentials.toString()
     } catch (e: UninitializedPropertyAccessException) {
       null
     }

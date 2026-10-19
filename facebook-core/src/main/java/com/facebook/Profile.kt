@@ -277,7 +277,7 @@ class Profile : Parcelable {
                       userInfo.optString("middle_name"),
                       userInfo.optString("last_name"),
                       userInfo.optString("name"),
-                      if (link != null) Uri.parse(link) else null,
+                      Uri.parse(link),
                       if (picture != null) Uri.parse(picture) else null)
               setCurrentProfile(profile)
             }
