@@ -245,6 +245,7 @@ class ProfilePictureView : FrameLayout {
       super.onRestoreInstanceState(state)
     } else {
       val instanceState = state as Bundle
+      @Suppress("DEPRECATION")
       super.onRestoreInstanceState(instanceState.getParcelable(SUPER_STATE_KEY))
       profileId = instanceState.getString(PROFILE_ID_KEY)
       this.presetSize = instanceState.getInt(PRESET_SIZE_KEY)

@@ -193,6 +193,7 @@ object Utility {
     builder.path(path)
     if (parameters != null) {
       for (key in parameters.keySet()) {
+        @Suppress("DEPRECATION")
         val parameter = parameters[key]
         if (parameter is String) {
           builder.appendQueryParameter(key, parameter as String?)
@@ -834,6 +835,7 @@ object Utility {
       return null
     }
     val secondsFromBase: Long
+    @Suppress("DEPRECATION")
     val secondsObject = bundle[key]
     if (secondsObject is Long) {
       secondsFromBase = secondsObject

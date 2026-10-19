@@ -239,6 +239,7 @@ object ProtectedModeManager {
         parameters.putString(PROTECTED_MODE_IS_APPLIED_KEY, PROTECTED_MODE_IS_APPLIED_VALUE)
     }
 
+    @Suppress("DEPRECATION")
     fun protectedModeIsApplied(parameters: Bundle?): Boolean {
         if (parameters == null) {
             // if parameters aren't provided then the flag indicating core setup can't be assumed implicitly

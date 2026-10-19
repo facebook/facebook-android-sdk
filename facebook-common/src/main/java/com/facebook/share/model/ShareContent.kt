@@ -78,6 +78,7 @@ abstract class ShareContent<M : ShareContent<M, B>, B : ShareContent.Builder<M, 
     shareHashtag = builder.hashtag
   }
 
+  @Suppress("DEPRECATION")
   protected constructor(parcel: Parcel) {
     contentUrl = parcel.readParcelable(Uri::class.java.classLoader)
     peopleIds = readUnmodifiableStringList(parcel)

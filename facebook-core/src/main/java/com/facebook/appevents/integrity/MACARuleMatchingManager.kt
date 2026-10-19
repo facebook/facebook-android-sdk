@@ -76,6 +76,7 @@ object MACARuleMatchingManager {
       return data?.containsKey(variable) == ruleValue.toBoolean()
     }
 
+    @Suppress("DEPRECATION")
     val dataValue = (data?.get(variable.lowercase()) ?: data?.get(variable)) ?: return false
 
     return when (op) {

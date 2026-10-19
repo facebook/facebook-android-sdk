@@ -85,6 +85,7 @@ abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
         return true
       }
       val error = getError(extras)
+      @Suppress("DEPRECATION")
       val errorCode = extras["error_code"]?.toString()
       val errorMessage = getErrorMessage(extras)
       val e2e = extras.getString(NativeProtocol.FACEBOOK_PROXY_AUTH_E2E_KEY)
@@ -142,6 +143,7 @@ abstract class NativeAppLoginMethodHandler : LoginMethodHandler {
   protected open fun handleResultCancel(request: LoginClient.Request?, data: Intent) {
     val extras = data.extras
     val error = getError(extras)
+    @Suppress("DEPRECATION")
     val errorCode: String? = extras?.get("error_code")?.toString()
 
     // If the device has lost network, the result will be a cancel with a connection failure

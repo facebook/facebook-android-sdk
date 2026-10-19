@@ -79,6 +79,7 @@ constructor(context: Context, cacheKey: String? = null) {
 
   @Throws(JSONException::class)
   private fun serializeKey(key: String, bundle: Bundle, editor: SharedPreferences.Editor) {
+    @Suppress("DEPRECATION")
     val value =
         bundle[key] ?: // Cannot serialize null values.
         return
@@ -445,6 +446,7 @@ constructor(context: Context, cacheKey: String? = null) {
     }
 
     @JvmStatic
+    @Suppress("DEPRECATION")
     fun getSource(bundle: Bundle): AccessTokenSource? {
       return if (bundle.containsKey(TOKEN_SOURCE_KEY)) {
         bundle.getSerializable(TOKEN_SOURCE_KEY) as AccessTokenSource?

@@ -76,9 +76,11 @@ abstract class AuthenticationTokenTracker {
     override fun onReceive(context: Context, intent: Intent) {
       if (AuthenticationTokenManager.ACTION_CURRENT_AUTHENTICATION_TOKEN_CHANGED == intent.action) {
         Utility.logd(TAG, "AuthenticationTokenChanged")
+        @Suppress("DEPRECATION")
         val oldAuthenticationToken =
             intent.getParcelableExtra<Parcelable>(
                 AuthenticationTokenManager.EXTRA_OLD_AUTHENTICATION_TOKEN) as AuthenticationToken?
+        @Suppress("DEPRECATION")
         val newAuthenticationToken =
             intent.getParcelableExtra<Parcelable>(
                 AuthenticationTokenManager.EXTRA_NEW_AUTHENTICATION_TOKEN) as AuthenticationToken?

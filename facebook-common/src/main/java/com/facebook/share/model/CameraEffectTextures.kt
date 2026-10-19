@@ -26,14 +26,17 @@ class CameraEffectTextures : ShareModel {
     textures = parcel.readBundle(javaClass.classLoader)
   }
 
+  @Suppress("DEPRECATION")
   fun getTextureBitmap(key: String?): Bitmap? {
     return textures?.get(key) as? Bitmap
   }
 
+  @Suppress("DEPRECATION")
   fun getTextureUri(key: String?): Uri? {
     return textures?.get(key) as? Uri
   }
 
+  @Suppress("DEPRECATION")
   operator fun get(key: String?): Any? {
     return textures?.get(key)
   }
@@ -93,6 +96,7 @@ class CameraEffectTextures : ShareModel {
     }
 
     /** This method is for internal use only. */
+    @Suppress("DEPRECATION")
     fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(parcel.readParcelable(CameraEffectTextures::class.java.classLoader))
     }

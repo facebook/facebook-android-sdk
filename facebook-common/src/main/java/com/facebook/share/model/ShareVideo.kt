@@ -29,6 +29,7 @@ class ShareVideo : ShareMedia<ShareVideo, ShareVideo.Builder> {
     localUrl = builder.localUrl
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) : super(parcel) {
     localUrl = parcel.readParcelable(Uri::class.java.classLoader)
   }
@@ -65,6 +66,7 @@ class ShareVideo : ShareMedia<ShareVideo, ShareVideo.Builder> {
       } else setLocalUrl(model.localUrl)
     }
 
+    @Suppress("DEPRECATION")
     internal fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(parcel.readParcelable(ShareVideo::class.java.classLoader))
     }

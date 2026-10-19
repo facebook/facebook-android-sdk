@@ -148,6 +148,7 @@ class AppEvent : Serializable {
         val paramMap: MutableMap<String, String> = hashMapOf()
         for (key in parameters.keySet()) {
             validateIdentifier(key)
+            @Suppress("DEPRECATION")
             val value = parameters[key]
             if (value !is String && value !is Number) {
                 throw FacebookException(

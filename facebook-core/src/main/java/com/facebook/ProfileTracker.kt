@@ -60,7 +60,9 @@ abstract class ProfileTracker {
   private inner class ProfileBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
       if (ProfileManager.ACTION_CURRENT_PROFILE_CHANGED == intent.action) {
+        @Suppress("DEPRECATION")
         val oldProfile: Profile? = intent.getParcelableExtra(ProfileManager.EXTRA_OLD_PROFILE)
+        @Suppress("DEPRECATION")
         val newProfile: Profile? = intent.getParcelableExtra(ProfileManager.EXTRA_NEW_PROFILE)
         onCurrentProfileChanged(oldProfile, newProfile)
       }

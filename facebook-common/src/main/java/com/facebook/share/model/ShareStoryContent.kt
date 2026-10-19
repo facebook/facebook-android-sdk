@@ -33,6 +33,7 @@ class ShareStoryContent : ShareContent<ShareStoryContent, ShareStoryContent.Buil
     attributionLink = builder.attributionLink
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) : super(parcel) {
     backgroundAsset = parcel.readParcelable(ShareMedia::class.java.classLoader)
     stickerAsset = parcel.readParcelable(SharePhoto::class.java.classLoader)

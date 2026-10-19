@@ -74,8 +74,10 @@ abstract class AccessTokenTracker {
     override fun onReceive(context: Context, intent: Intent) {
       if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED == intent.action) {
         logd(TAG, "AccessTokenChanged")
+        @Suppress("DEPRECATION")
         val oldAccessToken: AccessToken? =
             intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN)
+        @Suppress("DEPRECATION")
         val newAccessToken: AccessToken? =
             intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN)
         onCurrentAccessTokenChanged(oldAccessToken, newAccessToken)

@@ -57,6 +57,7 @@ class SharePhoto : ShareMedia<SharePhoto, SharePhoto.Builder> {
     caption = builder.caption
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) : super(parcel) {
     bitmap = parcel.readParcelable(Bitmap::class.java.classLoader)
     imageUrl = parcel.readParcelable(Uri::class.java.classLoader)
@@ -149,6 +150,7 @@ class SharePhoto : ShareMedia<SharePhoto, SharePhoto.Builder> {
               .setCaption(model.caption)
     }
 
+    @Suppress("DEPRECATION")
     internal fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(parcel.readParcelable(SharePhoto::class.java.classLoader))
     }

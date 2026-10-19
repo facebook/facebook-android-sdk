@@ -30,6 +30,7 @@ object BundleJSONConverter {
   fun convertToJSON(bundle: Bundle): JSONObject {
     val json = JSONObject()
     for (key in bundle.keySet()) {
+      @Suppress("DEPRECATION")
       val value =
           bundle[key] ?: // Null is not supported.
           continue

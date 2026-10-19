@@ -245,6 +245,7 @@ class AuthenticationTokenClaims : Parcelable {
     this.userLink = userLink
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) {
     val jti = parcel.readString()
     this.jti = Validate.notNullOrEmpty(jti, JSON_KEY_JIT)

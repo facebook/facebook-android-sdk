@@ -195,6 +195,7 @@ object UserDataStore {
       return
     }
     for (key in ud.keySet()) {
+      @Suppress("DEPRECATION")
       val rawVal = ud[key] ?: continue
       val value = rawVal.toString()
       if (maybeSHA256Hashed(value)) {

@@ -234,6 +234,7 @@ open class LoginManager() {
     var isCanceled = false
     if (data != null) {
       data.setExtrasClassLoader(LoginClient.Result::class.java.classLoader)
+      @Suppress("DEPRECATION")
       val result: LoginClient.Result? = data.getParcelableExtra(LoginFragment.RESULT_KEY)
       if (result != null) {
         originalRequest = result.request
@@ -1362,6 +1363,7 @@ open class LoginManager() {
         return null
       }
       intent.setExtrasClassLoader(LoginClient.Result::class.java.classLoader)
+      @Suppress("DEPRECATION")
       val result: LoginClient.Result =
           intent.getParcelableExtra(LoginFragment.RESULT_KEY) ?: return null
       return result.extraData

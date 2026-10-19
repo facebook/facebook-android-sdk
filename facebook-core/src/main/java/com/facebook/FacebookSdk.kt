@@ -832,6 +832,7 @@ object FacebookSdk {
             return
         }
         if (applicationId == null) {
+            @Suppress("DEPRECATION")
             val appId = ai.metaData[APPLICATION_ID_PROPERTY]
             if (appId is String) {
                 val appIdString = appId

@@ -200,6 +200,7 @@ class FBLoginSSOLauncher @JvmOverloads constructor(
       val extras = data.extras
       if (extras != null) {
         val error = extras.getString("error") ?: extras.getString("error_type")
+        @Suppress("DEPRECATION")
         val errorCode = extras["error_code"]?.toString()
         val errorMessage =
             extras.getString("error_message") ?: extras.getString("error_description")

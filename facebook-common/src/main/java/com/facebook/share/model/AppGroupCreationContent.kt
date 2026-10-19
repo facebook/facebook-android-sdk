@@ -40,6 +40,7 @@ class AppGroupCreationContent : ShareModel {
     appGroupPrivacy = builder.appGroupPrivacy
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) {
     name = parcel.readString()
     description = parcel.readString()

@@ -77,6 +77,7 @@ open class DeviceAuthDialog : DialogFragment() {
     val facebookActivity = requireActivity() as FacebookActivity
     val fragment = facebookActivity.currentFragment as LoginFragment?
     deviceAuthMethodHandler = fragment?.loginClient?.getCurrentHandler() as DeviceAuthMethodHandler?
+    @Suppress("DEPRECATION")
     savedInstanceState?.getParcelable<RequestState>(REQUEST_STATE_KEY)?.let { requestState ->
       setCurrentRequestState(requestState)
     }

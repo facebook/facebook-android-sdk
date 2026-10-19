@@ -58,6 +58,7 @@ class GameRequestContent : ShareModel {
     suggestions = builder.suggestions
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) {
     message = parcel.readString()
     cta = parcel.readString()
@@ -220,6 +221,7 @@ class GameRequestContent : ShareModel {
               .setSuggestions(model.suggestions)
     }
 
+    @Suppress("DEPRECATION")
     internal fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(parcel.readParcelable(GameRequestContent::class.java.classLoader))
     }

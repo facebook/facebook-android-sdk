@@ -59,6 +59,7 @@ class ShareHashtag : ShareModel {
       }
     }
 
+    @Suppress("DEPRECATION")
     internal fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(parcel.readParcelable(ShareHashtag::class.java.classLoader))
     }

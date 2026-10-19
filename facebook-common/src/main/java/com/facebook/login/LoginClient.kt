@@ -580,6 +580,7 @@ open class LoginClient : Parcelable {
       this.errorCode = errorCode
     }
 
+    @Suppress("DEPRECATION")
     private constructor(parcel: Parcel) {
       this.code = Code.valueOf(parcel.readString() ?: "error")
       token = parcel.readParcelable(AccessToken::class.java.classLoader)
@@ -658,6 +659,7 @@ open class LoginClient : Parcelable {
   }
 
   // Parcelable implementation
+  @Suppress("DEPRECATION")
   constructor(source: Parcel) {
     val o: Array<Parcelable> =
         source.readParcelableArray(LoginMethodHandler::class.java.classLoader) ?: emptyArray()

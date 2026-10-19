@@ -1081,6 +1081,7 @@ class GraphRequest {
     private fun isGzipCompressible(requests: GraphRequestBatch): Boolean {
       for (request in requests) {
         for (key in request.parameters.keySet()) {
+          @Suppress("DEPRECATION")
           val value = request.parameters[key]
           if (isSupportedAttachmentType(value)) {
             return false
@@ -1170,6 +1171,7 @@ class GraphRequest {
         val request = requests[0]
         val attachments: MutableMap<String, Attachment> = HashMap()
         for (key in request.parameters.keySet()) {
+          @Suppress("DEPRECATION")
           val value = request.parameters[key]
           if (isSupportedAttachmentType(value)) {
             attachments[key] = Attachment(request, value)
@@ -1297,6 +1299,7 @@ class GraphRequest {
     private fun serializeParameters(bundle: Bundle, serializer: Serializer, request: GraphRequest) {
       val keys = bundle.keySet()
       for (key in keys) {
+        @Suppress("DEPRECATION")
         val value = bundle[key]
         if (isSupportedParameterType(value)) {
           serializer.writeObject(key, value, request)
@@ -1548,6 +1551,7 @@ class GraphRequest {
     val uriBuilder = Uri.parse(baseUrl).buildUpon()
     val keys = parameters.keySet()
     for (key in keys) {
+      @Suppress("DEPRECATION")
       var value = parameters[key]
       if (value == null) {
         value = ""
@@ -1678,6 +1682,7 @@ class GraphRequest {
     val attachmentNames = ArrayList<String?>()
     val keys = parameters.keySet()
     for (key in keys) {
+      @Suppress("DEPRECATION")
       val value = parameters[key]
       if (isSupportedAttachmentType(value)) {
         // Make the name unique across this entire batch.
@@ -1957,6 +1962,7 @@ class GraphRequest {
       this.resource = resource
     }
 
+    @Suppress("DEPRECATION")
     private constructor(source: Parcel) {
       mimeType = source.readString()
       resource = source.readParcelable(FacebookSdk.getApplicationContext().classLoader)

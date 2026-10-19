@@ -68,6 +68,7 @@ class AuthenticationToken : Parcelable {
     this.signature = rawSignature
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) {
     val token = parcel.readString()
     this.token = Validate.notNullOrEmpty(token, "token")

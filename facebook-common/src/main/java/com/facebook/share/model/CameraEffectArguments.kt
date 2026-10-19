@@ -55,6 +55,7 @@ class CameraEffectArguments : ShareModel {
    * @param key Key for the value desired.
    * @return The value associated with the passed in key, or null if the key does not exist.
    */
+  @Suppress("DEPRECATION")
   operator fun get(key: String?): Any? {
     return params?.get(key)
   }
@@ -112,6 +113,7 @@ class CameraEffectArguments : ShareModel {
     }
 
     /** This method is for internal use only. */
+    @Suppress("DEPRECATION")
     fun readFrom(parcel: Parcel): Builder {
       return this.readFrom(parcel.readParcelable(CameraEffectArguments::class.java.classLoader))
     }

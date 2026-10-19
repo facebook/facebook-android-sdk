@@ -75,6 +75,7 @@ class BoltsMeasurementEventListener private constructor(context: Context) : Broa
             key.replace("[^0-9a-zA-Z _-]".toRegex(), "-")
                 .replace("^[ -]*".toRegex(), "")
                 .replace("[ -]*$".toRegex(), "")
+        @Suppress("DEPRECATION")
         logData.putString(safeKey, eventArgs.get(key) as String?)
       }
     }

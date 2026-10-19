@@ -41,6 +41,7 @@ open class LoginFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    @Suppress("DEPRECATION")
     val restoredLoginClient = savedInstanceState?.getParcelable<LoginClient>(SAVED_LOGIN_CLIENT)
     loginClient =
         if (restoredLoginClient != null) {
@@ -57,6 +58,7 @@ open class LoginFragment : Fragment() {
     if (intent != null) {
       val bundle = intent.getBundleExtra(REQUEST_KEY)
       if (bundle != null) {
+        @Suppress("DEPRECATION")
         request = bundle.getParcelable(EXTRA_REQUEST)
       }
     }

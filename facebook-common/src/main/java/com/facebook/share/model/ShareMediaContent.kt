@@ -19,6 +19,7 @@ class ShareMediaContent : ShareContent<ShareMediaContent, ShareMediaContent.Buil
     media = builder.media.toList()
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(source: Parcel) : super(source) {
     this.media =
         source.readParcelableArray(ShareMedia::class.java.classLoader)?.mapNotNull {

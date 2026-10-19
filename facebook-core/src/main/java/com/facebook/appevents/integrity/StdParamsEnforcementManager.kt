@@ -94,6 +94,7 @@ object StdParamsEnforcementManager {
         val paramsToRemove = mutableListOf<String>()
 
         for (key in parameters.keySet()) {
+            @Suppress("DEPRECATION")
             val value: String = parameters.get(key).toString()
 
             // check for schema restrictions

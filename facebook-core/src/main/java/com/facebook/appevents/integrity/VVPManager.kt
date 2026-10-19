@@ -276,6 +276,7 @@ object VVPManager {
           //   valueRegex null = no value constraint
           // Both null already filtered out at compile time (compileRule).
           for (key in parameters.keySet().toList()) {
+            @Suppress("DEPRECATION")
             val value = parameters.get(key)?.toString() ?: continue
             val keyPos = rule.keyRegex?.matcher(key)?.find() ?: true
             val keyNeg = rule.keyNegativeRegex?.matcher(key)?.find() ?: false

@@ -50,6 +50,7 @@ class ShareMessengerURLActionButton : ShareMessengerActionButton {
     shouldHideWebviewShareButton = builder.shouldHideWebviewShareButton
   }
 
+  @Suppress("DEPRECATION")
   internal constructor(parcel: Parcel) : super(parcel) {
     url = parcel.readParcelable(Uri::class.java.classLoader)
     isMessengerExtensionURL = parcel.readByte().toInt() != 0

@@ -75,6 +75,7 @@ abstract class ShareMedia<M : ShareMedia<M, B>, B : ShareMedia.Builder<M, B>> : 
 
       @JvmStatic
       internal fun readListFrom(parcel: Parcel): List<ShareMedia<*, *>> {
+        @Suppress("DEPRECATION")
         val parcelables =
             parcel.readParcelableArray(ShareMedia::class.java.classLoader) ?: return listOf()
         return parcelables.filterIsInstance<ShareMedia<*, *>>()
