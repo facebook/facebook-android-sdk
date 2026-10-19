@@ -8,7 +8,6 @@
 
 package com.facebook
 
-import android.os.AsyncTask
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -20,6 +19,7 @@ import java.net.HttpURLConnection
  * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed by
  * applications having unique threading model needs.
  */
+@Suppress("DEPRECATION")
 open class GraphRequestAsyncTask
 /**
  * Constructor that allows specification of an HTTP connection to use for executing the requests. No
@@ -31,7 +31,7 @@ open class GraphRequestAsyncTask
  * @param requests the requests to execute
  */
 (private val connection: HttpURLConnection?, val requests: GraphRequestBatch) :
-    AsyncTask<Void, Void, List<GraphResponse>>() {
+    android.os.AsyncTask<Void, Void, List<GraphResponse>>() {
   protected var exception: Exception? = null
     private set
 

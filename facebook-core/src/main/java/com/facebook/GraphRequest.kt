@@ -900,6 +900,7 @@ class GraphRequest {
     fun executeBatchAsync(requests: GraphRequestBatch): GraphRequestAsyncTask {
       notEmptyAndContainsNoNulls(requests, "requests")
       val asyncTask = GraphRequestAsyncTask(requests)
+      @Suppress("DEPRECATION")
       asyncTask.executeOnExecutor(FacebookSdk.getExecutor())
       return asyncTask
     }
@@ -1008,6 +1009,7 @@ class GraphRequest {
     ): GraphRequestAsyncTask {
       val asyncTask = GraphRequestAsyncTask(connection, requests)
       requests.callbackHandler = callbackHandler
+      @Suppress("DEPRECATION")
       asyncTask.executeOnExecutor(FacebookSdk.getExecutor())
       return asyncTask
     }

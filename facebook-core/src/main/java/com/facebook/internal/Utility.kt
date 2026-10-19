@@ -28,7 +28,6 @@ import android.view.Display
 import android.view.WindowManager
 import android.view.autofill.AutofillManager
 import android.webkit.CookieManager
-import android.webkit.CookieSyncManager
 import com.facebook.AccessToken
 import com.facebook.FacebookException
 import com.facebook.FacebookSdk
@@ -438,7 +437,7 @@ object Utility {
     // CookieSyncManager is needed before CookieManager on pre-Lollipop devices
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
       @Suppress("DEPRECATION")
-      CookieSyncManager.createInstance(context).sync()
+      android.webkit.CookieSyncManager.createInstance(context).sync()
     }
     val cookieManager = CookieManager.getInstance()
     val cookies = cookieManager.getCookie(domain) ?: return
@@ -455,7 +454,7 @@ object Utility {
       cookieManager.flush()
     } else {
       @Suppress("DEPRECATION")
-      CookieSyncManager.getInstance().sync()
+      android.webkit.CookieSyncManager.getInstance().sync()
     }
   }
 
@@ -660,6 +659,7 @@ object Utility {
     var versionCode = -1
     try {
       val pi = appContext.packageManager.getPackageInfo(pkgName, 0) ?: return
+      @Suppress("DEPRECATION")
       versionCode = pi.versionCode
       versionName = pi.versionName
     } catch (e: PackageManager.NameNotFoundException) {
@@ -707,10 +707,12 @@ object Utility {
                 appContext.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
             displayManager?.getDisplay(Display.DEFAULT_DISPLAY)
           } else {
+            @Suppress("DEPRECATION")
             (appContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay
           }
       if (display != null) {
         val displayMetrics = DisplayMetrics()
+        @Suppress("DEPRECATION")
         display.getMetrics(displayMetrics)
         width = displayMetrics.widthPixels
         height = displayMetrics.heightPixels
@@ -1071,6 +1073,7 @@ object Utility {
   }
 
   // getAvailableBlocks/getBlockSize deprecated but required pre-API v18
+  @Suppress("DEPRECATION")
   private fun refreshAvailableExternalStorage() {
     try {
       if (externalStorageExists()) {
@@ -1085,6 +1088,7 @@ object Utility {
   }
 
   // getAvailableBlocks/getBlockSize deprecated but required pre-API v18
+  @Suppress("DEPRECATION")
   private fun refreshTotalExternalStorage() {
     try {
       if (externalStorageExists()) {
@@ -1192,6 +1196,7 @@ object Utility {
     return isChromeOS
   }
 
+  @Suppress("DEPRECATION")
   val resourceLocale: Locale?
     @JvmStatic
     get() =

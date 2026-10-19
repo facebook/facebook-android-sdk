@@ -310,6 +310,7 @@ class AttributionIdentifiers {
       identifiers.isAdvertisingIdCarriedOver = true
     }
 
+    @Suppress("DEPRECATION")
     private fun getInstallerPackageName(context: Context): String? {
       val packageManager = context.packageManager
       return packageManager?.getInstallerPackageName(context.packageName)

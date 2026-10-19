@@ -32,6 +32,7 @@ object FacebookSignatureValidator {
       hashSetOf(FBR_HASH, FBR2_HASH, FBI_HASH, FBL_HASH, MSR_HASH, FBF_HASH, IGR_HASH)
 
   @JvmStatic
+  @Suppress("DEPRECATION")
   fun validateSignature(context: Context, packageName: String): Boolean {
     val brand = Build.BRAND
     val applicationFlags = context.applicationInfo.flags

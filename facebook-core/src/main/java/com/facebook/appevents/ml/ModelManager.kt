@@ -361,6 +361,7 @@ object ModelManager {
           onComplete.onComplete(file)
           return
         }
+        @Suppress("DEPRECATION")
         FileDownloadTask(uri, file, onComplete).execute()
       }
     }

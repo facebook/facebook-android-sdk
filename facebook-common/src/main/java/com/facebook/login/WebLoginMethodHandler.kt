@@ -12,7 +12,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Parcel
 import android.text.TextUtils
-import android.webkit.CookieSyncManager
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.facebook.AccessToken.Companion.getCurrentAccessToken
@@ -200,7 +199,9 @@ abstract class WebLoginMethodHandler : LoginMethodHandler {
         // CookieSyncManager has never been created.
         if (loginClient.activity != null) {
           try {
-            val syncManager = CookieSyncManager.createInstance(loginClient.activity)
+            @Suppress("DEPRECATION")
+            val syncManager = android.webkit.CookieSyncManager.createInstance(loginClient.activity)
+            @Suppress("DEPRECATION")
             syncManager.sync()
           } catch (e: Exception) {
             // A crash happens in clearing the cookies. It's likely that webview is not available.

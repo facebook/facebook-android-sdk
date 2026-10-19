@@ -8,7 +8,6 @@
 
 package com.facebook.appevents.internal
 
-import android.os.AsyncTask
 import androidx.annotation.VisibleForTesting
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -16,11 +15,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 
+@Suppress("DEPRECATION")
 class FileDownloadTask(
     private val uriStr: String,
     private val destFile: File,
     private val onSuccess: Callback
-) : AsyncTask<String?, Void?, Boolean>() {
+) : android.os.AsyncTask<String?, Void?, Boolean>() {
 
   @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
   public override fun doInBackground(vararg args: String?): Boolean {

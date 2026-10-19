@@ -23,6 +23,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.res.ResourcesCompat
 import com.facebook.AccessToken
 import com.facebook.AccessTokenTracker
 import com.facebook.CallbackManager
@@ -551,7 +552,8 @@ protected constructor(
     if (isInEditMode) {
       // cannot use a drawable in edit mode, so setting the background color instead
       // of a background resource.
-      setBackgroundColor(resources.getColor(com.facebook.common.R.color.com_facebook_blue))
+      setBackgroundColor(
+          ResourcesCompat.getColor(resources, com.facebook.common.R.color.com_facebook_blue, null))
       // hardcoding in edit mode as getResources().getString() doesn't seem to work in
       // Android Studio
       loginText = "Continue with Facebook"

@@ -91,6 +91,7 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
    *
    * @param fragment android.app.Fragment to use to share the provided content.
    */
+  @Suppress("DEPRECATION")
   constructor(fragment: android.app.Fragment) : this(FragmentWrapper(fragment))
 
   /** for internal use only */
@@ -100,6 +101,7 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
   /** for internal use only */
   constructor(fragment: Fragment, requestCode: Int) : this(FragmentWrapper(fragment), requestCode)
   /** for internal use only */
+  @Suppress("DEPRECATION")
   constructor(
       fragment: android.app.Fragment,
       requestCode: Int
@@ -429,7 +431,7 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
      * @param shareContent Content to share
      */
     // `open` keeps the JVM static non-final so Java subclasses can hide it.
-    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT", "DEPRECATION")
     @JvmStatic
     open fun show(fragment: android.app.Fragment, shareContent: ShareContent<*, *>) {
       show(FragmentWrapper(fragment), shareContent)

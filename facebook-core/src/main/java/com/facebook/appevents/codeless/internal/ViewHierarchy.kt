@@ -277,7 +277,9 @@ object ViewHierarchy {
       val d = view.dayOfMonth
       textObj = String.format("%04d-%02d-%02d", y, m, d)
     } else if (view is TimePicker) {
+      @Suppress("DEPRECATION")
       val h = view.currentHour
+      @Suppress("DEPRECATION")
       val m = view.currentMinute
       textObj = String.format("%02d:%02d", h, m)
     } else if (view is RadioGroup) {

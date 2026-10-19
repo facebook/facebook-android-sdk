@@ -80,6 +80,7 @@ class CustomTabLoginMethodHandler : WebLoginMethodHandler {
     intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters)
     intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, chromePackage)
     intent.putExtra(CustomTabMainActivity.EXTRA_TARGET_APP, request.loginTargetApp.toString())
+    @Suppress("DEPRECATION")
     loginClient.fragment?.startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE)
     return 1
   }

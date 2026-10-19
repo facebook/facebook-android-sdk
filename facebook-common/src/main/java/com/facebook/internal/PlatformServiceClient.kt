@@ -153,6 +153,7 @@ abstract class PlatformServiceClient(
     this.redirectURI = redirectURI
     this.protocolVersion = protocolVersion
     this.nonce = nonce
+    @Suppress("DEPRECATION")
     handler =
         object : Handler() {
           override fun handleMessage(message: Message) {

@@ -10,7 +10,6 @@ package com.facebook
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Fragment
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Canvas
@@ -52,17 +51,19 @@ protected constructor(
   protected abstract val defaultRequestCode: Int
 
   /** The native fragment that contains this control. */
-  val nativeFragment: Fragment?
+  @Suppress("DEPRECATION")
+  val nativeFragment: android.app.Fragment?
     get() = parentFragment?.nativeFragment
 
   /**
    * Sets the fragment that contains this control. This allows the button to be embedded inside a
    * native Fragment, and will allow the fragment to receive the [onActivityResult]
-   * [Fragment.onActivityResult] call rather than the Activity.
+   * [android.app.Fragment.onActivityResult] call rather than the Activity.
    *
    * @param fragment the android.app.Fragment that contains this control
    */
-  fun setFragment(fragment: Fragment) {
+  @Suppress("DEPRECATION")
+  fun setFragment(fragment: android.app.Fragment) {
     parentFragment = FragmentWrapper(fragment)
   }
 
@@ -77,7 +78,7 @@ protected constructor(
   /**
    * Set the fragment that contains this control. This allows the button to be embedded inside an
    * AndroidX Fragment, and will allow the fragment to receive the [onActivityResult]
-   * [Fragment.onActivityResult] call rather than the Activity.
+   * [androidx.fragment.app.Fragment.onActivityResult] call rather than the Activity.
    *
    * @param fragment the androidx.fragment.app.Fragment that contains this control
    */

@@ -101,6 +101,7 @@ class FacebookDialogFragment : DialogFragment() {
     }
   }
 
+  @Suppress("DEPRECATION")
   override fun onDestroyView() {
     val dialog = dialog
     if (dialog != null && retainInstance) {

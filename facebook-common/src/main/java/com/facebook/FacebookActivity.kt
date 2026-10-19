@@ -73,11 +73,13 @@ open class FacebookActivity : FragmentActivity() {
     if (fragment == null) {
       if (FacebookDialogFragment.TAG == intent.action) {
         val dialogFragment = FacebookDialogFragment()
+        @Suppress("DEPRECATION")
         dialogFragment.retainInstance = true
         dialogFragment.show(manager, FRAGMENT_TAG)
         fragment = dialogFragment
       } else {
         fragment = LoginFragment()
+        @Suppress("DEPRECATION")
         fragment.setRetainInstance(true)
         manager
             .beginTransaction()

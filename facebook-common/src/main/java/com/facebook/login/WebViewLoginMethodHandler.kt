@@ -74,6 +74,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
     loginDialog = builder.build()
 
     val dialogFragment = FacebookDialogFragment()
+    @Suppress("DEPRECATION")
     dialogFragment.retainInstance = true
     dialogFragment.innerDialog = loginDialog
     dialogFragment.show(fragmentActivity.getSupportFragmentManager(), FacebookDialogFragment.TAG)

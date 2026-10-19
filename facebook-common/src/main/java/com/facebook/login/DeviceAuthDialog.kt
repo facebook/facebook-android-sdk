@@ -12,6 +12,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -87,6 +88,7 @@ open class DeviceAuthDialog : DialogFragment() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     val dialog: Dialog =
         object : Dialog(requireActivity(), R.style.com_facebook_auth_dialog) {
+          @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
           override fun onBackPressed() {
             if (onBackButtonPressed()) {
               super.onBackPressed()
@@ -118,6 +120,7 @@ open class DeviceAuthDialog : DialogFragment() {
     isBeingDestroyed = true
     completed.set(true)
     super.onDestroyView()
+    @Suppress("DEPRECATION")
     currentGraphRequestPoll?.cancel(true)
     scheduledPoll?.cancel(true)
   }
@@ -204,7 +207,13 @@ open class DeviceAuthDialog : DialogFragment() {
     val cancelButton = view.findViewById<View>(R.id.cancel_button) as Button
     cancelButton.setOnClickListener { onCancel() }
     instructions = view.findViewById<View>(R.id.com_facebook_device_auth_instructions) as TextView
-    instructions.text = Html.fromHtml(getString(R.string.com_facebook_device_auth_instructions))
+    val instructionsHtml = getString(R.string.com_facebook_device_auth_instructions)
+    instructions.text =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+          Html.fromHtml(instructionsHtml, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+          @Suppress("DEPRECATION") Html.fromHtml(instructionsHtml)
+        }
     return view
   }
 

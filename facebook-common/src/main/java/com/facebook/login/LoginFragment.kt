@@ -152,6 +152,7 @@ open class LoginFragment : Fragment() {
     }
   }
 
+  @Suppress("DEPRECATION")
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     loginClient.onActivityResult(requestCode, resultCode, data)

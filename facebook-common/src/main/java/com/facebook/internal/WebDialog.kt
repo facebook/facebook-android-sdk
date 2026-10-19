@@ -10,7 +10,6 @@ package com.facebook.internal
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -20,7 +19,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.net.http.SslError
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -36,6 +34,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import androidx.core.content.res.ResourcesCompat
 import com.facebook.AccessToken
 import com.facebook.AccessToken.Companion.getCurrentAccessToken
 import com.facebook.AccessToken.Companion.isCurrentAccessTokenActive
@@ -100,7 +99,8 @@ open class WebDialog : Dialog {
   var onCompleteListener: OnCompleteListener? = null
   protected var webView: WebView? = null
     private set
-  private var spinner: ProgressDialog? = null
+  @Suppress("DEPRECATION")
+  private var spinner: android.app.ProgressDialog? = null
   private var crossImageView: ImageView? = null
   private var contentFrameLayout: FrameLayout? = null
   private var uploadTask: UploadStagingResourcesTask? = null
@@ -235,9 +235,10 @@ open class WebDialog : Dialog {
     super.dismiss()
   }
 
+  @Suppress("DEPRECATION")
   override fun onStart() {
     super.onStart()
-    if (uploadTask != null && uploadTask?.status == AsyncTask.Status.PENDING) {
+    if (uploadTask != null && uploadTask?.status == android.os.AsyncTask.Status.PENDING) {
       uploadTask?.execute()
       spinner?.show()
     } else {
@@ -245,6 +246,7 @@ open class WebDialog : Dialog {
     }
   }
 
+  @Suppress("DEPRECATION")
   override fun onStop() {
     uploadTask?.let { task ->
       task.cancel(true)
@@ -280,8 +282,10 @@ open class WebDialog : Dialog {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    spinner = ProgressDialog(context)
+    @Suppress("DEPRECATION")
+    spinner = android.app.ProgressDialog(context)
     spinner?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+    @Suppress("DEPRECATION")
     spinner?.setMessage(context.getString(R.string.com_facebook_loading))
     // Stops people from accidently cancelling the login flow
     spinner?.setCanceledOnTouchOutside(false)
@@ -294,6 +298,7 @@ open class WebDialog : Dialog {
     window?.setGravity(Gravity.CENTER)
 
     // resize the dialog if the soft keyboard comes up
+    @Suppress("DEPRECATION")
     window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
     /* Create the 'x' image, but don't add to the contentFrameLayout layout yet
@@ -333,8 +338,10 @@ open class WebDialog : Dialog {
 
   fun resize() {
     val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    @Suppress("DEPRECATION")
     val display = wm.defaultDisplay
     val metrics = DisplayMetrics()
+    @Suppress("DEPRECATION")
     display.getMetrics(metrics)
     // always use the portrait dimensions to do the scaling calculations so we always get a portrait
     // shaped
@@ -422,7 +429,8 @@ open class WebDialog : Dialog {
     crossImageView = ImageView(context)
     // Dismiss the dialog when user click on the 'x'
     crossImageView?.setOnClickListener { cancel() }
-    val crossDrawable = context.resources.getDrawable(R.drawable.com_facebook_close)
+    val crossDrawable =
+        ResourcesCompat.getDrawable(context.resources, R.drawable.com_facebook_close, null)
     crossImageView?.setImageDrawable(crossDrawable)
     /* 'x' should not be visible while webview is loading
      * make it visible only after webview has fully loaded
@@ -455,7 +463,9 @@ open class WebDialog : Dialog {
         FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     webView?.setVisibility(View.INVISIBLE)
+    @Suppress("DEPRECATION")
     webView?.getSettings()?.savePassword = false
+    @Suppress("DEPRECATION")
     webView?.getSettings()?.saveFormData = false
     webView?.setFocusable(true)
     webView?.setFocusableInTouchMode(true)
@@ -530,6 +540,7 @@ open class WebDialog : Dialog {
       }
     }
 
+    @Suppress("DEPRECATION")
     override fun onReceivedError(
         view: WebView,
         errorCode: Int,
@@ -665,9 +676,10 @@ open class WebDialog : Dialog {
     }
   }
 
+  @Suppress("DEPRECATION")
   private inner class UploadStagingResourcesTask
   internal constructor(private val action: String, private val parameters: Bundle) :
-      AsyncTask<Void, Void, Array<String?>?>() {
+      android.os.AsyncTask<Void, Void, Array<String?>?>() {
     private var exceptions: Array<Exception?> = emptyArray()
     override fun doInBackground(vararg p0: Void): Array<String?>? {
       val params = parameters.getStringArray(ShareConstants.WEB_DIALOG_PARAM_MEDIA) ?: return null

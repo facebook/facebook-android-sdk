@@ -146,6 +146,7 @@ open class LoginManager() {
    * @param fragment The android.app.Fragment which is starting the login process.
    * @param response The response that has the error.
    */
+  @Suppress("DEPRECATION")
   fun resolveError(fragment: android.app.Fragment, response: GraphResponse) {
     this.resolveError(FragmentWrapper(fragment), response)
   }
@@ -435,6 +436,7 @@ open class LoginManager() {
    * @param fragment The android.app.Fragment which is starting the login process.
    * @param permissions The requested permissions.
    */
+  @Suppress("DEPRECATION")
   fun logInWithReadPermissions(fragment: android.app.Fragment, permissions: Collection<String>) {
     logInWithReadPermissions(FragmentWrapper(fragment), permissions)
   }
@@ -581,6 +583,7 @@ open class LoginManager() {
    * @param fragment The android.app.Fragment which is starting the login process.
    * @param permissions The requested permissions.
    */
+  @Suppress("DEPRECATION")
   fun logInWithPublishPermissions(fragment: android.app.Fragment, permissions: Collection<String>) {
     logInWithPublishPermissions(FragmentWrapper(fragment), permissions)
   }
@@ -657,6 +660,7 @@ open class LoginManager() {
    * @param fragment The android.app.Fragment which is starting the login process.
    * @param permissions The requested permissions.
    */
+  @Suppress("DEPRECATION")
   fun logIn(fragment: android.app.Fragment, permissions: Collection<String>?) {
     logIn(FragmentWrapper(fragment), permissions)
   }
@@ -668,6 +672,7 @@ open class LoginManager() {
    * @param permissions The requested permissions.
    * @param loggerID Override the default logger ID for the request
    */
+  @Suppress("DEPRECATION")
   fun logIn(fragment: android.app.Fragment, permissions: Collection<String>?, loggerID: String?) {
     logIn(FragmentWrapper(fragment), permissions, loggerID)
   }

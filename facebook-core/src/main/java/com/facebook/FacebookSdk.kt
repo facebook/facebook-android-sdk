@@ -11,7 +11,6 @@ package com.facebook
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.AsyncTask
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.RestrictTo
@@ -192,7 +191,8 @@ object FacebookSdk {
     fun getExecutor(): Executor {
         LOCK.withLock {
             if (executor == null) {
-                executor = AsyncTask.THREAD_POOL_EXECUTOR
+                @Suppress("DEPRECATION")
+                executor = android.os.AsyncTask.THREAD_POOL_EXECUTOR
             }
         }
         return checkNotNull(executor)
@@ -875,6 +875,7 @@ object FacebookSdk {
      */
     @AutoHandleExceptions
     @JvmStatic
+    @Suppress("DEPRECATION")
     fun getApplicationSignature(context: Context?): String? {
         Validate.sdkInitialized()
         if (context == null) {
