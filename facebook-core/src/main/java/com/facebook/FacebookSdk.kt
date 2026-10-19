@@ -367,6 +367,7 @@ object FacebookSdk {
      * [CALLBACK_OFFSET_PROPERTY].
      */
     @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
+    @Suppress("DEPRECATION")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(applicationContext: Context, callbackRequestCodeOffset: Int) {
@@ -393,6 +394,7 @@ object FacebookSdk {
      * [CALLBACK_OFFSET_PROPERTY].
      */
     @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
+    @Suppress("DEPRECATION")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(
@@ -426,6 +428,7 @@ object FacebookSdk {
      * manifest setting.
      */
     @Deprecated("sdkInitialize is called automatically on app start. Use FacebookSdk.fullyInitialize() instead.")
+    @Suppress("DEPRECATION")
     @Synchronized
     @JvmStatic
     fun sdkInitialize(applicationContext: Context) {

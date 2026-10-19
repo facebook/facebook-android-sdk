@@ -20,7 +20,7 @@ class FacebookInitProvider : ContentProvider() {
   companion object {
     private val TAG = FacebookInitProvider::class.java.simpleName
   }
-  @SuppressWarnings("deprecation")
+  @Suppress("DEPRECATION")
   override fun onCreate(): Boolean {
     try {
       val context = this.context

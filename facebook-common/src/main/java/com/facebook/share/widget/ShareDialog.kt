@@ -400,6 +400,8 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
      * @param activity Activity to use to share the provided content
      * @param shareContent Content to share
      */
+    // `open` keeps the JVM static non-final so Java subclasses can hide it.
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
     @JvmStatic
     open fun show(activity: Activity, shareContent: ShareContent<*, *>) {
       ShareDialog(activity).show(shareContent)
@@ -412,6 +414,8 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
      * @param fragment androidx.fragment.app.Fragment to use to share the provided content
      * @param shareContent Content to share
      */
+    // `open` keeps the JVM static non-final so Java subclasses can hide it.
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
     @JvmStatic
     open fun show(fragment: Fragment, shareContent: ShareContent<*, *>) {
       show(FragmentWrapper(fragment), shareContent)
@@ -424,6 +428,8 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
      * @param fragment android.app.Fragment to use to share the provided content
      * @param shareContent Content to share
      */
+    // `open` keeps the JVM static non-final so Java subclasses can hide it.
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
     @JvmStatic
     open fun show(fragment: android.app.Fragment, shareContent: ShareContent<*, *>) {
       show(FragmentWrapper(fragment), shareContent)
@@ -439,6 +445,8 @@ open class ShareDialog : FacebookDialogBase<ShareContent<*, *>, Sharer.Result>, 
      * @param contentType Class of the intended [com.facebook.share.model.ShareContent] to share.
      * @return True if the specified content type can be shown via the dialog
      */
+    // `open` keeps the JVM static non-final so Java subclasses can hide it.
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
     @JvmStatic
     open fun canShow(contentType: Class<out ShareContent<*, *>>): Boolean {
       return canShowWebTypeCheck(contentType) || canShowNative(contentType)

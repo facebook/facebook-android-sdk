@@ -22,6 +22,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object OnDeviceProcessingManager {
+  @Suppress("DEPRECATION")
   private val ALLOWED_IMPLICIT_EVENTS: Set<String> =
       setOf(
           AppEventsConstants.EVENT_NAME_PURCHASED,

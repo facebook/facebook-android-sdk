@@ -42,6 +42,7 @@ open class FacebookActivity : FragmentActivity() {
   var currentFragment: Fragment? = null
     private set
 
+  @Suppress("DEPRECATION")
   public override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val intent = intent

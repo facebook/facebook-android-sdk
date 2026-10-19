@@ -127,6 +127,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         logPurchase(purchaseAmount, currency, parameters, true, operationalData)
     }
 
+    @Suppress("DEPRECATION")
     fun logPurchase(
         purchaseAmount: BigDecimal?,
         currency: Currency?,
@@ -315,6 +316,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         )
     }
 
+    @Suppress("DEPRECATION")
     fun logEvent(
         eventName: String?,
         valueToSum: Double?,

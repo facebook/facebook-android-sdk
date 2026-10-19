@@ -37,6 +37,8 @@ open class CustomTab(action: String, parameters: Bundle?) {
   }
 
   companion object {
+    // `open` keeps the JVM static non-final so Java subclasses can hide it.
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
     @JvmStatic
     open fun getURIForAction(action: String, parameters: Bundle?): Uri {
       return buildUri(

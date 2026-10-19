@@ -67,7 +67,7 @@ object ModelManager {
   private const val CACHE_KEY_REQUEST_TIMESTAMP = "model_request_timestamp"
   const val MODEL_REQUEST_INTERVAL_MILLISECONDS = 1000 * 60 * 60 * 24 * 3
 
-  @SuppressWarnings("deprecation")
+  @Suppress("DEPRECATION")
   private val MTML_SUGGESTED_EVENTS_PREDICTION =
       listOf(
           ViewOnClickListener.OTHER_EVENT,

@@ -57,6 +57,7 @@ abstract class ShareMedia<M : ShareMedia<M, B>, B : ShareMedia.Builder<M, B>> : 
       return this as B
     }
 
+    @Suppress("DEPRECATION")
     override fun readFrom(model: M?): B {
       if (model == null) {
         return this as B

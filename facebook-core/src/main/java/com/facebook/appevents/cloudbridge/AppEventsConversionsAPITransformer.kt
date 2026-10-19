@@ -311,6 +311,7 @@ object AppEventsConversionsAPITransformer {
               SectionCustomEventFieldMapping(
                   ConversionsAPISection.CUSTOM_DATA, ConversionsAPICustomEventField.AD_TYPE))
 
+  @Suppress("DEPRECATION")
   @JvmField
   val standardEventTransformations =
       mapOf(

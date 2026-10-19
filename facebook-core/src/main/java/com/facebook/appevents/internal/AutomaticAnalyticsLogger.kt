@@ -84,6 +84,7 @@ object AutomaticAnalyticsLogger {
         }
     }
 
+    @Suppress("DEPRECATION")
     @JvmStatic
     fun logPurchase(
         purchase: String,
@@ -158,6 +159,7 @@ object AutomaticAnalyticsLogger {
         }
     }
 
+    @Suppress("DEPRECATION")
     @Synchronized
     @JvmStatic
     fun getPurchaseDedupeParameters(purchaseLoggingParametersList: List<PurchaseLoggingParameters>): Bundle? {

@@ -1347,6 +1347,8 @@ open class LoginManager() {
      *
      * @return The login manager.
      */
+    // `open` keeps the JVM static non-final so Java subclasses can hide it.
+    @Suppress("NON_FINAL_MEMBER_IN_OBJECT")
     @JvmStatic
     open fun getInstance(): LoginManager {
       if (!this::instance.isInitialized) {
