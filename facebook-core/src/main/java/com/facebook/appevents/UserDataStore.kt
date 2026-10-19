@@ -10,13 +10,13 @@ package com.facebook.appevents
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.util.Patterns
 import androidx.annotation.RestrictTo
 import com.facebook.FacebookSdk
 import com.facebook.appevents.InternalAppEventsLogger.Companion.getAnalyticsExecutor
 import com.facebook.appevents.aam.MetadataRule.Companion.getEnabledRuleNames
+import com.facebook.internal.SharedPreferencesUtil
 import com.facebook.internal.Utility.jsonStrToMap
 import com.facebook.internal.Utility.mapToJsonStr
 import com.facebook.internal.Utility.sha256hash
@@ -182,7 +182,7 @@ object UserDataStore {
       return
     }
     sharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+        SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
     val externalUdRaw = sharedPreferences.getString(USER_DATA_KEY, "") ?: ""
     val internalUdRaw = sharedPreferences.getString(INTERNAL_USER_DATA_KEY, "") ?: ""
     externalHashedUserData.putAll(jsonStrToMap(externalUdRaw))

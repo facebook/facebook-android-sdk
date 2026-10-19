@@ -9,11 +9,11 @@
 package com.facebook.appevents
 
 import android.os.Bundle
-import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.FacebookTestUtility.assertEquals
 import com.facebook.MockSharedPreference
+import com.facebook.internal.SharedPreferencesUtil
 import com.facebook.internal.Utility.sha256hash
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
@@ -31,7 +31,7 @@ import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.RuntimeEnvironment
 
-@PrepareForTest(FacebookSdk::class, PreferenceManager::class)
+@PrepareForTest(FacebookSdk::class, SharedPreferencesUtil::class)
 class UserDataStoreTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   @Before
@@ -42,7 +42,7 @@ class UserDataStoreTest : FacebookPowerMockTestCase() {
     whenever(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application)
     whenever(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
 
-    PowerMockito.mockStatic(PreferenceManager::class.java)
+    PowerMockito.mockStatic(SharedPreferencesUtil::class.java)
 
     val mockCompanion: InternalAppEventsLogger.Companion = mock()
     WhiteboxImpl.setInternalState(InternalAppEventsLogger::class.java, "Companion", mockCompanion)
@@ -54,7 +54,7 @@ class UserDataStoreTest : FacebookPowerMockTestCase() {
     // Test initStore without cache in SharedPreference
     Whitebox.setInternalState(UserDataStore::class.java, "initialized", AtomicBoolean(false))
     val mockPreference = MockSharedPreference()
-    whenever(PreferenceManager.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
     Whitebox.setInternalState(
         UserDataStore::class.java, "externalHashedUserData", ConcurrentHashMap<String, String>())
     UserDataStore.initStore()
@@ -73,7 +73,7 @@ class UserDataStoreTest : FacebookPowerMockTestCase() {
         .putString(
             "com.facebook.appevents.UserDataStore.userData",
             JSONObject(cacheData as Map<*, *>).toString())
-    whenever(PreferenceManager.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
     UserDataStore.initStore()
     externalHashedUserData =
         Whitebox.getInternalState(UserDataStore::class.java, "externalHashedUserData")
@@ -83,7 +83,7 @@ class UserDataStoreTest : FacebookPowerMockTestCase() {
   @Test
   fun testSetUserDataAndHash() {
     val mockPreference = MockSharedPreference()
-    whenever(PreferenceManager.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
     Whitebox.setInternalState(UserDataStore::class.java, "initialized", AtomicBoolean(false))
     val email = "test@fb.com"
     val phone = "8008007000"
@@ -106,7 +106,7 @@ class UserDataStoreTest : FacebookPowerMockTestCase() {
   @Test
   fun testClear() {
     val mockPreference = MockSharedPreference()
-    whenever(PreferenceManager.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
     Whitebox.setInternalState(UserDataStore::class.java, "initialized", AtomicBoolean(false))
     UserDataStore.setUserDataAndHash(
         "test@fb.com", null, null, "8008007000", null, null, null, null, null, null)

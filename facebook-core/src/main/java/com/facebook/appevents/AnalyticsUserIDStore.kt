@@ -8,11 +8,11 @@
 
 package com.facebook.appevents
 
-import android.preference.PreferenceManager
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.InternalAppEventsLogger.Companion.getAnalyticsExecutor
 import com.facebook.appevents.internal.AppEventUtility.assertIsNotMainThread
+import com.facebook.internal.SharedPreferencesUtil
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 internal object AnalyticsUserIDStore {
@@ -42,7 +42,7 @@ internal object AnalyticsUserIDStore {
       try {
         userID = id
         val sharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+            SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
         val editor = sharedPreferences.edit()
         editor.putString(ANALYTICS_USER_ID_KEY, userID)
         editor.apply()
@@ -76,7 +76,7 @@ internal object AnalyticsUserIDStore {
         return
       }
       val sharedPreferences =
-          PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+          SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
       userID = sharedPreferences.getString(ANALYTICS_USER_ID_KEY, null)
       initialized = true
     } finally {

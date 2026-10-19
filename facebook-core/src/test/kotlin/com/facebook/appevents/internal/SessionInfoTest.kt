@@ -9,16 +9,16 @@
 package com.facebook.appevents.internal
 
 import android.content.Context
-import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.facebook.internal.SharedPreferencesUtil
 import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.isA
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.powermock.api.mockito.PowerMockito.mock
@@ -27,7 +27,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 
-@PrepareForTest(FacebookSdk::class, PreferenceManager::class, SourceApplicationInfo::class)
+@PrepareForTest(FacebookSdk::class, SharedPreferencesUtil::class, SourceApplicationInfo::class)
 class SessionInfoTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockContext: Context
@@ -55,11 +55,11 @@ class SessionInfoTest : FacebookPowerMockTestCase() {
     whenever(mockSessionInfo.writeSessionToDisk()).thenCallRealMethod()
 
     mockStatic(FacebookSdk::class.java)
-    mockStatic(PreferenceManager::class.java)
+    mockStatic(SharedPreferencesUtil::class.java)
 
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
-    whenever(PreferenceManager.getDefaultSharedPreferences(isA(Context::class.java)))
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(any()))
         .thenReturn(mockSharedPreferences)
 
     val mockSourceAppInfoCompanion = mock(SourceApplicationInfo.Companion::class.java)

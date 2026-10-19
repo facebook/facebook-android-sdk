@@ -12,10 +12,10 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
+import com.facebook.internal.SharedPreferencesUtil
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -25,7 +25,7 @@ import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(FacebookSdk::class, PreferenceManager::class)
+@PrepareForTest(FacebookSdk::class, SharedPreferencesUtil::class)
 class SourceApplicationInfoTest : FacebookPowerMockTestCase() {
   private lateinit var mockSharedPreferences: MockSharedPreference
   private lateinit var mockContext: Context
@@ -36,12 +36,12 @@ class SourceApplicationInfoTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     mockStatic(FacebookSdk::class.java)
-    mockStatic(PreferenceManager::class.java)
+    mockStatic(SharedPreferencesUtil::class.java)
     mockContext = mock(Context::class.java)
     mockSharedPreferences = MockSharedPreference()
     whenever(FacebookSdk.getApplicationContext()).thenReturn(mockContext)
     whenever(FacebookSdk.isInitialized()).thenReturn(true)
-    whenever(PreferenceManager.getDefaultSharedPreferences(mockContext))
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(mockContext))
         .thenReturn(mockSharedPreferences)
     mockSharedPreferences
         .edit()

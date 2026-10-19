@@ -9,11 +9,11 @@
 package com.facebook.appevents
 
 import android.content.Context
-import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
 import com.facebook.appevents.internal.AppEventUtility
+import com.facebook.internal.SharedPreferencesUtil
 import java.util.concurrent.Executor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -25,7 +25,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.internal.WhiteboxImpl
 
-@PrepareForTest(FacebookSdk::class, PreferenceManager::class, AppEventUtility::class)
+@PrepareForTest(FacebookSdk::class, SharedPreferencesUtil::class, AppEventUtility::class)
 class AnalyticsUserIDStoreTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   private val mockPreference = MockSharedPreference()
@@ -45,8 +45,8 @@ class AnalyticsUserIDStoreTest : FacebookPowerMockTestCase() {
     whenever(AppEventUtility.assertIsMainThread()).then {}
 
     mockPreference.edit().putString("com.facebook.appevents.AnalyticsUserIDStore.userID", userID)
-    PowerMockito.mockStatic(PreferenceManager::class.java)
-    whenever(PreferenceManager.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
+    PowerMockito.mockStatic(SharedPreferencesUtil::class.java)
+    whenever(SharedPreferencesUtil.getDefaultSharedPreferences(any())).thenReturn(mockPreference)
   }
 
   @Test

@@ -9,9 +9,9 @@
 package com.facebook.appevents.internal
 
 import android.app.Activity
-import android.preference.PreferenceManager
 import com.facebook.FacebookSdk
 import com.facebook.bolts.AppLinks
+import com.facebook.internal.SharedPreferencesUtil
 
 internal class SourceApplicationInfo
 private constructor(val callingApplicationPackage: String?, val isOpenedByAppLink: Boolean) {
@@ -27,7 +27,7 @@ private constructor(val callingApplicationPackage: String?, val isOpenedByAppLin
 
   fun writeSourceApplicationInfoToDisk() {
     val sharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+        SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
     val editor = sharedPreferences.edit()
     editor.putString(CALL_APPLICATION_PACKAGE_KEY, callingApplicationPackage)
     editor.putBoolean(OPENED_BY_APP_LINK_KEY, isOpenedByAppLink)
@@ -81,7 +81,7 @@ private constructor(val callingApplicationPackage: String?, val isOpenedByAppLin
     @JvmStatic
     fun getStoredSourceApplicatioInfo(): SourceApplicationInfo? {
       val sharedPreferences =
-          PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+          SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
       if (!sharedPreferences.contains(CALL_APPLICATION_PACKAGE_KEY)) {
         return null
       }
@@ -94,7 +94,7 @@ private constructor(val callingApplicationPackage: String?, val isOpenedByAppLin
     @JvmStatic
     fun clearSavedSourceApplicationInfoFromDisk() {
       val sharedPreferences =
-          PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+          SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
       val editor = sharedPreferences.edit()
       editor.remove(CALL_APPLICATION_PACKAGE_KEY)
       editor.remove(OPENED_BY_APP_LINK_KEY)

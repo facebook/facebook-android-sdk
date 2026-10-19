@@ -8,8 +8,8 @@
 
 package com.facebook.appevents.internal
 
-import android.preference.PreferenceManager
 import com.facebook.FacebookSdk
+import com.facebook.internal.SharedPreferencesUtil
 import java.util.UUID
 
 internal class SessionInfo
@@ -38,7 +38,7 @@ constructor(
   /** Performs disk IO. Do not call from main thread */
   fun writeSessionToDisk() {
     val sharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+        SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
     val editor = sharedPreferences.edit()
     editor.putLong(LAST_SESSION_INFO_START_KEY, sessionStartTime ?: 0)
     editor.putLong(LAST_SESSION_INFO_END_KEY, sessionLastEventTime ?: 0)
@@ -67,7 +67,7 @@ constructor(
     @JvmStatic
     fun getStoredSessionInfo(): SessionInfo? {
       val sharedPreferences =
-          PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+          SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
       val startTime = sharedPreferences.getLong(LAST_SESSION_INFO_START_KEY, 0)
       val endTime = sharedPreferences.getLong(LAST_SESSION_INFO_END_KEY, 0)
       val sessionIDStr = sharedPreferences.getString(SESSION_ID_KEY, null)
@@ -85,7 +85,7 @@ constructor(
     @JvmStatic
     fun clearSavedSessionFromDisk() {
       val sharedPreferences =
-          PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
+          SharedPreferencesUtil.getDefaultSharedPreferences(FacebookSdk.getApplicationContext())
       val editor = sharedPreferences.edit()
       editor.remove(LAST_SESSION_INFO_START_KEY)
       editor.remove(LAST_SESSION_INFO_END_KEY)
