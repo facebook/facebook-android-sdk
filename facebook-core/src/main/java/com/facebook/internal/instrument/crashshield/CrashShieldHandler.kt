@@ -52,7 +52,7 @@ object CrashShieldHandler {
     return crashingObjects.contains(o)
   }
 
-  @JvmStatic fun methodFinished(o: Any?) = Unit
+  @JvmStatic fun methodFinished(@Suppress("UNUSED_PARAMETER") o: Any?) = Unit
 
   @JvmStatic
   fun reset() {

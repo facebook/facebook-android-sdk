@@ -139,9 +139,7 @@ private constructor(
                     listenerArgs
                 )
 
-                METHOD_ON_BILLING_SERVICE_DISCONNECTED -> onBillingServiceDisconnected(
-                    wrapperArgs, listenerArgs
-                )
+                METHOD_ON_BILLING_SERVICE_DISCONNECTED -> onBillingServiceDisconnected()
             }
             return null
         }
@@ -559,7 +557,7 @@ private constructor(
         }
     }
 
-    private fun onBillingServiceDisconnected(wrapperArgs: Array<Any>?, listenerArgs: Array<Any>?) {
+    private fun onBillingServiceDisconnected() {
         isServiceConnected.set(false)
     }
 

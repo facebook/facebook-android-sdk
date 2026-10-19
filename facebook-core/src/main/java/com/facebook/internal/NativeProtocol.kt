@@ -246,7 +246,11 @@ object NativeProtocol {
   }
 
   @JvmStatic
-  fun validateActivityIntent(context: Context, intent: Intent?, appInfo: NativeAppInfo?): Intent? {
+  fun validateActivityIntent(
+      context: Context,
+      intent: Intent?,
+      @Suppress("UNUSED_PARAMETER") appInfo: NativeAppInfo?
+  ): Intent? {
     if (intent == null) {
       return null
     }
@@ -257,7 +261,11 @@ object NativeProtocol {
   }
 
   @JvmStatic
-  fun validateServiceIntent(context: Context, intent: Intent?, appInfo: NativeAppInfo?): Intent? {
+  fun validateServiceIntent(
+      context: Context,
+      intent: Intent?,
+      @Suppress("UNUSED_PARAMETER") appInfo: NativeAppInfo?
+  ): Intent? {
     if (intent == null) {
       return null
     }
@@ -273,7 +281,7 @@ object NativeProtocol {
       applicationId: String,
       permissions: Collection<String?>,
       e2e: String,
-      isRerequest: Boolean,
+      @Suppress("UNUSED_PARAMETER") isRerequest: Boolean,
       isForPublish: Boolean,
       defaultAudience: DefaultAudience,
       clientState: String,
@@ -326,8 +334,8 @@ object NativeProtocol {
       isFamilyLogin: Boolean,
       shouldSkipAccountDedupe: Boolean,
       nonce: String?,
-      codeChallenge: String?,
-      codeChallengeMethod: String?,
+      @Suppress("UNUSED_PARAMETER") codeChallenge: String?,
+      @Suppress("UNUSED_PARAMETER") codeChallengeMethod: String?,
       redirectURI: String?,
       intentUriPackageTarget: String?,
       forceConfirmation: Boolean = false,
@@ -415,11 +423,11 @@ object NativeProtocol {
 
   @JvmStatic
   fun createProxyAuthIntents(
-      context: Context?,
+      @Suppress("UNUSED_PARAMETER") context: Context?,
       applicationId: String,
       permissions: Collection<String?>,
       e2e: String,
-      isRerequest: Boolean,
+      @Suppress("UNUSED_PARAMETER") isRerequest: Boolean,
       isForPublish: Boolean,
       defaultAudience: DefaultAudience,
       clientState: String,
@@ -470,11 +478,11 @@ object NativeProtocol {
   // KatanaProxyLoginMethodHandler).
   @JvmStatic
   fun createFBLoginSSOIntents(
-      context: Context?,
+      @Suppress("UNUSED_PARAMETER") context: Context?,
       applicationId: String,
       permissions: Collection<String?>,
       e2e: String,
-      isRerequest: Boolean,
+      @Suppress("UNUSED_PARAMETER") isRerequest: Boolean,
       isForPublish: Boolean,
       defaultAudience: DefaultAudience,
       clientState: String,

@@ -119,7 +119,8 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
      * @deprecated This is no longer used
      * @return the AuthDialogBuilder
      */
-    fun setIsRerequest(isRerequest: Boolean): AuthDialogBuilder = this
+    fun setIsRerequest(@Suppress("UNUSED_PARAMETER") isRerequest: Boolean): AuthDialogBuilder =
+        this
 
     fun setIsChromeOS(isChromeOS: Boolean): AuthDialogBuilder {
       this.redirect_uri =
@@ -233,7 +234,7 @@ open class WebViewLoginMethodHandler : WebLoginMethodHandler {
           context: Context,
           action: String?,
           parameters: Bundle?,
-          theme: Int,
+          @Suppress("UNUSED_PARAMETER") theme: Int,
           targetApp: LoginTargetApp,
           listener: OnCompleteListener?,
           customRedirectUri: String

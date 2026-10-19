@@ -106,7 +106,7 @@ object ShareContentValidation {
     }
   }
 
-  private fun validateLinkContent(linkContent: ShareLinkContent, validator: Validator) {
+  private fun validateLinkContent(linkContent: ShareLinkContent) {
     val contentUrl = linkContent.contentUrl
     if (contentUrl != null && !isWebUri(contentUrl)) {
       throw FacebookException("Content Url must be an http:// or https:// url")
@@ -139,7 +139,7 @@ object ShareContentValidation {
     }
   }
 
-  private fun validatePhotoForApi(photo: SharePhoto, validator: Validator) {
+  private fun validatePhotoForApi(photo: SharePhoto) {
     validatePhoto(photo)
     val photoBitmap = photo.bitmap
     val photoUri = photo.imageUrl
@@ -150,14 +150,14 @@ object ShareContentValidation {
     }
   }
 
-  private fun validatePhotoForNativeDialog(photo: SharePhoto, validator: Validator) {
-    validatePhotoForApi(photo, validator)
+  private fun validatePhotoForNativeDialog(photo: SharePhoto) {
+    validatePhotoForApi(photo)
     if (photo.bitmap != null || !isWebUri(photo.imageUrl)) {
       hasContentProvider(getApplicationContext())
     }
   }
 
-  private fun validatePhotoForWebDialog(photo: SharePhoto, validator: Validator) {
+  private fun validatePhotoForWebDialog(photo: SharePhoto) {
     validatePhoto(photo)
   }
 
@@ -169,7 +169,7 @@ object ShareContentValidation {
     }
   }
 
-  private fun validateVideo(video: ShareVideo?, validator: Validator) {
+  private fun validateVideo(video: ShareVideo?) {
     if (video == null) {
       throw FacebookException("Cannot share a null ShareVideo")
     }
@@ -252,13 +252,13 @@ object ShareContentValidation {
     }
 
     override fun validate(photo: SharePhoto) {
-      validatePhotoForWebDialog(photo, this)
+      validatePhotoForWebDialog(photo)
     }
   }
 
   private class ApiValidator : Validator() {
     override fun validate(photo: SharePhoto) {
-      validatePhotoForApi(photo, this)
+      validatePhotoForApi(photo)
     }
 
     override fun validate(videoContent: ShareVideoContent) {
@@ -287,7 +287,7 @@ object ShareContentValidation {
   open class Validator {
 
     open fun validate(linkContent: ShareLinkContent) {
-      validateLinkContent(linkContent, this)
+      validateLinkContent(linkContent)
     }
 
     open fun validate(photoContent: SharePhotoContent) {
@@ -307,11 +307,11 @@ object ShareContentValidation {
     }
 
     open fun validate(photo: SharePhoto) {
-      validatePhotoForNativeDialog(photo, this)
+      validatePhotoForNativeDialog(photo)
     }
 
     open fun validate(video: ShareVideo?) {
-      validateVideo(video, this)
+      validateVideo(video)
     }
 
     open fun validate(medium: ShareMedia<*, *>) {

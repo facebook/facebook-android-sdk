@@ -141,11 +141,11 @@ object ShareInternalUtility {
   @JvmStatic
   fun handleActivityResult(
       requestCode: Int,
-      resultCode: Int,
+      @Suppress("UNUSED_PARAMETER") resultCode: Int,
       data: Intent?,
       resultProcessor: ResultProcessor?
   ): Boolean {
-    val appCall = getAppCallFromActivityResult(requestCode, resultCode, data) ?: return false
+    val appCall = getAppCallFromActivityResult(requestCode, data) ?: return false
     cleanupAttachmentsForCall(appCall.callId)
     if (resultProcessor == null) {
       return true
@@ -193,11 +193,7 @@ object ShareInternalUtility {
     }
   }
 
-  private fun getAppCallFromActivityResult(
-      requestCode: Int,
-      resultCode: Int,
-      data: Intent?
-  ): AppCall? {
+  private fun getAppCallFromActivityResult(requestCode: Int, data: Intent?): AppCall? {
     val callId = getCallIdFromIntent(data) ?: return null
     return finishPendingCall(callId, requestCode)
   }

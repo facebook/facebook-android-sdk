@@ -144,7 +144,7 @@ object ActivityLifecycleTracker {
 
     // Public in order to allow unity sdk to correctly log app events
     @JvmStatic
-    fun onActivityCreated(activity: Activity?) {
+    fun onActivityCreated(@Suppress("UNUSED_PARAMETER") activity: Activity?) {
         singleThreadExecutor.execute {
             if (currentSession == null) {
                 currentSession = getStoredSessionInfo()
@@ -189,19 +189,18 @@ object ActivityLifecycleTracker {
                 iapExecutor.execute { InAppPurchaseManager.startTracking() }
             }
         }
-        val appContext = activity.applicationContext
         val handleActivityResume = Runnable {
             val lastEventTime = currentSession?.sessionLastEventTime
             if (currentSession == null) {
                 currentSession = SessionInfo(currentTime, null)
-                logActivateApp(activityName, null, appId, appContext)
+                logActivateApp(activityName, null, appId)
             } else if (lastEventTime != null) {
                 val suspendTime = currentTime - lastEventTime
                 if (suspendTime > sessionTimeoutInSeconds * 1000) {
                     // We were suspended for a significant amount of time.
                     // Count this as a new session and log the old session
                     logDeactivateApp(activityName, currentSession, appId)
-                    logActivateApp(activityName, null, appId, appContext)
+                    logActivateApp(activityName, null, appId)
                     currentSession = SessionInfo(currentTime, null)
                 } else if (suspendTime > INTERRUPTION_THRESHOLD_MILLISECONDS) {
                     currentSession?.incrementInterruptionCount()

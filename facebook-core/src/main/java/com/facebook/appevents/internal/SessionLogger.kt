@@ -8,7 +8,6 @@
 
 package com.facebook.appevents.internal
 
-import android.content.Context
 import android.os.Bundle
 import android.text.format.DateUtils
 import com.facebook.LoggingBehavior
@@ -49,8 +48,7 @@ internal object SessionLogger {
     fun logActivateApp(
         activityName: String,
         sourceApplicationInfo: SourceApplicationInfo?,
-        appId: String?,
-        context: Context
+        appId: String?
     ) {
         val sourAppInfoStr = sourceApplicationInfo?.toString() ?: "Unclassified"
         val eventParams = Bundle()

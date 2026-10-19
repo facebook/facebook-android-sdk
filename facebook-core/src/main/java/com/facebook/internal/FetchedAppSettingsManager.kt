@@ -158,7 +158,7 @@ object FetchedAppSettingsManager {
                     appSettings = parseAppSettingsFromJSON(applicationId, settingsJSON)
                 }
             }
-            val resultJSON = getAppSettingsQueryResponse(applicationId)
+            val resultJSON = getAppSettingsQueryResponse()
             parseAppSettingsFromJSON(applicationId, resultJSON)
             sharedPrefs.edit().putString(settingsKey, resultJSON.toString()).apply()
 
@@ -269,7 +269,7 @@ object FetchedAppSettingsManager {
         if (!forceRequery && fetchedAppSettings.containsKey(applicationId)) {
             return fetchedAppSettings[applicationId]
         }
-        val response = getAppSettingsQueryResponse(applicationId)
+        val response = getAppSettingsQueryResponse()
         val fetchedAppSettings = parseAppSettingsFromJSON(applicationId, response)
         if (applicationId == FacebookSdk.getApplicationId()) {
             loadingState.set(FetchAppSettingState.SUCCESS)
@@ -384,7 +384,7 @@ object FetchedAppSettingsManager {
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread. This call can block for long time if network is not available and network
     // timeout is long.
-    private fun getAppSettingsQueryResponse(applicationId: String): JSONObject {
+    private fun getAppSettingsQueryResponse(): JSONObject {
         val appSettingsParams = Bundle()
         val appSettingFields = mutableListOf<String>().apply { addAll(APP_SETTING_FIELDS) }
         if (BuildConfig.DEBUG) {

@@ -111,7 +111,7 @@ object FetchedAppGateKeepersManager {
             return
         }
         executor.execute {
-            val gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId)
+            val gateKeepersResultJSON = getAppGateKeepersQueryResponse()
             if (gateKeepersResultJSON.length() != 0) {
                 parseAppGateKeepersFromJSON(applicationId, gateKeepersResultJSON)
                 gateKeepersSharedPrefs
@@ -148,7 +148,7 @@ object FetchedAppGateKeepersManager {
                 return cached
             }
         }
-        val response = getAppGateKeepersQueryResponse(applicationId)
+        val response = getAppGateKeepersQueryResponse()
         val context = FacebookSdk.getApplicationContext()
         val gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId)
         val gateKeepersSharedPrefs =
@@ -225,7 +225,7 @@ object FetchedAppGateKeepersManager {
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread.
-    private fun getAppGateKeepersQueryResponse(applicationId: String): JSONObject {
+    private fun getAppGateKeepersQueryResponse(): JSONObject {
         val appGateKeepersParams = Bundle()
         appGateKeepersParams.putString(APPLICATION_PLATFORM, APP_PLATFORM)
         appGateKeepersParams.putString(APPLICATION_SDK_VERSION, FacebookSdk.getSdkVersion())
