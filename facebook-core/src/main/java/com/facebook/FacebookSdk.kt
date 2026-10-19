@@ -60,7 +60,7 @@ import org.json.JSONObject
 
 /** This class allows some customization of Facebook SDK behavior. */
 object FacebookSdk {
-    private val TAG = FacebookSdk::class.java.canonicalName
+    private val TAG = FacebookSdk::class.java.name
     private val loggingBehaviors = hashSetOf(LoggingBehavior.DEVELOPER_ERRORS)
     private const val DEFAULT_CALLBACK_REQUEST_CODE_OFFSET = 0xface
     private var executor: Executor? = null

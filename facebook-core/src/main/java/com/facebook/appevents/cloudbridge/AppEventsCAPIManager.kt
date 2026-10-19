@@ -93,7 +93,7 @@ object AppEventsCAPIManager {
 
       Logger.log(
           LoggingBehavior.APP_EVENTS,
-          TAG.toString(),
+          TAG as String,
           " \n\nSaving Cloudbridge settings from saved Prefs: \n================\n DATASETID: %s\n URL: %s \n ACCESSKEY: %s \n\n ",
           datasetID,
           url,
@@ -169,7 +169,7 @@ object AppEventsCAPIManager {
     val config: Map<String, Any>?
     try {
       val data = convertJSONArrayToList(result?.get("data") as JSONArray)
-      config = convertJSONObjectToHashMap(JSONObject(data.firstOrNull()))
+      config = convertJSONObjectToHashMap(JSONObject(data.firstOrNull()!!))
 
       url = config[SettingsAPIFields.URL.rawValue] as String?
       datasetID = config[SettingsAPIFields.DATASETID.rawValue] as String?

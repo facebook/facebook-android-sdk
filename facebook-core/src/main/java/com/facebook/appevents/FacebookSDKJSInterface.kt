@@ -55,7 +55,7 @@ internal class FacebookSDKJSInterface(private val context: Context?) {
 
     private fun jsonStringToBundle(jsonString: String?): Bundle {
       try {
-        val jsonObject = JSONObject(jsonString)
+        val jsonObject = JSONObject(jsonString!!)
         return jsonToBundle(jsonObject)
       } catch (ignored: JSONException) {
         // ignore

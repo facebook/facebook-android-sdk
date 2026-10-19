@@ -548,7 +548,7 @@ class GraphRequest {
     ): GraphRequest {
       if (isFileUri(photoUri)) {
         return newUploadPhotoRequest(
-            accessToken, graphPath, File(photoUri.path), caption, params, callback)
+            accessToken, graphPath, File(photoUri.path!!), caption, params, callback)
       } else if (!isContentUri(photoUri)) {
         throw FacebookException("The photo Uri must be either a file:// or content:// Uri")
       }
@@ -1208,7 +1208,7 @@ class GraphRequest {
       val matcher = versionPattern.matcher(unversionedPath)
       if (matcher.matches()) {
         // Group 1 contains the path aside from version
-        unversionedPath = matcher.group(1)
+        unversionedPath = matcher.group(1)!!
       }
       return unversionedPath.startsWith("me/") || unversionedPath.startsWith("/me/")
     }
@@ -1237,7 +1237,7 @@ class GraphRequest {
         val key = keyIterator.next()
         val value = graphObject.opt(key)
         val passByValue = isOGAction && key.equals("image", ignoreCase = true)
-        processGraphObjectProperty(key, value, serializer, passByValue)
+        processGraphObjectProperty(key, value!!, serializer, passByValue)
       }
     }
 
@@ -1257,7 +1257,7 @@ class GraphRequest {
             val propertyName = keys.next()
             val subKey = String.format("%s[%s]", key, propertyName)
             processGraphObjectProperty(
-                subKey, jsonObject.opt(propertyName), serializer, passByValue)
+                subKey, jsonObject.opt(propertyName)!!, serializer, passByValue)
           }
         } else {
           // Normal case is passing objects by reference, so just pass the ID or URL, if any,
@@ -1609,7 +1609,7 @@ class GraphRequest {
 
   private val graphPathWithVersion: String?
     get() {
-      val matcher = versionPattern.matcher(graphPath)
+      val matcher = versionPattern.matcher(graphPath!!)
       return if (matcher.matches()) {
         graphPath
       } else String.format("%s/%s", version, graphPath)
@@ -1649,14 +1649,12 @@ class GraphRequest {
   }
 
   private fun isApplicationRequest(): Boolean {
-    if (this.graphPath == null) {
-      return false
-    }
+    val graphPath = this.graphPath ?: return false
     val applicationIdEndpointRegex = "^/?" + FacebookSdk.getApplicationId() + "/?.*"
     val appNodeEndpointRegex = "^/?app/?.*"
     return this.forceApplicationRequest ||
-        Pattern.matches(applicationIdEndpointRegex, this.graphPath) ||
-        Pattern.matches(appNodeEndpointRegex, this.graphPath)
+        Pattern.matches(applicationIdEndpointRegex, graphPath) ||
+        Pattern.matches(appNodeEndpointRegex, graphPath)
   }
 
   private class Attachment(val request: GraphRequest, val value: Any?)

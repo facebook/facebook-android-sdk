@@ -97,7 +97,7 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
   @JvmOverloads
   @Throws(IOException::class)
   operator fun get(key: String, contentTag: String? = null): InputStream? {
-    val file = File(directory, Utility.md5hash(key))
+    val file = File(directory, Utility.md5hash(key)!!)
     val input: FileInputStream
     input =
         try {
@@ -207,7 +207,7 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
     get() = directory.path
 
   private fun renameToTargetAndTrim(key: String, buffer: File) {
-    val target = File(directory, Utility.md5hash(key))
+    val target = File(directory, Utility.md5hash(key)!!)
 
     // This is triggered by close().  By the time close() returns, the file should be cached, so
     // this needs to happen synchronously on this thread.

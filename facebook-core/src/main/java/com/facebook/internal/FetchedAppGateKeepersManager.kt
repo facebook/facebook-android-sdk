@@ -92,7 +92,7 @@ object FetchedAppGateKeepersManager {
         val gateKeepersSharedPrefs =
             context.getSharedPreferences(APP_GATEKEEPERS_PREFS_STORE, Context.MODE_PRIVATE)
         val gateKeepersJSONString = gateKeepersSharedPrefs.getString(gateKeepersKey, null)
-        if (!Utility.isNullOrEmpty(gateKeepersJSONString)) {
+        if (!gateKeepersJSONString.isNullOrEmpty()) {
             var gateKeepersJSON: JSONObject? = null
             try {
                 gateKeepersJSON = JSONObject(gateKeepersJSONString)

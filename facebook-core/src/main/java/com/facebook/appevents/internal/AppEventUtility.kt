@@ -46,10 +46,10 @@ object AppEventUtility {
   fun normalizePrice(value: String?): Double {
     return try {
       val pattern = Pattern.compile(PRICE_REGEX, Pattern.MULTILINE)
-      val matcher = pattern.matcher(value)
+      val matcher = pattern.matcher(value!!)
       if (matcher.find()) {
-        val firstValue = matcher.group(0)
-        NumberFormat.getNumberInstance(currentLocale).parse(firstValue).toDouble()
+        val firstValue = matcher.group(0)!!
+        NumberFormat.getNumberInstance(currentLocale).parse(firstValue)!!.toDouble()
       } else {
         0.0
       }

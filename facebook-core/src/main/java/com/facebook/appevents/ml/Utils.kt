@@ -87,7 +87,7 @@ object Utils {
       }
       val jsonStr = String(allData, 4, jsonLen)
       val info = JSONObject(jsonStr)
-      val names = info.names()
+      val names = info.names() ?: return null
       val keys = arrayOfNulls<String>(names.length())
       for (i in keys.indices) {
         keys[i] = names.getString(i)

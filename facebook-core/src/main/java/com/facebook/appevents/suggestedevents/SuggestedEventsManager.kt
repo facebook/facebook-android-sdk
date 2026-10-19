@@ -64,7 +64,7 @@ object SuggestedEventsManager {
   }
 
   @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-  internal fun populateEventsFromRawJsonString(rawSuggestedEventSetting: String?) {
+  internal fun populateEventsFromRawJsonString(rawSuggestedEventSetting: String) {
     try {
       val jsonObject = JSONObject(rawSuggestedEventSetting)
       if (jsonObject.has(PRODUCTION_EVENTS_KEY)) {

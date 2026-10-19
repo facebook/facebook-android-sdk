@@ -287,7 +287,7 @@ object InstrumentUtility {
   /** Create Graph Request for Instrument reports and send the reports to Facebook. */
   @JvmStatic
   fun sendReports(key: String?, reports: JSONArray, callback: GraphRequest.Callback?) {
-    if (reports.length() == 0) {
+    if (key == null || reports.length() == 0) {
       return
     }
     val params = JSONObject()

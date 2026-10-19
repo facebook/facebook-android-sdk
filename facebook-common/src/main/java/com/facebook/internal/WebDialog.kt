@@ -486,8 +486,8 @@ open class WebDialog : Dialog {
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
       logd(LOG_TAG, "Redirect URL: $url")
       val parsedURL = Uri.parse(url)
-      val isPlatformDialogURL =
-          (parsedURL.path != null && Pattern.matches(PLATFORM_DIALOG_PATH_REGEX, parsedURL.path))
+      val path = parsedURL.path
+      val isPlatformDialogURL = (path != null && Pattern.matches(PLATFORM_DIALOG_PATH_REGEX, path))
       if (url.startsWith(expectedRedirectUrl)) {
         val values = parseResponseUri(url)
         var error = values.getString("error")

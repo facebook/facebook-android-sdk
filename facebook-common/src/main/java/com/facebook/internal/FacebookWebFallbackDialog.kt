@@ -15,7 +15,6 @@ import android.os.Handler
 import android.os.Looper
 import com.facebook.internal.BundleJSONConverter.convertToBundle
 import com.facebook.internal.NativeProtocol.getLatestKnownVersion
-import com.facebook.internal.Utility.isNullOrEmpty
 import com.facebook.internal.Utility.logd
 import com.facebook.internal.Utility.parseUrlQueryString
 import org.json.JSONException
@@ -42,7 +41,7 @@ private constructor(context: Context, url: String, expectedRedirectUrl: String) 
     val bridgeArgsJSONString =
         queryParams.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_BRIDGE_ARGS)
     queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_BRIDGE_ARGS)
-    if (!isNullOrEmpty(bridgeArgsJSONString)) {
+    if (!bridgeArgsJSONString.isNullOrEmpty()) {
       try {
         val bridgeArgsJSON = JSONObject(bridgeArgsJSONString)
         val bridgeArgs = convertToBundle(bridgeArgsJSON)
@@ -56,7 +55,7 @@ private constructor(context: Context, url: String, expectedRedirectUrl: String) 
     val methodResultsJSONString =
         queryParams.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_RESULTS)
     queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_RESULTS)
-    if (!isNullOrEmpty(methodResultsJSONString)) {
+    if (!methodResultsJSONString.isNullOrEmpty()) {
       try {
         val methodArgsJSON = JSONObject(methodResultsJSONString)
         val methodResults = convertToBundle(methodArgsJSON)

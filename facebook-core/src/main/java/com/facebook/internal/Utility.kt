@@ -544,7 +544,7 @@ object Utility {
       try {
         val jsonObject = JSONObject()
         for ((key, value) in map) {
-          jsonObject.put(key, value)
+          jsonObject.put(key ?: continue, value)
         }
         jsonObject.toString()
       } catch (_e: JSONException) {

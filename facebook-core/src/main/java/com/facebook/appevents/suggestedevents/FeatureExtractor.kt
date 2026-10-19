@@ -118,7 +118,7 @@ internal object FeatureExtractor {
     val ret = FloatArray(NUM_OF_FEATURES) { 0f }
     try {
       val lowercaseAppName = appName.lowercase(Locale.getDefault())
-      val viewTree = JSONObject(viewHierarchy.optJSONObject(VIEW_KEY).toString()) // copy
+      val viewTree = JSONObject(viewHierarchy.optJSONObject(VIEW_KEY)!!.toString()) // copy
       val screenName = viewHierarchy.optString(SCREEN_NAME_KEY)
       val siblings = JSONArray()
       pruneTree(viewTree, siblings) // viewTree is updated here
@@ -185,7 +185,7 @@ internal object FeatureExtractor {
       densefeat[12] += 1.0f
     }
     try {
-      val childViews = node.optJSONArray(CHILDREN_VIEW_KEY)
+      val childViews = node.optJSONArray(CHILDREN_VIEW_KEY)!!
       val len = childViews.length()
       for (i in 0 until len) {
         sum(densefeat, parseFeatures(childViews.getJSONObject(i)))
@@ -294,7 +294,7 @@ internal object FeatureExtractor {
       }
       var isChildInteracted = false
       var isDescendantInteracted = false
-      val childViews = node.optJSONArray(CHILDREN_VIEW_KEY)
+      val childViews = node.optJSONArray(CHILDREN_VIEW_KEY)!!
       for (i in 0 until childViews.length()) {
         val child = childViews.getJSONObject(i)
         if (child.optBoolean(IS_INTERACTED_KEY)) {

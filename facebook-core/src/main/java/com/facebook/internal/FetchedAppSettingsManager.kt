@@ -225,13 +225,13 @@ object FetchedAppSettingsManager {
         val handler = Handler(Looper.getMainLooper())
         if (FetchAppSettingState.ERROR == currentState) {
             while (!fetchedAppSettingsCallbacks.isEmpty()) {
-                val callback = fetchedAppSettingsCallbacks.poll()
+                val callback = fetchedAppSettingsCallbacks.poll() ?: break
                 handler.post { callback.onError() }
             }
             return
         }
         while (!fetchedAppSettingsCallbacks.isEmpty()) {
-            val callback = fetchedAppSettingsCallbacks.poll()
+            val callback = fetchedAppSettingsCallbacks.poll() ?: break
             handler.post { callback.onSuccess(appSettings) }
         }
     }

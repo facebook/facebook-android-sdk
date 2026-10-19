@@ -58,7 +58,6 @@ import com.facebook.internal.InstallReferrerUtil.tryUpdateReferrerInfoBlocking
 import com.facebook.internal.Logger.Companion.log
 import com.facebook.internal.Utility.getActivityName
 import com.facebook.internal.Utility.getMetadataApplicationId
-import com.facebook.internal.Utility.isNullOrEmpty
 import com.facebook.internal.Utility.logd
 import com.facebook.internal.Utility.stringsEqualOrEmpty
 import com.facebook.internal.Validate.sdkInitialized
@@ -159,7 +158,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
         var campaignId: String? = null
         try {
             val payloadString = payload.getString(PUSH_PAYLOAD_KEY)
-            if (isNullOrEmpty(payloadString)) {
+            if (payloadString.isNullOrEmpty()) {
                 return // Ignore the payload if no fb push payload is present.
             }
             val facebookPayload = JSONObject(payloadString)
