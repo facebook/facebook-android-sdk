@@ -204,7 +204,7 @@ internal constructor(
         val permission = permissionEntry.optString("permission")
         var status = permissionEntry.optString("status")
         if (!isNullOrEmpty(permission) && !isNullOrEmpty(status)) {
-          status = status.toLowerCase(Locale.US)
+          status = status.lowercase(Locale.US)
           when (status) {
             "granted" -> permissions.add(permission)
             "declined" -> declinedPermissions.add(permission)

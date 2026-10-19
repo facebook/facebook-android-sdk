@@ -22,6 +22,7 @@ import com.facebook.internal.Utility.mapToJsonStr
 import com.facebook.internal.Utility.sha256hash
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.lang.StringBuilder
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -197,7 +198,7 @@ object UserDataStore {
       val rawVal = ud[key] ?: continue
       val value = rawVal.toString()
       if (maybeSHA256Hashed(value)) {
-        externalHashedUserData[key] = value.toLowerCase()
+        externalHashedUserData[key] = value.lowercase(Locale.getDefault())
       } else {
         val encryptedValue = sha256hash(normalizeData(key, value))
         if (encryptedValue != null) {
@@ -243,7 +244,7 @@ object UserDataStore {
   }
 
   private fun normalizeData(type: String, data: String): String {
-    var normalized = data.trim { it <= ' ' }.toLowerCase()
+    var normalized = data.trim { it <= ' ' }.lowercase(Locale.getDefault())
     if (EMAIL == type) {
       return if (Patterns.EMAIL_ADDRESS.matcher(normalized).matches()) {
         normalized

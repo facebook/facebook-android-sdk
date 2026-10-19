@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.TextView
 import com.facebook.appevents.codeless.internal.ViewHierarchy
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.util.Locale
 
 @AutoHandleExceptions
 internal object MetadataMatcher {
@@ -50,7 +51,7 @@ internal object MetadataMatcher {
     val validIndicators: MutableList<String> = mutableListOf()
     for (indicator in indicators) {
       if (indicator.isNotEmpty() && indicator.length <= MAX_INDICATOR_LENGTH) {
-        validIndicators.add(indicator.toLowerCase())
+        validIndicators.add(indicator.lowercase(Locale.getDefault()))
       }
     }
     return validIndicators
@@ -102,7 +103,7 @@ internal object MetadataMatcher {
     if (view is TextView) {
       val text = view.text.toString()
       if (text.isNotEmpty() && text.length < MAX_INDICATOR_LENGTH) {
-        indicators.add(text.toLowerCase())
+        indicators.add(text.lowercase(Locale.getDefault()))
       }
       return indicators
     }

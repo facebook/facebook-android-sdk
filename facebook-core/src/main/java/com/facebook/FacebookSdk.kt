@@ -832,7 +832,7 @@ object FacebookSdk {
             val appId = ai.metaData[APPLICATION_ID_PROPERTY]
             if (appId is String) {
                 val appIdString = appId
-                if (appIdString.toLowerCase(Locale.ROOT).startsWith("fb")) {
+                if (appIdString.lowercase(Locale.ROOT).startsWith("fb")) {
                     applicationId = appIdString.substring(2)
                 } else {
                     applicationId = appIdString

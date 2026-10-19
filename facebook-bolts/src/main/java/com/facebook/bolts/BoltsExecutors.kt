@@ -88,7 +88,7 @@ internal class BoltsExecutors private constructor() {
     private val isAndroidRuntime: Boolean
       get() {
         val javaRuntimeName = System.getProperty("java.runtime.name") ?: return false
-        return javaRuntimeName.toLowerCase(Locale.US).contains("android")
+        return javaRuntimeName.lowercase(Locale.US).contains("android")
       }
 
     /** An [java.util.concurrent.Executor] that executes tasks in parallel. */

@@ -24,6 +24,7 @@ import com.facebook.appevents.aam.MetadataRule.Companion.getRules
 import com.facebook.appevents.internal.AppEventUtility.getRootView
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.lang.ref.WeakReference
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
 @AutoHandleExceptions
@@ -77,7 +78,7 @@ internal class MetadataViewObserver private constructor(activity: Activity) :
   }
 
   private fun processEditText(view: View) {
-    val text = (view as EditText).text.toString().trim().toLowerCase()
+    val text = (view as EditText).text.toString().trim().lowercase(Locale.getDefault())
     if (text.isEmpty() || processedText.contains(text) || text.length > MAX_TEXT_LENGTH) {
       return
     }

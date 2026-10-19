@@ -41,6 +41,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.util.Locale
 import java.util.regex.Pattern
 import org.json.JSONArray
 import org.json.JSONException
@@ -105,7 +106,7 @@ internal object FeatureExtractor {
   @JvmStatic
   fun getTextFeature(buttonText: String, activityName: String, appName: String): String {
     // intentionally use "|" and "," to separate to respect how text processed during training
-    return "$appName | $activityName, $buttonText".toLowerCase()
+    return "$appName | $activityName, $buttonText".lowercase(Locale.getDefault())
   }
 
   @JvmStatic
@@ -116,7 +117,7 @@ internal object FeatureExtractor {
     }
     val ret = FloatArray(NUM_OF_FEATURES) { 0f }
     try {
-      val lowercaseAppName = appName.toLowerCase()
+      val lowercaseAppName = appName.lowercase(Locale.getDefault())
       val viewTree = JSONObject(viewHierarchy.optJSONObject(VIEW_KEY).toString()) // copy
       val screenName = viewHierarchy.optString(SCREEN_NAME_KEY)
       val siblings = JSONArray()
@@ -137,9 +138,9 @@ internal object FeatureExtractor {
 
   private fun parseFeatures(node: JSONObject): FloatArray {
     val densefeat = FloatArray(NUM_OF_FEATURES) { 0f }
-    val text = node.optString(TEXT_KEY).toLowerCase()
-    val hint = node.optString(HINT_KEY).toLowerCase()
-    val className = node.optString(CLASS_NAME_KEY).toLowerCase()
+    val text = node.optString(TEXT_KEY).lowercase(Locale.getDefault())
+    val hint = node.optString(HINT_KEY).lowercase(Locale.getDefault())
+    val className = node.optString(CLASS_NAME_KEY).lowercase(Locale.getDefault())
     val inputType = node.optInt(INPUT_TYPE_KEY, -1)
     val textValues = arrayOf(text, hint)
     if (matchIndicators(arrayOf("$", "amount", "price", "total"), textValues)) {
@@ -341,8 +342,8 @@ internal object FeatureExtractor {
       textSB: StringBuilder,
       hintSB: StringBuilder
   ) {
-    val text = view.optString(TEXT_KEY, "").toLowerCase()
-    val hint = view.optString(HINT_KEY, "").toLowerCase()
+    val text = view.optString(TEXT_KEY, "").lowercase(Locale.getDefault())
+    val hint = view.optString(HINT_KEY, "").lowercase(Locale.getDefault())
     if (text.isNotEmpty()) {
       textSB.append(text).append(" ")
     }

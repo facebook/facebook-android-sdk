@@ -39,7 +39,7 @@ private constructor(hostView: View, rootView: View, activityName: String) : View
       ViewHierarchy.getExistingOnClickListener(hostView)
   private val rootViewWeakReference: WeakReference<View> = WeakReference(rootView)
   private val hostViewWeakReference: WeakReference<View> = WeakReference(hostView)
-  private val activityName: String = activityName.toLowerCase().replace("activity", "")
+  private val activityName: String = activityName.lowercase(Locale.getDefault()).replace("activity", "")
   override fun onClick(view: View) {
     baseListener?.onClick(view)
     process()
@@ -73,7 +73,7 @@ private constructor(hostView: View, rootView: View, activityName: String) : View
     runOnNonUiThread(
         Runnable {
           try {
-            val appName = getAppName(FacebookSdk.getApplicationContext()).toLowerCase()
+            val appName = getAppName(FacebookSdk.getApplicationContext()).lowercase(Locale.getDefault())
             val dense = getDenseFeatures(viewData, appName)
             val textFeature = getTextFeature(buttonText, activityName, appName)
             if (dense == null) {

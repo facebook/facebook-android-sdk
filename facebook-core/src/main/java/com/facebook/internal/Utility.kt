@@ -1284,7 +1284,7 @@ object Utility {
       try {
         val options = dataProcessingOptions.getJSONArray("data_processing_options")
         for (i in 0 until options.length()) {
-          val option = options.getString(i).toLowerCase()
+          val option = options.getString(i).lowercase(Locale.getDefault())
           if (option == "ldu") {
             return true
           }
