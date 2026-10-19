@@ -21,6 +21,7 @@ import com.facebook.internal.Utility.getGraphMeRequestWithCacheAsync
 import com.facebook.internal.Utility.isNullOrEmpty
 import com.facebook.internal.Utility.jsonArrayToStringList
 import com.facebook.internal.Validate
+import com.facebook.internal.optStringOrNull
 import java.lang.Exception
 import java.util.Collections
 import java.util.Date
@@ -656,7 +657,7 @@ class AccessToken : Parcelable {
       val applicationId = jsonObject.getString(APPLICATION_ID_KEY)
       val userId = jsonObject.getString(USER_ID_KEY)
       val dataAccessExpirationTime = Date(jsonObject.optLong(DATA_ACCESS_EXPIRATION_TIME, 0))
-      val graphDomain = jsonObject.optString(GRAPH_DOMAIN, null)
+      val graphDomain = jsonObject.optStringOrNull(GRAPH_DOMAIN)
       return AccessToken(
           token,
           applicationId,

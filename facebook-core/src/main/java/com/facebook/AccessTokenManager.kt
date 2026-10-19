@@ -23,6 +23,7 @@ import com.facebook.appevents.FlushReason
 import com.facebook.internal.Utility.areObjectsEqual
 import com.facebook.internal.Utility.clearFacebookCookies
 import com.facebook.internal.Utility.isNullOrEmpty
+import com.facebook.internal.optStringOrNull
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
@@ -222,7 +223,7 @@ internal constructor(
       refreshResult.expiresIn = data.optInt("expires_in")
       refreshResult.dataAccessExpirationTime =
           data.optLong("data_access_expiration_time")
-      refreshResult.graphDomain = data.optString("graph_domain", null)
+      refreshResult.graphDomain = data.optStringOrNull("graph_domain")
     }
 
     val onAllCompleted = Runnable {

@@ -150,13 +150,13 @@ internal constructor(
         val definition = jsonArray.optJSONObject(i) ?: continue
         val name = definition.optString(KEY_NAME) ?: continue
         if (name.equals(KEY_OTHER, ignoreCase = true)) {
-          otherRecoveryMessage = definition.optString(KEY_RECOVERY_MESSAGE, null)
+          otherRecoveryMessage = definition.optStringOrNull(KEY_RECOVERY_MESSAGE)
           otherErrors = parseJSONDefinition(definition)
         } else if (name.equals(KEY_TRANSIENT, ignoreCase = true)) {
-          transientRecoveryMessage = definition.optString(KEY_RECOVERY_MESSAGE, null)
+          transientRecoveryMessage = definition.optStringOrNull(KEY_RECOVERY_MESSAGE)
           transientErrors = parseJSONDefinition(definition)
         } else if (name.equals(KEY_LOGIN_RECOVERABLE, ignoreCase = true)) {
-          loginRecoverableRecoveryMessage = definition.optString(KEY_RECOVERY_MESSAGE, null)
+          loginRecoverableRecoveryMessage = definition.optStringOrNull(KEY_RECOVERY_MESSAGE)
           loginRecoverableErrors = parseJSONDefinition(definition)
         }
       }

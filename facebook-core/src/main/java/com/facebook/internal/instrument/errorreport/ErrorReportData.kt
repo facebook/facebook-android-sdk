@@ -10,6 +10,7 @@ package com.facebook.internal.instrument.errorreport
 
 import androidx.annotation.RestrictTo
 import com.facebook.internal.instrument.InstrumentUtility
+import com.facebook.internal.optStringOrNull
 import java.io.File
 import org.json.JSONException
 import org.json.JSONObject
@@ -36,7 +37,7 @@ class ErrorReportData {
     val obj = InstrumentUtility.readFile(filename, true)
     if (obj != null) {
       timestamp = obj.optLong(PARAM_TIMESTAMP, 0)
-      errorMessage = obj.optString(PRARAM_ERROR_MESSAGE, null)
+      errorMessage = obj.optStringOrNull(PRARAM_ERROR_MESSAGE)
     }
   }
 

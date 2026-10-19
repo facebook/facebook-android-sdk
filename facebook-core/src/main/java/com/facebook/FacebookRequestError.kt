@@ -15,6 +15,7 @@ import com.facebook.internal.FacebookRequestErrorClassification
 import com.facebook.internal.FacebookRequestErrorClassification.Companion.defaultErrorClassification
 import com.facebook.internal.FetchedAppSettingsManager.getAppSettingsWithoutQuery
 import com.facebook.internal.Utility.getStringPropertyAsJSON
+import com.facebook.internal.optStringOrNull
 import com.facebook.internal.qualityvalidation.Excuse
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations
 import java.net.HttpURLConnection
@@ -307,21 +308,21 @@ private constructor(
             if (jsonBody.has(ERROR_KEY)) {
               // We assume the error object is correctly formatted.
               val error = getStringPropertyAsJSON(jsonBody, ERROR_KEY, null) as JSONObject?
-              errorType = error?.optString(ERROR_TYPE_FIELD_KEY, null)
-              errorMessage = error?.optString(ERROR_MESSAGE_FIELD_KEY, null)
+              errorType = error?.optStringOrNull(ERROR_TYPE_FIELD_KEY)
+              errorMessage = error?.optStringOrNull(ERROR_MESSAGE_FIELD_KEY)
               errorCode =
                   error?.optInt(ERROR_CODE_FIELD_KEY, INVALID_ERROR_CODE) ?: INVALID_ERROR_CODE
               errorSubCode =
                   error?.optInt(ERROR_SUB_CODE_KEY, INVALID_ERROR_CODE) ?: INVALID_ERROR_CODE
-              errorUserMessage = error?.optString(ERROR_USER_MSG_KEY, null)
-              errorUserTitle = error?.optString(ERROR_USER_TITLE_KEY, null)
+              errorUserMessage = error?.optStringOrNull(ERROR_USER_MSG_KEY)
+              errorUserTitle = error?.optStringOrNull(ERROR_USER_TITLE_KEY)
               errorIsTransient = error?.optBoolean(ERROR_IS_TRANSIENT_KEY, false) ?: false
               hasError = true
             } else if (jsonBody.has(ERROR_CODE_KEY) ||
                 jsonBody.has(ERROR_MSG_KEY) ||
                 jsonBody.has(ERROR_REASON_KEY)) {
-              errorType = jsonBody.optString(ERROR_REASON_KEY, null)
-              errorMessage = jsonBody.optString(ERROR_MSG_KEY, null)
+              errorType = jsonBody.optStringOrNull(ERROR_REASON_KEY)
+              errorMessage = jsonBody.optStringOrNull(ERROR_MSG_KEY)
               errorCode = jsonBody.optInt(ERROR_CODE_KEY, INVALID_ERROR_CODE)
               errorSubCode = jsonBody.optInt(ERROR_SUB_CODE_KEY, INVALID_ERROR_CODE)
               hasError = true

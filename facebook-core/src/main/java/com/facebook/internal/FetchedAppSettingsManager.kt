@@ -448,7 +448,7 @@ object FetchedAppSettingsManager {
         if (protectedModeSettings == null || protectedModeSettings.isNull(VVP_CONFIG_KEY)) {
             return null
         }
-        return protectedModeSettings.optString(VVP_CONFIG_KEY, null)
+        return protectedModeSettings.optStringOrNull(VVP_CONFIG_KEY)
     }
 
     private fun parseCurrencyAndValueDedupeParameters(

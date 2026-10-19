@@ -26,6 +26,7 @@ import com.facebook.internal.FeatureManager.isEnabled
 import com.facebook.internal.Utility.resourceLocale
 import com.facebook.internal.Utility.runOnNonUiThread
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import com.facebook.internal.optStringOrNull
 import java.io.File
 import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
@@ -308,7 +309,7 @@ object ModelManager {
           try {
             val useCase = json.getString(USE_CASE_KEY)
             val assetUri = json.getString(ASSET_URI_KEY)
-            val ruleUri = json.optString(RULES_URI_KEY, null)
+            val ruleUri = json.optStringOrNull(RULES_URI_KEY)
             val versionId = json.getInt(VERSION_ID_KEY)
             val thresholds = parseJsonArray(json.getJSONArray(THRESHOLD_KEY))
             TaskHandler(useCase, assetUri, ruleUri, versionId, thresholds)

@@ -16,6 +16,7 @@ import com.facebook.internal.instrument.InstrumentUtility.getCause
 import com.facebook.internal.instrument.InstrumentUtility.getStackTrace
 import com.facebook.internal.instrument.InstrumentUtility.readFile
 import com.facebook.internal.instrument.InstrumentUtility.writeFile
+import com.facebook.internal.optStringOrNull
 import java.io.File
 import org.json.JSONArray
 import org.json.JSONException
@@ -105,9 +106,9 @@ class InstrumentData {
     val obj = readFile(filename, true)
     if (obj != null) {
       timestamp = obj.optLong(PARAM_TIMESTAMP, 0)
-      appVersion = obj.optString(PARAM_APP_VERSION, null)
-      cause = obj.optString(PARAM_REASON, null)
-      stackTrace = obj.optString(PARAM_CALLSTACK, null)
+      appVersion = obj.optStringOrNull(PARAM_APP_VERSION)
+      cause = obj.optStringOrNull(PARAM_REASON)
+      stackTrace = obj.optStringOrNull(PARAM_CALLSTACK)
       featureNames = obj.optJSONArray(PARAM_FEATURE_NAMES)
     }
   }

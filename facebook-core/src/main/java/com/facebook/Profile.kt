@@ -16,6 +16,7 @@ import com.facebook.internal.ImageRequest.Companion.getProfilePictureUri
 import com.facebook.internal.Utility
 import com.facebook.internal.Utility.getGraphMeRequestWithCacheAsync
 import com.facebook.internal.Validate.notNullOrEmpty
+import com.facebook.internal.optStringOrNull
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -180,14 +181,14 @@ class Profile : Parcelable {
   }
 
   internal constructor(jsonObject: JSONObject) {
-    id = jsonObject.optString(ID_KEY, null)
-    firstName = jsonObject.optString(FIRST_NAME_KEY, null)
-    middleName = jsonObject.optString(MIDDLE_NAME_KEY, null)
-    lastName = jsonObject.optString(LAST_NAME_KEY, null)
-    name = jsonObject.optString(NAME_KEY, null)
-    val linkUriString = jsonObject.optString(LINK_URI_KEY, null)
+    id = jsonObject.optStringOrNull(ID_KEY)
+    firstName = jsonObject.optStringOrNull(FIRST_NAME_KEY)
+    middleName = jsonObject.optStringOrNull(MIDDLE_NAME_KEY)
+    lastName = jsonObject.optStringOrNull(LAST_NAME_KEY)
+    name = jsonObject.optStringOrNull(NAME_KEY)
+    val linkUriString = jsonObject.optStringOrNull(LINK_URI_KEY)
     linkUri = if (linkUriString == null) null else Uri.parse(linkUriString)
-    val pictureUriString = jsonObject.optString(PICTURE_URI_KEY, null)
+    val pictureUriString = jsonObject.optStringOrNull(PICTURE_URI_KEY)
     pictureUri = if (pictureUriString == null) null else Uri.parse(pictureUriString)
   }
 
@@ -269,7 +270,7 @@ class Profile : Parcelable {
                 return
               }
               val link = userInfo.optString("link")
-              val picture = userInfo.optString("profile_picture", null)
+              val picture = userInfo.optStringOrNull("profile_picture")
               val profile =
                   Profile(
                       id,

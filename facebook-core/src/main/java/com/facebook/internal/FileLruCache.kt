@@ -113,7 +113,7 @@ class FileLruCache(private val tag: String, private val limits: Limits) {
       if (foundKey != key) {
         return null
       }
-      val headerContentTag = header.optString(HEADER_CACHE_CONTENT_TAG_KEY, null)
+      val headerContentTag = header.optStringOrNull(HEADER_CACHE_CONTENT_TAG_KEY)
       if (contentTag != null && contentTag != headerContentTag) {
         return null
       }
