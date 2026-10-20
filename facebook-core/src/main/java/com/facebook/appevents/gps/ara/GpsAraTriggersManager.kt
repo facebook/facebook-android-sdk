@@ -22,6 +22,7 @@ import com.facebook.appevents.gps.GpsDebugLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.internal.AnalyticsEvents
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import com.facebook.internal.instrument.crashshield.NoAutoExceptionHandling
 import java.net.URLEncoder
 
 @AutoHandleExceptions
@@ -120,7 +121,9 @@ object GpsAraTriggersManager {
     }
 
     // Nullable despite MeasurementManager.get() being annotated @NonNull: it can still return null.
+    // Not crash-shielded, so a throw reaches registerTrigger's catch and is logged as GPS_ARA_FAILED.
     @TargetApi(34)
+    @NoAutoExceptionHandling
     private fun getMeasurementManager(context: Context): MeasurementManager? =
         // On certain Android versions, Context.getSystemService() returns null since ARA is not yet
         // merged into the public SDK. If this happens, we use the factory method to get the
