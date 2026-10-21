@@ -132,8 +132,7 @@ class InternalAppEventsLogger internal constructor(private val loggerImpl: AppEv
             UserDataStore.setUserDataAndHash(userData)
         }
 
-        @Suppress("DEPRECATION")
-        @RestrictTo(RestrictTo.Scope.GROUP_ID)
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         fun setInternalUserData(ud: Map<String, String>) {
             UserDataStore.setInternalUd(ud)
