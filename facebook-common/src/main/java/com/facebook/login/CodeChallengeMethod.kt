@@ -8,7 +8,7 @@
 
 package com.facebook.login
 
-enum class CodeChallengeMethod(@Suppress("UNUSED_PARAMETER") s: String = "S256") {
-  S256("S256"),
-  PLAIN("plain")
+enum class CodeChallengeMethod {
+  S256,
+  PLAIN
 }
