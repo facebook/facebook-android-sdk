@@ -48,6 +48,7 @@ class ContextSwitchContent : ShareModel {
     override fun readFrom(model: ContextSwitchContent?): Builder =
         model?.let { setContextID(it.contextID) } ?: this
 
+    @Suppress("DEPRECATION")
     fun readFrom(parcel: Parcel): Builder =
         this.readFrom(
             parcel.readParcelable<Parcelable>(ContextSwitchContent::class.java.classLoader)

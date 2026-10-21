@@ -86,6 +86,7 @@ class ContextChooseContent : ShareModel {
         model?.let { setFilters(it.getFilters()).setMaxSize(it.maxSize).setMinSize(it.minSize) }
             ?: this
 
+    @Suppress("DEPRECATION")
     fun readFrom(parcel: Parcel): Builder =
         readFrom(
             parcel.readParcelable<Parcelable>(ContextChooseContent::class.java.classLoader)

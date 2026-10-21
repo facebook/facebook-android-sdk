@@ -46,6 +46,7 @@ class ContextCreateDialog : FacebookDialogBase<ContextCreateContent, ContextCrea
    *
    * @param fragment fragment to use to trigger this Dialog.
    */
+  @Suppress("DEPRECATION")
   constructor(fragment: android.app.Fragment) : this(FragmentWrapper(fragment))
 
   private constructor(

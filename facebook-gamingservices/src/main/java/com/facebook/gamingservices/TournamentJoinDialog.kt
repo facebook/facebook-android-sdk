@@ -57,6 +57,7 @@ class TournamentJoinDialog : FacebookDialogBase<String?, TournamentJoinDialog.Re
      *
      * @param fragment android.app.Fragment hosting the dialog.
      */
+    @Suppress("DEPRECATION")
     constructor(fragment: android.app.Fragment) : this(FragmentWrapper(fragment))
     private constructor(
             fragmentWrapper: FragmentWrapper

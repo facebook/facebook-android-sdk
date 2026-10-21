@@ -48,6 +48,7 @@ class ContextCreateContent : ShareModel {
     override fun readFrom(model: ContextCreateContent?): Builder =
         model?.let { setSuggestedPlayerID(it.suggestedPlayerID) } ?: this
 
+    @Suppress("DEPRECATION")
     fun readFrom(parcel: Parcel): Builder =
         this.readFrom(
             parcel.readParcelable<Parcelable>(ContextCreateContent::class.java.classLoader)

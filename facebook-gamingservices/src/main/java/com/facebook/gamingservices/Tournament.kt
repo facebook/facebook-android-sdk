@@ -79,8 +79,8 @@ class Tournament : ShareModel {
       return Tournament(identifier, endTime, title, payload)
     }
 
-    override fun readFrom(tournament: Tournament?): Builder =
-        tournament?.let {
+    override fun readFrom(model: Tournament?): Builder =
+        model?.let {
           this.identifier(it.identifier)
               .expiration(it.expiration)
               .title(it.title)

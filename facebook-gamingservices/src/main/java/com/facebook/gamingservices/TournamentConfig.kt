@@ -148,12 +148,9 @@ class TournamentConfig : ShareModel {
       return TournamentConfig(this)
     }
 
-    internal fun readFrom(parcel: Parcel): Builder {
-      (parcel.readParcelable(TournamentConfig::class.java.classLoader) as TournamentConfig?).let {
-        return this.readFrom(it)
-      }
-      return this
-    }
+    @Suppress("DEPRECATION")
+    internal fun readFrom(parcel: Parcel): Builder =
+        readFrom(parcel.readParcelable(TournamentConfig::class.java.classLoader) as TournamentConfig?)
 
     override fun readFrom(model: TournamentConfig?): Builder {
       if (model == null) {
