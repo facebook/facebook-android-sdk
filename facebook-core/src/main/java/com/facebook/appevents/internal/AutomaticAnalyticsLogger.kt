@@ -163,17 +163,21 @@ object AutomaticAnalyticsLogger {
     @Synchronized
     @JvmStatic
     fun getPurchaseDedupeParameters(purchaseLoggingParametersList: List<PurchaseLoggingParameters>): Bundle? {
-        val purchaseParams = purchaseLoggingParametersList[0]
-        val inAppPurchase = InAppPurchase(
-            AppEventsConstants.EVENT_NAME_PURCHASED,
-            purchaseParams.purchaseAmount.toDouble(),
-            purchaseParams.currency
-        )
+        // GPBL does not identify the selected one-time offer in Purchase data. Keep every parsed
+        // price as a dedupe candidate while logPurchase emits only the first one.
+        val purchasesToDedupe =
+            purchaseLoggingParametersList.map { purchaseParams ->
+                InAppPurchase(
+                    AppEventsConstants.EVENT_NAME_PURCHASED,
+                    purchaseParams.purchaseAmount.toDouble(),
+                    purchaseParams.currency
+                )
+            }
         return InAppPurchaseManager.performDedupe(
-            listOf(inAppPurchase),
+            purchasesToDedupe,
             System.currentTimeMillis(),
             true,
-            listOf(Pair(purchaseParams.param, purchaseParams.operationalData))
+            purchaseLoggingParametersList.map { Pair(it.param, it.operationalData) }
         )
     }
 
@@ -369,17 +373,77 @@ object AutomaticAnalyticsLogger {
             }
             return subscriptionParametersList
         } else {
-            val oneTimePurchaseOfferDetailsJSON =
-                skuDetailsJSON.getJSONObject(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)
-                    ?: return null
-            return mutableListOf(
-                PurchaseLoggingParameters(
-                    BigDecimal(oneTimePurchaseOfferDetailsJSON.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7) / 1_000_000.0),
-                    Currency.getInstance(oneTimePurchaseOfferDetailsJSON.getString(Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7)),
-                    params,
-                    operationalData
+            val oneTimePurchaseParameters = mutableListOf<PurchaseLoggingParameters>()
+            val seenOffers = mutableSetOf<Pair<Long, Currency>>()
+
+            fun parseOfferDetails(offerDetails: JSONObject): Pair<Long, Currency>? {
+                return try {
+                    Pair(
+                        offerDetails.getLong(Constants.GP_IAP_PRICE_AMOUNT_MICROS_V5V7),
+                        Currency.getInstance(
+                            offerDetails.getString(
+                                Constants.GP_IAP_PRICE_CURRENCY_CODE_V5V7
+                            )
+                        )
+                    )
+                } catch (_: JSONException) {
+                    null
+                } catch (_: IllegalArgumentException) {
+                    null
+                }
+            }
+
+            fun addOffer(offer: Pair<Long, Currency>) {
+                if (!seenOffers.add(offer)) {
+                    return
+                }
+                oneTimePurchaseParameters.add(
+                    PurchaseLoggingParameters(
+                        BigDecimal(offer.first / 1_000_000.0),
+                        offer.second,
+                        // Price and currency differ by offer; the remaining metadata describes the
+                        // same purchase. Copies isolate later dedupe annotations between candidates.
+                        Bundle(params),
+                        operationalData.copy()
+                    )
                 )
-            )
+            }
+
+            // Preserve the price logged by older SDK versions when the legacy offer is valid.
+            skuDetailsJSON
+                .optJSONObject(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)
+                ?.let { parseOfferDetails(it) }
+                ?.let { addOffer(it) }
+
+            var malformedListOfferCount = 0
+            val oneTimePurchaseOfferDetailsJSONArray =
+                skuDetailsJSON.optJSONArray(
+                    Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS_LIST
+                )
+            if (oneTimePurchaseOfferDetailsJSONArray != null) {
+                for (index in 0 until oneTimePurchaseOfferDetailsJSONArray.length()) {
+                    val offerDetails = oneTimePurchaseOfferDetailsJSONArray.optJSONObject(index)
+                    val offer = offerDetails?.let { parseOfferDetails(it) }
+                    if (offer != null) {
+                        addOffer(offer)
+                    } else {
+                        malformedListOfferCount++
+                    }
+                }
+            }
+            if (oneTimePurchaseParameters.isEmpty()) {
+                Log.w(
+                    TAG,
+                    "Failed to find valid price information for Google Play one-time product."
+                )
+            } else if (malformedListOfferCount > 0) {
+                Log.w(
+                    TAG,
+                    "Skipped $malformedListOfferCount Google Play one-time product offer(s) with " +
+                        "missing or invalid price information."
+                )
+            }
+            return oneTimePurchaseParameters
         }
     }
 
@@ -515,11 +579,11 @@ object AutomaticAnalyticsLogger {
                     )
                 )
 
-            } else if (skuDetailsJSON.has(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS) || skuDetailsJSON.has(
-                    Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS
-                )
+            } else if (skuDetailsJSON.has(Constants.GP_IAP_SUBSCRIPTION_OFFER_DETAILS) ||
+                skuDetailsJSON.has(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS_LIST) ||
+                skuDetailsJSON.has(Constants.GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS)
             ) {
-                // GPBL v5 - v7
+                // GPBL v5+
                 getPurchaseParametersGPBLV5V7(type, params, operationalData, skuDetailsJSON)
             } else {
                 null

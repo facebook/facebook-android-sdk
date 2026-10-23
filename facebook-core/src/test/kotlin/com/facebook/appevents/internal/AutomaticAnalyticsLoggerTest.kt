@@ -74,6 +74,22 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
         "{\"productId\":\"id123\",\"type\":\"inapp\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"description\":\"Exampledescription.\",\"price\":\"$12.00\",\"price_amount_micros\":12000000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"sampleToken\"}"
     private val oneTimePurchaseDetailsGPBLV5V7 =
         "{\"productId\":\"id123\",\"type\":\"inapp\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken=\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$12.00\",\"offerIdToken\":\"offerIdToken==\"}}"
+    private val oneTimePurchaseDetailsGPBLV8 =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetails\":{},\"oneTimePurchaseOfferDetailsList\":[{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"}]}"
+    private val oneTimePurchaseDetailsGPBLV8ListOnly =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetailsList\":[{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"},{\"priceAmountMicros\":15000000,\"priceCurrencyCode\":\"EUR\"}]}"
+    private val oneTimePurchaseDetailsGPBLV8EmptyList =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"},\"oneTimePurchaseOfferDetailsList\":[]}"
+    private val oneTimePurchaseDetailsGPBLV8PartiallyMalformedList =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetailsList\":[{},{\"priceAmountMicros\":13000000,\"priceCurrencyCode\":\"INVALID\"},{\"priceAmountMicros\":15000000,\"priceCurrencyCode\":\"EUR\"}]}"
+    private val oneTimePurchaseDetailsGPBLV8InvalidListWithLegacyOffer =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"},\"oneTimePurchaseOfferDetailsList\":[{}]}"
+    private val oneTimePurchaseDetailsGPBLV8DifferentLegacyAndListOffers =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"},\"oneTimePurchaseOfferDetailsList\":[{\"priceAmountMicros\":9990000,\"priceCurrencyCode\":\"USD\"}]}"
+    private val oneTimePurchaseDetailsGPBLV8DuplicateOffers =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetails\":{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"},\"oneTimePurchaseOfferDetailsList\":[{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"},{\"priceAmountMicros\":12000000,\"priceCurrencyCode\":\"USD\"}]}"
+    private val oneTimePurchaseDetailsGPBLV8WithoutValidOffers =
+        "{\"productId\":\"id123\",\"type\":\"inapp\",\"oneTimePurchaseOfferDetails\":{},\"oneTimePurchaseOfferDetailsList\":[]}"
     private val subscriptionDetailsGPBLV2V4 =
         "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"iconUrl\":\"exampleIconUrl\",\"price\":\"$3.99\",\"price_amount_micros\":3990000,\"price_currency_code\":\"USD\",\"skuDetailsToken\":\"exampleDetailsToken=\",\"subscriptionPeriod\":\"P1W\",\"freeTrialPeriod\":\"P1W\",\"introductoryPriceAmountMicros\":3590000,\"introductoryPricePeriod\":\"P1W\",\"introductoryPrice\":\"$3.59\", \"introductoryPricePeriod\": \"P1W\"}"
     private val subscriptionDetailsWithNoFreeTrialGPBLV2V4 =
@@ -81,6 +97,8 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     private val subscriptionDetailsGPBLV5V7 =
         "{\"productId\":\"id123\",\"type\":\"subs\",\"title\":\"ExampleTitle\",\"name\":\"ExampleName\",\"description\":\"Exampledescription.\",\"localizedIn\":[\"en-US\"],\"skuDetailsToken\":\"detailsToken\",\"subscriptionOfferDetails\":[{\"offerIdToken\":\"offerIdToken1=\",\"basePlanId\":\"baseplanId\",\"offerId\":\"offerId\",\"pricingPhases\":[{\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"Free\",\"billingPeriod\":\"P2W\",\"recurrenceMode\":2,\"billingCycleCount\":1},{\"priceAmountMicros\":3590000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.59\",\"billingPeriod\":\"P2W\",\"recurrenceMode\":2,\"billingCycleCount\":2},{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P2W\",\"recurrenceMode\":1}],\"offerTags\":[]},{\"offerIdToken\":\"offerIdToken2=\",\"basePlanId\":\"basePlanId2\",\"pricingPhases\":[{\"priceAmountMicros\":3990000,\"priceCurrencyCode\":\"USD\",\"formattedPrice\":\"$3.99\",\"billingPeriod\":\"P1W\",\"recurrenceMode\":1}],\"offerTags\":[]}]}"
     private var logDebugCallCount = 0
+    private var logWarningCallCount = 0
+    private var warningMessage = ""
     private var appEventLoggerCallCount = 0
 
     private lateinit var context: Context
@@ -126,6 +144,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             .thenReturn(mockFetchedAppSettings)
 
         whenever(Log.d(any(), any<String>())).then { logDebugCallCount++ }
+        whenever(Log.w(any(), any<String>())).then {
+            logWarningCallCount++
+            warningMessage = it.getArgument(1)
+            0
+        }
         whenever(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
         val dedupeParameters = listOf(
             Pair(
@@ -2153,6 +2176,227 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
             )
         ).isEqualTo("GPBL.5.1.0")
 
+    }
+
+    @Test
+    fun `test log purchase uses GPBL v8 offer list when legacy details are empty`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        verify(mockInternalAppEventsLogger)
+            .logPurchaseImplicitly(
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>(),
+                any<OperationalData>(),
+            )
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(12))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(logWarningCallCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `test GPBL v8 list-only details log first offer and dedupe all offers`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+        val manualPurchaseHistory =
+            ConcurrentHashMap<
+                InAppPurchase,
+                MutableList<Pair<Long, Pair<Bundle, OperationalData>>>
+            >()
+        val parameters = Bundle()
+        parameters.putCharSequence(Constants.IAP_PRODUCT_ID, "id123")
+        val secondOfferPurchase =
+            InAppPurchase(
+                AppEventsConstants.EVENT_NAME_PURCHASED,
+                15.0,
+                Currency.getInstance("EUR")
+            )
+        manualPurchaseHistory[secondOfferPurchase] =
+            mutableListOf(
+                Pair(System.currentTimeMillis(), Pair(parameters, OperationalData()))
+            )
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            manualPurchaseHistory
+        )
+
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8ListOnly,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(12))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(
+            OperationalData.getParameter(
+                OperationalDataEnum.IAPParameters,
+                Constants.IAP_ACTUAL_DEDUP_RESULT,
+                bundle,
+                operationalData
+            )
+        ).isEqualTo("1")
+    }
+
+    @Test
+    fun `test GPBL v8 empty offer list uses valid legacy details`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8EmptyList,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(12))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(logWarningCallCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `test GPBL v8 invalid offer list uses valid legacy details`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8InvalidListWithLegacyOffer,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(12))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(logWarningCallCount).isEqualTo(1)
+        Assertions.assertThat(warningMessage)
+            .isEqualTo(
+                "Skipped 1 Google Play one-time product offer(s) with missing or invalid price " +
+                    "information."
+            )
+    }
+
+    @Test
+    fun `test GPBL v8 valid legacy details preserve the logged amount`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8DifferentLegacyAndListOffers,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(12))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
+        Assertions.assertThat(logWarningCallCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `test GPBL v8 without valid offers warns and skips logging`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8WithoutValidOffers,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        verify(mockInternalAppEventsLogger, never())
+            .logPurchaseImplicitly(
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>(),
+                any<OperationalData>(),
+            )
+        Assertions.assertThat(logWarningCallCount).isEqualTo(1)
+        Assertions.assertThat(warningMessage)
+            .isEqualTo(
+                "Failed to find valid price information for Google Play one-time product."
+            )
+    }
+
+    @Test
+    fun `test GPBL v8 malformed offers do not prevent logging a valid offer`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8PartiallyMalformedList,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(15))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("EUR"))
+        Assertions.assertThat(logWarningCallCount).isEqualTo(1)
+        Assertions.assertThat(warningMessage)
+            .isEqualTo(
+                "Skipped 2 Google Play one-time product offer(s) with missing or invalid price " +
+                    "information."
+            )
+    }
+
+    @Test
+    fun `test GPBL v8 duplicate offers produce one dedupe candidate`() {
+        whenever(FeatureManager.isEnabled(FeatureManager.Feature.AndroidManualImplicitPurchaseDedupe))
+            .thenReturn(true)
+        val emptyManualHistory =
+            ConcurrentHashMap<
+                InAppPurchase,
+                MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>
+            >()
+        val emptyImplicitHistory =
+            ConcurrentHashMap<
+                InAppPurchase,
+                MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>
+            >()
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfManualPurchases",
+            emptyManualHistory
+        )
+        Whitebox.setInternalState(
+            InAppPurchaseManager::class.java,
+            "timesOfImplicitPurchases",
+            emptyImplicitHistory
+        )
+
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8DuplicateOffers,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS
+        )
+
+        val implicitHistory =
+            Whitebox.getInternalState<
+                ConcurrentHashMap<
+                    InAppPurchase,
+                    MutableList<Pair<Long, Pair<Bundle?, OperationalData?>>>
+                >
+            >(InAppPurchaseManager::class.java, "timesOfImplicitPurchases")
+        Assertions.assertThat(implicitHistory).hasSize(1)
+        Assertions.assertThat(implicitHistory.values.single()).hasSize(1)
+    }
+
+    @Test
+    fun `test GPBL v8 offer list logs a restored purchase on first launch`() {
+        AutomaticAnalyticsLogger.logPurchase(
+            oneTimePurchase,
+            oneTimePurchaseDetailsGPBLV8ListOnly,
+            false,
+            InAppPurchaseUtils.BillingClientVersion.V8_PLUS,
+            true
+        )
+
+        verify(mockInternalAppEventsLogger)
+            .logEventImplicitly(
+                eq(Constants.EVENT_NAME_PURCHASE_RESTORED),
+                any<BigDecimal>(),
+                any<Currency>(),
+                any<Bundle>(),
+                any<OperationalData>()
+            )
+        Assertions.assertThat(amount).isEqualByComparingTo(BigDecimal(12))
+        Assertions.assertThat(currency).isEqualTo(Currency.getInstance("USD"))
     }
 
     @Test

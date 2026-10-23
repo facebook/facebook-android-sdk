@@ -68,8 +68,10 @@ object Constants {
     const val GP_IAP_FREE_TRIAL_PERIOD = "freeTrialPeriod"
 
 
-    // Google Play Billing v5 - v7
+    // Google Play Billing v5+
     const val GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS = "oneTimePurchaseOfferDetails"
+    const val GP_IAP_ONE_TIME_PURCHASE_OFFER_DETAILS_LIST =
+        "oneTimePurchaseOfferDetailsList"
     const val GP_IAP_PRICE_AMOUNT_MICROS_V5V7 = "priceAmountMicros"
     const val GP_IAP_PRICE_CURRENCY_CODE_V5V7 = "priceCurrencyCode"
     const val GP_IAP_SUBSCRIPTION_OFFER_DETAILS = "subscriptionOfferDetails"
