@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [19.0.0]
 
 ### Added
-- Starting on 10/31/2026, Screen Title and AppLink URL will be included with events logged with Facebook SDK. You can disable additional metadata by setting AutoLogAppMetadataEnabled false in your AndroidManifest.xml or by turning off "Automatically include more app event details" in Events Manager.
+- Starting on 10/31/2026, Screen Title and AppLink URL will be included with events logged with Facebook SDK. You can disable additional metadata by setting com.facebook.sdk.AutoLogMetaDataEnabled false in your AndroidManifest.xml or by turning off "Automatically include more app event details" in Events Manager.
 
-- FB SDK will automatically send sampled information about your app, such as the layout of elements on app screens. This information helps Meta improve ads systems and build new features. It is not used for ads delivery. You can disable the feature by setting the LogProductImprovementEnabled false in your AndroidManifest.xml or by turning off "Automatically send more app information" in Events Manager.
+- FB SDK will automatically send sampled information about your app, such as the layout of elements on app screens. This information helps Meta improve ads systems and build new features. It is not used for ads delivery. You can disable the feature by setting the com.facebook.sdk.AutoLogProductImprovementEnabled false in your AndroidManifest.xml or by turning off "Automatically send more app information" in Events Manager.
 
 
 ### Changed
