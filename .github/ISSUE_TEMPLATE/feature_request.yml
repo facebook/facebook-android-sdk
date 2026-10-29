@@ -9,7 +9,7 @@ body:
     options:
     - label: "I've updated to the latest released version of the SDK"
       required: true
-    - label: "I've searched for existing [Github issues](https://github.com/facebook/facebook-android-sdk/issues)"
+    - label: "I've searched for existing [Github issues](https://github.com/meta/facebook-android-sdk/issues)"
       required: true
     - label: "I've read the [Code of Conduct](CODE_OF_CONDUCT.md)"
       required: true

@@ -60,7 +60,7 @@
 # consumer apps, which makes Class.forName fail and silently disables advertiser_id (GAID)
 # collection -- affecting app event matching and deferred deep links.
 # These rules are inert for apps that do not bundle Google Play Services.
-# See https://github.com/facebook/facebook-android-sdk/issues/1404
+# See https://github.com/meta/facebook-android-sdk/issues/1404
 -keep class com.google.android.gms.common.GooglePlayServicesUtil {
     public static int isGooglePlayServicesAvailable(android.content.Context);
 }

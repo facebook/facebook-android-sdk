@@ -362,7 +362,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [6.5.1]
 
 ### Fixed
-- Fixed AppLinkData issue: [issue 761](https://github.com/facebook/facebook-android-sdk/issues/761)
+- Fixed AppLinkData issue: [issue 761](https://github.com/meta/facebook-android-sdk/issues/761)
 - Fixed timestamp issue of Model Delivery
 
 ## [6.5.0]
@@ -445,8 +445,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.11.1]
 
 ### Fixed
-- Fix java.lang.SecurityException in AccessTokenManager: [issue 627](https://github.com/facebook/facebook-android-sdk/issues/627)
-- Fix Google Api Error because of values-fb: [issue 614](https://github.com/facebook/facebook-android-sdk/issues/614)
+- Fix java.lang.SecurityException in AccessTokenManager: [issue 627](https://github.com/meta/facebook-android-sdk/issues/627)
+- Fix Google Api Error because of values-fb: [issue 614](https://github.com/meta/facebook-android-sdk/issues/614)
 - Minor fixes
 
 ## [5.11.0]
@@ -564,75 +564,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-...HEAD
-[18.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.2.3...sdk-version-18.3.0
-[18.2.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.1.3...sdk-version-18.2.3
-[18.1.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-18.0.3...sdk-version-18.1.3
-[17.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.1...sdk-version-17.0.2
-[17.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-17.0.0...sdk-version-17.0.1
-[17.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.3.0...sdk-version-17.0.0
-[16.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.2.0...sdk-version-16.3.0
-[16.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.1.3...sdk-version-16.2.0
-[16.1.3]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.1.2...sdk-version-16.1.3
-[16.1.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.0.1...sdk-version-16.1.2
-[16.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-16.0.0...sdk-version-16.0.1
-[16.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.2.0...sdk-version-16.0.0
-[15.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.1.0...sdk-version-15.2.0
-[15.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.2...sdk-version-15.1.0
-[15.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.1...sdk-version-15.0.2
-[15.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-15.0.0...sdk-version-15.0.1
-[15.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.1...sdk-version-15.0.0
-[14.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.1.0...sdk-version-14.1.1
-[14.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-14.0.0...sdk-version-14.1.0
-[14.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.2.0...sdk-version-14.0.0
-[13.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.1.0...sdk-version-13.2.0
-[13.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
-[13.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.3.0...sdk-version-13.0.0
-[12.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.2.0...sdk-version-12.3.0
-[12.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.1.0...sdk-version-12.2.0
-[12.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.1...sdk-version-12.1.0
-[12.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-12.0.0...sdk-version-12.0.1
-[12.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.3.0...sdk-version-12.0.0
-[11.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.2.0...sdk-version-11.3.0
-[11.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.1...sdk-version-11.2.0
-[11.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.1.0...sdk-version-11.1.1
-[11.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-11.0.0...sdk-version-11.1.0
-[11.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.1...sdk-version-11.0.0
-[9.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.0...sdk-version-9.1.1
-[9.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.0.0...sdk-version-9.1.0
-[9.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.2.0...sdk-version-9.0.0
-[8.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.1.0...sdk-version-8.2.0
-[8.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.0.0...sdk-version-8.1.0
-[8.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.1.0...sdk-version-8.0.0
-[7.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.1...sdk-version-7.1.0
-[7.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.0...sdk-version-7.0.1
-[7.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.1...sdk-version-7.0.0
-[6.5.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.0...sdk-version-6.5.1
-[6.5.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.4.0...sdk-version-6.5.0
-[6.4.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.3.0...sdk-version-6.4.0
-[6.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.2.0...sdk-version-6.3.0
-[6.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.1.0...sdk-version-6.2.0
-[6.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...sdk-version-6.1.0
-[6.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.2...sdk-version-6.0.0
-[5.15.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.1...sdk-version-5.15.2
-[5.15.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.0...sdk-version-5.15.1
-[5.15.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.13.0...sdk-version-5.15.0
-[5.13.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.12.1...sdk-version-5.13.0
-[5.12.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.12.0...sdk-version-5.12.1
-[5.12.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.11.2...sdk-version-5.12.0
-[5.11.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.11.1...sdk-version-5.11.2
-[5.11.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.11.0...sdk-version-5.11.1
-[5.11.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.9.0...sdk-version-5.11.0
-[5.9.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.8.0...sdk-version-5.9.0
-[5.8.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.5.2...sdk-version-5.8.0
-[5.5.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.5.1...sdk-version-5.5.2
-[5.5.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.5.0...sdk-version-5.5.1
-[5.5.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.4.0...sdk-version-5.5.0
-[5.4.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.2.0...sdk-version-5.4.0
-[5.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.1.0...sdk-version-5.2.0
-[5.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.2...sdk-version-5.1.0
-[5.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.1...sdk-version-5.0.2
-[5.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.0...sdk-version-5.0.1
-[5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
-[4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
-[4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
+[Unreleased]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-19.0.0...HEAD
+[19.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-18.3.0...sdk-version-19.0.0
+[18.3.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-18.2.3...sdk-version-18.3.0
+[18.2.3]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-18.1.3...sdk-version-18.2.3
+[18.1.3]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-18.0.3...sdk-version-18.1.3
+[17.0.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-17.0.1...sdk-version-17.0.2
+[17.0.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-17.0.0...sdk-version-17.0.1
+[17.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-16.3.0...sdk-version-17.0.0
+[16.3.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-16.2.0...sdk-version-16.3.0
+[16.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-16.1.3...sdk-version-16.2.0
+[16.1.3]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-16.1.2...sdk-version-16.1.3
+[16.1.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-16.0.1...sdk-version-16.1.2
+[16.0.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-16.0.0...sdk-version-16.0.1
+[16.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-15.2.0...sdk-version-16.0.0
+[15.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-15.1.0...sdk-version-15.2.0
+[15.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-15.0.2...sdk-version-15.1.0
+[15.0.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-15.0.1...sdk-version-15.0.2
+[15.0.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-15.0.0...sdk-version-15.0.1
+[15.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-14.1.1...sdk-version-15.0.0
+[14.1.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-14.1.0...sdk-version-14.1.1
+[14.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-14.0.0...sdk-version-14.1.0
+[14.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-13.2.0...sdk-version-14.0.0
+[13.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-13.1.0...sdk-version-13.2.0
+[13.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-13.0.0...sdk-version-13.1.0
+[13.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-12.3.0...sdk-version-13.0.0
+[12.3.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-12.2.0...sdk-version-12.3.0
+[12.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-12.1.0...sdk-version-12.2.0
+[12.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-12.0.1...sdk-version-12.1.0
+[12.0.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-12.0.0...sdk-version-12.0.1
+[12.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-11.3.0...sdk-version-12.0.0
+[11.3.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-11.2.0...sdk-version-11.3.0
+[11.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-11.1.1...sdk-version-11.2.0
+[11.1.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-11.1.0...sdk-version-11.1.1
+[11.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-11.0.0...sdk-version-11.1.0
+[11.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-9.1.1...sdk-version-11.0.0
+[9.1.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-9.1.0...sdk-version-9.1.1
+[9.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-9.0.0...sdk-version-9.1.0
+[9.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-8.2.0...sdk-version-9.0.0
+[8.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-8.1.0...sdk-version-8.2.0
+[8.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-8.0.0...sdk-version-8.1.0
+[8.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-7.1.0...sdk-version-8.0.0
+[7.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-7.0.1...sdk-version-7.1.0
+[7.0.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-7.0.0...sdk-version-7.0.1
+[7.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.5.1...sdk-version-7.0.0
+[6.5.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.5.0...sdk-version-6.5.1
+[6.5.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.4.0...sdk-version-6.5.0
+[6.4.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.3.0...sdk-version-6.4.0
+[6.3.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.2.0...sdk-version-6.3.0
+[6.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.1.0...sdk-version-6.2.0
+[6.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-6.0.0...sdk-version-6.1.0
+[6.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.15.2...sdk-version-6.0.0
+[5.15.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.15.1...sdk-version-5.15.2
+[5.15.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.15.0...sdk-version-5.15.1
+[5.15.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.13.0...sdk-version-5.15.0
+[5.13.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.12.1...sdk-version-5.13.0
+[5.12.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.12.0...sdk-version-5.12.1
+[5.12.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.11.2...sdk-version-5.12.0
+[5.11.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.11.1...sdk-version-5.11.2
+[5.11.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.11.0...sdk-version-5.11.1
+[5.11.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.9.0...sdk-version-5.11.0
+[5.9.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.8.0...sdk-version-5.9.0
+[5.8.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.5.2...sdk-version-5.8.0
+[5.5.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.5.1...sdk-version-5.5.2
+[5.5.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.5.0...sdk-version-5.5.1
+[5.5.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.4.0...sdk-version-5.5.0
+[5.4.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.2.0...sdk-version-5.4.0
+[5.2.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.1.0...sdk-version-5.2.0
+[5.1.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.0.2...sdk-version-5.1.0
+[5.0.2]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.0.1...sdk-version-5.0.2
+[5.0.1]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-5.0.0...sdk-version-5.0.1
+[5.0.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
+[4.41.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
+[4.40.0]: https://github.com/meta/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0

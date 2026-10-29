@@ -127,15 +127,15 @@ We are able to accept contributions to the Facebook SDK for Android. To contribu
 following.
 
 - Follow the instructions in
-  the [CONTRIBUTING.md](https://github.com/facebook/facebook-android-sdk/blob/main/CONTRIBUTING.md).
-- Submit your pull request to the [main](https://github.com/facebook/facebook-android-sdk/tree/main)
+  the [CONTRIBUTING.md](https://github.com/meta/facebook-android-sdk/blob/main/CONTRIBUTING.md).
+- Submit your pull request to the [main](https://github.com/meta/facebook-android-sdk/tree/main)
   branch. This allows us to merge your change into our internal main and then push out the change in
   the next release.
 
 LICENSE
 -------
 Except as otherwise noted, the Facebook SDK for Android is licensed under the Facebook Platform
-License (https://github.com/facebook/facebook-android-sdk/blob/main/LICENSE.txt).
+License (https://github.com/meta/facebook-android-sdk/blob/main/LICENSE.txt).
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is
 distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
