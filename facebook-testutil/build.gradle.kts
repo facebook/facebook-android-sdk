@@ -22,7 +22,7 @@ extra["artifactId"] = "facebook-testutil"
 
 extra["description"] = "Facebook Android SDK Testutil"
 
-extra["url"] = "https://github.com/facebook/facebook-android-sdk"
+extra["url"] = "https://github.com/meta/facebook-android-sdk"
 
 dependencies {
     implementation(libs.kotlin.stdlib)

@@ -22,7 +22,7 @@ extra["artifactId"] = "facebook-login"
 
 extra["description"] = "Facebook Login Android SDK"
 
-extra["url"] = "https://github.com/facebook/facebook-android-sdk"
+extra["url"] = "https://github.com/meta/facebook-android-sdk"
 
 dependencies {
     // Facebook Dependencies

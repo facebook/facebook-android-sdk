@@ -24,7 +24,7 @@ extra["artifactId"] = "facebook-core"
 
 extra["description"] = "Facebook Core Android SDK"
 
-extra["url"] = "https://github.com/facebook/facebook-android-sdk"
+extra["url"] = "https://github.com/meta/facebook-android-sdk"
 
 dependencies {
     api(project(":facebook-bolts"))

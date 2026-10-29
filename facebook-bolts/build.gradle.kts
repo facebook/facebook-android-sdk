@@ -24,7 +24,7 @@ extra["artifactId"] = "facebook-bolts"
 
 extra["description"] = "Facebook Android SDK Bolts support library"
 
-extra["url"] = "https://github.com/facebook/facebook-android-sdk"
+extra["url"] = "https://github.com/meta/facebook-android-sdk"
 
 dependencies {
     implementation(libs.androidx.annotation)
