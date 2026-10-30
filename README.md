@@ -30,6 +30,17 @@ FEATURES
 * [Graph API](https://developers.facebook.com/docs/android/graph)
 * [Marketing](https://developers.facebook.com/docs/app-events/marketing-kit)
 
+FACEBOOK LOGIN AUTHENTICATION SURFACES
+-------------------------------------
+Facebook Login authentication in app-owned Android embedded browsers (WebViews) is no longer
+supported. Use the SDK's native Facebook app login or supported browser-based authentication,
+such as Chrome Custom Tabs, rather than forcing an embedded-WebView authentication flow. See the
+[2021 deprecation announcement](https://developers.facebook.com/blog/post/2021/06/28/deprecating-support-fb-login-authentication-android-embedded-browsers/).
+
+Legacy WebView-related classes may remain in the source; their presence does not establish that
+embedded-browser authentication is supported. This restriction is distinct from login through
+the Facebook Android app, whose own authentication surface can use a Facebook-owned WebView.
+
 STRUCTURE
 ---------
 The SDK is separated into modules with the following structure.
